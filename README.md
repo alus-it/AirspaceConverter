@@ -33,20 +33,21 @@ The command line version works taking several arguments, for example:
 `AirspaceConverter -q 1013 -a 35 -i inputFileOpenAir.txt -i inputFileOpenAIP.aip -m terrainMap.dem -o outputFile.kmz`  
 
 Possible options:  
-* -q: optional, specify the QNH in hPa used to calculate height of flight levels
-* -a: optional, specify a default terrain altitude in meters to calculate AGL heights of points not covered by loaded terrain map(s)
-* -i: mandatory, multiple, input file(s) can be OpenAir (.txt) or OpenAIP (.aip)
-* -m: optional, multiple, terrain map file(s) (.dem) used to lookup terrain height
-* -o: optional, output file .kml or .kmz if not specified will be used the name of first input file as KMZ
-* -v: print version number
-* -h: print this guide
+  -q: optional, specify the QNH in hPa used to calculate height of flight levels  
+  -a: optional, specify a default terrain altitude in meters to calculate AGL heights of points not covered by loaded terrain map(s)  
+  -i: mandatory, multiple, input file(s) can be OpenAir (.txt) or OpenAIP (.aip)  
+  -m: optional, multiple, terrain map file(s) (.dem) used to lookup terrain height  
+  -o: optional, output file .kml or .kmz if not specified will be used the name of first input file as KMZ  
+  -v: print version number  
+  -h: print this guide
 
 Windows version
 ---------------
 The Windows executable needs just a couple of small DLLs: zip.dll zlib.dll to be kept in the same folder.  
 If you get the error about VCRUNTIME140.dll missing: it can be easily and quickly fixed installing the: MS VC++ redistributable, this will allow this software to run also on older Windows versions such us WindowsXP.  
 
-The Windows version has graphical user interface, this should be the default way to use it:  
+The Windows version has graphical user interface, this should be the default way to use it:
+
 1. If needed, specify the QNH to be used for calculating the height of flight levels.
 2. Select as input multiple OpenAir (.txt) and/or OpenAIP (.aip) files.
 3. Optionally it is possible to load multiple raster map files (.dem) with the terrain altitude.
