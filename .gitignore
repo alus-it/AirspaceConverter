@@ -3,6 +3,9 @@
 *.lo
 *.o
 *.obj
+*.a
+*.so
+*.so.*
 
 # Precompiled Headers
 *.gch
@@ -12,10 +15,6 @@
 *.so
 *.dylib
 *.dll
-
-# Fortran module files
-*.mod
-*.smod
 
 # Compiled Static libraries
 *.lai
@@ -27,3 +26,39 @@
 *.exe
 *.out
 *.app
+
+# Ignore bin folder
+/bin
+/Debug
+/Release
+
+# Ignore Eclipse project files
+.project
+.cproject
+.settings/*
+
+# Visual studio stuff
+*.aps
+*.idb
+*.ipch
+*.lastbuildstate
+*.log
+*.manifest
+*.pdb
+*.res
+*.sdf
+*.suo
+*.tlog
+*.db
+*.opendb
+
+# Visual Studio folders
+/VisualStudio/.vs
+/VisualStudio/Debug
+/VisualStudio/Release
+/VisualStudio/packages
+/VisualStudio/AirspaceConverter/Debug
+/VisualStudio/AirspaceConverter/Release
+/VisualStudio/AirspaceConverter/x64
+
+
