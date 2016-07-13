@@ -66,15 +66,23 @@ Downloads
 The already compiled executable for windows can be downloaded from the project page:  
 http://www.alus.it/AirspaceConverter
 
-Preparing the development environment
--------------------------------------
-To be done....
+Build dependencies
+------------------
+In order to compile this project the following libraries are required:  
+- libzip2 (libzip-dev)
+- Boost libraries
 
-Compiling AirspaceConverter
----------------------------
-To be done....
+Compiling AirspaceConverter on Linux
+------------------------------------
+From the root of this project: `make all`  
+To build in debug: `make DEBUG=1 all`  
+The "AirspaceConverter" executable will be located in the "Release" or "Debug" folder
 
-CONTACTS
+Compiling AirspaceConverter on Windows
+--------------------------------------
+In the "VisualStudio" folder there is the VisualStudio solution and project files
+
+Contacts
 --------
 Author: Alberto Realis-Luc  
 Web: http://www.alus.it/AirspaceConverter/  
