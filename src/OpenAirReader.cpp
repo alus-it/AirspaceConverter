@@ -476,10 +476,14 @@ void OpenAirReader::ResetVar()
 
 bool OpenAirReader::InsertAirspace(Airspace& airspace)
 {
-	if (airspaces == nullptr) return false;
+	if (airspaces == nullptr) {
+		assert(false);
+		return false;
+	}
 	const bool validAirspace = airspace.GetType() != Airspace::UNKNOWN && !airspace.GetName().empty() && airspace.GetNumberOfGeometries() > 0 && !airspace.GetTopAltitude().IsGND();
 	if (validAirspace) {
 		airspace.Discretize();
+		airspace.ClosePoints();
 		airspaces->insert(std::pair<int, Airspace>(airspace.GetType(),std::move(airspace)));
 	} else airspace.Clear();
 	ResetVar();

@@ -18,33 +18,6 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-const std::string KMLwriter::disclaimer = std::string(
-	"<!--\n"
-	"KML brewed with: \"AirspaceConverter\" Version: " VERSION " - www.alus.it\n"
-	"AirspaceConverter is proudly brought to you by: Alberto Realis-Luc\n"
-	"Copyrights(C) 2016 Alus.it\n"
-	"\n"
-	"WARNING:\n"
-	"This is a BETA version of AirspaceConverter!\n"
-	"So beware that the output may contain errors!!!\n"
-	"The only usage of this software is to test it; so, you, as tester user, are strictly requested to report any error found precisely and immaculately.\n"
-	"\n"
-	"Disclaimer:\n"
-	"The author of AirspaceConverter assumes no liability at all for the previous, actual or future correctness, completeness, functionality or usability\n"
-	"of the data provided via this KML file and the usage of AirspaceConverter. There exists no obligation at all for the author to continuously update\n"
-	"or maintain the data provided. The KML airspace structure file and the data contained therein are only intended to serve as a means to facilitate\n"
-	"familiarization with and to illustrate air space structure. The KML airspace structure file does not replace the pilot's obligation for preflight\n"
-	"planning nor shall it be used as a means of support during flight. In particular, use of the KML airspace structure file does not excuse the user\n"
-	"from the responsibility to observe the current issue of any relevant AIP, AIP Supplements, NOTAM and AICs.\n"
-	"The use of this KML/KMZ airspace structure file takes place only at the user's total own risk.\n"
-	"Commercial use of the data provided via this KML airspace structure file is strictly prohibited.\n"
-	"The use of AirspaceConverter is only at complete user's own risk.\n"
-	"Any commercial usage of AirspaceConverter is also strictly prohibited if not authorized by the author.\n"
-	"\n"
-	"Error reports, complaints and suggestions please email to: info@alus.it\n"
-	"-->\n"
-);
-
 const std::string KMLwriter::colors[][2] = {
 	{ "509900ff", "7f9900ff" }, //CLASSA   
 	{ "50cc0000", "7fcc0000" }, //CLASSB   
@@ -126,15 +99,11 @@ bool KMLwriter::GetTerrainAltitudeMt(const double& lat, const double& lon, doubl
 	return false;
 }
 
-KMLwriter::KMLwriter()
-	: allAGLaltitudesCovered(true) {
-}
-
-KMLwriter::~KMLwriter() {}
-
 void KMLwriter::WriteHeader() {
-	file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" 
-		<< disclaimer
+	file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+		<< "<!--\n";
+	for(const std::string& line: AirspaceConverter::disclaimer) file << line << "\n";
+	file << "-->\n"
 		<< "<kml xmlns = \"http://www.opengis.net/kml/2.2\">\n"
 		<< "<Document>\n"
 		<< "<open>true</open>\n";

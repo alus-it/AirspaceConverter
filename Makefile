@@ -44,6 +44,7 @@ CPPFILES =              \
 	main.cpp              \
 	OpenAIPreader.cpp     \
 	OpenAirReader.cpp     \
+	PFMwriter.cpp         \
 	RasterMap.cpp
 
 # List of object files
@@ -54,7 +55,7 @@ all: $(BIN)AirspaceConverter
 
 # Link
 $(BIN)AirspaceConverter: $(OBJS)
-	@echo Linking all into: $@
+	@echo Linking: $@
 	@$(CXX) -L$(LIB) $(LFLAGS) $(OBJS) -o $@
 
 # Create output directory if missing
@@ -66,7 +67,6 @@ $(BIN):
 $(BIN)%.o: $(SRC)%.cpp
 	@echo 'Compiling: $<'
 	@$(CXX) $(CPPFLAGS) -c $< -o $@
-	@echo 'Finished to compile: $<'
 
 ### Clean dependencies
 clean:

@@ -12,23 +12,22 @@
 
 #pragma once
 
-#ifndef VERSION
-#define VERSION "0.0.0.9"
-#endif
-
-#include <functional>
 #include <string>
-#include <vector>
+#include <map>
+#include <fstream>
 
-class AirspaceConverter
-{
+class Airspace;
 
+class PFMwriter {
 public:
-	static std::function<void(const std::string&, const bool)> LogMessage;
-	inline static void SetLogMessageFuntion(std::function<void(const std::string&, const bool)> func) { LogMessage = func; }
-	static const std::vector<std::string> disclaimer;
+	inline PFMwriter() {}
+	inline ~PFMwriter() {}
+
+	bool WriteFile(const std::string& filename, const std::multimap<int, Airspace>& airspaces);
 
 private:
-	static void DefaultLogMessage(const std::string&, const bool isError = false);
+	void WriteHeader(const std::string& filename);
 
+	std::ofstream file;
 };
+

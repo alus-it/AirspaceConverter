@@ -15,6 +15,7 @@
 #include "OpenAIPreader.h"
 #include "OpenAirReader.h"
 #include "KMLwriter.h"
+#include "PFMwriter.h"
 #include <iostream>
 #include <cstring>
 #include <boost/filesystem/path.hpp>
@@ -27,7 +28,7 @@ void printHelp() {
 	std::cout << "-a: optional, specify a default terrain altitude in meters to calculate AGL heights of points not covered by loaded terrain map(s)" << std::endl;
 	std::cout << "-i: mandatory, multiple, input file(s) can be OpenAir (.txt) or OpenAIP (.aip)" << std::endl;
 	std::cout << "-m: optional, multiple, terrain map file(s) (.dem) used to lookup terrain height" << std::endl;
-	std::cout << "-o: optional, output file .kml or .kmz if not specified will be used the name of first input file as KMZ" << std::endl;
+	std::cout << "-o: optional, output file .kml, .kmz  or .mp (Polish) if not specified will be used the name of first input file as KMZ" << std::endl;
 	std::cout << "-v: print version number" << std::endl;
 	std::cout << "-h: print this guide" << std::endl << std::endl;
 }
@@ -104,14 +105,26 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (inputFiles.empty()) {
-		std::cerr << "ERROR: No input files specified." << std::endl;
+		std::cerr << "FATAL ERROR: No input files specified." << std::endl;
 		return EXIT_FAILURE;
 	}
 
+	// Determine what kind of output is requested
+	bool outputIsKMLorKMZ = false;
+
+	// Prepare output filename if not entered by user
 	if (outputFile.empty()) {
 		boost::filesystem::path outputPath(inputFiles.front());
 		outputPath.replace_extension("kmz");
 		outputFile = outputPath.string();
+		outputIsKMLorKMZ = true;
+	} else {
+		std::string outputExt(boost::filesystem::path(outputFile).extension().string());
+		if (boost::iequals(outputExt,".kmz") || boost::iequals(outputExt,".kml")) outputIsKMLorKMZ = true;
+		else if(!boost::iequals(outputExt,".mp")) {
+			std::cerr << "FATAL ERROR: Output file extension unknown." << std::endl;
+			return EXIT_FAILURE;
+		}
 	}
 
 	// Set QNH
@@ -127,27 +140,37 @@ int main(int argc, char *argv[]) {
 	OpenAirReader openAirReader(airspaces);
 
 	// Process input files
-	bool allFailed = true;
+	bool flag = true; // all failed
 	for(const std::string& inputFile : inputFiles) {
 		std::string ext(boost::filesystem::path(inputFile).extension().string());
 		if(boost::iequals(ext, ".txt")) {
-			if(openAirReader.ReadFile(inputFile)) allFailed = false;
+			if(openAirReader.ReadFile(inputFile)) flag = false;
 		} else if(boost::iequals(ext, ".aip")) {
-			if(OpenAIPreader::ReadFile(inputFile, airspaces)) allFailed = false;
+			if(OpenAIPreader::ReadFile(inputFile, airspaces)) flag = false;
 		} else std::cerr << "ERROR: unknown extension: " << ext << "for input file" << std::endl;
 	}
-	if(allFailed) {
-		std::cerr << "FATAL ERROR: no input files loaded, terminating." << std::endl;
+	if(flag) {
+		std::cerr << "FATAL ERROR: no input files loaded." << std::endl;
 		return EXIT_FAILURE;
 	}
 	
-	// Load terrain maps
-	allFailed = true;
-	for(const std::string& mapFile : mapFiles) if(KMLwriter::AddTerrainMap(mapFile)) allFailed = false;
-	if(allFailed) std::cout << "Warning: no terrain map loaded, using default terrain height for all applicable AGL points." << std::endl;
+	if (outputIsKMLorKMZ) {
 
-	// Make output file
-	KMLwriter writer;
-	return writer.WriteFile(outputFile, airspaces) ? EXIT_SUCCESS : EXIT_FAILURE;
+		// Load terrain maps
+		flag = true; // all failed
+		for(const std::string& mapFile : mapFiles) if(KMLwriter::AddTerrainMap(mapFile)) flag = false;
+		if(flag) std::cout << "Warning: no terrain map loaded, using default terrain height for all applicable AGL points." << std::endl;
+
+		// Make KML file
+		KMLwriter writer;
+		flag = writer.WriteFile(outputFile, airspaces);
+	} else {
+
+		// Make Polish file
+		PFMwriter writer;
+		flag = writer.WriteFile(outputFile, airspaces);
+	}
+
+	return flag ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 

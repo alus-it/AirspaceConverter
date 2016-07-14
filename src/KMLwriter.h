@@ -24,8 +24,8 @@ class RasterMap;
 class KMLwriter
 {
 public:
-	KMLwriter();
-	~KMLwriter();
+	inline KMLwriter() : allAGLaltitudesCovered(true) {}
+	inline ~KMLwriter() {}
 
 	bool WriteFile(const std::string& filename, const std::multimap<int, Airspace>& airspaces);
 	static bool AddTerrainMap(const std::string& filename);
@@ -48,7 +48,6 @@ private:
 
 	static bool GetTerrainAltitudeMt(const double& lat, const double& lon, double&alt);
 	
-	static const std::string disclaimer;
 	static const std::string colors[][2];
 	static std::vector<RasterMap*> terrainMaps;
 	static double defaultTerrainAltitudeMt;
