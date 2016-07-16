@@ -58,7 +58,10 @@ void Altitude::SetFlightLevel(const int FL) {
 
 const std::string Altitude::ToString() const {
 	if (fl > 0) return "FL " + std::to_string(fl);
-	if (refIsMsl) return std::to_string(altFt) + " FT AMSL";
+	if (refIsMsl) {
+		if(altFt!=0) return std::to_string(altFt) + " FT AMSL";
+		else return "MSL";
+	}
 	if (IsGND()) return "GND";
 	return std::to_string(altFt) + " FT AGL";
 }
@@ -88,13 +91,13 @@ const bool Airspace::CATEGORY_VISIBILITY[] = {
 };
 
 const std::string Airspace::CATEGORY_NAMES[] = {
-	"Class A", //CLASSA
-	"Class B", //CLASSB
-	"Class C", //CLASSC
-	"Class D", //CLASSD
-	"Class E", //CLASSE
-	"Class F", //CLASSF
-	"Class G", //CLASSG
+	"A", //CLASSA
+	"B", //CLASSB
+	"C", //CLASSC
+	"D", //CLASSD
+	"E", //CLASSE
+	"F", //CLASSF
+	"G", //CLASSG
 	"Danger", //DANGER
 	"Prohibited", //PROHIBITED
 	"Restricted", //RESTRICTED

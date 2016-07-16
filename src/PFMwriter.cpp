@@ -13,7 +13,45 @@
 #include "PFMwriter.h"
 #include "AirspaceConverter.h"
 #include "Airspace.h"
+#include <sstream>
+#include <boost/filesystem/path.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <cassert>
+
+const std::string PFMwriter::types[] = {
+	{ "0x0a" }, //CLASSA
+	{ "0x0a" }, //CLASSB
+	{ "0x0a" }, //CLASSC
+	{ "0x0a" }, //CLASSD
+	{ "0x0a" }, //CLASSE
+	{ "0x0a" }, //CLASSF
+	{ "0x0a" }, //CLASSG
+	{ "0x0a" }, //DANGER
+	{ "0x0a" }, //PROHIBITED
+	{ "0x0a" }, //RESTRICTED
+	{ "0x0a" }, //CTR
+	{ "0x0a" }, //TMA
+	{ "0x0a" }, //TMZ
+	{ "0x0a" }, //RMZ
+	{ "0x0a" }, //FIR
+	{ "0x0a" }, //UIR
+	{ "0x0a" }, //OTH
+	{ "0x0a" }, //GLIDING
+	{ "0x0a" }, //NOGLIDER
+	{ "0x0a" }, //WAVE
+	{ "0x0a" }  //UNKNOWN
+};
+
+const std::string PFMwriter::MakeLabel(const Airspace& airspace) {
+	std::stringstream ss;
+	ss << airspace.GetCategoryName() << " "
+		<< airspace.GetTopAltitude().ToString() << " - "
+		<< airspace.GetBaseAltitude().ToString() << " "
+		<< airspace.GetName();
+	std::string label(ss.str());
+	if(label.length()>80) label.resize(80);
+	return label;
+}
 
 void PFMwriter::WriteHeader(const std::string& filename) {
 	for(const std::string& line: AirspaceConverter::disclaimer) file << ";" << line << "\n";
@@ -51,6 +89,12 @@ void PFMwriter::WriteHeader(const std::string& filename) {
 
 bool PFMwriter::WriteFile(const std::string& filename, const std::multimap<int, Airspace>& airspaces)
 {
+	// Check if has the right extension
+	if (!boost::iequals(boost::filesystem::path(filename).extension().string(), ".mp")) {
+		AirspaceConverter::LogMessage("ERROR: Expected MP extension but found: " + boost::filesystem::path(filename).extension().string(), true);
+		return false;
+	}
+
 	if (file.is_open()) file.close();
 	file.open(filename);
 	if (!file.is_open() || file.bad()) {
@@ -69,19 +113,21 @@ bool PFMwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 		for (auto it = filtered.first; it != filtered.second; ++it) {
 			const Airspace& a = it->second;
 
-			file << "[POLYGON]\n"
-				<< "Type=0x0a\n" //TODO: proper colors
-				<< "Label="<<a.GetName()<<"\n" //TODO: proper labels
-				<< "Data0=";
 			assert(a.GetNumberOfPoints() > 3);
 			assert(a.GetFirstPoint()==a.GetLastPoint());
-			LatLon p;
+
+			file << "[POLYGON]\n"
+				<< "Type="<< types[a.GetType()] <<"\n"
+				<< "Label="<<MakeLabel(a)<<"\n"
+				<< "Data0=";
+
+			double lat,lon;
 			for (unsigned int i=0; i<a.GetNumberOfPoints()-1; i++) {
-				p = a.GetPointAt(i);
-				file << "(" << p.Lat() << "," << p.Lon() << "),";
+				a.GetPointAt(i).GetLatLon(lat,lon);
+				file << "(" << lat << "," << lon << "),";
 			}
-			p = a.GetLastPoint();
-			file << "(" << p.Lat() << "," << p.Lon() << ")\n";
+			a.GetLastPoint().GetLatLon(lat,lon);
+			file << "(" << lat << "," << lon << ")\n";
 			file<< "EndLevel=4\n"
 				"[END]\n\n";
 		}

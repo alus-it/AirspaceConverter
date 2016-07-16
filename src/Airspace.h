@@ -194,7 +194,7 @@ public:
 	void Discretize();
 
 	inline const Type& GetType() const { return type; }
-	inline const std::string& GetCategory() const { return CategoryName(type); }
+	inline const std::string& GetCategoryName() const { return CategoryName(type); }
 	inline const Altitude& GetTopAltitude() const { return top; }
 	inline const Altitude& GetBaseAltitude() const { return base; }
 	inline const std::string& GetName() const { return name; }

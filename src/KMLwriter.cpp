@@ -123,13 +123,13 @@ void KMLwriter::WriteHeader() {
 void KMLwriter::OpenPlacemark(const Airspace& airspace) {
 	file << "<Placemark>\n"
 		<< "<name>" << airspace.GetName() << "</name>\n"
-		<< "<styleUrl>#Style" << airspace.GetCategory() << "</styleUrl>\n"
+		<< "<styleUrl>#Style" << airspace.GetCategoryName() << "</styleUrl>\n"
 		<< "<visibility>" << (airspace.IsVisibleByDefault() ? 1 : 0) << "</visibility>\n"
-		<< "<styleUrl>#Style" << airspace.GetCategory() << "</styleUrl>\n"
+		<< "<styleUrl>#Style" << airspace.GetCategoryName() << "</styleUrl>\n"
 		<< "<ExtendedData>\n"
 		<< "<SchemaData>\n"
 		<< "<SimpleData name=\"Name\">" << airspace.GetName() << "</SimpleData>\n"
-		<< "<SimpleData name=\"Category\">" << airspace.GetCategory() << "</SimpleData>\n"
+		<< "<SimpleData name=\"Category\">" << (airspace.GetType() <= Airspace::CLASSG ? ("Class " + airspace.GetCategoryName()) : airspace.GetCategoryName() ) << "</SimpleData>\n"
 		<< "<SimpleData name=\"Top\">" << airspace.GetTopAltitude().ToString() << "</SimpleData>\n"
 		<< "<SimpleData name=\"Base\">" << airspace.GetBaseAltitude().ToString() << "</SimpleData>\n"
 		<< "</SchemaData>\n"
@@ -284,6 +284,10 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 		for (auto it = filtered.first; it != filtered.second; ++it) {
 			
 			const Airspace& a = it->second;
+
+			assert(a.GetNumberOfPoints() > 3);
+			assert(a.GetFirstPoint()==a.GetLastPoint());
+
 			OpenPlacemark(a);
 			if (a.IsGNDbased()) WriteBaseOrTop(a, a.GetTopAltitude(), true); // then that's easy!
 			else { // otherwise we have to abuse KML which is not properly done to draw middle air aispaces
