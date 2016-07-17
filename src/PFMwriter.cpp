@@ -18,29 +18,31 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <cassert>
 
-const std::string PFMwriter::types[] = {
-	{ "0x0a" }, //CLASSA
-	{ "0x0a" }, //CLASSB
-	{ "0x0a" }, //CLASSC
-	{ "0x0a" }, //CLASSD
-	{ "0x0a" }, //CLASSE
-	{ "0x0a" }, //CLASSF
-	{ "0x0a" }, //CLASSG
-	{ "0x0a" }, //DANGER
-	{ "0x0a" }, //PROHIBITED
-	{ "0x0a" }, //RESTRICTED
-	{ "0x0a" }, //CTR
-	{ "0x0a" }, //TMA
-	{ "0x0a" }, //TMZ
-	{ "0x0a" }, //RMZ
-	{ "0x0a" }, //FIR
-	{ "0x0a" }, //UIR
-	{ "0x0a" }, //OTH
-	{ "0x0a" }, //GLIDING
-	{ "0x0a" }, //NOGLIDER
-	{ "0x0a" }, //WAVE
-	{ "0x0a" }  //UNKNOWN
+/* TODO: customized types
+const int PFMwriter::types[] = {
+	0x60, //CLASSA
+	0x61, //CLASSB
+	0x69, //CLASSC
+	0x62, //CLASSD
+	0x66, //CLASSE
+	0x63, //CLASSF
+	0x69, //CLASSG
+	0x63, //DANGER
+	0x66, //PROHIBITED
+	0x61, //RESTRICTED
+	0x61, //CTR
+	0x64, //TMA
+	0x60, //TMZ
+	0x60, //RMZ
+	0x01, //FIR
+	0x01, //UIR
+	0x01, //OTH
+	0x69, //GLIDING
+	0x62, //NOGLIDER
+	0x69, //WAVE
+	0x01  //UNKNOWN
 };
+*/
 
 const std::string PFMwriter::MakeLabel(const Airspace& airspace) {
 	std::stringstream ss;
@@ -57,7 +59,7 @@ void PFMwriter::WriteHeader(const std::string& filename) {
 	for(const std::string& line: AirspaceConverter::disclaimer) file << ";" << line << "\n";
 	file << "\n[IMG ID]\n" //section identifier
 		<< "ID=62831853\n" // unique identifier: 2 PI
-		<< "Name=" << filename << "/n" // map name
+		<< "Name=" << boost::filesystem::path(filename).stem().string() << "\n" // map name
 		<< "LBLcoding=6\n"
 		<< "Codepage=1252\n"
 		<< "Datum=W84\n"
@@ -105,32 +107,45 @@ bool PFMwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 
 	WriteHeader(filename);
 
-	// For each category
-	for (int t = Airspace::CLASSA; t <= Airspace::UNKNOWN; t++) {
-		// First verify if there are airspaces of that class
-		if (airspaces.count(t) == 0) continue;
-		const auto filtered = airspaces.equal_range(t);
-		for (auto it = filtered.first; it != filtered.second; ++it) {
-			const Airspace& a = it->second;
+	// Go trough all airspaces
+	for (const std::pair<const int,Airspace>& pair : airspaces)
+	{
+		// Get the airspace
+		const Airspace& a = pair.second;
 
-			assert(a.GetNumberOfPoints() > 3);
-			assert(a.GetFirstPoint()==a.GetLastPoint());
+		// Just a couple if assertions
+		assert(a.GetNumberOfPoints() > 3);
+		assert(a.GetFirstPoint()==a.GetLastPoint());
 
+		// Determine if it's a POLYGON or a POLYLINE
+		if (a.GetType() == Airspace::PROHIBITED || a.GetType() == Airspace::CTR || a.GetType() == Airspace::DANGER) {
 			file << "[POLYGON]\n"
-				<< "Type="<< types[a.GetType()] <<"\n"
-				<< "Label="<<MakeLabel(a)<<"\n"
-				<< "Data0=";
-
-			double lat,lon;
-			for (unsigned int i=0; i<a.GetNumberOfPoints()-1; i++) {
-				a.GetPointAt(i).GetLatLon(lat,lon);
-				file << "(" << lat << "," << lon << "),";
-			}
-			a.GetLastPoint().GetLatLon(lat,lon);
-			file << "(" << lat << "," << lon << ")\n";
-			file<< "EndLevel=4\n"
-				"[END]\n\n";
+				//<< "Type="<< types[a.GetType()] <<"\n"; //TODO...
+				<< "Type=0x18" <<"\n";
+		} else {
+			file << "[POLYLINE]\n"
+				<< "Type=0x07\n"; //TODO....
 		}
+
+		// Add the label
+		file << "Label="<<MakeLabel(a)<<"\n";
+
+		file << "Levels=3\n";
+
+		// Insert all the points
+		file << "Data0=";
+		double lat,lon;
+		for (unsigned int i=0; i<a.GetNumberOfPoints()-1; i++) {
+			a.GetPointAt(i).GetLatLon(lat,lon);
+			file << "(" << lat << "," << lon << "),";
+		}
+		a.GetLastPoint().GetLatLon(lat,lon);
+		file << "(" << lat << "," << lon << ")\n";
+
+		//file<< "EndLevel=4\n";
+
+		// Close the element
+		file << "[END]\n\n";
 	}
 	file.close();
 	return true;
