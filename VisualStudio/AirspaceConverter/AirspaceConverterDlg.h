@@ -48,35 +48,32 @@ private:
 	afx_msg void OnBnClickedLoadDemFolderBt();
 	afx_msg void OnBnClickedClearInputBt();
 	afx_msg void OnBnClickedClearMapsBt();
-	afx_msg void OnBnClickedMakeKML();
-	afx_msg void OnBnClickedCompress();
+	afx_msg void OnBnClickedConvert();
 	afx_msg void OnBnClickedOpenOutputFile();
 	afx_msg void OnBnClickedOpenOutputFolder();
 	afx_msg void OnBnClickedChooseOutputFileBt();
+	afx_msg void UpdateOutputFilename();
 	
 	LRESULT OnGeneralEndOperations(WPARAM, LPARAM);
 	LRESULT OnEndWriteKMLok(WPARAM, LPARAM);
 	LRESULT OnEndWriteKMLwarningAGL(WPARAM, LPARAM);
 
-	void UpdateOutputFilename();
 	void LogMessage(const std::string& text, const bool isError = false);
 	
 	CButton loadInputFileBt;
 	CButton loadDEMfileBt;
-	CButton MakeKMLBt;
+	CButton ConvertBt;
 	CButton OpenOutputFileBt;
 	CButton OpenOutputFolderBt;
 	CButton LoadAirspacesFolderBt;
 	CButton LoadRasterMapsFolderBt;
 	CButton unloadAirspacesBt;
 	CButton unloadRasterMapsBt;
-	CButton compressCheckBox;
 	CButton chooseOutputFileBt;
 	CButton CloseButton;
 	CEdit editQNHtextField;
 	CEdit editDefualtAltTextField;
 	CEdit outputFileEditBox;
-	BOOL compress;
 	CProgressCtrl progressBar;
 
 	void EndBusy();
@@ -92,4 +89,5 @@ private:
 	bool isWinXPorOlder;
 	bool conversionDone;
 	CRichEditCtrl LoggingBox;
+	CComboBox OutputTypeCombo;
 };

@@ -210,6 +210,7 @@
     <ClInclude Include="..\..\src\KMLwriter.h" />
     <ClInclude Include="..\..\src\OpenAIPreader.h" />
     <ClInclude Include="..\..\src\OpenAirReader.h" />
+    <ClInclude Include="..\..\src\PFMwriter.h" />
     <ClInclude Include="..\..\src\RasterMap.h" />
     <ClInclude Include="AirspaceConverterApp.h" />
     <ClInclude Include="AirspaceConverterDlg.h" />
@@ -224,6 +225,7 @@
     <ClCompile Include="..\..\src\KMLwriter.cpp" />
     <ClCompile Include="..\..\src\OpenAIPreader.cpp" />
     <ClCompile Include="..\..\src\OpenAirReader.cpp" />
+    <ClCompile Include="..\..\src\PFMwriter.cpp" />
     <ClCompile Include="..\..\src\RasterMap.cpp" />
     <ClCompile Include="AirspaceConverterApp.cpp" />
     <ClCompile Include="AirspaceConverterDlg.cpp" />

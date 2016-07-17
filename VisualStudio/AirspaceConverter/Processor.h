@@ -19,7 +19,7 @@
 #include <vector>
 
 #define WM_GENERAL_WORK_DONE		WM_USER+1
-#define WM_WRITE_KML_OK				WM_USER+2
+#define WM_WRITE_OUTPUT_OK			WM_USER+2
 #define WM_WRITE_KML_AGL_WARNING	WM_USER+3
 
 class Airspace;
@@ -38,6 +38,7 @@ public:
 	bool UnloadAirspaces();
 	bool UnloadRasterMaps();
 	bool MakeKMLfile(const std::string& outputKMLfile, const double& defaultTerraninAltMt);
+	bool MakePolishFile(const std::string& outputMPfile);
 	inline void SetWindow(HWND hwnd) { window = hwnd; }
 	inline unsigned long GetNumOfAirspaces() const { return airspaces.size(); }
 	int GetNumOfTerrainMaps() const;
@@ -52,6 +53,7 @@ private:
 	void LoadAirspacesfilesThread();
 	void LoadDEMfilesThread();
 	void MakeKMLfileThread();
+	void MakeMPfileThread();
 
 	bool abort;
 

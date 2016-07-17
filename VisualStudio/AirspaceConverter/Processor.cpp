@@ -16,6 +16,7 @@
 #include "../../src/OpenAirReader.h"
 #include "../../src/Airspace.h"
 #include "../../src/KMLwriter.h"
+#include "../../src/PFMwriter.h"
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -98,7 +99,23 @@ bool Processor::MakeKMLfile(const std::string& outputKMLfile, const double& defa
 void Processor::MakeKMLfileThread()
 {
 	KMLwriter writer;
-	if (writer.WriteFile(outputFile, airspaces)) PostMessage(window, writer.WereAllAGLaltitudesCovered() ? WM_WRITE_KML_OK : WM_WRITE_KML_AGL_WARNING, 0, 0);
+	if (writer.WriteFile(outputFile, airspaces)) PostMessage(window, writer.WereAllAGLaltitudesCovered() ? WM_WRITE_OUTPUT_OK : WM_WRITE_KML_AGL_WARNING, 0, 0);
+	else PostMessage(window, WM_GENERAL_WORK_DONE, 0, 0);
+}
+
+bool Processor::MakePolishFile(const std::string & outputMPfile)
+{
+	if (workerThread.joinable()) return false;
+	outputFile = outputMPfile;
+	abort = false;
+	workerThread = std::thread(std::bind(&Processor::MakeMPfileThread, this));
+	return true;
+}
+
+void Processor::MakeMPfileThread()
+{
+	PFMwriter writer;
+	if(writer.WriteFile(outputFile, airspaces)) PostMessage(window, WM_WRITE_OUTPUT_OK, 0, 0);
 	else PostMessage(window, WM_GENERAL_WORK_DONE, 0, 0);
 }
 
