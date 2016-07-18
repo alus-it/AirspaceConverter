@@ -21,7 +21,7 @@ class Processor;
 class CAirspaceConverterDlg : public CDialog
 {
 public:
-	CAirspaceConverterDlg(CWnd* pParent = NULL);
+	CAirspaceConverterDlg(CWnd* pParent = nullptr);
 	~CAirspaceConverterDlg();
 
 // Dialog Data
@@ -52,14 +52,16 @@ private:
 	afx_msg void OnBnClickedOpenOutputFile();
 	afx_msg void OnBnClickedOpenOutputFolder();
 	afx_msg void OnBnClickedChooseOutputFileBt();
-	afx_msg void UpdateOutputFilename();
+	afx_msg void OnBnClickedOutputTypeCombo();
 	
 	LRESULT OnGeneralEndOperations(WPARAM, LPARAM);
 	LRESULT OnEndWriteKMLok(WPARAM, LPARAM);
 	LRESULT OnEndWriteKMLwarningAGL(WPARAM, LPARAM);
 
 	void LogMessage(const std::string& text, const bool isError = false);
+	void UpdateOutputFilename();
 	
+	CComboBox OutputTypeCombo;
 	CButton loadInputFileBt;
 	CButton loadDEMfileBt;
 	CButton ConvertBt;
@@ -74,6 +76,7 @@ private:
 	CEdit editQNHtextField;
 	CEdit editDefualtAltTextField;
 	CEdit outputFileEditBox;
+	CRichEditCtrl LoggingBox;
 	CProgressCtrl progressBar;
 
 	void EndBusy();
@@ -88,6 +91,4 @@ private:
 	int numRasterMapLoaded;
 	bool isWinXPorOlder;
 	bool conversionDone;
-	CRichEditCtrl LoggingBox;
-	CComboBox OutputTypeCombo;
 };

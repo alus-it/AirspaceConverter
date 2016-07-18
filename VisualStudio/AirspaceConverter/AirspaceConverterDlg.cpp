@@ -39,6 +39,9 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
 	DECLARE_MESSAGE_MAP()
+
+private:
+	afx_msg void OnNMClickLink(NMHDR *pNMHDR, LRESULT *pResult);
 };
 
 CAboutDlg::CAboutDlg() : CDialog(IDD_ABOUTBOX) {}
@@ -56,7 +59,16 @@ BOOL CAboutDlg::OnInitDialog()
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
+	ON_NOTIFY(NM_CLICK, IDC_SYSLINK_WEB, &CAboutDlg::OnNMClickLink)
+	ON_NOTIFY(NM_CLICK, IDC_SYSLINK_EMAIL, &CAboutDlg::OnNMClickLink)
 END_MESSAGE_MAP()
+
+void CAboutDlg::OnNMClickLink(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	PNMLINK pNMLink = (PNMLINK)pNMHDR;
+	ShellExecuteW(NULL, L"open", pNMLink->item.szUrl, NULL, NULL, SW_SHOWNORMAL);
+	*pResult = 0;
+}
 
 CAirspaceConverterDlg::CAirspaceConverterDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(IDD_AIRSPACECONVERTER_DIALOG, pParent)
@@ -121,7 +133,7 @@ BEGIN_MESSAGE_MAP(CAirspaceConverterDlg, CDialog)
 	ON_BN_CLICKED(IDC_CLEAR_INPUT_BT, &CAirspaceConverterDlg::OnBnClickedClearInputBt)
 	ON_BN_CLICKED(IDC_CLEAR_MAPS_BT, &CAirspaceConverterDlg::OnBnClickedClearMapsBt)
 	ON_BN_CLICKED(IDC_OUTPUT_FILE_BT, &CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt)
-	ON_CBN_SELCHANGE(IDC_COMBO_OUTPUT_TYPE, &CAirspaceConverterDlg::UpdateOutputFilename)
+	ON_CBN_SELCHANGE(IDC_COMBO_OUTPUT_TYPE, &CAirspaceConverterDlg::OnBnClickedOutputTypeCombo)
 END_MESSAGE_MAP()
 
 BOOL CAirspaceConverterDlg::OnInitDialog()
@@ -153,10 +165,10 @@ BOOL CAirspaceConverterDlg::OnInitDialog()
 	// Add extra initialization here ...
 
 	// Initialize output type combo box
-	OutputTypeCombo.AddString(_T("Google Earth KML format"));
-	OutputTypeCombo.AddString(_T("Google Earth KMZ compressed format"));
-	OutputTypeCombo.AddString(_T("Polish format for GPSmapper"));
-	OutputTypeCombo.SetCurSel(1);
+	OutputTypeCombo.InsertString(-1, _T("KMZ compressed format for Google Earth"));
+	OutputTypeCombo.InsertString(-1, _T("KML format for Google Earth"));
+	OutputTypeCombo.InsertString(-1, _T("Polish format for cGPSmapper"));
+	OutputTypeCombo.SetCurSel(0);
 
 	// Check if is running on Windows XP (v 5.2) or older
 	OSVERSIONINFOEX osvi;
@@ -270,23 +282,26 @@ LRESULT CAirspaceConverterDlg::OnEndWriteKMLwarningAGL(WPARAM, LPARAM)
 
 void CAirspaceConverterDlg::UpdateOutputFilename()
 {
+	conversionDone = false;
 	if (outputFile.empty()) outputFileEditBox.SetWindowTextW(_T(""));
 	else {
 		boost::filesystem::path outputPath(outputFile);
 		switch (OutputTypeCombo.GetCurSel())
 		{
 		case 0:
-			outputPath.replace_extension("kml");
+			outputPath.replace_extension(".kmz");
 			break;
 		case 1:
-			outputPath.replace_extension("kmz");
+			outputPath.replace_extension(".kml");
 			break;
 		case 2:
-			outputPath.replace_extension("mp");
+			outputPath.replace_extension(".mp");
 			break;
 		default:
 			assert(false);
-			break;
+			outputFile.clear();
+			outputFileEditBox.SetWindowTextW(_T(""));
+			return;
 		}
 		outputFile = outputPath.string();
 		outputFileEditBox.SetWindowTextW(CString(outputFile.c_str()));
@@ -318,11 +333,12 @@ void CAirspaceConverterDlg::EndBusy()
 		numAirspacesLoaded = 0;
 		numRasterMapLoaded = 0;
 	}
+	BOOL isKmlKmzFile(OutputTypeCombo.GetCurSel() != 2); // Not Polish file
 	loadInputFileBt.EnableWindow(TRUE);
-	loadDEMfileBt.EnableWindow(TRUE);
+	loadDEMfileBt.EnableWindow(isKmlKmzFile);
 	if (!isWinXPorOlder) {
 		LoadAirspacesFolderBt.EnableWindow(TRUE);
-		LoadRasterMapsFolderBt.EnableWindow(TRUE);
+		LoadRasterMapsFolderBt.EnableWindow(isKmlKmzFile);
 		OpenOutputFileBt.EnableWindow(conversionDone);
 		OpenOutputFolderBt.EnableWindow(conversionDone);
 	}
@@ -330,11 +346,10 @@ void CAirspaceConverterDlg::EndBusy()
 	unloadRasterMapsBt.EnableWindow(numRasterMapLoaded  > 0 ? TRUE : FALSE);
 	ConvertBt.EnableWindow(numAirspacesLoaded > 0 && !outputFile.empty() ? TRUE : FALSE);
 	OutputTypeCombo.EnableWindow(TRUE);
-	editQNHtextField.EnableWindow(numAirspacesLoaded == 0 ? TRUE : FALSE);
-	editDefualtAltTextField.EnableWindow(TRUE);
+	editQNHtextField.EnableWindow(isKmlKmzFile ? numAirspacesLoaded == 0 : FALSE);
+	editDefualtAltTextField.EnableWindow(isKmlKmzFile);
 	chooseOutputFileBt.EnableWindow(numAirspacesLoaded == 0 ? FALSE : TRUE);
 	CloseButton.EnableWindow(TRUE);
-	UpdateOutputFilename();
 	progressBar.SetMarquee(FALSE, 1);
 	progressBar.ModifyStyle(PBS_MARQUEE, 0);
 	progressBar.SetPos(0);
@@ -355,6 +370,7 @@ void CAirspaceConverterDlg::OnBnClickedInputFile()
 			if (!boost::filesystem::is_regular_file(inputFilename)) continue;
 			if(processor->AddInputFile(inputFilename) && outputFile.empty()) outputFile = inputFilename;
 		}
+		UpdateOutputFilename();
 		if (processor != nullptr && processor->LoadAirspacesFiles(QNH)) StartBusy();
 		else MessageBox(_T("Error while starting input thread."), _T("Error"), MB_ICONERROR);
 	}
@@ -385,6 +401,7 @@ void CAirspaceConverterDlg::OnBnClickedInputFolderBt()
 			if (!boost::filesystem::is_regular_file(*it)) continue;
 			if (processor->AddInputFile(it->path().string()) && outputFile.empty()) outputFile = it->path().string();
 		}
+		UpdateOutputFilename();
 		if (processor != nullptr && processor->LoadAirspacesFiles(QNH)) StartBusy();	
 		else MessageBox(_T("Error while starting input thread."), _T("Error"), MB_ICONERROR);
 	}
@@ -412,7 +429,6 @@ void CAirspaceConverterDlg::OnBnClickedClearInputBt()
 		numAirspacesLoaded = 0;
 		outputFile.clear();
 		UpdateOutputFilename();
-		conversionDone = false;
 		LogMessage("Unloaded input airspaces.");
 		EndBusy();
 	}
@@ -431,45 +447,64 @@ void CAirspaceConverterDlg::OnBnClickedClearMapsBt()
 
 void CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt()
 {
-	CFileDialog dlg(FALSE, NULL, NULL, OFN_HIDEREADONLY, _T("KML files|*.kml|KMZ files|*.kmz|MP files|*.mp||"), (CWnd*)this, 0, TRUE);
+	assert(!outputFile.empty());
+	CFileDialog dlg(FALSE, NULL, CString(outputFile.c_str()), OFN_HIDEREADONLY, _T("KMZ files|*.kmz|KML files|*.kml|MP files|*.mp||"), (CWnd*)this, 0, TRUE);
 	if (dlg.DoModal() == IDOK) {
 		outputFile = CT2CA(dlg.GetPathName());
-		
-		std::string ext(boost::filesystem::path(outputFile).extension().string());
-
-		if (boost::iequals(ext, ".kml")) {
-			OutputTypeCombo.SetCurSel(0);
+		boost::filesystem::path outputPath(outputFile);
+		std::string ext(outputPath.extension().string());
+		if (boost::iequals(ext, ".kmz")) OutputTypeCombo.SetCurSel(0);
+		else if (boost::iequals(ext, ".kml")) OutputTypeCombo.SetCurSel(1);
+		else if (boost::iequals(ext, ".mp")) OutputTypeCombo.SetCurSel(2);
+		else { // otherwise force it to the selected extension from the open file dialog
+			switch (dlg.GetOFN().nFilterIndex) {
+			default:
+				assert(false);
+			case 1:
+				outputFile = outputPath.replace_extension(".kmz").string();
+				OutputTypeCombo.SetCurSel(0);
+				break;
+			case 2:
+				outputFile = outputPath.replace_extension(".kml").string();
+				OutputTypeCombo.SetCurSel(1);
+				break;
+			case 3:
+				outputFile = outputPath.replace_extension(".mp").string();
+				OutputTypeCombo.SetCurSel(2);
+				break;
+			}
 		}
-		else if (boost::iequals(ext, ".kmz")) {
-			OutputTypeCombo.SetCurSel(1);
-		
-		} if (boost::iequals(ext, ".mp")) {
-			OutputTypeCombo.SetCurSel(2);
-		}
-		else
-			assert(false);
-
-		UpdateOutputFilename();
-		conversionDone = false;
-		UpdateData(FALSE);
+		OnBnClickedOutputTypeCombo();
 	}
+}
+
+void CAirspaceConverterDlg::OnBnClickedOutputTypeCombo()
+{
+	UpdateOutputFilename();
+	BOOL isKmlKmzFile(OutputTypeCombo.GetCurSel() != 2); // Not Polish file
+	loadDEMfileBt.EnableWindow(isKmlKmzFile);
+	if (!isWinXPorOlder) LoadRasterMapsFolderBt.EnableWindow(isKmlKmzFile);
+	editQNHtextField.EnableWindow(isKmlKmzFile ? numAirspacesLoaded == 0 : FALSE);
+	editDefualtAltTextField.EnableWindow(isKmlKmzFile);
+	UpdateData(FALSE);
 }
 
 void CAirspaceConverterDlg::OnBnClickedConvert()
 {
 	if (outputFile.empty()) return;
 	int sel = OutputTypeCombo.GetCurSel();
+	assert(sel >= 0 && sel <= 2);
+	boost::filesystem::path outputPath(outputFile);
+	if (boost::filesystem::exists(outputPath)) { // check if file already exists
+		CString msg(outputFile.c_str());
+		msg += "\nalready exists, overwrite?";
+		if (MessageBox(msg, _T("Overwrite?"), MB_YESNO | MB_ICONINFORMATION) == IDYES) std::remove(outputFile.c_str());
+		else return;
+	}
 	if (sel == 0 || sel == 1) {
-		boost::filesystem::path outputPath(outputFile);
-		if (boost::filesystem::exists(outputPath)) { // check if file already exists
-			CString msg(outputFile.c_str());
-			msg += "\nalready exists, overwrite?";
-			if (MessageBox(msg, _T("Overwrite?"), MB_YESNO | MB_ICONINFORMATION) == IDYES) std::remove(outputFile.c_str());
-			else return;
-		}
-		if (sel == 1) {
+		if (sel == 0) {
 			boost::filesystem::path kmlPath(outputPath);
-			kmlPath.replace_extension("kml");
+			kmlPath.replace_extension(".kml");
 			if (boost::filesystem::exists(kmlPath)) {
 				CString msg(kmlPath.c_str());
 				msg += " already exists.\nIn order to make the KMZ it needs to be overwritten. Continue?";
@@ -479,13 +514,10 @@ void CAirspaceConverterDlg::OnBnClickedConvert()
 		}
 		if (processor != nullptr && processor->MakeKMLfile(outputFile, defaultTerrainAlt)) StartBusy();
 		else MessageBox(_T("Error while starting KML output thread."), _T("Error"), MB_ICONERROR);
-	}
-	else if (sel == 2)
-	{
+	} else if (sel == 2) {
 		if (processor != nullptr && processor->MakePolishFile(outputFile)) StartBusy();
 		else MessageBox(_T("Error while starting Polish output thread."), _T("Error"), MB_ICONERROR);
 	}
-	else assert(false);
 }
 
 void CAirspaceConverterDlg::OnBnClickedOpenOutputFile()
