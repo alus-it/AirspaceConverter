@@ -13,7 +13,7 @@
 #pragma once
 
 #ifndef VERSION
-#define VERSION "0.0.0.9"
+#define VERSION "0.0.1.0"
 #endif
 
 #include <functional>
