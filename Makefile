@@ -9,8 +9,6 @@
 # This source file is part of AirspaceConverter project
 #============================================================================
 
-# AirspaceConverter version string
-VERSION := 0.0.0.9
 
 # Tools
 CXX := g++
@@ -24,7 +22,7 @@ LIB := /usr/lib/x86_64-linux-gnu
 LFLAGS := -lz -lzip -lboost_system -lboost_filesystem
 
 # Source path
-SRC = src/
+SRC := src/
 
 # Release or debug, binary dir and specific comppile options
 DEBUG ?= 0
@@ -36,12 +34,12 @@ else
 	BIN := Release/
 endif
 
-# Dependency dir
-DEPDIR := $(BIN).d
+# Dependencies dir
+DEPDIR := $(BIN).d/
 $(shell mkdir -p $(DEPDIR) >/dev/null)
 
-# Dependency flags
-DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td
+# Dependencies flags
+DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)$*.Td
 
 # List of C++ source files
 CPPFILES =              \
@@ -57,7 +55,7 @@ CPPFILES =              \
 # List of object files
 OBJS = $(patsubst %.cpp, $(BIN)%.o, $(CPPFILES))
 
-### Build dependencies
+# Build all
 all: $(BIN)AirspaceConverter
 
 # Link
@@ -72,18 +70,18 @@ $(BIN):
 
 # Compile
 $(BIN)%.o: $(SRC)%.cpp
-$(BIN)%.o: $(SRC)%.cpp $(DEPDIR)/%.d
+$(BIN)%.o: $(SRC)%.cpp $(DEPDIR)%.d
 	@echo 'Compiling: $<'
 	@$(CXX) $(DEPFLAGS) $(CPPFLAGS) -c $< -o $@
-	@mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d
+	@mv -f $(DEPDIR)$*.Td $(DEPDIR)$*.d
 
-# Dependencies dependencies
-$(DEPDIR)/%.d: ;
-.PRECIOUS: $(DEPDIR)/%.d
+# Dependencies
+$(DEPDIR)%.d: ;
+.PRECIOUS: $(DEPDIR)%.d
 
--include $(patsubst %,$(DEPDIR)/%.d,$(basename $(CPPFILES)))
+-include $(patsubst %,$(DEPDIR)%.d,$(basename $(CPPFILES)))
 
-### Clean dependencies
+# Clean
 clean:
 	@echo Cleaning: objects, dependencies and executable
 	@$(RM) $(BIN)*
