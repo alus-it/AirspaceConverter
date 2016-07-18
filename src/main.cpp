@@ -114,9 +114,7 @@ int main(int argc, char *argv[]) {
 
 	// Prepare output filename if not entered by user
 	if (outputFile.empty()) {
-		boost::filesystem::path outputPath(inputFiles.front());
-		outputPath.replace_extension("kmz");
-		outputFile = outputPath.string();
+		outputFile = boost::filesystem::path(inputFiles.front()).replace_extension(".kmz").string();
 		outputIsKMLorKMZ = true;
 	} else {
 		std::string outputExt(boost::filesystem::path(outputFile).extension().string());

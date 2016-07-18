@@ -254,7 +254,7 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 		return false;
 	}
 
-	const std::string fileKML(compressAsKMZ ? boost::filesystem::path(filename).replace_extension("kml").string() : filename);
+	const std::string fileKML(compressAsKMZ ? boost::filesystem::path(filename).replace_extension(".kml").string() : filename);
 
 	if (file.is_open()) file.close();
 	file.open(fileKML);
@@ -345,7 +345,7 @@ bool KMLwriter::CompressToKMZ(const std::string& inputKMLfile, const bool delete
 	}
 
 	// Find the name of the output KMZ file
-	std::string kmzFile = boost::filesystem::path(inputKMLfile).replace_extension("kmz").string();
+	std::string kmzFile = boost::filesystem::path(inputKMLfile).replace_extension(".kmz").string();
 
 	// Put the name of KML file (without path) in the ZIP
 	std::string fileKML = boost::filesystem::path(inputKMLfile).filename().string();

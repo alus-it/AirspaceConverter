@@ -37,7 +37,7 @@ Possible options:
   -a: optional, specify a default terrain altitude in meters to calculate AGL heights of points not covered by loaded terrain map(s)  
   -i: mandatory, multiple, input file(s) can be OpenAir (.txt) or OpenAIP (.aip)  
   -m: optional, multiple, terrain map file(s) (.dem) used to lookup terrain height  
-  -o: optional, output file .kml or .kmz if not specified will be used the name of first input file as KMZ  
+  -o: optional, output file .kml, .kmz  or .mp (Polish) if not specified will be used the name of first input file as KMZ  
   -v: print version number  
   -h: print this guide
 
