@@ -14,15 +14,18 @@
 
 #include <string>
 #include <map>
+#include <fstream>
 
 class Airspace;
+class LatLon;
 
-class OpenAirReader
+class OpenAir
 {
 public:
-	OpenAirReader(std::multimap<int, Airspace>& outputMap);
-	inline ~OpenAirReader() {}
+	OpenAir(std::multimap<int, Airspace>& airspacesMap);
+	inline ~OpenAir() {}
 	bool ReadFile(const std::string& fileName);
+	bool WriteFile(const std::string& fileName);
 
 private:
 	bool ParseAC(const std::string& line, Airspace& airspace);
@@ -38,9 +41,13 @@ private:
 	//bool ParseDY(const std::string& line, Airspace& airspace); // Airway not yet supported
 	void ResetVar();
 	bool InsertAirspace(Airspace& airspace);
+	void WriteHeader();
+	void WriteCategory(const Airspace& airsapce);
+	void WriteLatLon(const LatLon& point);
 
 	std::multimap<int, Airspace>* airspaces;
 	bool varRotationClockwise;
 	double varLat, varLon;
 	double varWidth;
+	std::ofstream file;
 };

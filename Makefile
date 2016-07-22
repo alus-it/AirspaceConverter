@@ -11,31 +11,37 @@
 
 
 # Tools
-CXX := g++
-RM := rm -rf
+CXX = g++
+RM = rm -rf
 
 # Compiler options
-CPPFLAGS := -std=c++0x -Wall -Werror -fmessage-length=0
+CPPFLAGS = -std=c++0x -Wall -Werror -fmessage-length=0
 
 # Linker options
-LIB := /usr/lib/x86_64-linux-gnu
-LFLAGS := -lz -lzip -lboost_system -lboost_filesystem
+LIB = /usr/lib/x86_64-linux-gnu
+LFLAGS = -lz -lzip -lboost_system -lboost_filesystem
 
 # Source path
-SRC := src/
+SRC = src/
 
 # Release or debug, binary dir and specific comppile options
 DEBUG ?= 0
 ifeq ($(DEBUG),1)
 	CPPFLAGS += -O0 -g3 -DDEBUG
-	BIN := Debug/
+	BIN = Debug/
 else
 	CPPFLAGS += -O3
-	BIN := Release/
+	BIN = Release/
+endif
+
+# Option to avoid using libzip, just for compiling anyaway in case of older zip.h
+NOZIP ?= 0
+ifeq ($(NOZIP),1)
+	CPPFLAGS += -DNOZIP
 endif
 
 # Dependencies dir
-DEPDIR := $(BIN).d/
+DEPDIR = $(BIN).d/
 $(shell mkdir -p $(DEPDIR) >/dev/null)
 
 # Dependencies flags
@@ -48,7 +54,7 @@ CPPFILES =              \
 	KMLwriter.cpp         \
 	main.cpp              \
 	OpenAIPreader.cpp     \
-	OpenAirReader.cpp     \
+	OpenAir.cpp     \
 	PFMwriter.cpp         \
 	RasterMap.cpp
 
@@ -83,6 +89,6 @@ $(DEPDIR)%.d: ;
 
 # Clean
 clean:
-	@echo Cleaning: objects, dependencies and executable
+	@echo $(CPPFLAGS)
 	@$(RM) $(BIN)*
 

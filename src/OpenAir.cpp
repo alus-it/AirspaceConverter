@@ -10,10 +10,9 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
-#include "OpenAirReader.h"
+#include "OpenAir.h"
 #include "AirspaceConverter.h"
 #include "Airspace.h"
-#include <fstream>
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -92,8 +91,8 @@ static bool ParseCoordinates(const std::string& text, double& lat, double& lon)
 	return true;
 }
 
-OpenAirReader::OpenAirReader(std::multimap<int, Airspace>& outputMap)
-	: airspaces(&outputMap)
+OpenAir::OpenAir(std::multimap<int, Airspace>& airspacesMap)
+	: airspaces(&airspacesMap)
 	, varRotationClockwise(true)
 	, varLat(LatLon::UNDEF_LAT)
 	, varLon(LatLon::UNDEF_LON)
@@ -101,7 +100,7 @@ OpenAirReader::OpenAirReader(std::multimap<int, Airspace>& outputMap)
 }
 
 // Reading and parsing OpenAir airspace file
-bool OpenAirReader::ReadFile(const std::string& fileName) {
+bool OpenAir::ReadFile(const std::string& fileName) {
 	assert(airspaces != nullptr);
 	if (airspaces == nullptr) return false;
 	std::ifstream input(fileName);
@@ -214,7 +213,7 @@ bool OpenAirReader::ReadFile(const std::string& fileName) {
 	return allParsedOK;
 }
 
-bool OpenAirReader::ParseAC(const std::string & line, Airspace& airspace)
+bool OpenAir::ParseAC(const std::string & line, Airspace& airspace)
 {
 	InsertAirspace(airspace); // If new airspace first store the actual one
 	assert(airspace.GetType() == Airspace::UNKNOWN);
@@ -241,7 +240,7 @@ bool OpenAirReader::ParseAC(const std::string & line, Airspace& airspace)
 	return true;
 }
 
-bool OpenAirReader::ParseAN(const std::string & line, Airspace& airspace)
+bool OpenAir::ParseAN(const std::string & line, Airspace& airspace)
 {
 	if (airspace.GetType() == Airspace::UNKNOWN) return true;
 	if (line.size() < 4) return false;
@@ -249,7 +248,7 @@ bool OpenAirReader::ParseAN(const std::string & line, Airspace& airspace)
 	return true;
 }
 
-bool OpenAirReader::ParseAltitude(const std::string& line, const bool isTop, Airspace& airspace)
+bool OpenAir::ParseAltitude(const std::string& line, const bool isTop, Airspace& airspace)
 {
 	if (airspace.GetType() == Airspace::UNKNOWN) return true;
 	const int l = line.length();
@@ -330,19 +329,19 @@ bool OpenAirReader::ParseAltitude(const std::string& line, const bool isTop, Air
 	return true;
 }
 
-bool OpenAirReader::ParseS(const std::string & line)
+bool OpenAir::ParseS(const std::string & line)
 {
 	if (line.size() > 1 && (line.at(1) == 'P' || line.at(1) == 'B')) return true; // ignore it...
 	return false;
 }
 
-bool OpenAirReader::ParseT(const std::string& line)
+bool OpenAir::ParseT(const std::string& line)
 {
 	if (line.size() > 1 && (line.at(1) == 'C' || line.at(1) == 'O')) return true; // Style, pen or brush record ignore it...
 	return false;
 }
 
-bool OpenAirReader::ParseDP(const std::string& line, Airspace& airspace)
+bool OpenAir::ParseDP(const std::string& line, Airspace& airspace)
 {
 	if (airspace.GetType() == Airspace::UNKNOWN) return true;
 	if (line.length() < 14) return false;
@@ -354,7 +353,7 @@ bool OpenAirReader::ParseDP(const std::string& line, Airspace& airspace)
 	return false;
 }
 
-bool OpenAirReader::ParseV(const std::string & line, Airspace& airspace)
+bool OpenAir::ParseV(const std::string & line, Airspace& airspace)
 {
 	if (airspace.GetType() == Airspace::UNKNOWN) return true;
 	if (line.length() < 5) return false;
@@ -389,7 +388,7 @@ bool OpenAirReader::ParseV(const std::string & line, Airspace& airspace)
 	return true;
 }
 
-bool OpenAirReader::ParseDA(const std::string& line, Airspace& airspace)
+bool OpenAir::ParseDA(const std::string& line, Airspace& airspace)
 {
 	if (airspace.GetType() == Airspace::UNKNOWN) return true;
 	if (varLat == LatLon::UNDEF_LAT || line.length() < 8) return false;
@@ -418,7 +417,7 @@ bool OpenAirReader::ParseDA(const std::string& line, Airspace& airspace)
 	return true;
 }
 
-bool OpenAirReader::ParseDB(const std::string& line, Airspace& airspace)
+bool OpenAir::ParseDB(const std::string& line, Airspace& airspace)
 {
 	if (airspace.GetType() == Airspace::UNKNOWN) return true;
 	if (varLat == LatLon::UNDEF_LAT || line.length() < 26) return false;
@@ -444,7 +443,7 @@ bool OpenAirReader::ParseDB(const std::string& line, Airspace& airspace)
 	return true;
 }
 
-bool OpenAirReader::ParseDC(const std::string& line, Airspace& airspace)
+bool OpenAir::ParseDC(const std::string& line, Airspace& airspace)
 {
 	if (airspace.GetType() == Airspace::UNKNOWN) return true;
 	if (varLat == LatLon::UNDEF_LAT || line.length() < 4 || !isDigit(line.at(3))) return false;
@@ -454,7 +453,7 @@ bool OpenAirReader::ParseDC(const std::string& line, Airspace& airspace)
 }
 
 /* Airway not yet supported
-bool OpenAirReader::ParseDY(const std::string & line, Airspace& airspace)
+bool OpenAir::ParseDY(const std::string & line, Airspace& airspace)
 {
 	if (airspace.GetType() == Airspace::UNKNOWN) return true;
 	if (varWidth == 0 || line.length() < 14) return false;
@@ -467,14 +466,14 @@ bool OpenAirReader::ParseDY(const std::string & line, Airspace& airspace)
 }
 */
 
-void OpenAirReader::ResetVar()
+void OpenAir::ResetVar()
 {
 	varRotationClockwise = true;
 	varLat = LatLon::UNDEF_LAT;
 	varWidth = 0;
 }
 
-bool OpenAirReader::InsertAirspace(Airspace& airspace)
+bool OpenAir::InsertAirspace(Airspace& airspace)
 {
 	if (airspaces == nullptr) {
 		assert(false);
@@ -488,4 +487,85 @@ bool OpenAirReader::InsertAirspace(Airspace& airspace)
 	} else airspace.Clear();
 	ResetVar();
 	return validAirspace;
+}
+
+bool OpenAir::WriteFile(const std::string& fileName) {
+	if (airspaces == nullptr) return false;
+	if (file.is_open()) file.close();
+	file.open(fileName);
+	if (!file.is_open() || file.bad()) {
+		AirspaceConverter::LogMessage("ERROR: Unable to open output file: " + fileName, true);
+		return false;
+	}
+	AirspaceConverter::LogMessage("Writing output file: " + fileName, false);
+
+	WriteHeader();
+
+	// Go trough all airspace
+	for (const std::pair<const int,Airspace>& pair : *airspaces)
+	{
+		// Get the airspace
+		const Airspace& a = pair.second;
+
+		// Just a couple if assertions
+		assert(a.GetNumberOfPoints() > 3);
+		assert(a.GetFirstPoint()==a.GetLastPoint());
+
+		WriteCategory(a);
+		file << "AN " << a.GetName() << "\r\n";
+		file << "AL " << a.GetBaseAltitude().ToString() << "\r\n";
+		file << "AH " << a.GetTopAltitude().ToString() << "\r\n";
+
+		//TODO: for now we just print down all the points, but would be nice to "undiscretize" back to circles and arcs
+
+		// Brutally insert all the points
+		for (unsigned int i=0; i<a.GetNumberOfPoints()-1; i++) {
+			file << "DP ";
+			WriteLatLon(a.GetPointAt(i));
+			file << "\r\n";
+		}
+		file << "DP ";
+		WriteLatLon(a.GetLastPoint());
+		file << "\r\n\r\n";
+	}
+	file.close();
+	return true;
+}
+
+void OpenAir::WriteHeader() {
+	for(const std::string& line: AirspaceConverter::disclaimer) file << "*" << line << "\r\n";
+	file << "\r\n";
+}
+
+void OpenAir::WriteCategory(const Airspace& airspace) {
+	file << "AC ";
+	switch(airspace.GetType()) {
+		case Airspace::RESTRICTED: file << "R"; break;
+		case Airspace::DANGER: file << "Q"; break;
+		case Airspace::PROHIBITED: file << "P"; break;
+		case Airspace::CTR: file << "CTR"; break;
+		case Airspace::CLASSA: file << "A"; break;
+		case Airspace::CLASSB: file << "B"; break;
+		case Airspace::CLASSC: file << "C"; break;
+		case Airspace::CLASSD: file << "D"; break;
+		case Airspace::CLASSE: file << "E"; break;
+		case Airspace::CLASSF: file << "F"; break;
+		case Airspace::CLASSG: file << "G"; break;
+		case Airspace::WAVE: file << "W"; break;
+		case Airspace::TMZ: file << "TMZ"; break;
+		case Airspace::NOGLIDER: file << "GP"; break;
+		default:
+			//TODO: cases not existent in OpenAir: what to do?
+			break;
+	}
+	file << "\r\n";
+}
+
+void OpenAir::WriteLatLon(const LatLon& point) {
+	int deg;
+	double min;
+	point.GetLatDegMin(deg,min);
+	file << deg << ":" << min << " " << point.GetNorS() << "  ";
+	point.GetLonDegMin(deg,min);
+	file << deg << ":" << min << " " << point.GetEorW();
 }

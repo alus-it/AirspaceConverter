@@ -60,10 +60,17 @@ public:
 	inline void SetLatLon(double& latitude, double& longitude) { lat = latitude; lon = longitude; }
 	inline bool operator==(const LatLon& other) const { return other.lat == lat && other.lon == lon; }
 	inline bool operator!=(const LatLon& other) const { return other.lat != lat || other.lon != lon; }
+	inline void GetLatDegMin(int& deg, double& min) const { return convertDec2DegMin(lat, deg, min); }
+	inline void GetLonDegMin(int& deg, double& min) const { return convertDec2DegMin(lon, deg, min); }
+	inline char GetNorS() const { return lat > 0 ? 'N' : 'S'; }
+	inline char GetEorW() const { return lon > 0 ? 'E' : 'W'; }
+
 	static const int UNDEF_LAT, UNDEF_LON;
 
 private:
 	double lat, lon;
+	static void convertDec2DegMin(const double& dec, int& deg, double& min);
+	static const double SIXTYTH;
 };
 
 class Geometry

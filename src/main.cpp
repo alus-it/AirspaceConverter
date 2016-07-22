@@ -13,13 +13,20 @@
 #include "AirspaceConverter.h"
 #include "Airspace.h"
 #include "OpenAIPreader.h"
-#include "OpenAirReader.h"
 #include "KMLwriter.h"
 #include "PFMwriter.h"
+#include "OpenAir.h"
 #include <iostream>
 #include <cstring>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+
+enum OutputType {
+	kml = 0,
+	kmz,
+	mp,
+	txt
+};
 
 void printHelp() {
 	std::cout << "Example usage: AirspaceConverter -q 1013 -a 35 -i inputFileOpenAir.txt -i inputFileOpenAIP.aip -m terrainMap.dem -o outputFile.kmz" << std::endl << std::endl;
@@ -28,7 +35,7 @@ void printHelp() {
 	std::cout << "-a: optional, specify a default terrain altitude in meters to calculate AGL heights of points not covered by loaded terrain map(s)" << std::endl;
 	std::cout << "-i: mandatory, multiple, input file(s) can be OpenAir (.txt) or OpenAIP (.aip)" << std::endl;
 	std::cout << "-m: optional, multiple, terrain map file(s) (.dem) used to lookup terrain height" << std::endl;
-	std::cout << "-o: optional, output file .kml, .kmz  or .mp (Polish) if not specified will be used the name of first input file as KMZ" << std::endl;
+	std::cout << "-o: optional, output file .kml, .kmz, .mp (Polish) or .txt (OpenAir) if not specified will be used the name of first input file as KMZ" << std::endl;
 	std::cout << "-v: print version number" << std::endl;
 	std::cout << "-h: print this guide" << std::endl << std::endl;
 }
@@ -110,21 +117,20 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Determine what kind of output is requested
-	bool outputIsKMLorKMZ = false;
+	OutputType outputType = kmz;
 
 	// Prepare output filename if not entered by user
-	if (outputFile.empty()) {
-		outputFile = boost::filesystem::path(inputFiles.front()).replace_extension(".kmz").string();
-		outputIsKMLorKMZ = true;
-	} else {
+	if (!outputFile.empty()) {
 		std::string outputExt(boost::filesystem::path(outputFile).extension().string());
-		if (boost::iequals(outputExt,".kmz") || boost::iequals(outputExt,".kml")) outputIsKMLorKMZ = true;
-		else if(!boost::iequals(outputExt,".mp")) {
+		if (boost::iequals(outputExt,".kmz")) outputType = kmz;
+		else if(boost::iequals(outputExt,".kml")) outputType = kml;
+		else if(boost::iequals(outputExt,".mp")) outputType = mp;
+		else if(boost::iequals(outputExt,".txt")) outputType = txt;
+		else {
 			std::cerr << "FATAL ERROR: Output file extension unknown." << std::endl;
 			return EXIT_FAILURE;
 		}
 	}
-
 	// Set QNH
 	Altitude::SetQNH(QNH);
 
@@ -134,15 +140,15 @@ int main(int argc, char *argv[]) {
 	// Initialize airspaces multimap
 	std::multimap<int, Airspace> airspaces;
 
-	// Initialize OpenAir reader
-	OpenAirReader openAirReader(airspaces);
+	// Initialize OpenAir module
+	OpenAir openAir(airspaces);
 
 	// Process input files
 	bool flag = true; // all failed
 	for(const std::string& inputFile : inputFiles) {
 		std::string ext(boost::filesystem::path(inputFile).extension().string());
 		if(boost::iequals(ext, ".txt")) {
-			if(openAirReader.ReadFile(inputFile)) flag = false;
+			if(openAir.ReadFile(inputFile)) flag = false;
 		} else if(boost::iequals(ext, ".aip")) {
 			if(OpenAIPreader::ReadFile(inputFile, airspaces)) flag = false;
 		} else std::cerr << "ERROR: unknown extension: " << ext << "for input file" << std::endl;
@@ -152,21 +158,33 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 	
-	if (outputIsKMLorKMZ) {
+	switch(outputType) {
+		case kmz:
+		case kml:
+			{
+				// Load terrain maps
+				flag = true; // all failed
+				for(const std::string& mapFile : mapFiles) if(KMLwriter::AddTerrainMap(mapFile)) flag = false;
+				if(flag) std::cout << "Warning: no terrain map loaded, using default terrain height for all applicable AGL points." << std::endl;
 
-		// Load terrain maps
-		flag = true; // all failed
-		for(const std::string& mapFile : mapFiles) if(KMLwriter::AddTerrainMap(mapFile)) flag = false;
-		if(flag) std::cout << "Warning: no terrain map loaded, using default terrain height for all applicable AGL points." << std::endl;
-
-		// Make KML file
-		KMLwriter writer;
-		flag = writer.WriteFile(outputFile, airspaces);
-	} else {
-
-		// Make Polish file
-		PFMwriter writer;
-		flag = writer.WriteFile(outputFile, airspaces);
+				// Make KML file
+				KMLwriter writer;
+				flag = writer.WriteFile(outputFile, airspaces);
+			}
+			break;
+		case mp:
+			{
+				// Make Polish file
+				PFMwriter writer;
+				flag = writer.WriteFile(outputFile, airspaces);
+			}
+			break;
+		case txt:
+			flag = openAir.WriteFile(outputFile);
+			break;
+		default:
+			assert(false);
+			break;
 	}
 
 	return flag ? EXIT_SUCCESS : EXIT_FAILURE;

@@ -13,12 +13,12 @@
 #include "stdafx.h"
 #include "Processor.h"
 #include "../../src/OpenAIPreader.h"
-#include "../../src/OpenAirReader.h"
 #include "../../src/Airspace.h"
 #include "../../src/KMLwriter.h"
 #include "../../src/PFMwriter.h"
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include "../../src/OpenAir.h"
 
 Processor::Processor(HWND hwnd) :
 	window(hwnd),
@@ -55,8 +55,8 @@ bool Processor::LoadAirspacesFiles(const double& newQNH) {
 void Processor::LoadAirspacesfilesThread() {
 	for (const std::string& inputFile : openAIPinputFiles) OpenAIPreader::ReadFile(inputFile, airspaces);
 	openAIPinputFiles.clear();
-	OpenAirReader openAirReader(airspaces);
-	for (const std::string& inputFile : openAirInputFiles) openAirReader.ReadFile(inputFile);
+	OpenAir openAir(airspaces);
+	for (const std::string& inputFile : openAirInputFiles) openAir.ReadFile(inputFile);
 	openAirInputFiles.clear();
 	PostMessage(window, WM_GENERAL_WORK_DONE, 0, 0);
 }

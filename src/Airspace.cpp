@@ -16,6 +16,8 @@
 
 const int LatLon::UNDEF_LAT = -91;
 const int LatLon::UNDEF_LON = -181;
+const double LatLon::SIXTYTH = 1.0 / 60;
+
 const double Altitude::FEET2METER = 0.3048; // 1 Ft = 0.3048 m
 const double Altitude::K1 = 0.190263;
 const double Altitude::K2 = 8.417286e-5;
@@ -31,6 +33,12 @@ const double Geometry::NM2RAD = PI / (180 * 60);
 const double Geometry::RAD2NM = (180 * 60) / PI;
 
 double Geometry::resolution = 0.3 * NM2RAD; // 0.3 NM = 555.6 m
+
+void LatLon::convertDec2DegMin(const double& dec, int& deg, double& min) {
+	double decimal = fabs(dec);
+	deg=(int)floor(decimal);
+	min = (decimal-deg)/SIXTYTH;
+}
 
 double Altitude::QNEaltitudeToStaticPressure(const double alt) {
 	return std::pow((std::pow(QNE, K1) - K2*alt), 1.0 / K1);
