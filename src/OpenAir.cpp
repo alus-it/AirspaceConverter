@@ -17,16 +17,13 @@
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-static inline std::string& RemoveComments(std::string &s) {
+std::string& OpenAir::RemoveComments(std::string &s) {
 	s.erase(find_if(s.begin(), s.end(), [](const char c) { return c == '*'; }), s.end());
 	return s;
 }
 
-static inline bool isDigit(const char c) {
-	return (c >= '0' && c <= '9');
-}
 
-static bool ParseDegrees(const std::string& dddmmss, double& deg) {
+bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg) {
 	boost::char_separator<char> sep(":");
 	boost::tokenizer<boost::char_separator<char>> tokens(dddmmss, sep);
 	deg = 0;
@@ -52,7 +49,7 @@ static bool ParseDegrees(const std::string& dddmmss, double& deg) {
 	return true;
 }
 
-static bool ParseCoordinates(const std::string& text, double& lat, double& lon)
+bool OpenAir::ParseCoordinates(const std::string& text, double& lat, double& lon)
 {
 	boost::char_separator<char> sep(" ");
 	boost::tokenizer<boost::char_separator<char> > tokens(text, sep);
@@ -481,7 +478,7 @@ bool OpenAir::InsertAirspace(Airspace& airspace)
 	}
 	const bool validAirspace = airspace.GetType() != Airspace::UNKNOWN && !airspace.GetName().empty() && airspace.GetNumberOfGeometries() > 0 && !airspace.GetTopAltitude().IsGND();
 	if (validAirspace) {
-		airspace.Discretize();
+		assert(airspace.GetNumberOfPoints() > 0);
 		airspace.ClosePoints();
 		airspaces->insert(std::pair<int, Airspace>(airspace.GetType(),std::move(airspace)));
 	} else airspace.Clear();
@@ -517,6 +514,10 @@ bool OpenAir::WriteFile(const std::string& fileName) {
 		file << "AH " << a.GetTopAltitude().ToString() << "\r\n";
 
 		//TODO: for now we just print down all the points, but would be nice to "undiscretize" back to circles and arcs
+		//a.Undiscretize();
+		//for(auto& g: a.GetGeometries) {
+		// WriteGeometry(g);
+		//}
 
 		// Brutally insert all the points
 		for (unsigned int i=0; i<a.GetNumberOfPoints()-1; i++) {

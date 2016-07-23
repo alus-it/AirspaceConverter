@@ -198,7 +198,8 @@ public:
 	void AddGeometry(const Geometry* geometry);
 
 	inline void ClosePoints() { if (points.front() != points.back()) points.push_back(points.front()); }
-	void Discretize();
+
+	bool Undiscretize();
 
 	inline const Type& GetType() const { return type; }
 	inline const std::string& GetCategoryName() const { return CategoryName(type); }

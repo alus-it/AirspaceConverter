@@ -28,6 +28,11 @@ public:
 	bool WriteFile(const std::string& fileName);
 
 private:
+	inline static bool isDigit(const char c) { return (c >= '0' && c <= '9'); }
+	static std::string& RemoveComments(std::string &s);
+	static bool ParseDegrees(const std::string& dddmmss, double& deg);
+	static bool ParseCoordinates(const std::string& text, double& lat, double& lon);
+
 	bool ParseAC(const std::string& line, Airspace& airspace);
 	bool ParseAN(const std::string& line, Airspace& airspace);
 	bool ParseAltitude(const std::string& line, const bool isTop, Airspace& airspace);

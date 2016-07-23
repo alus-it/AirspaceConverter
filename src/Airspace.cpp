@@ -133,14 +133,12 @@ Airspace::Airspace(Airspace&& orig) // Move constructor
 	orig.type = UNKNOWN;
 }
 
-Airspace::~Airspace()
-{
+Airspace::~Airspace() {
 	for (const Geometry* g : geometries) delete g;
 	geometries.clear();
 }
 
-void Airspace::Clear()
-{
+void Airspace::Clear() {
 	type = UNKNOWN;
 	name.clear();
 	for (const Geometry* g : geometries) delete g;
@@ -148,20 +146,25 @@ void Airspace::Clear()
 	points.clear();
 }
 
-void Airspace::AddPoint(const double & lat, const double & lon)
-{
-	geometries.push_back(new Point(LatLon(lat, lon)));
+void Airspace::AddPoint(const double& lat, const double& lon) {
+	LatLon point(lat, lon);
+	geometries.push_back(new Point(point));
+	points.push_back(point);
 }
 
-void Airspace::AddGeometry(const Geometry* geometry)
-{
+void Airspace::AddGeometry(const Geometry* geometry) {
 	geometries.push_back(geometry);
+	geometry->Discretize(points);
 }
 
-void Airspace::Discretize()
+bool Airspace::Undiscretize()
 {
-	points.clear();
-	for (auto g : geometries) g->Discretize(points);
+	if (!geometries.empty()) return true;
+	if (points.empty()) return false;
+
+	//TODO: to be done!
+
+	return false;
 }
 
 double Geometry::AbsAngle(const double& angle) { //to put angle in the range between 0 and 2PI
