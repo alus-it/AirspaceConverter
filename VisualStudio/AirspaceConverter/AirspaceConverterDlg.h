@@ -29,18 +29,16 @@ public:
 	enum { IDD = IDD_AIRSPACECONVERTER_DIALOG };
 #endif
 
-protected:
+private:
 	virtual void DoDataExchange(CDataExchange* pDX);
 	HICON m_hIcon;
 
 	// Generated message map functions
 	virtual BOOL OnInitDialog();
+	DECLARE_MESSAGE_MAP()
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
-	DECLARE_MESSAGE_MAP()
-	
-private:
 	afx_msg void OnBnClickedAbout();
 	afx_msg void OnBnClickedInputFile();
 	afx_msg void OnBnClickedLoadDEM();

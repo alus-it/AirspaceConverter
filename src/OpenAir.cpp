@@ -489,7 +489,7 @@ bool OpenAir::InsertAirspace(Airspace& airspace)
 bool OpenAir::WriteFile(const std::string& fileName) {
 	if (airspaces == nullptr) return false;
 	if (file.is_open()) file.close();
-	file.open(fileName);
+	file.open(fileName, std::ios::out | std::ios::trunc | std::ios::binary);
 	if (!file.is_open() || file.bad()) {
 		AirspaceConverter::LogMessage("ERROR: Unable to open output file: " + fileName, true);
 		return false;

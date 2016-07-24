@@ -257,7 +257,7 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 	const std::string fileKML(compressAsKMZ ? boost::filesystem::path(filename).replace_extension(".kml").string() : filename);
 
 	if (file.is_open()) file.close();
-	file.open(fileKML);
+	file.open(fileKML, std::ios::out | std::ios::trunc | std::ios::binary);
 	if (!file.is_open() || file.bad()) {
 		AirspaceConverter::LogMessage("ERROR: Unable to open output file: " + filename, true);
 		return false;

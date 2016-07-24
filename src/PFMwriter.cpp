@@ -98,7 +98,7 @@ bool PFMwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 	}
 
 	if (file.is_open()) file.close();
-	file.open(filename);
+	file.open(filename, std::ios::out | std::ios::trunc | std::ios::binary);
 	if (!file.is_open() || file.bad()) {
 		AirspaceConverter::LogMessage("ERROR: Unable to open output file: " + filename, true);
 		return false;

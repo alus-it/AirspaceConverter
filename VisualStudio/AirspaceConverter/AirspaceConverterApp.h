@@ -24,7 +24,7 @@ public:
 	CAirspaceConverterApp();
 
 // Overrides
-public:
+private:
 	virtual BOOL InitInstance();
 
 // Implementation

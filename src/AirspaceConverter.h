@@ -22,13 +22,19 @@
 
 class AirspaceConverter
 {
-
 public:
+	enum OutputType {
+		KMZ = 0,
+		KML,
+		OpenAir,
+		Polish,
+		NumOfOutputTypes
+	};
+
 	static std::function<void(const std::string&, const bool)> LogMessage;
 	inline static void SetLogMessageFuntion(std::function<void(const std::string&, const bool)> func) { LogMessage = func; }
 	static const std::vector<std::string> disclaimer;
 
 private:
 	static void DefaultLogMessage(const std::string&, const bool isError = false);
-
 };

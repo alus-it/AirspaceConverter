@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include "../../src/AirspaceConverter.h"
 #include <thread>
 //#include <deque>
 #include <map>
@@ -38,28 +39,27 @@ public:
 	bool UnloadAirspaces();
 	bool UnloadRasterMaps();
 	bool MakeKMLfile(const std::string& outputKMLfile, const double& defaultTerraninAltMt);
-	bool MakePolishFile(const std::string& outputMPfile);
+	bool MakeOtherFile(const std::string& outputFilename, const AirspaceConverter::OutputType type);
 	inline void SetWindow(HWND hwnd) { window = hwnd; }
 	inline unsigned long GetNumOfAirspaces() const { return airspaces.size(); }
 	int GetNumOfTerrainMaps() const;
 	inline void Join() { if (workerThread.joinable()) workerThread.join(); }
-	inline void Abort() { abort = true; Join(); }
+	//inline void Abort() { abort = true; Join(); }
 	
 private:
-	HWND window;
-	std::thread workerThread;
-	//std::deque<std::string> queue;
-
 	void LoadAirspacesfilesThread();
 	void LoadDEMfilesThread();
 	void MakeKMLfileThread();
-	void MakeMPfileThread();
+	void MakeOtherFileThread();
 
-	bool abort;
-
+	HWND window;
+	std::thread workerThread;
+	//std::deque<std::string> queue;
+	//bool abort;
 	std::multimap<int, Airspace> airspaces;
 	double QNH;
 	double defaultTerrainAlt;
 	std::string outputFile;
 	std::vector<std::string> openAIPinputFiles, openAirInputFiles, DEMfiles;
+	AirspaceConverter::OutputType outputType;
 };

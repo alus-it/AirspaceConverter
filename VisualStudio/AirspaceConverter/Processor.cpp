@@ -22,11 +22,12 @@
 
 Processor::Processor(HWND hwnd) :
 	window(hwnd),
-	abort(false) {
+	//abort(false),
+	outputType(AirspaceConverter::NumOfOutputTypes) {
 }
 
 Processor::~Processor() {
-	Abort();
+	//Abort();
 	KMLwriter::ClearTerrainMaps();
 }
 
@@ -47,7 +48,7 @@ bool Processor::AddInputFile(const std::string& inputFile)
 bool Processor::LoadAirspacesFiles(const double& newQNH) {
 	if (workerThread.joinable() || (openAIPinputFiles.empty() && openAirInputFiles.empty())) return false;
 	Altitude::SetQNH(newQNH);
-	abort = false;
+	//abort = false;
 	workerThread = std::thread(std::bind(&Processor::LoadAirspacesfilesThread, this));
 	return true;
 }
@@ -69,7 +70,7 @@ bool Processor::UnloadAirspaces() {
 
 bool Processor::LoadDEMfiles() {
 	if (workerThread.joinable() || DEMfiles.empty()) return false;
-	abort = false;
+	//abort = false;
 	workerThread = std::thread(std::bind(&Processor::LoadDEMfilesThread, this));
 	return true;
 }
@@ -91,7 +92,7 @@ bool Processor::MakeKMLfile(const std::string& outputKMLfile, const double& defa
 	if (workerThread.joinable()) return false;
 	outputFile = outputKMLfile;
 	KMLwriter::SetDefaultTerrainAltitude(defaultTerraninAltMt);
-	abort = false;
+	//abort = false;
 	workerThread = std::thread(std::bind(&Processor::MakeKMLfileThread, this));
 	return true;
 }
@@ -103,20 +104,38 @@ void Processor::MakeKMLfileThread()
 	else PostMessage(window, WM_GENERAL_WORK_DONE, 0, 0);
 }
 
-bool Processor::MakePolishFile(const std::string & outputMPfile)
+bool Processor::MakeOtherFile(const std::string& outputFilename, AirspaceConverter::OutputType type)
 {
 	if (workerThread.joinable()) return false;
-	outputFile = outputMPfile;
-	abort = false;
-	workerThread = std::thread(std::bind(&Processor::MakeMPfileThread, this));
+	outputFile = outputFilename;
+	outputType = type;
+	//abort = false;
+	workerThread = std::thread(std::bind(&Processor::MakeOtherFileThread, this));
 	return true;
 }
 
-void Processor::MakeMPfileThread()
+void Processor::MakeOtherFileThread()
 {
-	PFMwriter writer;
-	if(writer.WriteFile(outputFile, airspaces)) PostMessage(window, WM_WRITE_OUTPUT_OK, 0, 0);
-	else PostMessage(window, WM_GENERAL_WORK_DONE, 0, 0);
+	bool done = false;
+	switch (outputType) {
+	case AirspaceConverter::OpenAir:
+		{
+			OpenAir writer(airspaces);
+			done = writer.WriteFile(outputFile);
+		}
+		break;
+	case AirspaceConverter::Polish:
+		{
+			PFMwriter writer;
+			done = writer.WriteFile(outputFile, airspaces);
+		}
+		break;
+	default:
+		assert(false);
+		break;
+	
+	}
+	PostMessage(window, done ? WM_WRITE_OUTPUT_OK : WM_GENERAL_WORK_DONE, 0, 0);
 }
 
 int Processor::GetNumOfTerrainMaps() const
