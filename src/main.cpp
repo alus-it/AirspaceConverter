@@ -21,13 +21,6 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-enum OutputType {
-	kml = 0,
-	kmz,
-	mp,
-	txt
-};
-
 void printHelp() {
 	std::cout << "Example usage: AirspaceConverter -q 1013 -a 35 -i inputFileOpenAir.txt -i inputFileOpenAIP.aip -m terrainMap.dem -o outputFile.kmz" << std::endl << std::endl;
 	std::cout << "Possible options:" << std::endl;
@@ -117,15 +110,15 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Determine what kind of output is requested
-	OutputType outputType = kmz;
+	AirspaceConverter::OutputType outputType = AirspaceConverter::KMZ;
 
 	// Prepare output filename if not entered by user
 	if (!outputFile.empty()) {
 		std::string outputExt(boost::filesystem::path(outputFile).extension().string());
-		if (boost::iequals(outputExt,".kmz")) outputType = kmz;
-		else if(boost::iequals(outputExt,".kml")) outputType = kml;
-		else if(boost::iequals(outputExt,".mp")) outputType = mp;
-		else if(boost::iequals(outputExt,".txt")) outputType = txt;
+		if (boost::iequals(outputExt,".kmz")) { /* already KMZ by default */ }
+		else if(boost::iequals(outputExt,".kml")) outputType = AirspaceConverter::KML;
+		else if(boost::iequals(outputExt,".mp")) outputType = AirspaceConverter::Polish;
+		else if(boost::iequals(outputExt,".txt")) outputType = AirspaceConverter::OpenAir;
 		else {
 			std::cerr << "FATAL ERROR: Output file extension unknown." << std::endl;
 			return EXIT_FAILURE;
@@ -159,8 +152,8 @@ int main(int argc, char *argv[]) {
 	}
 	
 	switch(outputType) {
-		case kmz:
-		case kml:
+		case AirspaceConverter::KMZ:
+		case AirspaceConverter::KML:
 			{
 				// Load terrain maps
 				flag = true; // all failed
@@ -172,16 +165,17 @@ int main(int argc, char *argv[]) {
 				flag = writer.WriteFile(outputFile, airspaces);
 			}
 			break;
-		case mp:
+		case AirspaceConverter::OpenAir:
+			flag = openAir.WriteFile(outputFile);
+			break;
+		case AirspaceConverter::Polish:
 			{
 				// Make Polish file
 				PFMwriter writer;
 				flag = writer.WriteFile(outputFile, airspaces);
 			}
 			break;
-		case txt:
-			flag = openAir.WriteFile(outputFile);
-			break;
+
 		default:
 			assert(false);
 			break;
