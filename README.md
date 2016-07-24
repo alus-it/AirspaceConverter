@@ -1,7 +1,7 @@
 AirspaceConverter
 =================
 Welcome to AirspaceConverter repository!  
-This is an open source, multi-platform  tool to convert OpenAir or OpenAIP airspace files to KML/KMZ for Google Earth.
+This is an open source, multi-platform  tool to convert OpenAir or OpenAIP airspace files to KML/KMZ for Google Earth, and OpenAIP to OpenAir.
 This utility is also capable to output in PFM "Polish" format, as file .mp, for software like cGPSmapper.  
 AirspaceConverter is written entirely in C++11 can be ran both on Linux and on Windows.
 The Windows version has MFC user interface in order to be easy to use and immediately available.
@@ -9,10 +9,12 @@ For more information's about this project: http://www.alus.it/AirspaceConverter
 Contributors are, as usual, warmly welcome!
 
 Why this software?
------------------
+------------------
 Airspace represented in 3D in Google Earth can help to visualize and better understand the airspace structure.
 Not only, having the planned route or track of a flight (as GPX file), displayed as well in Google Earth will make easy to check for airspace crossed or to be avoided.  
-This software can also be useful for maintainers of OpenAir files, not only to visualize airspace but also to verify the syntax of OpenAir commands entered.
+This software can also be useful for maintainers of OpenAir files, not only to visualize airspace but also to verify the syntax of OpenAir commands entered.  
+OpenAIP provide a free, worldwide and updated airspace repository but in his own format, while many devices and software support OpenAir airspace files.
+This software allows to convert also to OpenAir.
 
 About KML format
 ----------------
@@ -38,7 +40,7 @@ Possible options:
   -a: optional, specify a default terrain altitude in meters to calculate AGL heights of points not covered by loaded terrain map(s)  
   -i: mandatory, multiple, input file(s) can be OpenAir (.txt) or OpenAIP (.aip)  
   -m: optional, multiple, terrain map file(s) (.dem) used to lookup terrain height  
-  -o: optional, output file .kml, .kmz  or .mp (Polish) if not specified will be used the name of first input file as KMZ  
+  -o: optional, output file .kml, .kmz, .mp (Polish) or .txt (OpenAir) if not specified will be used the name of first input file as KMZ  
   -v: print version number  
   -h: print this guide
 
@@ -64,7 +66,7 @@ Please refer to official AIP publications for valid and updated airspace definit
 
 Downloads
 ---------
-The already compiled executable for windows can be downloaded from the project page:  
+The already compiled executables for Linux and Windows can be downloaded from the project page:  
 http://www.alus.it/AirspaceConverter
 
 Build dependencies
