@@ -162,9 +162,15 @@ bool Airspace::Undiscretize()
 	if (!geometries.empty()) return true;
 	if (points.empty()) return false;
 
+	//TODO: for now we just print down all the points, but would be nice to "undiscretize" back to circles and arcs
+	// Brutally insert all the points
+	for (const LatLon& point : points) {
+		geometries.push_back(new Point(point));
+	}
+
 	//TODO: to be done!
 
-	return false;
+	return true;
 }
 
 double Geometry::AbsAngle(const double& angle) { //to put angle in the range between 0 and 2PI

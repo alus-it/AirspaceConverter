@@ -79,6 +79,7 @@ public:
 	virtual ~Geometry() {}
 	virtual bool Discretize(std::vector<LatLon>& output) const = 0;
 	static inline void SetResolution(double resolutionNM) { resolution = resolutionNM * NM2RAD; }
+	inline const LatLon& GetCenterPoint() const { return point; }
 
 protected:
 	inline Geometry(const LatLon& center) : point(center) {}
@@ -207,6 +208,7 @@ public:
 	inline const Altitude& GetBaseAltitude() const { return base; }
 	inline const std::string& GetName() const { return name; }
 	inline const unsigned int GetNumberOfGeometries() const { return geometries.size(); }
+	inline const Geometry* GetGeometryAt(unsigned int i) { return i < geometries.size() ? geometries.at(i) : nullptr; }
 	inline const std::vector<LatLon>& GetPoints() const { return points; }
 	inline const LatLon& GetFirstPoint() const { return points.front(); }
 	inline const LatLon& GetLastPoint() const { return points.back(); }

@@ -499,10 +499,10 @@ bool OpenAir::WriteFile(const std::string& fileName) {
 	WriteHeader();
 
 	// Go trough all airspace
-	for (const std::pair<const int,Airspace>& pair : *airspaces)
+	for (std::pair<const int,Airspace>& pair : *airspaces)
 	{
 		// Get the airspace
-		const Airspace& a = pair.second;
+		Airspace& a = pair.second;
 
 		// Just a couple if assertions
 		assert(a.GetNumberOfPoints() > 3);
@@ -513,21 +513,15 @@ bool OpenAir::WriteFile(const std::string& fileName) {
 		file << "AL " << a.GetBaseAltitude().ToString() << "\r\n";
 		file << "AH " << a.GetTopAltitude().ToString() << "\r\n";
 
-		//TODO: for now we just print down all the points, but would be nice to "undiscretize" back to circles and arcs
-		//a.Undiscretize();
-		//for(auto& g: a.GetGeometries) {
-		// WriteGeometry(g);
-		//}
+		
+		
+		if (a.GetNumberOfGeometries() == 0) a.Undiscretize();
+		const unsigned int numOfGeometries = a.GetNumberOfGeometries();
+		assert(numOfGeometries > 0);
 
-		// Brutally insert all the points
-		for (unsigned int i=0; i<a.GetNumberOfPoints()-1; i++) {
-			file << "DP ";
-			WriteLatLon(a.GetPointAt(i));
-			file << "\r\n";
-		}
-		file << "DP ";
-		WriteLatLon(a.GetLastPoint());
-		file << "\r\n\r\n";
+		for (unsigned int i = 0; i < numOfGeometries; i++) WriteGeometry(a.GetGeometryAt(i));
+
+		file << "\r\n";
 	}
 	file.close();
 	return true;
@@ -569,4 +563,21 @@ void OpenAir::WriteLatLon(const LatLon& point) {
 	file << deg << ":" << min << " " << point.GetNorS() << "  ";
 	point.GetLonDegMin(deg,min);
 	file << deg << ":" << min << " " << point.GetEorW();
+}
+
+void OpenAir::WritePoint(const Point& point)
+{
+	file << "DP ";
+	WriteLatLon(point.GetCenterPoint());
+	file << "\r\n";
+}
+
+void OpenAir::WriteGeometry(const Geometry* geometry)
+{
+	const Point* point = dynamic_cast<const Point*>(geometry);
+	if (point != nullptr) WritePoint(*point);
+	else AirspaceConverter::LogMessage("Not a point!", true);
+
+	//TODO: all the other geometries!
+	
 }
