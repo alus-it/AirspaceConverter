@@ -508,19 +508,25 @@ bool OpenAir::WriteFile(const std::string& fileName) {
 		assert(a.GetNumberOfPoints() > 3);
 		assert(a.GetFirstPoint()==a.GetLastPoint());
 
-		WriteCategory(a);
+		// Skip OpenAir not supported categories
+		if (!WriteCategory(a)) continue;
+		
+		// Write the name
 		file << "AN " << a.GetName() << "\r\n";
+		
+		// Write base and ceiling altitudes
 		file << "AL " << a.GetBaseAltitude().ToString() << "\r\n";
 		file << "AH " << a.GetTopAltitude().ToString() << "\r\n";
 
-		
-		
+		// If no geometries are defined we have to calculate them
 		if (a.GetNumberOfGeometries() == 0) a.Undiscretize();
 		const unsigned int numOfGeometries = a.GetNumberOfGeometries();
 		assert(numOfGeometries > 0);
 
-		for (unsigned int i = 0; i < numOfGeometries; i++) WriteGeometry(a.GetGeometryAt(i));
+		// Write each geometry
+		for (unsigned int i = 0; i < numOfGeometries; i++) a.GetGeometryAt(i)->WriteOpenAirGeometry(this);
 
+		// Add an empty line at the end of the airspace
 		file << "\r\n";
 	}
 	file.close();
@@ -532,52 +538,66 @@ void OpenAir::WriteHeader() {
 	file << "\r\n";
 }
 
-void OpenAir::WriteCategory(const Airspace& airspace) {
-	file << "AC ";
+bool OpenAir::WriteCategory(const Airspace& airspace) {
+	std::string openAirCategory;
 	switch(airspace.GetType()) {
-		case Airspace::RESTRICTED: file << "R"; break;
-		case Airspace::DANGER: file << "Q"; break;
-		case Airspace::PROHIBITED: file << "P"; break;
-		case Airspace::CTR: file << "CTR"; break;
-		case Airspace::CLASSA: file << "A"; break;
-		case Airspace::CLASSB: file << "B"; break;
-		case Airspace::CLASSC: file << "C"; break;
-		case Airspace::CLASSD: file << "D"; break;
-		case Airspace::CLASSE: file << "E"; break;
-		case Airspace::CLASSF: file << "F"; break;
-		case Airspace::CLASSG: file << "G"; break;
-		case Airspace::WAVE: file << "W"; break;
-		case Airspace::TMZ: file << "TMZ"; break;
-		case Airspace::NOGLIDER: file << "GP"; break;
-		default:
-			//TODO: cases not existent in OpenAir: what to do?
-			break;
+		case Airspace::RESTRICTED:	openAirCategory = "R"; break;
+		case Airspace::DANGER:		openAirCategory = "Q"; break;
+		case Airspace::PROHIBITED:	openAirCategory = "P"; break;
+		case Airspace::CTR:			openAirCategory = "CTR"; break;
+		case Airspace::CLASSA:		openAirCategory = "A"; break;
+		case Airspace::CLASSB:		openAirCategory = "B"; break;
+		case Airspace::CLASSC:		openAirCategory = "C"; break;
+		case Airspace::CLASSD:		openAirCategory = "D"; break;
+		case Airspace::CLASSE:		openAirCategory = "E"; break;
+		case Airspace::CLASSF:		openAirCategory = "F"; break;
+		case Airspace::CLASSG:		openAirCategory = "G"; break;
+		case Airspace::WAVE:		openAirCategory = "W"; break;
+		case Airspace::TMZ:			openAirCategory = "TMZ"; break;
+		case Airspace::NOGLIDER:	openAirCategory = "GP"; break;
+		default: return false; //cases not existent in OpenAir: TMA, RMZ, FIR, UIR, OTH, GLIDING, UNKNOWN
 	}
-	file << "\r\n";
+	file << "AC " << openAirCategory << "\r\n";
+	return true;
 }
 
 void OpenAir::WriteLatLon(const LatLon& point) {
 	int deg;
 	double min;
-	point.GetLatDegMin(deg,min);
-	file << deg << ":" << min << " " << point.GetNorS() << "  ";
-	point.GetLonDegMin(deg,min);
+	point.GetLatDegMin(deg, min);
+	file << deg << ":" << min << " " << point.GetNorS() << " ";
+	point.GetLonDegMin(deg, min);
 	file << deg << ":" << min << " " << point.GetEorW();
 }
 
-void OpenAir::WritePoint(const Point& point)
+void OpenAir::WritePoint(const Point* point)
 {
+	assert(point != nullptr);
+	if (point == nullptr) return;
 	file << "DP ";
-	WriteLatLon(point.GetCenterPoint());
+	WriteLatLon(point->GetCenterPoint());
 	file << "\r\n";
 }
 
-void OpenAir::WriteGeometry(const Geometry* geometry)
+void OpenAir::WriteCircle(const Circle* circle)
 {
-	const Point* point = dynamic_cast<const Point*>(geometry);
-	if (point != nullptr) WritePoint(*point);
-	else AirspaceConverter::LogMessage("Not a point!", true);
+	assert(circle != nullptr);
+	if (circle == nullptr) return;
+	file << "V X=";
+	WriteLatLon(circle->GetCenterPoint());
+	file << "\r\nDC " << circle->GetRadiusNM() << "\r\n";
+}
 
-	//TODO: all the other geometries!
-	
+void OpenAir::WriteSector(const Sector* sector)
+{
+	assert(sector != nullptr);
+	if (sector == nullptr) return;
+	if (!sector->IsCounterclockwise()) file << "X D=-\r\n";
+	file << "V X=";
+	WriteLatLon(sector->GetCenterPoint());
+	file << "\r\nDB ";
+	WriteLatLon(sector->GetStartPoint());
+	file << ",";
+	WriteLatLon(sector->GetEndPoint());
+	file << "\r\n";
 }

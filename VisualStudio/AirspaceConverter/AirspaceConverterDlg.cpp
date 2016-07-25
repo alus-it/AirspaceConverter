@@ -169,7 +169,7 @@ BOOL CAirspaceConverterDlg::OnInitDialog()
 	OutputTypeCombo.InsertString(-1, _T("KML format for Google Earth"));
 	OutputTypeCombo.InsertString(-1, _T("OpenAir"));
 	OutputTypeCombo.InsertString(-1, _T("Polish format for cGPSmapper"));
-	OutputTypeCombo.SetCurSel(0);
+	OutputTypeCombo.SetCurSel(AirspaceConverter::KMZ);
 
 	// Check if is running on Windows XP (v 5.2) or older
 	OSVERSIONINFOEX osvi;
@@ -457,9 +457,10 @@ void CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt()
 		outputFile = CT2CA(dlg.GetPathName());
 		boost::filesystem::path outputPath(outputFile);
 		std::string ext(outputPath.extension().string());
-		if (boost::iequals(ext, ".kmz")) OutputTypeCombo.SetCurSel(0);
-		else if (boost::iequals(ext, ".kml")) OutputTypeCombo.SetCurSel(1);
-		else if (boost::iequals(ext, ".mp")) OutputTypeCombo.SetCurSel(2);
+		if (boost::iequals(ext, ".kmz")) OutputTypeCombo.SetCurSel(AirspaceConverter::KMZ);
+		else if (boost::iequals(ext, ".kml")) OutputTypeCombo.SetCurSel(AirspaceConverter::KML);
+		else if (boost::iequals(ext, ".txt")) OutputTypeCombo.SetCurSel(AirspaceConverter::OpenAir);
+		else if (boost::iequals(ext, ".mp")) OutputTypeCombo.SetCurSel(AirspaceConverter::Polish);
 		else { // otherwise force it to the selected extension from the open file dialog
 			assert(dlg.GetOFN().nFilterIndex > AirspaceConverter::KMZ && dlg.GetOFN().nFilterIndex <= AirspaceConverter::NumOfOutputTypes);
 			AirspaceConverter::OutputType type = (AirspaceConverter::OutputType)(dlg.GetOFN().nFilterIndex - 1);

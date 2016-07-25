@@ -18,11 +18,15 @@
 
 class Airspace;
 class LatLon;
-class Geometry;
 class Point;
+class Circle;
+class Sector;
 
 class OpenAir
 {
+friend class Point;
+friend class Circle;
+friend class Sector;
 public:
 	OpenAir(std::multimap<int, Airspace>& airspacesMap);
 	inline ~OpenAir() {}
@@ -49,10 +53,11 @@ private:
 	void ResetVar();
 	bool InsertAirspace(Airspace& airspace);
 	void WriteHeader();
-	void WriteCategory(const Airspace& airsapce);
+	bool WriteCategory(const Airspace& airsapce);
 	void WriteLatLon(const LatLon& point);
-	void WritePoint(const Point& point);
-	void WriteGeometry(const Geometry* geometry);
+	void WritePoint(const Point* point);
+	void WriteCircle(const Circle* circle);
+	void WriteSector(const Sector* sector);
 
 	std::multimap<int, Airspace>* airspaces;
 	bool varRotationClockwise;
