@@ -97,6 +97,7 @@ protected:
 	static const double RAD2NM;
 	
 	static double FindStep(const double& radius, const double& angle);
+	static double DeltaAngle(const double angle, const double reference);
 	static double AbsAngle(const double& angle);
 	static double CalcGreatCircleCourse(const double& lat1, const double& lon1, const double& lat2, const double& lon2, const double& d);
 	static double CalcGreatCircleCourse(const double& lat1, const double& lon1, const double& lat2, const double& lon2);
@@ -104,7 +105,7 @@ protected:
 	static LatLon CalcRadialPoint(const double& lat1, const double& lon1, const double& dir, const double& dst);
 	static bool CalcBisector(const double& latA, const double& lonA, const double& latB, const double& lonB, const double& latC, const double& lonC, double& bisector);
 	static bool CalcRadialIntersection(const double& lat1, const double& lon1, const double& lat2, const double& lon2, const double& crs13, const double& crs23, double& lat3, double& lon3, double& dst13);
-	static bool ArePointsOnArc(const LatLon& A, const LatLon& B, const LatLon& C, const LatLon& D, double& latc, double& lonc, double& radius);
+	static bool ArePointsOnArc(const LatLon& A, const LatLon& B, const LatLon& C, const LatLon& D, double& latc, double& lonc, double& radius, bool& clockwise);
 
 private:
 	static const double PI;

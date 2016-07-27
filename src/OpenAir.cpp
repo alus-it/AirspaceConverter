@@ -22,7 +22,6 @@ std::string& OpenAir::RemoveComments(std::string &s) {
 	return s;
 }
 
-
 bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg) {
 	boost::char_separator<char> sep(":");
 	boost::tokenizer<boost::char_separator<char>> tokens(dddmmss, sep);
@@ -519,7 +518,13 @@ bool OpenAir::WriteFile(const std::string& fileName) {
 		file << "AH " << a.GetTopAltitude().ToString() << "\r\n";
 
 		// If no geometries are defined we have to calculate them
-		if (a.GetNumberOfGeometries() == 0) a.Undiscretize();
+		
+		////////TESTING
+		/*if (a.GetNumberOfGeometries() == 0)*/
+		///////////END TESTING
+		
+		a.Undiscretize();
+		
 		const unsigned int numOfGeometries = a.GetNumberOfGeometries();
 		assert(numOfGeometries > 0);
 

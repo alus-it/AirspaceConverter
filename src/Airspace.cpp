@@ -160,50 +160,68 @@ void Airspace::AddGeometry(const Geometry* geometry) {
 
 bool Airspace::Undiscretize()
 {
+	/////TESTING////////////////
+	bool discretize = false;
+	bool forceClean = true;
+	if (discretize || forceClean) {
+		for (const Geometry* g : geometries) delete g;
+		geometries.clear();
+	}
+	////END TESTING/////////////////////////
+	
 	if (!geometries.empty()) return true;
 	if (points.empty()) return false;
 
+	/////TESTING////////////////////////////////////////////////////////////////
 	//TODO: for now we just print down all the points, but would be nice to "undiscretize" back to circles and arcs
 	// Brutally insert all the points
-	for (const LatLon& point : points) {
-		geometries.push_back(new Point(point));
+	if (discretize) {
+		for (const LatLon& point : points) {
+			geometries.push_back(new Point(point));
+		}
+		return true;
 	}
+	/////END TESTING///////////////////////////////////////////////////////////////////
 
 	//TODO: to be done!
-	/*
 	assert(points.size() >= 4);
 	unsigned int steps = points.size() - 4;
 
 	LatLon startPoint, endPoint, centerPoint;
 	double currentRadius=0;
 	bool alreadyOnArc = false;
+	bool counterClockwise;
 	for (unsigned int i = 0; i < steps; i++) {
 		double latc=LatLon::UNDEF_LAT, lonc=LatLon::UNDEF_LON, radius=0;
+		bool clockwise;
 	
-		if (Geometry::ArePointsOnArc(points.at(i), points.at(i + 1), points.at(i + 2), points.at(i + 3), latc, lonc, radius)) {
+		if (Geometry::ArePointsOnArc(points.at(i), points.at(i + 1), points.at(i + 2), points.at(i + 3), latc, lonc, radius, clockwise)) {
 			endPoint = points.at(i + 3);
 			if (alreadyOnArc) { // the arc continues
 				//TODO: Make a proper check if the center is the same!!!
 				
 				const double deltaRadius = std::fabs(radius - currentRadius) * Geometry::RAD2NM;
-				
-				//TODO:
 				assert(deltaRadius < 0.0267); // ASSERTION FAILED!
-				
+			} else { // New arc
 				startPoint = points.at(i);
-				alreadyOnArc = true;
 				currentRadius = radius;
 				centerPoint = LatLon(latc*Geometry::RAD2DEG, lonc*Geometry::RAD2DEG);
+				counterClockwise = clockwise;
+				alreadyOnArc = true;
+			
 			}
 		} else {
 			if (alreadyOnArc) {
 				alreadyOnArc = false;
-				geometries.push_back(new Sector(centerPoint.Lat(), centerPoint.Lon(), startPoint.Lat(), startPoint.Lon(), endPoint.Lat(), endPoint.Lon(), true)); //TODO: determine if it is clockwise
+				geometries.push_back(new Sector(centerPoint.Lat(), centerPoint.Lon(), startPoint.Lat(), startPoint.Lon(), endPoint.Lat(), endPoint.Lon(), counterClockwise));
 			} else
 				geometries.push_back(new Point(points.at(i)));
 		}
 	}
-	*/
+	if (alreadyOnArc) {
+		assert(currentRadius > 0);
+		geometries.push_back(new Circle(centerPoint.Lat(), centerPoint.Lon(), currentRadius * Geometry::RAD2NM));
+	}
 	return true;
 }
 
@@ -267,26 +285,35 @@ double Geometry::FindStep(const double& radius, const double& angle) {
 	return angle / steps;
 }
 
+double Geometry::DeltaAngle(const double angle, const double reference)
+{
+	assert(angle >= 0 && angle <= TWO_PI);
+	assert(reference >= 0 && reference <= TWO_PI);
+	double delta = angle - reference;
+	if (delta > PI) delta -= TWO_PI;
+	else if (delta < -PI) delta += TWO_PI;
+	return delta;
+}
+
 bool Geometry::CalcBisector(const double& latA, const double& lonA, const double& latB, const double& lonB, const double& latC, const double& lonC, double& bisector) {
 	const double courseBA = CalcGreatCircleCourse(latB, lonB, latA, lonA);
 	const double courseBC = CalcGreatCircleCourse(latB, lonB, latC, lonC);
-	
-	double diff = courseBA - courseBC; //angle between the directions
-	if (diff>0) { //positive difference: the internal angle in on the right
+
+	double diff = DeltaAngle(courseBC, courseBA); //angle between the directions
+
+	if (diff>0) { //positive difference: the internal angle in on the left
 		diff = AbsAngle(diff);
-		bisector = AbsAngle(courseBA - diff / 2);
-		return true;
-	}
-	else { //negative difference: the internal angle is on the left
-		diff = AbsAngle(-diff);
 		bisector = AbsAngle(courseBA + diff / 2);
-		return false;
+		return false; // counter clockwise turn
 	}
-	//*bisectorOpposite = absAngle(*bisector + M_PI);
-	//TODO: which bisector do we have to take???
+	else { //negative difference: the internal angle is on the right
+		diff = AbsAngle(-diff);
+		bisector = AbsAngle(courseBA - diff / 2);
+		return true; // clockwise turn
+	}
 }
 
-bool Geometry::CalcRadialIntersection(const double& lat1, const double& lon1, const double& lat2, const double& lon2, const double& crs13, const double& crs23, double& lat3, double& lon3, double& dist) {
+bool Geometry::CalcRadialIntersection(const double& lat1, const double& lon1, const double& lat2, const double& lon2, const double& crs13, const double& crs23, double& lat3, double& lon3, double& dst13) {
 	const double crs12 = CalcGreatCircleCourse(lat1, lon1, lat2, lon2); //TODO: this can be done only one time
 	const double crs21 = CalcGreatCircleCourse(lat2, lon2, lat1, lon1); //TODO: this can be done only one time
 
@@ -301,25 +328,36 @@ bool Geometry::CalcRadialIntersection(const double& lat1, const double& lon1, co
 		ang2 = fabs(ang2);
 		const double dst12 = CalcAngularDist(lat1, lon1, lat2, lon2);
 		const double ang3 = acos(-cos(ang1)*cos(ang2) + sin(ang1)*sin(ang2)*cos(dst12));
-		const double dst13 = atan2(sin(dst12)*sin(ang1)*sin(ang2), cos(ang2) + cos(ang1)*cos(ang3));
+		dst13 = atan2(sin(dst12)*sin(ang1)*sin(ang2), cos(ang2) + cos(ang1)*cos(ang3));
+
+		assert(dst13 > 0); //FIXME: Assertion failed
+
 
 		if (dst13 == 0) return false;
 
 		lat3 = asin(sin(lat1)*cos(dst13) + cos(lat1)*sin(dst13)*cos(crs13));
-		double dlon = atan2(sin(crs13)*sin(dst13)*cos(lat1), cos(dst13) - sin(lat1)*sin(lat3));
-		lon3 = std::fmod(lon1 - dlon + PI, TWO_PI) - PI;
+		lon3 = std::fmod(lon1 - atan2(sin(crs13)*sin(dst13)*cos(lat1), cos(dst13) - sin(lat1)*sin(lat3)) + PI, TWO_PI) - PI;
 
-		dist = CalcAngularDist(lat1, lon1, lat3, lon3);
+		// Compare the two radius they must be similar
 		const double dst23 = CalcAngularDist(lat2, lon2, lat3, lon3);
-		const double deltaRadius = std::fabs(dist - dst23) * RAD2NM;
+		
+		///////TESTING////////////
+		double radiusNM = dst13*RAD2NM;
+		double diff = std::fabs(dst13 - dst23);
+		double diffMt = diff * RAD2NM * 1852;
+		double limitMt = (radiusNM / 10) * 1852;
+		
+		//if (std::fabs(dst13 - dst23) > dst13 / 50) return false;
 
-		//TODO: make this properly
-		return deltaRadius < 0.0267 ? true : false; // difference must be less than 50 m for now
+		if (diffMt > limitMt)
+			return false;
+
+		return true;
 	}
 }
 
-bool Geometry::ArePointsOnArc(const LatLon& A, const LatLon& B, const LatLon& C, const LatLon& D, double& latc, double& lonc, double& radius) {
-	const double latA = A.Lat() * DEG2RAD;
+bool Geometry::ArePointsOnArc(const LatLon& A, const LatLon& B, const LatLon& C, const LatLon& D, double& latc, double& lonc, double& radius, bool& clockwise) {
+	const double latA = A.Lat() * DEG2RAD; //TODO: avoid to recalculate alaways
 	const double lonA = A.Lon() * DEG2RAD;
 	const double latB = B.Lat() * DEG2RAD;
 	const double lonB = B.Lon() * DEG2RAD;
@@ -329,7 +367,8 @@ bool Geometry::ArePointsOnArc(const LatLon& A, const LatLon& B, const LatLon& C,
 	const double lonD = D.Lon() * DEG2RAD;
 
 	double bisectorB, bisectorC;
-	if (CalcBisector(latA, lonA, latB, lonB, latC, lonC, bisectorB) != CalcBisector(latB, lonB, latC, lonC, latD, lonD, bisectorC)) return false;
+	clockwise = CalcBisector(latA, lonA, latB, lonB, latC, lonC, bisectorB);
+	if (clockwise != CalcBisector(latB, lonB, latC, lonC, latD, lonD, bisectorC)) return false;
 
 	return CalcRadialIntersection(latB, lonB, latC, lonC, bisectorB, bisectorC, latc, lonc, radius);
 }
