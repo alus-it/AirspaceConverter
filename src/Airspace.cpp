@@ -36,7 +36,7 @@ const double Geometry::RAD2NM = (180 * 60) / PI;
 double Geometry::resolution = 0.3 * NM2RAD; // 0.3 NM = 555.6 m
 
 void LatLon::convertDec2DegMin(const double& dec, int& deg, double& min) {
-	double decimal = fabs(dec);
+	double decimal = std::fabs(dec);
 	deg=(int)floor(decimal);
 	min = (decimal-deg)/SIXTYTH;
 }
@@ -160,75 +160,73 @@ void Airspace::AddGeometry(const Geometry* geometry) {
 
 bool Airspace::Undiscretize()
 {
-	/////TESTING////////////////
-	bool discretize = false;
-	bool forceClean = true;
-	if (discretize || forceClean) {
-		for (const Geometry* g : geometries) delete g;
-		geometries.clear();
-	}
-	////END TESTING/////////////////////////
-	
 	if (!geometries.empty()) return true;
 	if (points.empty()) return false;
 
-	/////TESTING////////////////////////////////////////////////////////////////
-	//TODO: for now we just print down all the points, but would be nice to "undiscretize" back to circles and arcs
-	// Brutally insert all the points
-	if (discretize) {
-		for (const LatLon& point : points) {
-			geometries.push_back(new Point(point));
-		}
-		return true;
-	}
-	/////END TESTING///////////////////////////////////////////////////////////////////
-
-	//TODO: to be done!
 	assert(points.size() >= 4);
 	unsigned int steps = points.size() - 3;
-
-	LatLon startPoint, endPoint, centerPoint;
-	double currentRadius=0;
+	std::vector<LatLon*> arcPoints;
+	std::vector<std::pair<const double, const double>> centerPoints;
 	bool alreadyOnArc = false;
-	bool counterClockwise;
+	bool alwaysOnArc = false;
+	bool isClockwise;
+	double radius=0;
 	for (unsigned int i = 0; i < steps; i++) {
-		double latc=LatLon::UNDEF_LAT, lonc=LatLon::UNDEF_LON, radius=0;
+		//TODO: check if the points are all near to each oher enough to suspect that they are all part of a discretized arc
+
+		double latc = -7, lonc = -7;
 		bool clockwise;
-	
 		if (Geometry::ArePointsOnArc(points.at(i), points.at(i + 1), points.at(i + 2), latc, lonc, radius, clockwise)) {
-			endPoint = points.at(i + 2);
 			if (alreadyOnArc) { // the arc continues
+				//TODO: Verify carefully that it's the same arc
 				//TODO: Make a proper check if the center is the same!!!
 				
-				//const double deltaRadius = std::fabs(radius - currentRadius) * Geometry::RAD2NM;
-				//assert(deltaRadius < 0.0267); // ASSERTION FAILED!
+				arcPoints.push_back(&points.at(i + 2));
+				centerPoints.emplace_back(latc, lonc);
+
+				//TODO: else not on the same arc anymore...
+				//alreadyOnArc = false;
+				
 			} else { // New arc
-				startPoint = points.at(i);
-				currentRadius = radius;
-				centerPoint = LatLon(latc * Geometry::RAD2DEG, -lonc * Geometry::RAD2DEG);
-				counterClockwise = clockwise;
+				assert(arcPoints.empty());
+				arcPoints.push_back(&points.at(i));
+				arcPoints.push_back(&points.at(i + 1));
+				arcPoints.push_back(&points.at(i + 2));
+				assert(centerPoints.empty());
+				centerPoints.emplace_back(latc, lonc);
+				isClockwise = clockwise;
 				alreadyOnArc = true;
-			
+				if (i == 0) alwaysOnArc = true;
 			}
+			
 		} else {
 			if (alreadyOnArc) {
 				alreadyOnArc = false;
-				geometries.push_back(new Sector(centerPoint.Lat(), centerPoint.Lon(), startPoint.Lat(), startPoint.Lon(), endPoint.Lat(), endPoint.Lon(), counterClockwise));
+				alwaysOnArc = false;
+				//TODO: find a proper way to average the centers...
+				geometries.push_back(new Sector(latc*Geometry::RAD2DEG, -lonc*Geometry::RAD2DEG, arcPoints.front()->Lat(), arcPoints.front()->Lon(), arcPoints.back()->Lat(), arcPoints.back()->Lon(), isClockwise));
+				arcPoints.clear();
+				centerPoints.clear();
 			} else
 				geometries.push_back(new Point(points.at(i)));
 		}
 	}
 	if (alreadyOnArc) {
-		assert(currentRadius > 0);
-		geometries.push_back(new Circle(centerPoint.Lat(), centerPoint.Lon(), currentRadius * Geometry::RAD2NM));
+		//TODO: find a proper way to average the centers... and the radius!!!
+		const double clatDeg = centerPoints.front().first * Geometry::RAD2DEG;
+		const double clonDeg = -centerPoints.front().second * Geometry::RAD2DEG;
+		assert(radius > 0);
+		if(alwaysOnArc) geometries.push_back(new Circle(clatDeg, clonDeg, radius * Geometry::RAD2NM));
+		else geometries.push_back(new Sector(clatDeg, clonDeg, arcPoints.front()->Lat(), arcPoints.front()->Lon(), arcPoints.back()->Lat(), arcPoints.back()->Lon(), isClockwise));
 	}
 	return true;
 }
 
 double Geometry::AbsAngle(const double& angle) { //to put angle in the range between 0 and 2PI
-	if (isinf(angle)) return TWO_PI;
+	assert(!isinf(angle));
 	double absangle = std::fmod(angle, TWO_PI);
-	if (absangle<0) absangle += TWO_PI;
+	if (absangle < 0) absangle += TWO_PI;
+	assert(absangle >= 0 && absangle <= TWO_PI);
 	return absangle;
 }
 
@@ -238,7 +236,6 @@ double Geometry::CalcGreatCircleCourse(const double& lat1, const double& lon1, c
 	assert(lon1 >= -PI && lon1 <= PI);
 	assert(lat2 >= -PI_2 && lat2 <= PI_2);
 	assert(lon2 >= -PI && lon2 <= PI);
-	//assert(CalcAngularDist(lat1, lon1, lat2, lon2) == d);
 	if (lat2 == PI_2) return TWO_PI; //we are going to N pole
 	if (lat2 == -PI_2) return PI; //we are going to S pole
 	if (lon1 == lon2) return lat1>lat2 ? PI : TWO_PI; //we are going to E or W
@@ -254,7 +251,9 @@ double Geometry::CalcGreatCircleCourse(const double& lat1, const double& lon1, c
 	if (lat2 == PI_2) return TWO_PI; //we are going to N pole
 	if (lat2 == -PI_2) return PI; //we are going to S pole
 	if (lon1 == lon2) return lat1>lat2 ? PI : TWO_PI; //we are going to E or W
-	return AbsAngle(atan2(sin(lon1 - lon2)*cos(lat2), cos(lat1)*sin(lat2) - sin(lat1)*cos(lat2)*cos(lon1 - lon2)));
+	const double dlon = lon1 - lon2;
+	const double coslat2 = cos(lat2);
+	return AbsAngle(atan2(sin(dlon)*coslat2, cos(lat1)*sin(lat2) - sin(lat1)*coslat2*cos(dlon)));
 }
 
 double Geometry::CalcAngularDist(const double& lat1, const double& lon1, const double& lat2, const double& lon2) {
@@ -269,8 +268,14 @@ void Geometry::CalcRadialPoint(const double& lat1, const double& lon1, const dou
 	assert(lat1 >= -PI_2 && lat1 <= PI_2);
 	assert(lon1 >= -PI && lon1 <= PI);
 	assert(dir > -PI && dir <= 2 * TWO_PI);
-	lat = asin(sin(lat1) * cos(dst) + cos(lat1) * sin(dst) * cos(dir));
-	lon = std::fmod(lon1 - atan2(sin(dir) * sin(dst) * cos(lat1), cos(dst) - sin(lat1) * sin(lat)) + PI, TWO_PI) - PI;
+	const double sinlat1 = sin(lat1);
+	const double cosdst = cos(dst);
+	const double coslat1 = cos(lat1);
+	const double sindst = sin(dst);
+	lat = asin(sinlat1 * cosdst + coslat1 * sindst * cos(dir));
+	lon = std::fmod(lon1 - atan2(sin(dir) * sindst * coslat1, cosdst - sinlat1 * sin(lat)) + PI, TWO_PI) - PI;
+	assert(lat >= -PI_2 && lat <= PI_2);
+	assert(lon >= -PI && lon <= PI);
 }
 
 LatLon Geometry::CalcRadialPoint(const double& lat1, const double& lon1, const double& dir, const double& dst) {
@@ -306,12 +311,6 @@ bool Geometry::CalcBisector(const double& latA, const double& lonA, const double
 	const double courseBA = CalcGreatCircleCourse(latB, lonB, latA, lonA); //TODO: this can be done only one time
 	const double courseBC = CalcGreatCircleCourse(latB, lonB, latC, lonC);
 
-	//TEST
-	double courseBAdeg = courseBA * RAD2DEG;
-	double courseBCdeg = courseBC * RAD2DEG;
-	courseBAdeg++;
-	courseBCdeg++;
-
 	double diff = DeltaAngle(courseBC, courseBA); //angle between the directions
 
 	if (diff>0) { //positive difference: the internal angle in on the left
@@ -326,7 +325,6 @@ bool Geometry::CalcBisector(const double& latA, const double& lonA, const double
 	}
 }
 
-//TODO: verify
 void Geometry::CalcSphericalTriangle(const double& a, const double& beta, const double& gamma, double& alpha, double& b, double& c)
 {
 	assert(a >= 0 && a <= TWO_PI);
@@ -335,6 +333,7 @@ void Geometry::CalcSphericalTriangle(const double& a, const double& beta, const 
 	alpha = acos(sin(beta)*sin(gamma)*cos(a) - cos(beta)*cos(gamma));
 	b = atan2(sin(a)*sin(beta)*sin(gamma), cos(beta) + cos(gamma)*cos(alpha));
 	c = atan2(sin(a)*sin(beta)*sin(gamma), cos(gamma) + cos(alpha)*cos(beta));
+	assert(alpha >= 0 && alpha <= PI);
 }
 
 
@@ -343,36 +342,21 @@ bool Geometry::CalcRadialIntersection(const double& lat1, const double& lon1, co
 	const double crs12 = CalcGreatCircleCourse(lat1, lon1, lat2, lon2, dst12); //TODO: this can be done only one time
 	const double crs21 = CalcGreatCircleCourse(lat2, lon2, lat1, lon1, dst12); //TODO: this can be done only one time
 
-	//TEST:////////////////////////////
-	double dstNM = dst12 * RAD2NM;
-	double crs12deg = crs12 * RAD2DEG;
-	double crs21deg = crs21 * RAD2DEG;
-	dstNM++;
-	crs12deg++;
-	crs21deg++;
-	//////////////////////////////////
-	
-	double ang1 = std::fmod(crs13 - crs12 + PI, TWO_PI) - PI;
-	double ang2 = std::fmod(crs21 - crs23 + PI, TWO_PI) - PI;
-
-	//TEST://////////////////////////////
-	double a1deg = ang1 * RAD2DEG;
-	double a2deg = ang2 * RAD2DEG;
-	a1deg++;
-	a2deg++;
-	////////////////////////////////////
-
+	//double ang1 = std::fmod(crs13 - crs12 + PI, TWO_PI) - PI;
+	//double ang2 = std::fmod(crs21 - crs23 + PI, TWO_PI) - PI;
+	const double ang1 = AbsAngle(crs13 - crs12);
+	const double ang2 = AbsAngle(crs21 - crs23);
 
 	if ( (sin(ang1) == 0 && sin(ang2) == 0) || sin(ang1)*sin(ang2) < 0) return false;  //infinity of intersections or intersection ambiguous
 	
-	ang1 = std::fabs(ang1);
-	ang2 = std::fabs(ang2);
+	//ang1 = std::fabs(ang1);
+	//ang2 = std::fabs(ang2);
 
 	double ang3 = 0;
-		
-	CalcSphericalTriangle(dst12, ang1, ang2, ang3, dst23, dst13);
+	CalcSphericalTriangle(dst12, ang1, ang2, ang3, dst13, dst23);
 
-	assert(dst13 > 0); //FIXME: Assertion failed
+	assert(dst13 >= 0 && dst13 <= PI);
+	assert(dst23 >= 0 && dst23 <= PI);
 
 	CalcRadialPoint(lat1, lon1, crs13, dst13, lat3, lon3);
 
@@ -380,7 +364,7 @@ bool Geometry::CalcRadialIntersection(const double& lat1, const double& lon1, co
 }
 
 bool Geometry::ArePointsOnArc(const LatLon& A, const LatLon& B, const LatLon& C, double& latc, double& lonc, double& radius, bool& clockwise) {
-	const double latA = A.Lat() * DEG2RAD; //TODO: avoid to recalculate alaways
+	const double latA = A.Lat() * DEG2RAD; //TODO: avoid to recalculate always
 	const double lonA = - A.Lon() * DEG2RAD;
 	const double latB = B.Lat() * DEG2RAD;
 	const double lonB = - B.Lon() * DEG2RAD;
@@ -416,18 +400,9 @@ bool Geometry::ArePointsOnArc(const LatLon& A, const LatLon& B, const LatLon& C,
 
 	// Compare the two radius they must be similar
 	const double diff = std::fabs(radius - radius2);
-	const double limit = radius / 10;
+	const double limit = radius / 8;
 
-	///////TESTING////////////
-	double radiusNM = radius*RAD2NM;
-	double diffMt = diff * RAD2NM * 1852;
-	double limitMt = limit * RAD2NM * 1852;
-	radiusNM++;
-	diffMt++;
-	limitMt++;
-	///////////////////////////////////
-
-	return diff < limitMt;
+	return diff < limit;
 }
 
 bool Point::Discretize(std::vector<LatLon>& output) const
@@ -467,7 +442,7 @@ Sector::Sector(const double& clat, const double& clon, const double& lat1, const
 	radius = CalcAngularDist(latc, lonc, lat1r, lon1r);
 	
 	assert(radius > 0);
-	assert(fabs((radius * RAD2NM) - (CalcAngularDist(latc, lonc, lat2r, lon2r) * RAD2NM)) < 0.2);
+	assert(std::fabs((radius * RAD2NM) - (CalcAngularDist(latc, lonc, lat2r, lon2r) * RAD2NM)) < 0.2);
 	
 	angleStart = CalcGreatCircleCourse(latc, lonc, lat1r, lon1r);
 	angleEnd = CalcGreatCircleCourse(latc, lonc, lat2r, lon2r);

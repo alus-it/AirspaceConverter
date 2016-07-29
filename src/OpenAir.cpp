@@ -518,12 +518,7 @@ bool OpenAir::WriteFile(const std::string& fileName) {
 		file << "AH " << a.GetTopAltitude().ToString() << "\r\n";
 
 		// If no geometries are defined we have to calculate them
-		
-		////////TESTING
-		/*if (a.GetNumberOfGeometries() == 0)*/
-		///////////END TESTING
-		
-		a.Undiscretize();
+		if (a.GetNumberOfGeometries() == 0) a.Undiscretize();
 		
 		const unsigned int numOfGeometries = a.GetNumberOfGeometries();
 		assert(numOfGeometries > 0);
