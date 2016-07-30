@@ -155,7 +155,7 @@ void KMLwriter::ClosePolygon() {
 void KMLwriter::WriteBaseOrTop(const Airspace& airspace, const Altitude& alt, const bool extrudeToGround /*= false*/) {
 	OpenPolygon(extrudeToGround, alt.IsAMSL());
 	double altitude = alt.GetAltMt();
-	for (const LatLon& p : airspace.GetPoints()) file << p.Lon() << "," << p.Lat() << "," << altitude << "\n";
+	for (const Geometry::LatLon& p : airspace.GetPoints()) file << p.Lon() << "," << p.Lat() << "," << altitude << "\n";
 	ClosePolygon();
 }
 
@@ -163,7 +163,7 @@ void KMLwriter::WriteBaseOrTop(const Airspace& airspace, const std::vector<doubl
 	OpenPolygon(false, true);
 	assert(airspace.GetNumberOfPoints() == altitudesAmsl.size());
 	for (unsigned int i = 0; i < altitudesAmsl.size(); i++) {
-		const LatLon p = airspace.GetPointAt(i);
+		const Geometry::LatLon p = airspace.GetPointAt(i);
 		file << p.Lon() << "," << p.Lat() << "," << altitudesAmsl.at(i) << "\n";
 	}
 	ClosePolygon();
@@ -309,7 +309,7 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 
 					// Try to get terrein altitude then add the AGL altitude to get AMSL altitude
 					std::vector<double> amslAltitudesMt;
-					for (const LatLon& p : a.GetPoints()) {
+					for (const Geometry::LatLon& p : a.GetPoints()) {
 						double terrainHeightMt = defaultTerrainAltitudeMt;
 						allAGLaltitudesCovered = GetTerrainAltitudeMt(p.Lat(), p.Lon(), terrainHeightMt) && allAGLaltitudesCovered;
 						amslAltitudesMt.push_back(terrainHeightMt + altitudeAGLmt);

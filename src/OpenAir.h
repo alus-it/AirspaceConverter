@@ -15,12 +15,9 @@
 #include <string>
 #include <map>
 #include <fstream>
+#include "Geometry.h"
 
 class Airspace;
-class LatLon;
-class Point;
-class Circle;
-class Sector;
 
 class OpenAir
 {
@@ -37,7 +34,7 @@ private:
 	inline static bool isDigit(const char c) { return (c >= '0' && c <= '9'); }
 	static std::string& RemoveComments(std::string &s);
 	static bool ParseDegrees(const std::string& dddmmss, double& deg);
-	static bool ParseCoordinates(const std::string& text, double& lat, double& lon);
+	static bool ParseCoordinates(const std::string& text, Geometry::LatLon& point);
 
 	bool ParseAC(const std::string& line, Airspace& airspace);
 	bool ParseAN(const std::string& line, Airspace& airspace);
@@ -54,14 +51,14 @@ private:
 	bool InsertAirspace(Airspace& airspace);
 	void WriteHeader();
 	bool WriteCategory(const Airspace& airsapce);
-	void WriteLatLon(const LatLon& point);
+	void WriteLatLon(const Geometry::LatLon& point);
 	void WritePoint(const Point* point);
 	void WriteCircle(const Circle* circle);
 	void WriteSector(const Sector* sector);
 
 	std::multimap<int, Airspace>* airspaces;
 	bool varRotationClockwise;
-	double varLat, varLon;
+	Geometry::LatLon varPoint;
 	double varWidth;
 	std::ofstream file;
 };

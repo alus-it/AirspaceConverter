@@ -51,10 +51,11 @@ DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)$*.Td
 CPPFILES =              \
 	Airspace.cpp          \
 	AirspaceConverter.cpp \
+	Geometry.cpp          \
 	KMLwriter.cpp         \
 	main.cpp              \
 	OpenAIPreader.cpp     \
-	OpenAir.cpp     \
+	OpenAir.cpp           \
 	PFMwriter.cpp         \
 	RasterMap.cpp
 

@@ -48,11 +48,12 @@ bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg) {
 	return true;
 }
 
-bool OpenAir::ParseCoordinates(const std::string& text, double& lat, double& lon)
+bool OpenAir::ParseCoordinates(const std::string& text, Geometry::LatLon& point)
 {
 	boost::char_separator<char> sep(" ");
 	boost::tokenizer<boost::char_separator<char> > tokens(text, sep);
 	int i = 0;
+	double lat = 0, lon = 0;
 	for (const std::string& c : tokens)
 	{
 		if (c.empty()) return false;
@@ -65,8 +66,7 @@ bool OpenAir::ParseCoordinates(const std::string& text, double& lat, double& lon
 				const char NS = c.front();
 				if (NS == 'S' || NS == 's') lat = -lat;
 				else if (NS != 'N' && NS != 'n') return false;
-			}
-			else return false;
+			} else return false;
 			break;
 		case 2:
 			if (!ParseDegrees(c, lon)) return false;
@@ -76,22 +76,20 @@ bool OpenAir::ParseCoordinates(const std::string& text, double& lat, double& lon
 				const char EW = c.front();
 				if (EW == 'W' || EW == 'w') lat = -lat;
 				else if (EW != 'E' && EW != 'e') return false;
-				return true;
-			}
-			else return false;
+			} else return false;
+			break;
 		default:
 			return false;
 		}
 		i++;
 	}
+	point.SetLatLon(lat,lon);
 	return true;
 }
 
 OpenAir::OpenAir(std::multimap<int, Airspace>& airspacesMap)
 	: airspaces(&airspacesMap)
 	, varRotationClockwise(true)
-	, varLat(LatLon::UNDEF_LAT)
-	, varLon(LatLon::UNDEF_LON)
 	, varWidth(0) {
 }
 
@@ -341,9 +339,9 @@ bool OpenAir::ParseDP(const std::string& line, Airspace& airspace)
 {
 	if (airspace.GetType() == Airspace::UNKNOWN) return true;
 	if (line.length() < 14) return false;
-	double lat=0, lon=0;
-	if (ParseCoordinates(line.substr(3), lat, lon)) {
-		airspace.AddPoint(lat,lon);
+	Geometry::LatLon point;
+	if (ParseCoordinates(line.substr(3), point)) {
+		airspace.AddPoint(point);
 		return true;
 	}
 	return false;
@@ -366,8 +364,10 @@ bool OpenAir::ParseV(const std::string & line, Airspace& airspace)
 		}
 		break;
 	case 'X':
-		if (ParseCoordinates(line.substr(4), varLat, varLon)) return true;
-		varLat = LatLon::UNDEF_LAT;
+		{
+			if (ParseCoordinates(line.substr(4), varPoint)) return true;
+			varPoint.SetLatLon(Geometry::LatLon::UNDEF_LAT, Geometry::LatLon::UNDEF_LON);
+		}
 		return false;
 	case 'W':
 		if (isDigit(line.at(4))) varWidth = std::stod(line.substr(4));
@@ -387,7 +387,7 @@ bool OpenAir::ParseV(const std::string & line, Airspace& airspace)
 bool OpenAir::ParseDA(const std::string& line, Airspace& airspace)
 {
 	if (airspace.GetType() == Airspace::UNKNOWN) return true;
-	if (varLat == LatLon::UNDEF_LAT || line.length() < 8) return false;
+	if (varPoint.Lat() == Geometry::LatLon::UNDEF_LAT || line.length() < 8) return false;
 	boost::char_separator<char> sep(",");
 	std::string data(line.substr(3));
 	boost::tokenizer<boost::char_separator<char>> tokens(data, sep);
@@ -409,42 +409,42 @@ bool OpenAir::ParseDA(const std::string& line, Airspace& airspace)
 		}
 		i++;
 	}
-	airspace.AddGeometry(new Sector(varLat, varLon, radius, angleStart, angleEnd, varRotationClockwise));
+	airspace.AddGeometry(new Sector(varPoint, radius, angleStart, angleEnd, varRotationClockwise));
 	return true;
 }
 
 bool OpenAir::ParseDB(const std::string& line, Airspace& airspace)
 {
 	if (airspace.GetType() == Airspace::UNKNOWN) return true;
-	if (varLat == LatLon::UNDEF_LAT || line.length() < 26) return false;
+	if (varPoint.Lat() == Geometry::LatLon::UNDEF_LAT || line.length() < 26) return false;
 	boost::char_separator<char> sep(",");
 	std::string data(line.substr(3));
 	boost::tokenizer<boost::char_separator<char>> tokens(data, sep);
-	double lat1, lon1, lat2, lon2;
+	Geometry::LatLon p1, p2;
 	int i = 0;
 	for (const std::string& c : tokens) {
 		switch (i) {
 		case 0:
-			if (!ParseCoordinates(c, lat1, lon1)) return false;
+			if (!ParseCoordinates(c, p1)) return false;
 			break;
 		case 1:
-			if (!ParseCoordinates(c, lat2, lon2)) return false;
+			if (!ParseCoordinates(c, p2)) return false;
 			break;
 		default:
 			break;
 		}
 		i++;
 	}
-	airspace.AddGeometry(new Sector(varLat, varLon, lat1, lon1, lat2, lon2, varRotationClockwise));
+	airspace.AddGeometry(new Sector(varPoint, p1, p2, varRotationClockwise));
 	return true;
 }
 
 bool OpenAir::ParseDC(const std::string& line, Airspace& airspace)
 {
 	if (airspace.GetType() == Airspace::UNKNOWN) return true;
-	if (varLat == LatLon::UNDEF_LAT || line.length() < 4 || !isDigit(line.at(3))) return false;
+	if (varPoint.Lat() == Geometry::LatLon::UNDEF_LAT || line.length() < 4 || !isDigit(line.at(3))) return false;
 	double radius = std::stod(line.substr(3));
-	airspace.AddGeometry(new Circle(varLat, varLon, radius));
+	airspace.AddGeometry(new Circle(varPoint, radius));
 	return true;
 }
 
@@ -465,7 +465,7 @@ bool OpenAir::ParseDY(const std::string & line, Airspace& airspace)
 void OpenAir::ResetVar()
 {
 	varRotationClockwise = true;
-	varLat = LatLon::UNDEF_LAT;
+	varPoint.SetLatLon(Geometry::LatLon::UNDEF_LAT,Geometry::LatLon::UNDEF_LON);
 	varWidth = 0;
 }
 
@@ -561,7 +561,7 @@ bool OpenAir::WriteCategory(const Airspace& airspace) {
 	return true;
 }
 
-void OpenAir::WriteLatLon(const LatLon& point) {
+void OpenAir::WriteLatLon(const Geometry::LatLon& point) {
 	int deg;
 	double min;
 	point.GetLatDegMin(deg, min);
@@ -592,7 +592,7 @@ void OpenAir::WriteSector(const Sector* sector)
 {
 	assert(sector != nullptr);
 	if (sector == nullptr) return;
-	if (!sector->IsCounterclockwise()) file << "X D=-\r\n";
+	if (!sector->IsClockwise()) file << "X D=-\r\n";
 	file << "V X=";
 	WriteLatLon(sector->GetCenterPoint());
 	file << "\r\nDB ";

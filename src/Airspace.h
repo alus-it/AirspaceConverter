@@ -14,8 +14,7 @@
 
 #include <string>
 #include <vector>
-
-class OpenAir;
+#include "Geometry.h"
 
 class Altitude
 {
@@ -51,136 +50,7 @@ private:
 	static double QNH;
 };
 
-class LatLon
-{
-public:
-	inline LatLon() : lat(UNDEF_LAT), lon(UNDEF_LON) {}
-	inline LatLon(const double& latitude, const double& longitude) : lat(latitude), lon(longitude) {}
-	inline double Lat() const { return lat; }
-	inline double Lon() const { return lon; }
-	inline void GetLatLon(double& latitude, double& longitude) const { latitude = lat; longitude = lon; }
-	inline void SetLatLon(double& latitude, double& longitude) { lat = latitude; lon = longitude; }
-	inline bool operator==(const LatLon& other) const { return other.lat == lat && other.lon == lon; }
-	inline bool operator!=(const LatLon& other) const { return other.lat != lat || other.lon != lon; }
-	inline void GetLatDegMin(int& deg, double& min) const { return convertDec2DegMin(lat, deg, min); }
-	inline void GetLonDegMin(int& deg, double& min) const { return convertDec2DegMin(lon, deg, min); }
-	inline char GetNorS() const { return lat > 0 ? 'N' : 'S'; }
-	inline char GetEorW() const { return lon > 0 ? 'E' : 'W'; }
 
-	static const int UNDEF_LAT, UNDEF_LON;
-
-private:
-	double lat, lon;
-	static void convertDec2DegMin(const double& dec, int& deg, double& min);
-	static const double SIXTYTH;
-};
-
-class Geometry
-{
-friend class Airspace;
-friend class OpenAir;
-public:
-	virtual ~Geometry() {}
-	virtual bool Discretize(std::vector<LatLon>& output) const = 0;
-	static inline void SetResolution(double resolutionNM) { resolution = resolutionNM * NM2RAD; }
-	inline const LatLon& GetCenterPoint() const { return point; }
-
-protected:
-	inline Geometry(const LatLon& center) : point(center) {}
-	const LatLon point;
-	static double resolution; // [rad] maximun distance between points when discretizing 
-
-	static const double TWO_PI;
-	static const double DEG2RAD;
-	static const double RAD2DEG;
-	static const double NM2RAD;
-	static const double RAD2NM;
-	
-	static double FindStep(const double& radius, const double& angle);
-	static double DeltaAngle(const double angle, const double reference);
-	static double AbsAngle(const double& angle);
-	static double CalcGreatCircleCourse(const double& lat1, const double& lon1, const double& lat2, const double& lon2, const double& d);
-	static double CalcGreatCircleCourse(const double& lat1, const double& lon1, const double& lat2, const double& lon2);
-	static double CalcAngularDist(const double& lat1, const double& lon1, const double& lat2, const double& lon2);
-	static void CalcRadialPoint(const double& lat1, const double& lon1, const double& dir, const double& dst, double& lat, double& lon);
-	static LatLon CalcRadialPoint(const double& lat1, const double& lon1, const double& dir, const double& dst);
-	static bool CalcBisector(const double& latA, const double& lonA, const double& latB, const double& lonB, const double& latC, const double& lonC, double& bisector);
-	static void CalcSphericalTriangle(const double& a, const double& beta, const double& gamma, double& alpha, double& b, double& c);
-	static bool CalcRadialIntersection(const double& lat1, const double& lon1, const double& lat2, const double& lon2, const double& crs13, const double& crs23, double& lat3, double& lon3, double& dst13, double& dst23);
-	static bool ArePointsOnArc(const LatLon& A, const LatLon& B, const LatLon& C, double& latc, double& lonc, double& radius, bool& clockwise);
-
-private:
-	static const double PI;
-	static const double PI_2;
-	virtual void WriteOpenAirGeometry(OpenAir* openAir) const = 0;
-};
-
-class Point : public Geometry
-{
-friend class OpenAir;
-public:
-	inline Point(const LatLon& latlon) : Geometry(latlon) {}
-	inline Point(const double& lat, const double& lon) : Geometry(LatLon(lat,lon)) {}
-	inline ~Point() {}
-	bool Discretize(std::vector<LatLon>& output) const;
-
-private:
-	void WriteOpenAirGeometry(OpenAir* openAir) const;
-
-};
-
-class Sector : public Geometry
-{
-friend class OpenAir;
-public:
-	Sector(const double& clat, const double& clon, const double& radiusNM, const double& dir1, const double& dir2, const bool& clocwise);
-	Sector(const double& clat, const double& clon, const double& lat1, const double& lon1, const double& lat2, const double& lon2, const bool& clocwise);
-	inline ~Sector() {}
-	bool Discretize(std::vector<LatLon>& output) const;
-	inline double GetRadiusNM() const { return RAD2NM * radius; }
-	inline bool IsCounterclockwise() const { return couterclockwise; }
-	inline const LatLon& GetStartPoint() const { return A; }
-	inline const LatLon& GetEndPoint() const { return B; }
-
-private:
-	void WriteOpenAirGeometry(OpenAir* openAir) const;
-
-	double radius; // [rad]
-	double angleStart, angleEnd; // [rad]
-	const bool couterclockwise;
-	const double latc, lonc; // [rad]
-	LatLon A, B;
-};
-
-class Circle : public Geometry
-{
-friend class OpenAir;
-public:
-	Circle(const double& lat, const double& lon, const double& radiusNM);
-	inline ~Circle() {}
-	bool Discretize(std::vector<LatLon>& output) const;
-	inline double GetRadiusNM() const { return RAD2NM * radius; }
-
-private:
-	const double radius; // [rad]
-	const double latc, lonc; // [rad]
-
-	void WriteOpenAirGeometry(OpenAir* openAir) const;
-};
-
-/* Airway for now not supported
-class AirwayPoint : public Geometry
-{
-public:
-	inline AirwayPoint(const double& lat, const double& lon, const double& widthNM) : Geometry(LatLon(lat, lon)), width(widthNM) {}
-	inline ~AirwayPoint() {}
-	bool Discretize(std::vector<LatLon>& output) const;
-
-private:
-	double width;
-};
-
-*/
 
 class Airspace
 {
@@ -221,9 +91,9 @@ public:
 	inline void SetTopAltitude(const Altitude& alt) { top = alt; }
 	inline void SetBaseAltitude(const Altitude& alt) { base = alt; }
 	inline void SetName(const std::string& airspaceName) { name = airspaceName; }
-	inline void AddSinglePointOnly(const double& lat, const double& lon) { points.push_back(LatLon(lat, lon)); }
+	inline void AddSinglePointOnly(const double& lat, const double& lon) { points.push_back(Geometry::LatLon(lat, lon)); }
 	void Clear();
-	void AddPoint(const double& lat, const double& lon);
+	void AddPoint(const Geometry::LatLon& point);
 	void AddGeometry(const Geometry* geometry);
 
 	inline void ClosePoints() { if (points.front() != points.back()) points.push_back(points.front()); }
@@ -237,11 +107,11 @@ public:
 	inline const std::string& GetName() const { return name; }
 	inline const unsigned int GetNumberOfGeometries() const { return geometries.size(); }
 	inline const Geometry* GetGeometryAt(unsigned int i) { return i < geometries.size() ? geometries.at(i) : nullptr; }
-	inline const std::vector<LatLon>& GetPoints() const { return points; }
-	inline const LatLon& GetFirstPoint() const { return points.front(); }
-	inline const LatLon& GetLastPoint() const { return points.back(); }
+	inline const std::vector<Geometry::LatLon>& GetPoints() const { return points; }
+	inline const Geometry::LatLon& GetFirstPoint() const { return points.front(); }
+	inline const Geometry::LatLon& GetLastPoint() const { return points.back(); }
 	inline const unsigned int GetNumberOfPoints() const { return points.size(); }
-	inline const LatLon& GetPointAt(unsigned int pos) const { return points.at(pos); }
+	inline const Geometry::LatLon& GetPointAt(unsigned int pos) const { return points.at(pos); }
 	inline const bool IsGNDbased() const { return base.IsGND(); }
 	inline const bool IsVisibleByDefault() const { return CategoryVisibleByDefault(type); }
 
@@ -250,7 +120,7 @@ private:
 	static const bool CATEGORY_VISIBILITY[];
 	Altitude top, base;
 	std::vector<const Geometry*> geometries;
-	std::vector<LatLon> points;
+	std::vector<Geometry::LatLon> points;
 	Type type;
 	std::string name;
 };

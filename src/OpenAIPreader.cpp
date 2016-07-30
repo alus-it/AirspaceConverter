@@ -178,7 +178,7 @@ bool OpenAIPreader::ReadFile(const std::string& fileName, std::multimap<int, Air
 				boost::char_separator<char> sep(", ");
 				boost::tokenizer<boost::char_separator<char> > tokens(str, sep);
 				bool expectedLon(true), error(false);
-				double lat = LatLon::UNDEF_LAT, lon = LatLon::UNDEF_LON;
+				double lat = Geometry::LatLon::UNDEF_LAT, lon = Geometry::LatLon::UNDEF_LON;
 				for (const std::string& c : tokens)
 				{
 					if (expectedLon) { // Beware that here the longitude comes first!
