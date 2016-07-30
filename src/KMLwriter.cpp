@@ -125,7 +125,6 @@ void KMLwriter::OpenPlacemark(const Airspace& airspace) {
 		<< "<name>" << airspace.GetName() << "</name>\n"
 		<< "<styleUrl>#Style" << airspace.GetCategoryName() << "</styleUrl>\n"
 		<< "<visibility>" << (airspace.IsVisibleByDefault() ? 1 : 0) << "</visibility>\n"
-		<< "<styleUrl>#Style" << airspace.GetCategoryName() << "</styleUrl>\n"
 		<< "<ExtendedData>\n"
 		<< "<SchemaData>\n"
 		<< "<SimpleData name=\"Name\">" << airspace.GetName() << "</SimpleData>\n"
@@ -289,6 +288,8 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 			assert(a.GetFirstPoint()==a.GetLastPoint());
 
 			OpenPlacemark(a);
+
+			//TODO: if we have a terrain map for that area should be anyway better to get the AGL altitudes converted to AMSL
 			if (a.IsGNDbased()) WriteBaseOrTop(a, a.GetTopAltitude(), true); // then that's easy!
 			else { // otherwise we have to abuse KML which is not properly done to draw middle air aispaces
 				file << "<MultiGeometry>\n";
