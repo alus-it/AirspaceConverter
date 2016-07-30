@@ -90,7 +90,7 @@ bool OpenAir::ParseCoordinates(const std::string& text, Geometry::LatLon& point)
 OpenAir::OpenAir(std::multimap<int, Airspace>& airspacesMap)
 	: airspaces(&airspacesMap)
 	, varRotationClockwise(true)
-	, varWidth(0) {
+	/*, varWidth(0) */ {
 }
 
 // Reading and parsing OpenAir airspace file
@@ -370,11 +370,11 @@ bool OpenAir::ParseV(const std::string & line, Airspace& airspace)
 		}
 		return false;
 	case 'W':
-		if (isDigit(line.at(4))) varWidth = std::stod(line.substr(4));
+		/*if (isDigit(line.at(4))) varWidth = std::stod(line.substr(4));
 		else {
 			varWidth = 0;
 			return false;
-		}
+		}*/
 		break;
 	case 'Z': // ingnore it
 		break;
@@ -466,7 +466,7 @@ void OpenAir::ResetVar()
 {
 	varRotationClockwise = true;
 	varPoint.SetLatLon(Geometry::LatLon::UNDEF_LAT,Geometry::LatLon::UNDEF_LON);
-	varWidth = 0;
+	//varWidth = 0;
 }
 
 bool OpenAir::InsertAirspace(Airspace& airspace)

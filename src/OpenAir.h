@@ -59,6 +59,6 @@ private:
 	std::multimap<int, Airspace>* airspaces;
 	bool varRotationClockwise;
 	Geometry::LatLon varPoint;
-	double varWidth;
+	//double varWidth;
 	std::ofstream file;
 };

@@ -116,11 +116,9 @@ private:
 
 	const bool clockwise;
 	const double latc, lonc; // [rad]
-	LatLon A, B;
-	double radius; // [rad]
 	double angleStart, angleEnd; // [rad]
-
-
+	double radius; // [rad]
+	LatLon A, B;
 };
 
 class Circle : public Geometry

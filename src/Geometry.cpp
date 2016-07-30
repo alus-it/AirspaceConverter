@@ -233,11 +233,11 @@ Sector::Sector(const LatLon& center, const double& radiusNM, const double& dir1,
 	, clockwise(isClockwise)
 	, latc(center.LatRad())
 	, lonc(center.LonRad())
-	, A(CalcRadialPoint(latc, lonc, angleStart, radius))
-	, B(CalcRadialPoint(latc, lonc, angleEnd, radius))
-	, radius(radiusNM * NM2RAD)
 	, angleStart(dir1 * DEG2RAD)
-	, angleEnd(dir2 * DEG2RAD) {
+	, angleEnd(dir2 * DEG2RAD)
+	, radius(radiusNM * NM2RAD)
+	, A(CalcRadialPoint(latc, lonc, angleStart, radius))
+	, B(CalcRadialPoint(latc, lonc, angleEnd, radius)) {
 }
 
 Sector::Sector(const LatLon& center, const LatLon& pointStart, const LatLon& pointEnd, const bool& isClockwise)
@@ -248,9 +248,9 @@ Sector::Sector(const LatLon& center, const LatLon& pointStart, const LatLon& poi
 	, A(pointStart)
 	, B(pointEnd) {
 	const double lat1r = pointStart.LatRad();
-	const double lon1r = -pointStart.LonRad();
+	const double lon1r = pointStart.LonRad();
 	const double lat2r = pointEnd.LatRad();
-	const double lon2r = -pointEnd.LonRad();
+	const double lon2r = pointEnd.LonRad();
 	radius = CalcAngularDist(latc, lonc, lat1r, lon1r);
 
 	assert(radius > 0);

@@ -56,6 +56,9 @@
     <ClInclude Include="..\..\src\OpenAir.h">
       <Filter>Source Files\Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Geometry.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AirspaceConverterDlg.cpp">
@@ -89,6 +92,9 @@
       <Filter>Source Files\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\OpenAir.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Geometry.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
   </ItemGroup>

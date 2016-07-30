@@ -207,6 +207,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\src\Airspace.h" />
     <ClInclude Include="..\..\src\AirspaceConverter.h" />
+    <ClInclude Include="..\..\src\Geometry.h" />
     <ClInclude Include="..\..\src\KMLwriter.h" />
     <ClInclude Include="..\..\src\OpenAIPreader.h" />
     <ClInclude Include="..\..\src\OpenAir.h" />
@@ -222,6 +223,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\Airspace.cpp" />
     <ClCompile Include="..\..\src\AirspaceConverter.cpp" />
+    <ClCompile Include="..\..\src\Geometry.cpp" />
     <ClCompile Include="..\..\src\KMLwriter.cpp" />
     <ClCompile Include="..\..\src\OpenAIPreader.cpp" />
     <ClCompile Include="..\..\src\OpenAir.cpp" />
