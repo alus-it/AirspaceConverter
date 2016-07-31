@@ -19,14 +19,12 @@
 class Altitude
 {
 public:
-	//Altitude() { refIsMsl = true; altMt = 0; altFt = 0; fl = 0; }
 	inline void SetAltFtMSL(const int ft) { refIsMsl = true; altMt = ft*FEET2METER; altFt = ft; fl = 0; }
 	inline void SetAltMtMSL(const double mt) { refIsMsl = true;  altFt = (int)(mt / FEET2METER); altMt = mt; fl = 0; }
 	inline void SetAltFtGND(const int ft) { refIsMsl = false; altMt = ft*FEET2METER; altFt = ft; fl = 0; }
 	inline void SetAltMtGND(const double mt) { refIsMsl = false; altFt = (int)(mt / FEET2METER); altMt = mt; fl = 0; }
 	void SetFlightLevel(const int FL);
 	inline void SetGND() { refIsMsl = false; altMt = 0; altFt = 0; fl = 0; }
-
 	inline bool IsAMSL() const { return refIsMsl; }
 	inline bool IsAGL() const { return !refIsMsl; }
 	inline bool IsFL() const { return fl != 0; }
@@ -34,7 +32,6 @@ public:
 	inline double GetAltMt() const { return altMt; }
 	inline bool IsGND() const { return !refIsMsl && altFt == 0; }
 	const std::string ToString() const;
-
 	inline static void SetQNH(const double QNHmb) { QNH = QNHmb; }
 	inline static double GetQNH() { return QNH; }
 
@@ -49,8 +46,6 @@ private:
 	static const double FEET2METER, K1, K2, QNE;
 	static double QNH;
 };
-
-
 
 class Airspace
 {
@@ -86,7 +81,6 @@ public:
 
 	inline static const std::string& CategoryName(const Type& category) { return CATEGORY_NAMES[category]; }
 	static const bool CategoryVisibleByDefault(const Type& category) { return CATEGORY_VISIBILITY[category]; }
-
 	inline void SetType(const Type& category) { type = category; }
 	inline void SetTopAltitude(const Altitude& alt) { top = alt; }
 	inline void SetBaseAltitude(const Altitude& alt) { base = alt; }
@@ -95,11 +89,8 @@ public:
 	void Clear();
 	void AddPoint(const Geometry::LatLon& point);
 	void AddGeometry(const Geometry* geometry);
-
 	inline void ClosePoints() { if (points.front() != points.back()) points.push_back(points.front()); }
-
 	bool Undiscretize();
-
 	inline const Type& GetType() const { return type; }
 	inline const std::string& GetCategoryName() const { return CategoryName(type); }
 	inline const Altitude& GetTopAltitude() const { return top; }

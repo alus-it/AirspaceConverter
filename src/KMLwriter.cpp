@@ -305,7 +305,7 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 					// Sides
 					WriteSideWalls(a);
 				}
-				else { // base and top altitudes not on the same reference: crap! find all absolute altitudes!
+				else { // base and top altitudes not on the same reference: so find all absolute altitudes!
 					double altitudeAGLmt = (a.GetBaseAltitude().IsAGL() ? a.GetBaseAltitude() : a.GetTopAltitude()).GetAltMt();
 
 					// Try to get terrein altitude then add the AGL altitude to get AMSL altitude

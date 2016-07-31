@@ -65,6 +65,7 @@ protected:
 	static const double RAD2DEG;
 	static const double NM2RAD;
 	static const double RAD2NM;
+	static const double NM2M;
 	static double FindStep(const double& radius, const double& angle);
 	static double DeltaAngle(const double angle, const double reference);
 	static double AbsAngle(const double& angle);
@@ -77,6 +78,8 @@ protected:
 	static void CalcSphericalTriangle(const double& a, const double& beta, const double& gamma, double& alpha, double& b, double& c);
 	static bool CalcRadialIntersection(const double& lat1, const double& lon1, const double& lat2, const double& lon2, const double& crs13, const double& crs23, double& lat3, double& lon3, double& dst13, double& dst23);
 	static bool ArePointsOnArc(const LatLon& A, const LatLon& B, const LatLon& C, double& latc, double& lonc, double& radius, bool& clockwise);
+	static LatLon AveragePoints(const std::vector<std::pair<const double, const double>>& centerPoints);
+	static double AverageRadius(const Geometry::LatLon& center, const std::vector<LatLon*>& circlePoints);
 
 private:
 	static const double PI;

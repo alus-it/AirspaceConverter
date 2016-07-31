@@ -517,10 +517,14 @@ bool OpenAir::WriteFile(const std::string& fileName) {
 		file << "AL " << a.GetBaseAltitude().ToString() << "\r\n";
 		file << "AH " << a.GetTopAltitude().ToString() << "\r\n";
 
+		// Get number of geometries
+		unsigned int numOfGeometries = a.GetNumberOfGeometries();
+
 		// If no geometries are defined we have to calculate them
-		if (a.GetNumberOfGeometries() == 0) a.Undiscretize();
-		
-		const unsigned int numOfGeometries = a.GetNumberOfGeometries();
+		if (numOfGeometries == 0) {
+			a.Undiscretize();
+			numOfGeometries = a.GetNumberOfGeometries();
+		}
 		assert(numOfGeometries > 0);
 
 		// Write each geometry
@@ -534,7 +538,7 @@ bool OpenAir::WriteFile(const std::string& fileName) {
 }
 
 void OpenAir::WriteHeader() {
-	for(const std::string& line: AirspaceConverter::disclaimer) file << "*" << line << "\r\n";
+	for(const std::string& line: AirspaceConverter::disclaimer) file << "* " << line << "\r\n";
 	file << "\r\n";
 }
 

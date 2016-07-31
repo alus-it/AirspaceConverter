@@ -11,6 +11,7 @@
 
 #include "Airspace.h"
 #include <cmath>
+#include <algorithm>
 #include <cassert>
 
 const double Altitude::FEET2METER = 0.3048; // 1 Ft = 0.3048 m
@@ -145,61 +146,66 @@ bool Airspace::Undiscretize()
 	std::vector<Geometry::LatLon*> arcPoints;
 	std::vector<std::pair<const double, const double>> centerPoints;
 	bool alreadyOnArc = false;
-	bool alwaysOnArc = false;
+	bool alwaysOnSameArc = false;
 	bool isClockwise;
-	double radius=0;
+	double prevRadius = 0;
 	for (unsigned int i = 0; i < steps; i++) {
-		//TODO: check if the points are all near to each oher enough to suspect that they are all part of a discretized arc
-
-		double latc = -7, lonc = -7;
+		double latc = -7, lonc = -7, radius = 0;
 		bool clockwise;
 		if (Geometry::ArePointsOnArc(points.at(i), points.at(i + 1), points.at(i + 2), latc, lonc, radius, clockwise)) {
-			if (alreadyOnArc) { // the arc continues
-				//TODO: Verify carefully that it's the same arc
-				//TODO: Make a proper check if the center is the same!!!
+			if (alreadyOnArc) { // the arc seems to continue
 				
-				arcPoints.push_back(&points.at(i + 2));
-				centerPoints.emplace_back(latc, lonc);
+				// Find a small distance to compare with
+				assert(prevRadius != 0);
+				const double smallDst = std::min(radius, prevRadius) / 10;
 
-				//TODO: else not on the same arc anymore...
-				//alreadyOnArc = false;
-				
+				// If the radius is similar to the previous and the new center is enough near to the previous consider this as the same arc
+				if (std::fabs(radius-prevRadius) < smallDst && Geometry::CalcAngularDist(latc, lonc, centerPoints.back().first, centerPoints.back().second) < smallDst) {
+					arcPoints.push_back(&points.at(i + 2));
+					centerPoints.emplace_back(latc, lonc);
+					prevRadius = radius;
+				} else {
+
+					// Not on the same arc but another new one
+					assert(i > 0);
+					assert(!arcPoints.empty());
+					assert(!centerPoints.empty());
+					geometries.push_back(new Sector(Geometry::AveragePoints(centerPoints), *arcPoints.front(), *arcPoints.back(), isClockwise));
+					arcPoints.clear();
+					centerPoints.clear();
+					alreadyOnArc = false;
+					prevRadius = 0;
+					alwaysOnSameArc = false;
+				}
 			} else { // New arc
 				assert(arcPoints.empty());
+				assert(centerPoints.empty());
 				arcPoints.push_back(&points.at(i));
 				arcPoints.push_back(&points.at(i + 1));
 				arcPoints.push_back(&points.at(i + 2));
-				assert(centerPoints.empty());
 				centerPoints.emplace_back(latc, lonc);
 				isClockwise = clockwise;
 				alreadyOnArc = true;
-				if (i == 0) alwaysOnArc = true;
+				prevRadius = radius;
+				if (i == 0) alwaysOnSameArc = true;
 			}
-			
 		} else {
 			if (alreadyOnArc) {
 				alreadyOnArc = false;
-				alwaysOnArc = false;
-				//TODO: find a proper way to average the centers...
-				Geometry::LatLon center;
-				center.SetLatLonRad(latc,lonc);
-				geometries.push_back(new Sector(center, *arcPoints.front(), *arcPoints.back(), isClockwise));
+				alwaysOnSameArc = false;
+				geometries.push_back(new Sector(Geometry::AveragePoints(centerPoints), *arcPoints.front(), *arcPoints.back(), isClockwise));
 				arcPoints.clear();
 				centerPoints.clear();
+				prevRadius = 0;
 			} else
 				geometries.push_back(new Point(points.at(i)));
 		}
 	}
 	if (alreadyOnArc) {
-		//TODO: find a proper way to average the centers... and the radius!!!
-		Geometry::LatLon center;
-		center.SetLatLonRad(centerPoints.front().first,centerPoints.front().second);
-
-		assert(radius > 0);
-		if(alwaysOnArc) geometries.push_back(new Circle(center, radius * Geometry::RAD2NM));
+		Geometry::LatLon center = Geometry::AveragePoints(centerPoints);
+		assert(prevRadius > 0);
+		if (alwaysOnSameArc) geometries.push_back(new Circle(center, Geometry::AverageRadius(center, arcPoints) * Geometry::RAD2NM));
 		else geometries.push_back(new Sector(center, *arcPoints.front(), *arcPoints.back(), isClockwise));
 	}
 	return true;
 }
-
-
