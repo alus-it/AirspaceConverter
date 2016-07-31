@@ -69,6 +69,7 @@ protected:
 	static double FindStep(const double& radius, const double& angle);
 	static double DeltaAngle(const double angle, const double reference);
 	static double AbsAngle(const double& angle);
+	static double AnglePi2Pi(const double& angle);
 	static double CalcGreatCircleCourse(const double& lat1, const double& lon1, const double& lat2, const double& lon2, const double& d);
 	static double CalcGreatCircleCourse(const double& lat1, const double& lon1, const double& lat2, const double& lon2);
 	static double CalcAngularDist(const double& lat1, const double& lon1, const double& lat2, const double& lon2);

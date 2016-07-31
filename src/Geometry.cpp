@@ -43,6 +43,15 @@ double Geometry::AbsAngle(const double& angle) { //to put angle in the range bet
 	return absangle;
 }
 
+double Geometry::AnglePi2Pi(const double& angle) { //to put angle in the range between -PI and PI
+	assert(!isinf(angle) && !isnan(angle));
+	double anglePi2Pi = std::fmod(angle, TWO_PI);
+	if(anglePi2Pi > PI) anglePi2Pi -= TWO_PI;
+	else if(anglePi2Pi < -PI) anglePi2Pi += TWO_PI;
+	assert(anglePi2Pi >= -PI && anglePi2Pi <= PI);
+	return anglePi2Pi;
+}
+
 // This requires pre-computation of distance
 double Geometry::CalcGreatCircleCourse(const double& lat1, const double& lon1, const double& lat2, const double& lon2, const double& d) {
 	assert(lat1 >= -PI_2 && lat1 <= PI_2);
@@ -51,12 +60,7 @@ double Geometry::CalcGreatCircleCourse(const double& lat1, const double& lon1, c
 	assert(lon2 >= -PI && lon2 <= PI);
 	if (lat2 == PI_2) return TWO_PI; //we are going to N pole
 	if (lat2 == -PI_2) return PI; //we are going to S pole
-	
-	if (std::fabs(lon1 - lon2) <= 1e-10) return lat1>lat2 ? PI : TWO_PI; //we are going to E or W
-	
-	//if (lon1 == lon2) return lat1>lat2 ? PI : TWO_PI; //we are going to E or W
-
-
+	if (std::fabs(lon1 - lon2) <= 1e-10) return lat1>lat2 ? PI : TWO_PI; // if (lon1 == lon2) we are going to E or W
 	return AbsAngle(sin(lon2 - lon1) < 0 ? acos((sin(lat2) - sin(lat1)*cos(d)) / (sin(d)*cos(lat1))) : TWO_PI - acos((sin(lat2) - sin(lat1)*cos(d)) / (sin(d)*cos(lat1))));
 }
 
@@ -91,7 +95,11 @@ void Geometry::CalcRadialPoint(const double& lat1, const double& lon1, const dou
 	const double coslat1 = cos(lat1);
 	const double sindst = sin(dst);
 	lat = asin(sinlat1 * cosdst + coslat1 * sindst * cos(dir));
-	lon = std::fmod(lon1 - atan2(sin(dir) * sindst * coslat1, cosdst - sinlat1 * sin(lat)) + PI, TWO_PI) - PI;
+
+	//TODO: check this: a way to have lon alwyas between PI and -PI but not always works
+	//lon = std::fmod(lon1 - atan2(sin(dir) * sindst * coslat1, cosdst - sinlat1 * sin(lat)) + PI, TWO_PI) - PI;
+	lon = AnglePi2Pi(lon1 - atan2(sin(dir) * sindst * coslat1, cosdst - sinlat1 * sin(lat)));
+
 	assert(lat >= -PI_2 && lat <= PI_2);
 	assert(lon >= -PI && lon <= PI);
 }
@@ -120,6 +128,7 @@ double Geometry::DeltaAngle(const double angle, const double reference)
 	double delta = angle - reference;
 	if (delta > PI) delta -= TWO_PI;
 	else if (delta < -PI) delta += TWO_PI;
+	assert(delta >= -TWO_PI && delta <= TWO_PI);
 	return delta;
 }
 
@@ -158,15 +167,19 @@ bool Geometry::CalcRadialIntersection(const double& lat1, const double& lon1, co
 	const double dst12 = CalcAngularDist(lat1, lon1, lat2, lon2); //TODO: this can be done only one time
 	const double crs12 = CalcGreatCircleCourse(lat1, lon1, lat2, lon2, dst12); //TODO: this can be done only one time
 	const double crs21 = CalcGreatCircleCourse(lat2, lon2, lat1, lon1, dst12); //TODO: this can be done only one time
+
+	//TODO: angle PI -PI
 	//double ang1 = std::fmod(crs13 - crs12 + PI, TWO_PI) - PI;
 	//double ang2 = std::fmod(crs21 - crs23 + PI, TWO_PI) - PI;
 	//const double ang1 = AbsAngle(crs13 - crs12);
 	//const double ang2 = AbsAngle(crs21 - crs23);
-	double ang1 = DeltaAngle(crs13, crs12);
-	double ang2 = DeltaAngle(crs21, crs23);
+	//double ang1 = DeltaAngle(crs13, crs12);
+	//double ang2 = DeltaAngle(crs21, crs23);
+	double ang1 = AnglePi2Pi(crs13 - crs12);
+	double ang2 = AnglePi2Pi(crs21 - crs23);
 
 
-	if ((sin(ang1) == 0 && sin(ang2) == 0) || sin(ang1)*sin(ang2) < 0) return false;  //infinity of intersections or intersection ambiguous
+	if ((sin(ang1) == 0 && sin(ang2) == 0) || sin(ang1) * sin(ang2) < 0) return false;  //infinity of intersections or intersection ambiguous
 	ang1 = std::fabs(ang1);
 	ang2 = std::fabs(ang2);
 	double ang3 = 0;
