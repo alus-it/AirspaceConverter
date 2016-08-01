@@ -85,6 +85,7 @@ protected:
 private:
 	static const double PI;
 	static const double PI_2;
+	static const double TOL;
 	virtual void WriteOpenAirGeometry(OpenAir* openAir) const = 0;
 };
 
