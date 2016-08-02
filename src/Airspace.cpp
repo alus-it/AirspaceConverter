@@ -37,8 +37,7 @@ void Altitude::SetFlightLevel(const int FL) {
 	refIsMsl = true;
 	altFt = FL * 100;
 	altMt = altFt * FEET2METER;
-	if (QNH != QNE) 
-	{
+	if (QNH != QNE) {
 		altMt = QNEaltitudeToQNHaltitude(altMt);
 		altFt = (int)(altMt / FEET2METER);
 	}
@@ -136,11 +135,24 @@ void Airspace::AddGeometry(const Geometry* geometry) {
 	geometry->Discretize(points);
 }
 
+void Airspace::EvaluateAndAddArc(std::vector<Geometry::LatLon*>& arcPoints, std::vector<std::pair<const double, const double>>& centerPoints, const bool& clockwise) {
+	if (arcPoints.size() > 3) geometries.push_back(new Sector(Geometry::AveragePoints(centerPoints), *arcPoints.front(), *arcPoints.back(), clockwise));
+	else for(const Geometry::LatLon* p : arcPoints) geometries.push_back(new Point(*p));
+	arcPoints.clear();
+	centerPoints.clear();
+}
+
+void Airspace::EvaluateAndAddCircle(const std::vector<Geometry::LatLon*>& arcPoints, const std::vector<std::pair<const double, const double>>& centerPoints) {
+	if (arcPoints.size() > 8) {
+		const Geometry::LatLon center(Geometry::AveragePoints(centerPoints));
+		geometries.push_back(new Circle(center, Geometry::AverageRadius(center, arcPoints) * Geometry::RAD2NM));
+	} else for (const Geometry::LatLon* p : arcPoints) geometries.push_back(new Point(*p));
+}
+
 bool Airspace::Undiscretize()
 {
 	if (!geometries.empty()) return true;
 	if (points.empty()) return false;
-
 	assert(points.size() >= 4);
 	unsigned int steps = points.size() - 3;
 	std::vector<Geometry::LatLon*> arcPoints;
@@ -154,25 +166,19 @@ bool Airspace::Undiscretize()
 		bool clockwise;
 		if (Geometry::ArePointsOnArc(points.at(i), points.at(i + 1), points.at(i + 2), latc, lonc, radius, clockwise)) {
 			if (alreadyOnArc) { // the arc seems to continue
-				
-				// Find a small distance to compare with
 				assert(prevRadius != 0);
-				const double smallDst = std::min(radius, prevRadius) / 10;
+				const double smallDst = std::min(radius, prevRadius) / 10; // Find a small distance to compare with
 
 				// If the radius is similar to the previous and the new center is enough near to the previous consider this as the same arc
 				if (std::fabs(radius-prevRadius) < smallDst && Geometry::CalcAngularDist(latc, lonc, centerPoints.back().first, centerPoints.back().second) < smallDst) {
 					arcPoints.push_back(&points.at(i + 2));
 					centerPoints.emplace_back(latc, lonc);
 					prevRadius = radius;
-				} else {
-
-					// Not on the same arc but another new one
+				} else { // Not on the same arc but another new one
 					assert(i > 0);
 					assert(!arcPoints.empty());
 					assert(!centerPoints.empty());
-					geometries.push_back(new Sector(Geometry::AveragePoints(centerPoints), *arcPoints.front(), *arcPoints.back(), isClockwise));
-					arcPoints.clear();
-					centerPoints.clear();
+					EvaluateAndAddArc(arcPoints, centerPoints, isClockwise);
 					alreadyOnArc = false;
 					prevRadius = 0;
 					alwaysOnSameArc = false;
@@ -193,19 +199,15 @@ bool Airspace::Undiscretize()
 			if (alreadyOnArc) {
 				alreadyOnArc = false;
 				alwaysOnSameArc = false;
-				geometries.push_back(new Sector(Geometry::AveragePoints(centerPoints), *arcPoints.front(), *arcPoints.back(), isClockwise));
-				arcPoints.clear();
-				centerPoints.clear();
+				EvaluateAndAddArc(arcPoints, centerPoints, isClockwise);
 				prevRadius = 0;
-			} else
-				geometries.push_back(new Point(points.at(i)));
+			} else geometries.push_back(new Point(points.at(i)));
 		}
 	}
-	if (alreadyOnArc) {
-		Geometry::LatLon center = Geometry::AveragePoints(centerPoints);
+	if (alreadyOnArc) { // Add the remaining curve to geometries
 		assert(prevRadius > 0);
-		if (alwaysOnSameArc) geometries.push_back(new Circle(center, Geometry::AverageRadius(center, arcPoints) * Geometry::RAD2NM));
-		else geometries.push_back(new Sector(center, *arcPoints.front(), *arcPoints.back(), isClockwise));
-	}
+		if (alwaysOnSameArc) EvaluateAndAddCircle(arcPoints, centerPoints);	// If we were always on arc then here we have a circle
+		else EvaluateAndAddArc(arcPoints, centerPoints, isClockwise);
+	} else for (unsigned int i = steps - 1; i < points.size() ; i++) geometries.push_back(new Point(points.at(i))); // Otherwise the remaining points
 	return true;
 }

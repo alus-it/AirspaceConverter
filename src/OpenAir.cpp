@@ -471,14 +471,12 @@ void OpenAir::ResetVar()
 
 bool OpenAir::InsertAirspace(Airspace& airspace)
 {
-	if (airspaces == nullptr) {
-		assert(false);
-		return false;
-	}
+	assert(airspaces != nullptr);
+	if (airspaces == nullptr) return false;
 	const bool validAirspace = airspace.GetType() != Airspace::UNKNOWN && !airspace.GetName().empty() && airspace.GetNumberOfGeometries() > 0 && !airspace.GetTopAltitude().IsGND();
 	if (validAirspace) {
-		assert(airspace.GetNumberOfPoints() > 0);
 		airspace.ClosePoints();
+		assert(airspace.GetNumberOfPoints() > 3);
 		airspaces->insert(std::pair<int, Airspace>(airspace.GetType(),std::move(airspace)));
 	} else airspace.Clear();
 	ResetVar();

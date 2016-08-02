@@ -61,6 +61,7 @@ protected:
 	const LatLon point;
 	static double resolution; // [rad] maximun distance between points when discretizing
 	static const double TWO_PI;
+	static const double PI_2;
 	static const double DEG2RAD;
 	static const double RAD2DEG;
 	static const double NM2RAD;
@@ -84,7 +85,6 @@ protected:
 
 private:
 	static const double PI;
-	static const double PI_2;
 	static const double TOL;
 	virtual void WriteOpenAirGeometry(OpenAir* openAir) const = 0;
 };

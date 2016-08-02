@@ -107,6 +107,9 @@ public:
 	inline const bool IsVisibleByDefault() const { return CategoryVisibleByDefault(type); }
 
 private:
+	void EvaluateAndAddArc(std::vector<Geometry::LatLon*>& arcPoints, std::vector<std::pair<const double, const double>>& centerPoints, const bool& clockwise);
+	void EvaluateAndAddCircle(const std::vector<Geometry::LatLon*>& arcPoints, const std::vector<std::pair<const double, const double>>& centerPoints);
+
 	static const std::string CATEGORY_NAMES[];
 	static const bool CATEGORY_VISIBILITY[];
 	Altitude top, base;

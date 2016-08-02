@@ -101,7 +101,7 @@ double Geometry::CalcAngularDist(const double& lat1, const double& lon1, const d
 void Geometry::CalcRadialPoint(const double& lat1, const double& lon1, const double& dir, const double& dst, double& lat, double& lon) {
 	assert(lat1 >= -PI_2 && lat1 <= PI_2);
 	assert(lon1 >= -PI && lon1 <= PI);
-	assert(dir >= 0 && dir <= TWO_PI);
+	assert(dir >= 0 && dir <= 2 * TWO_PI);
 	const double sinlat1 = sin(lat1);
 	const double cosdst = cos(dst);
 	const double coslat1 = cos(lat1);
@@ -124,7 +124,7 @@ Geometry::LatLon Geometry::CalcRadialPoint(const double& lat1, const double& lon
 
 double Geometry::FindStep(const double& radius, const double& angle) {
 	assert(angle >= 0 && angle <= TWO_PI);
-	assert(radius >= 0 && radius <= PI_2);
+	assert(radius >= 0 && radius <= PI_2); //FIXME: assertion failed while discretizing
 	static const double smallRadius = 3 * NM2RAD; // 3 NM, radius under it the number of points will be decreased
 	static const double m = 300 / smallRadius; // coeffcient to decrease points for small circles, 300 is default number of points for circles bigger than 3 NM
 	int steps;
@@ -205,12 +205,13 @@ bool Geometry::ArePointsOnArc(const LatLon& A, const LatLon& B, const LatLon& C,
 	
 	// Calculate course difference between two segments
 	const double delta = DeltaAngle(crsBC, crsBA);
-	if (std::fabs(delta) <= TOL) return false; // aligned points so not on an arc of circle!
+	const double absDelta = std::fabs(delta);
+	if (absDelta <= TOL || absDelta >= PI - TOL) return false; // aligned points so not on an arc of circle!
 	clockwise = delta < 0; // negative difference: internal angle is on the right so turning clockwise
 	
 	// Calculate middle point 1 on segment AB and it's orthogonal course to the center
 	const double dstAB2 = dstAB / 2;
-	double lat1=0, lon1=0;
+	double lat1 = 0, lon1 = 0;
 	CalcRadialPoint(latA, lonA, crsAB, dstAB2, lat1, lon1);
 	const double crs1A = CalcGreatCircleCourse(lat1, lon1, latA, lonA, dstAB2);
 	const double crs1c = AbsAngle(clockwise ? crs1A - PI_2 : crs1A + PI_2);
@@ -225,6 +226,9 @@ bool Geometry::ArePointsOnArc(const LatLon& A, const LatLon& B, const LatLon& C,
 	// Intersect the two orthogonal courses to find the center
 	double radius2;
 	CalcRadialIntersection(lat1, lon1, lat2, lon2, crs1c, crs2c, latc, lonc, radius, radius2);
+
+	// Make sure that the radius is not something incredibly big
+	if (radius > PI_2) return false;
 
 	// Compare the two radius they must be similar
 	const double diff = std::fabs(radius - radius2);
@@ -276,6 +280,7 @@ Sector::Sector(const LatLon& center, const double& radiusNM, const double& dir1,
 	, radius(radiusNM * NM2RAD)
 	, A(CalcRadialPoint(latc, lonc, angleStart, radius))
 	, B(CalcRadialPoint(latc, lonc, angleEnd, radius)) {
+	assert(radius > 0 && radius < PI_2);
 }
 
 Sector::Sector(const LatLon& center, const LatLon& pointStart, const LatLon& pointEnd, const bool& isClockwise)
@@ -290,10 +295,8 @@ Sector::Sector(const LatLon& center, const LatLon& pointStart, const LatLon& poi
 	const double lat2r = pointEnd.LatRad();
 	const double lon2r = pointEnd.LonRad();
 	radius = CalcAngularDist(latc, lonc, lat1r, lon1r);
-
-	assert(radius > 0);
+	assert(radius > 0 && radius < PI_2);
 	assert(std::fabs((radius * RAD2NM) - (CalcAngularDist(latc, lonc, lat2r, lon2r) * RAD2NM)) < 0.2);
-
 	angleStart = CalcGreatCircleCourse(latc, lonc, lat1r, lon1r);
 	angleEnd = CalcGreatCircleCourse(latc, lonc, lat2r, lon2r);
 }
@@ -304,14 +307,12 @@ bool Sector::Discretize(std::vector<LatLon>& output) const
 		double e = angleStart <= angleEnd ? angleEnd : angleEnd + TWO_PI;
 		const double step = FindStep(radius, AbsAngle(e - angleStart));
 		assert(angleStart <= e);
-		for (double a = angleStart; a < e; a += step)
-			output.push_back(CalcRadialPoint(latc, lonc, a, radius));
+		for (double a = angleStart; a < e; a += step) output.push_back(CalcRadialPoint(latc, lonc, a, radius));
 	} else {
 		const double s = angleStart >= angleEnd ? angleStart : angleStart + TWO_PI;
 		const double step = FindStep(radius, AbsAngle(s - angleEnd));
 		assert(s >= angleEnd);
-		for (double a = s; a > angleEnd; a -= step)
-			output.push_back(CalcRadialPoint(latc, lonc, a, radius));
+		for (double a = s; a > angleEnd; a -= step) output.push_back(CalcRadialPoint(latc, lonc, a, radius));
 	}
 	return true;
 }
@@ -326,6 +327,7 @@ Circle::Circle(const LatLon& center, const double& radiusNM)
 	, radius(radiusNM * NM2RAD)
 	, latc(center.LatRad())
 	, lonc(center.LonRad()) {
+	assert(radius > 0 && radius < PI_2);
 }
 
 bool Circle::Discretize(std::vector<LatLon>& output) const
