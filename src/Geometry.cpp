@@ -247,6 +247,12 @@ Geometry::LatLon Geometry::AveragePoints(const std::vector<std::pair<const doubl
 	const int num = centerPoints.size();
 	latc /= num;
 	lonc /= num;
+	assert(latc >= -PI_2 && latc <= PI_2);
+	assert(lonc >= -PI && lonc <= PI);
+
+	//Test:
+	assert(std::fabs(latc) < 1.5707935633569142948761582291294); //FIXME
+
 	return LatLon::CreateFromRadiants(latc, lonc);
 }
 
@@ -295,7 +301,7 @@ Sector::Sector(const LatLon& center, const LatLon& pointStart, const LatLon& poi
 	const double lat2r = pointEnd.LatRad();
 	const double lon2r = pointEnd.LonRad();
 	radius = CalcAngularDist(latc, lonc, lat1r, lon1r);
-	assert(radius > 0 && radius < PI_2);
+	assert(radius > 0 && radius < PI_2);  //FIXME: assertion failed while reading OpenAir file previosly made from OpenAIP
 	assert(std::fabs((radius * RAD2NM) - (CalcAngularDist(latc, lonc, lat2r, lon2r) * RAD2NM)) < 0.2);
 	angleStart = CalcGreatCircleCourse(latc, lonc, lat1r, lon1r);
 	angleEnd = CalcGreatCircleCourse(latc, lonc, lat2r, lon2r);
