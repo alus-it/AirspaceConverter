@@ -136,14 +136,14 @@ void Airspace::AddGeometry(const Geometry* geometry) {
 }
 
 void Airspace::EvaluateAndAddArc(std::vector<Geometry::LatLon*>& arcPoints, std::vector<std::pair<const double, const double>>& centerPoints, const bool& clockwise) {
-	if (arcPoints.size() > 3) geometries.push_back(new Sector(Geometry::AveragePoints(centerPoints), *arcPoints.front(), *arcPoints.back(), clockwise));
+	if (arcPoints.size() > 4) geometries.push_back(new Sector(Geometry::AveragePoints(centerPoints), *arcPoints.front(), *arcPoints.back(), clockwise));
 	else for(const Geometry::LatLon* p : arcPoints) geometries.push_back(new Point(*p));
 	arcPoints.clear();
 	centerPoints.clear();
 }
 
 void Airspace::EvaluateAndAddCircle(const std::vector<Geometry::LatLon*>& arcPoints, const std::vector<std::pair<const double, const double>>& centerPoints) {
-	if (arcPoints.size() > 8) {
+	if (arcPoints.size() > 10) {
 		const Geometry::LatLon center(Geometry::AveragePoints(centerPoints));
 		geometries.push_back(new Circle(center, Geometry::AverageRadius(center, arcPoints) * Geometry::RAD2NM));
 	} else for (const Geometry::LatLon* p : arcPoints) geometries.push_back(new Point(*p));

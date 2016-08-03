@@ -124,7 +124,7 @@ Geometry::LatLon Geometry::CalcRadialPoint(const double& lat1, const double& lon
 
 double Geometry::FindStep(const double& radius, const double& angle) {
 	assert(angle >= 0 && angle <= TWO_PI);
-	assert(radius >= 0 && radius <= PI_2); //FIXME: assertion failed while discretizing
+	assert(radius >= 0 && radius <= PI_2);
 	static const double smallRadius = 3 * NM2RAD; // 3 NM, radius under it the number of points will be decreased
 	static const double m = 300 / smallRadius; // coeffcient to decrease points for small circles, 300 is default number of points for circles bigger than 3 NM
 	int steps;
@@ -134,7 +134,7 @@ double Geometry::FindStep(const double& radius, const double& angle) {
 }
 
 bool Geometry::CalcBisector(const double& latA, const double& lonA, const double& latB, const double& lonB, const double& latC, const double& lonC, double& bisector) {
-	const double crsBA = CalcGreatCircleCourse(latB, lonB, latA, lonA); //TODO: this can be done only one time
+	const double crsBA = CalcGreatCircleCourse(latB, lonB, latA, lonA);
 	const double crsBC = CalcGreatCircleCourse(latB, lonB, latC, lonC);
 	double diff = DeltaAngle(crsBC, crsBA); //angle between the directions
 	if (diff>0) { //positive difference: the internal angle in on the left
@@ -162,9 +162,10 @@ void Geometry::CalcSphericalTriangle(const double& a, const double& beta, const 
 }
 
 bool Geometry::CalcRadialIntersection(const double& lat1, const double& lon1, const double& lat2, const double& lon2, const double& crs13, const double& crs23, double& lat3, double& lon3, double& dst13, double& dst23) {
-	const double dst12 = CalcAngularDist(lat1, lon1, lat2, lon2); //TODO: this can be done only one time
-	const double crs12 = CalcGreatCircleCourse(lat1, lon1, lat2, lon2, dst12); //TODO: this can be done only one time
-	const double crs21 = CalcGreatCircleCourse(lat2, lon2, lat1, lon1, dst12); //TODO: this can be done only one time
+	if (std::fabs(DeltaAngle(crs13, crs23)) <= TOL) return false;
+	const double dst12 = CalcAngularDist(lat1, lon1, lat2, lon2);
+	const double crs12 = CalcGreatCircleCourse(lat1, lon1, lat2, lon2, dst12);
+	const double crs21 = CalcGreatCircleCourse(lat2, lon2, lat1, lon1, dst12);
 
 	//Angle PI -PI ?
 	//double ang1 = std::fmod(crs13 - crs12 + PI, TWO_PI) - PI;
@@ -185,7 +186,7 @@ bool Geometry::CalcRadialIntersection(const double& lat1, const double& lon1, co
 
 bool Geometry::ArePointsOnArc(const LatLon& A, const LatLon& B, const LatLon& C, double& latc, double& lonc, double& radius, bool& clockwise) {
 	static const double maxDst = (5000 / NM2M) * NM2RAD; // Do not process segments longer than 5 Km
-	const double latA = A.LatRad(); //TODO: avoid to recalculate always
+	const double latA = A.LatRad(); //TODO: maybe avoid to recalculate always
 	const double lonA = A.LonRad();
 	const double latB = B.LatRad();
 	const double lonB = B.LonRad();
@@ -222,10 +223,10 @@ bool Geometry::ArePointsOnArc(const LatLon& A, const LatLon& B, const LatLon& C,
 	CalcRadialPoint(latB, lonB, crsBC, dstBC2, lat2, lon2);
 	const double crs2B = CalcGreatCircleCourse(lat2, lon2, latB, lonB, dstBC2);
 	const double crs2c = AbsAngle(clockwise ? crs2B - PI_2 : crs2B + PI_2);
-	
+
 	// Intersect the two orthogonal courses to find the center
 	double radius2;
-	CalcRadialIntersection(lat1, lon1, lat2, lon2, crs1c, crs2c, latc, lonc, radius, radius2);
+	if (!CalcRadialIntersection(lat1, lon1, lat2, lon2, crs1c, crs2c, latc, lonc, radius, radius2)) return false;
 
 	// Make sure that the radius is not something incredibly big
 	if (radius > PI_2) return false;
@@ -249,10 +250,6 @@ Geometry::LatLon Geometry::AveragePoints(const std::vector<std::pair<const doubl
 	lonc /= num;
 	assert(latc >= -PI_2 && latc <= PI_2);
 	assert(lonc >= -PI && lonc <= PI);
-
-	//Test:
-	assert(std::fabs(latc) < 1.5707935633569142948761582291294); //FIXME
-
 	return LatLon::CreateFromRadiants(latc, lonc);
 }
 
@@ -301,7 +298,7 @@ Sector::Sector(const LatLon& center, const LatLon& pointStart, const LatLon& poi
 	const double lat2r = pointEnd.LatRad();
 	const double lon2r = pointEnd.LonRad();
 	radius = CalcAngularDist(latc, lonc, lat1r, lon1r);
-	assert(radius > 0 && radius < PI_2);  //FIXME: assertion failed while reading OpenAir file previosly made from OpenAIP
+	assert(radius > 0 && radius < PI_2);
 	assert(std::fabs((radius * RAD2NM) - (CalcAngularDist(latc, lonc, lat2r, lon2r) * RAD2NM)) < 0.2);
 	angleStart = CalcGreatCircleCourse(latc, lonc, lat1r, lon1r);
 	angleEnd = CalcGreatCircleCourse(latc, lonc, lat2r, lon2r);

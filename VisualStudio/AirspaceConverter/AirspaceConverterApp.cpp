@@ -37,7 +37,7 @@ BOOL CAirspaceConverterApp::InitInstance()
 {
 	CWinApp::InitInstance();
 
-	//TODO: call AfxInitRichEdit2() to initialize richedit2 library.
+	// Call AfxInitRichEdit2() to initialize richedit2 library.
 	AfxInitRichEdit();
 
 	// Standard initialization
