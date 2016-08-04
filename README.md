@@ -1,7 +1,7 @@
 AirspaceConverter
 =================
 Welcome to AirspaceConverter repository!  
-This is an open source, multi-platform  tool to convert OpenAir or OpenAIP airspace files to KML/KMZ for Google Earth, and OpenAIP to OpenAir.
+This is an open source, multi-platform  tool to convert OpenAir or OpenAIP airspace files to KML/KMZ for Google Earth or to OpenAir.
 This utility is also capable to output in PFM "Polish" format, as file .mp, for software like cGPSmapper.  
 AirspaceConverter is written entirely in C++11 can be ran both on Linux and on Windows.
 The Windows version has MFC user interface in order to be easy to use and immediately available.
@@ -14,7 +14,7 @@ Airspace represented in 3D in Google Earth can help to visualize and better unde
 Not only, having the planned route or track of a flight (as GPX file), displayed as well in Google Earth will make easy to check for airspace crossed or to be avoided.  
 This software can also be useful for maintainers of OpenAir files, not only to visualize airspace but also to verify the syntax of OpenAir commands entered.  
 OpenAIP provide a free, worldwide and updated airspace repository but in his own format, while many devices and software support OpenAir airspace files.
-This software allows to convert also to OpenAir.
+This software allows to convert also to OpenAir so making OpenAIP data available to many portable devices.
 
 About KML format
 ----------------
