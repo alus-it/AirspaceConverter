@@ -363,7 +363,7 @@ void CAirspaceConverterDlg::EndBusy()
 
 void CAirspaceConverterDlg::OnBnClickedInputFile()
 {
-	CFileDialog dlg(TRUE, _T(".aip"), NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("All airspace files|*.txt; *.aip|OpenAIP|*.aip|OpenAir|*.txt||"), (CWnd*)this, 0, TRUE);
+	CFileDialog dlg(TRUE, NULL, NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("All airspace files|*.txt; *.aip|OpenAIP|*.aip|OpenAir|*.txt||"), (CWnd*)this, 0, TRUE);
 	if (dlg.DoModal() == IDOK)
 	{
 		outputFile.clear();
@@ -382,7 +382,7 @@ void CAirspaceConverterDlg::OnBnClickedInputFile()
 
 void CAirspaceConverterDlg::OnBnClickedLoadDEM()
 {
-	CFileDialog dlg(TRUE, _T(".txt"), NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("Terrain raster map|*.dem||"), (CWnd*)this, 0, TRUE);
+	CFileDialog dlg(TRUE, _T("dem"), NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("Terrain raster map|*.dem||"), (CWnd*)this, 0, TRUE);
 	if (dlg.DoModal() == IDOK)
 	{
 		POSITION pos(dlg.GetStartPosition());
@@ -452,11 +452,15 @@ void CAirspaceConverterDlg::OnBnClickedClearMapsBt()
 void CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt()
 {
 	assert(!outputFile.empty());
-	CFileDialog dlg(FALSE, NULL, CString(outputFile.c_str()), OFN_HIDEREADONLY, _T("KMZ|*.kmz|KML|*.kml|OpenAir|*.txt|Polish|*.mp||"), (CWnd*)this, 0, TRUE);
+	boost::filesystem::path outputPath(outputFile);
+	std::string ext(outputPath.extension().string()); // This should be the same as type from the dialog combo box, preselect this type in the open file dlg
+	assert(ext.length() > 1);
+	assert(ext.at(0) == '.');
+	CFileDialog dlg(FALSE, NULL, CString(std::string("*" + ext).c_str()), OFN_HIDEREADONLY, _T("KMZ|*.kmz|KML|*.kml|OpenAir|*.txt|Polish|*.mp||"), (CWnd*)this, 0, TRUE);
 	if (dlg.DoModal() == IDOK) {
 		outputFile = CT2CA(dlg.GetPathName());
-		boost::filesystem::path outputPath(outputFile);
-		std::string ext(outputPath.extension().string());
+		outputPath = outputFile;
+		ext = outputPath.extension().string(); // Extension really typed in by the user
 		if (boost::iequals(ext, ".kmz")) OutputTypeCombo.SetCurSel(AirspaceConverter::KMZ);
 		else if (boost::iequals(ext, ".kml")) OutputTypeCombo.SetCurSel(AirspaceConverter::KML);
 		else if (boost::iequals(ext, ".txt")) OutputTypeCombo.SetCurSel(AirspaceConverter::OpenAir);

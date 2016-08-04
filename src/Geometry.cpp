@@ -278,8 +278,8 @@ Sector::Sector(const LatLon& center, const double& radiusNM, const double& dir1,
 	, clockwise(isClockwise)
 	, latc(center.LatRad())
 	, lonc(center.LonRad())
-	, angleStart(dir1 * DEG2RAD)
-	, angleEnd(dir2 * DEG2RAD)
+	, angleStart(AbsAngle(dir1 * DEG2RAD))
+	, angleEnd(AbsAngle(dir2 * DEG2RAD))
 	, radius(radiusNM * NM2RAD)
 	, A(CalcRadialPoint(latc, lonc, angleStart, radius))
 	, B(CalcRadialPoint(latc, lonc, angleEnd, radius)) {

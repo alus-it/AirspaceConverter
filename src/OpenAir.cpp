@@ -16,6 +16,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/format.hpp>
 
 std::string& OpenAir::RemoveComments(std::string &s) {
 	s.erase(find_if(s.begin(), s.end(), [](const char c) { return c == '*'; }), s.end());
@@ -174,9 +175,9 @@ bool OpenAir::ReadFile(const std::string& fileName) {
 				lineParsedOK = ParseDC(sLine, airspace);
 				break;
 			case 'Y': // DY
-				AirspaceConverter::LogMessage("Warning: skipping airway segment which is not yet supported: " + sLine, false);
-				assert(false); // Airway not yet supported
-				lineParsedOK = false; //ParseDY(sLine, airspace);
+				//ParseDY(sLine, airspace); // Airway not yet supported
+				AirspaceConverter::LogMessage(boost::str(boost::format("Warning: skipping airway segment (not yet supported) on line %1d: %2s") % linecount %sLine), false);
+				lineParsedOK = false; 
 				break;
 			default:
 				lineParsedOK = false;
@@ -197,8 +198,7 @@ bool OpenAir::ReadFile(const std::string& fileName) {
 			continue;
 		}
 		if (!lineParsedOK) {
-			AirspaceConverter::LogMessage("ERROR: unable to parse line: " + sLine, true);
-			assert(false);
+			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR: unable to parse line %1d: %2s") % linecount %sLine), true);
 			allParsedOK = false;
 		}
 	}
