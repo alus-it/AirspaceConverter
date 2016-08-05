@@ -90,8 +90,7 @@ bool OpenAIPreader::ReadFile(const std::string& fileName, std::multimap<int, Air
 		}
 
 		// for all children of AIRSPACES tag
-		for (ptree::value_type const& asp : root.get_child("AIRSPACES"))
-		{
+		for (ptree::value_type const& asp : root.get_child("AIRSPACES")) {
 			if (asp.first != "ASP") continue;
 			
 			// Airspace category
@@ -179,8 +178,7 @@ bool OpenAIPreader::ReadFile(const std::string& fileName, std::multimap<int, Air
 				boost::tokenizer<boost::char_separator<char> > tokens(str, sep);
 				bool expectedLon(true), error(false);
 				double lat = Geometry::LatLon::UNDEF_LAT, lon = Geometry::LatLon::UNDEF_LON;
-				for (const std::string& c : tokens)
-				{
+				for (const std::string& c : tokens) {
 					if (expectedLon) { // Beware that here the longitude comes first!
 						lon = std::stod(c);
 						error = lon < -180 || lon > 180;
@@ -194,8 +192,7 @@ bool OpenAIPreader::ReadFile(const std::string& fileName, std::multimap<int, Air
 						airspace.AddSinglePointOnly(lat, lon);
 					}
 				}
-				if (error || !expectedLon)
-				{
+				if (error || !expectedLon) {
 					AirspaceConverter::LogMessage("Warning: skipping invalid coordinates.", false);
 					assert(false);
 					continue;

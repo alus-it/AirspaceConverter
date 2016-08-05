@@ -11,13 +11,11 @@
 //============================================================================
 
 #pragma once
-
 #include <string>
 #include <map>
 
 class Airspace;
 
-namespace OpenAIPreader
-{
+namespace OpenAIPreader {
 	bool ReadFile(const std::string& fileName, std::multimap<int,Airspace>& output);
 };

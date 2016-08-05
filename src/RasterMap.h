@@ -8,17 +8,15 @@
 // License     : GNU GPL v3
 //
 // The source code in this file was adopted from LK8000 project
+//
+//   LK8000 Tactical Flight Computer -  WWW.LK8000.IT
+//   Released under GNU/GPL License v.2
+//   See CREDITS.TXT file in LK8000 project for authors and copyrights
+//   LK8000 Repository: https://github.com/LK8000/LK8000.git
+//
 //============================================================================
 
-/*
-   LK8000 Tactical Flight Computer -  WWW.LK8000.IT
-   Released under GNU/GPL License v.2
-   See CREDITS.TXT file for authors and copyrights
-
- */
-
 #pragma once
-
 #include <string>
 
 class RasterMap final {
@@ -36,23 +34,18 @@ public:
 
 	RasterMap();
 	~RasterMap();
-
 	inline bool isMapLoaded() const { return terrain_valid; }
 	bool GetMapCenter(double *lon, double *lat) const;
 	inline double GetStepSize() const { return TerrainInfo.StepSize; }
 	inline double GetTop() const { return TerrainInfo.Top; }
 	inline double GetBottom() const { return TerrainInfo.Bottom; }
 	//int GetEffectivePixelSize(double *pixel_D, double latitude, double longitude) const; // accurate method
-
 	void SetFieldRounding(double xr, double yr);
 	bool GetTerrainHeight(const double& Latitude, const double& Longitude, short& terrainHeight) const;
-
 	bool Open(const std::string& filename);
 	void Close();
-
 	//void Lock();
 	//void Unlock();
-
 	inline bool IsDirectAccess(void) const { return DirectAccess; };
 	inline bool IsPaged(void) const { return Paged; };
 	bool PointIsInTerrainRange(const double& latitude, const double& longitude) const;

@@ -8,14 +8,13 @@
 // License     : GNU GPL v3
 //
 // The source code in this file was adopted from LK8000 project
+//
+//   LK8000 Tactical Flight Computer -  WWW.LK8000.IT
+//   Released under GNU/GPL License v.2
+//   See CREDITS.TXT file in LK8000 project for authors and copyrights
+//   LK8000 Repository: https://github.com/LK8000/LK8000.git
+//
 //============================================================================
-
-/*
-   LK8000 Tactical Flight Computer -  WWW.LK8000.IT
-   Released under GNU/GPL License v.2
-   See CREDITS.TXT file for authors and copyrights
-
- */
 
 #include "RasterMap.h"
 #include "AirspaceConverter.h"
@@ -44,8 +43,7 @@ bool RasterMap::GetMapCenter(double *lon, double *lat) const {
 }
 
 // more accurate method
-/*int RasterMap::GetEffectivePixelSize(double *pixel_D, double latitude, double longitude) const
-{
+/*int RasterMap::GetEffectivePixelSize(double *pixel_D, double latitude, double longitude) const {
 	double terrain_step_x, terrain_step_y;
 	double step_size = TerrainInfo.StepSize*sqrt(2.0);
 	if ((*pixel_D <= 0) || (step_size == 0)) {

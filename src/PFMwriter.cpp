@@ -89,8 +89,7 @@ void PFMwriter::WriteHeader(const std::string& filename) {
 		<< "[END]\n\n";
 }
 
-bool PFMwriter::WriteFile(const std::string& filename, const std::multimap<int, Airspace>& airspaces)
-{
+bool PFMwriter::WriteFile(const std::string& filename, const std::multimap<int, Airspace>& airspaces) {
 	// Check if has the right extension
 	if (!boost::iequals(boost::filesystem::path(filename).extension().string(), ".mp")) {
 		AirspaceConverter::LogMessage("ERROR: Expected MP extension but found: " + boost::filesystem::path(filename).extension().string(), true);

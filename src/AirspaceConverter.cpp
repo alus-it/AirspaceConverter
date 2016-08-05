@@ -40,7 +40,6 @@ const std::vector<std::string> AirspaceConverter::disclaimer = {
 	"Error reports, complaints and suggestions please email to: info@alus.it",
 };
 
-void AirspaceConverter::DefaultLogMessage(const std::string& msgText, const bool isError)
-{
+void AirspaceConverter::DefaultLogMessage(const std::string& msgText, const bool isError) {
 	(isError ? std::cerr : std::cout) << msgText << std::endl;
 }

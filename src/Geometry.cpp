@@ -148,8 +148,7 @@ bool Geometry::CalcBisector(const double& latA, const double& lonA, const double
 	}
 }
 
-void Geometry::CalcSphericalTriangle(const double& a, const double& beta, const double& gamma, double& alpha, double& b, double& c)
-{
+void Geometry::CalcSphericalTriangle(const double& a, const double& beta, const double& gamma, double& alpha, double& b, double& c) {
 	assert(a >= 0 && a <= TWO_PI);
 	assert(beta >= 0 && beta <= PI);
 	assert(gamma >= 0 && gamma <= PI);
@@ -262,14 +261,12 @@ double Geometry::AverageRadius(const Geometry::LatLon& center, const std::vector
 	return radius / circlePoints.size();
 }
 
-bool Point::Discretize(std::vector<LatLon>& output) const
-{
+bool Point::Discretize(std::vector<LatLon>& output) const {
 	output.push_back(point); // Here it's easy :)
 	return true;
 }
 
-void Point::WriteOpenAirGeometry(OpenAir* openAir) const
-{
+void Point::WriteOpenAirGeometry(OpenAir* openAir) const {
 	openAir->WritePoint(this);
 }
 
@@ -304,8 +301,7 @@ Sector::Sector(const LatLon& center, const LatLon& pointStart, const LatLon& poi
 	angleEnd = CalcGreatCircleCourse(latc, lonc, lat2r, lon2r);
 }
 
-bool Sector::Discretize(std::vector<LatLon>& output) const
-{
+bool Sector::Discretize(std::vector<LatLon>& output) const {
 	if (clockwise) {
 		double e = angleStart <= angleEnd ? angleEnd : angleEnd + TWO_PI;
 		const double step = FindStep(radius, AbsAngle(e - angleStart));
@@ -320,8 +316,7 @@ bool Sector::Discretize(std::vector<LatLon>& output) const
 	return true;
 }
 
-void Sector::WriteOpenAirGeometry(OpenAir* openAir) const
-{
+void Sector::WriteOpenAirGeometry(OpenAir* openAir) const {
 	openAir->WriteSector(this);
 }
 
@@ -333,21 +328,18 @@ Circle::Circle(const LatLon& center, const double& radiusNM)
 	assert(radius > 0 && radius < PI_2);
 }
 
-bool Circle::Discretize(std::vector<LatLon>& output) const
-{
+bool Circle::Discretize(std::vector<LatLon>& output) const {
 	const double step = FindStep(radius, TWO_PI);
 	for (double a = 0; a < TWO_PI; a += step) output.push_back(CalcRadialPoint(latc, lonc, a, radius));
 	return true;
 }
 
-void Circle::WriteOpenAirGeometry(OpenAir* openAir) const
-{
+void Circle::WriteOpenAirGeometry(OpenAir* openAir) const {
 	openAir->WriteCircle(this);
 }
 
 /* Airway not supported yet
-bool AirwayPoint::Discretize(std::vector<LatLon>& output) const
-{
+bool AirwayPoint::Discretize(std::vector<LatLon>& output) const {
 	// TODO...
 	return false;
 }

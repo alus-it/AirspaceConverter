@@ -16,9 +16,9 @@
 #include "../../src/Airspace.h"
 #include "../../src/KMLwriter.h"
 #include "../../src/PFMwriter.h"
+#include "../../src/OpenAir.h"
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include "../../src/OpenAir.h"
 
 Processor::Processor(HWND hwnd) :
 	window(hwnd),

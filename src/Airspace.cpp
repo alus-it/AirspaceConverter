@@ -107,8 +107,7 @@ Airspace::Airspace(Airspace&& orig) // Move constructor
 	, geometries(std::move(orig.geometries))
 	, points(std::move(orig.points))
 	, type(std::move(orig.type))
-	, name(std::move(orig.name))
-{
+	, name(std::move(orig.name)) {
 	orig.type = UNKNOWN;
 }
 
@@ -149,8 +148,7 @@ void Airspace::EvaluateAndAddCircle(const std::vector<Geometry::LatLon*>& arcPoi
 	} else for (const Geometry::LatLon* p : arcPoints) geometries.push_back(new Point(*p));
 }
 
-bool Airspace::Undiscretize()
-{
+bool Airspace::Undiscretize() {
 	if (!geometries.empty()) return true;
 	if (points.empty()) return false;
 	assert(points.size() >= 4);

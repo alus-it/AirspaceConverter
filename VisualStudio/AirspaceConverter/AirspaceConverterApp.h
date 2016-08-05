@@ -18,8 +18,7 @@
 
 #include "resource.h"		// main symbols
 
-class CAirspaceConverterApp : public CWinApp
-{
+class CAirspaceConverterApp : public CWinApp {
 public:
 	CAirspaceConverterApp();
 

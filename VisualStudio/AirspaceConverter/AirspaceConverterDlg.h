@@ -11,15 +11,13 @@
 //============================================================================
 
 #pragma once
-
 #include "afxcmn.h"
 #include "afxwin.h"
 #include <string>
 
 class Processor;
 
-class CAirspaceConverterDlg : public CDialog
-{
+class CAirspaceConverterDlg : public CDialog {
 public:
 	CAirspaceConverterDlg(CWnd* pParent = nullptr);
 	~CAirspaceConverterDlg();
@@ -58,6 +56,8 @@ private:
 
 	void LogMessage(const std::string& text, const bool isError = false);
 	void UpdateOutputFilename();
+	void EndBusy();
+	void StartBusy();
 	
 	CComboBox OutputTypeCombo;
 	CButton loadInputFileBt;
@@ -77,9 +77,6 @@ private:
 	CRichEditCtrl LoggingBox;
 	CProgressCtrl progressBar;
 
-	void EndBusy();
-	void StartBusy();
-	
 	double QNH;
 	double defaultTerrainAlt;
 	std::string outputFile;

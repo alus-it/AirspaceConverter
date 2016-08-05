@@ -20,8 +20,7 @@
 #include <string>
 #include <vector>
 
-class AirspaceConverter
-{
+class AirspaceConverter {
 public:
 	enum OutputType {
 		KMZ = 0,

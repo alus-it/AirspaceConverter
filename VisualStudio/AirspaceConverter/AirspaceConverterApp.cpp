@@ -23,9 +23,8 @@ BEGIN_MESSAGE_MAP(CAirspaceConverterApp, CWinApp)
 	ON_COMMAND(ID_HELP, &CWinApp::OnHelp)
 END_MESSAGE_MAP()
 
-CAirspaceConverterApp::CAirspaceConverterApp()
-{
-	// TODO: add construction code here,
+CAirspaceConverterApp::CAirspaceConverterApp() {
+	// Add construction code here,
 	// Place all significant initialization in InitInstance
 }
 
@@ -33,8 +32,7 @@ CAirspaceConverterApp::CAirspaceConverterApp()
 CAirspaceConverterApp theApp;
 
 // CAirspaceConverterApp initialization
-BOOL CAirspaceConverterApp::InitInstance()
-{
+BOOL CAirspaceConverterApp::InitInstance() {
 	CWinApp::InitInstance();
 
 	// Call AfxInitRichEdit2() to initialize richedit2 library.
@@ -55,11 +53,8 @@ BOOL CAirspaceConverterApp::InitInstance()
 	/*if (nResponse == IDOK) {} //  dismissed with OK
 	else if (nResponse == IDCANCEL) {} //  dismissed with Cancel
 	else*/
-	if (nResponse == -1)
-	{
-		TRACE(traceAppMsg, 0, "Warning: dialog creation failed, so application is terminating unexpectedly.\n");
-	}
-
+	if (nResponse == -1) TRACE(traceAppMsg, 0, "Warning: dialog creation failed, so application is terminating unexpectedly.\n");
+	
 	// Since the dialog has been closed, return FALSE so that we exit the application, rather than start the application's message pump.
 	return FALSE;
 }

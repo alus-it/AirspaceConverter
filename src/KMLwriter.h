@@ -11,7 +11,6 @@
 //============================================================================
 
 #pragma once
-
 #include <string>
 #include <vector>
 #include <map>
@@ -21,8 +20,7 @@ class Altitude;
 class Airspace;
 class RasterMap;
 
-class KMLwriter
-{
+class KMLwriter {
 public:
 	inline KMLwriter() : allAGLaltitudesCovered(true) {}
 	inline ~KMLwriter() {}
@@ -37,6 +35,7 @@ public:
 	bool CompressToKMZ(const std::string& inputKMLfile, const bool deleteOriginal = true);
 
 private:
+	static bool GetTerrainAltitudeMt(const double& lat, const double& lon, double&alt);
 	void WriteHeader();
 	void OpenPlacemark(const Airspace& airspace);
 	void OpenPolygon(const bool extrude, const bool absolute);
@@ -46,13 +45,9 @@ private:
 	void WriteBaseOrTop(const Airspace& airspace, const Altitude& alt, const bool extrudeToGround = false);
 	void WriteBaseOrTop(const Airspace& airspace, const std::vector<double>& altitudesAmsl);
 
-	static bool GetTerrainAltitudeMt(const double& lat, const double& lon, double&alt);
-	
 	static const std::string colors[][2];
 	static std::vector<RasterMap*> terrainMaps;
-	static double defaultTerrainAltitudeMt;
-	
+	static double defaultTerrainAltitudeMt;	
 	std::ofstream file;
 	bool allAGLaltitudesCovered;
 };
-

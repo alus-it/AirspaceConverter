@@ -46,13 +46,11 @@ private:
 
 CAboutDlg::CAboutDlg() : CDialog(IDD_ABOUTBOX) {}
 
-void CAboutDlg::DoDataExchange(CDataExchange* pDX)
-{
+void CAboutDlg::DoDataExchange(CDataExchange* pDX) {
 	CDialog::DoDataExchange(pDX);
 }
 
-BOOL CAboutDlg::OnInitDialog()
-{
+BOOL CAboutDlg::OnInitDialog() {
 	CDialog::OnInitDialog();
 	this->GetDlgItem(IDC_VERSION)->SetWindowTextW(_T(VERSION));
 	return TRUE;
@@ -63,8 +61,7 @@ BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 	ON_NOTIFY(NM_CLICK, IDC_SYSLINK_EMAIL, &CAboutDlg::OnNMClickLink)
 END_MESSAGE_MAP()
 
-void CAboutDlg::OnNMClickLink(NMHDR* pNMHDR, LRESULT* pResult)
-{
+void CAboutDlg::OnNMClickLink(NMHDR* pNMHDR, LRESULT* pResult) {
 	PNMLINK pNMLink = (PNMLINK)pNMHDR;
 	ShellExecuteW(NULL, L"open", pNMLink->item.szUrl, NULL, NULL, SW_SHOWNORMAL);
 	*pResult = 0;
@@ -87,8 +84,7 @@ CAirspaceConverterDlg::~CAirspaceConverterDlg() {
 	if (processor != nullptr) delete processor;
 }
 
-void CAirspaceConverterDlg::DoDataExchange(CDataExchange* pDX)
-{
+void CAirspaceConverterDlg::DoDataExchange(CDataExchange* pDX) {
 	CDialog::DoDataExchange(pDX);
 	DDX_Text(pDX, IDC_NUM_AIRSPACES, numAirspacesLoaded);
 	DDX_Text(pDX, IDC_NUM_RASTER_MAPS, numRasterMapLoaded);
@@ -136,8 +132,7 @@ BEGIN_MESSAGE_MAP(CAirspaceConverterDlg, CDialog)
 	ON_CBN_SELCHANGE(IDC_COMBO_OUTPUT_TYPE, &CAirspaceConverterDlg::OnBnClickedOutputTypeCombo)
 END_MESSAGE_MAP()
 
-BOOL CAirspaceConverterDlg::OnInitDialog()
-{
+BOOL CAirspaceConverterDlg::OnInitDialog() {
 	CDialog::OnInitDialog();
 
 	// Add "About..." menu item to system menu. IDM_ABOUTBOX must be in the system command range.
@@ -145,14 +140,12 @@ BOOL CAirspaceConverterDlg::OnInitDialog()
 	ASSERT(IDM_ABOUTBOX < 0xF000);
 
 	CMenu* pSysMenu = GetSystemMenu(FALSE);
-	if (pSysMenu != NULL)
-	{
+	if (pSysMenu != NULL) {
 		BOOL bNameValid;
 		CString strAboutMenu;
 		bNameValid = strAboutMenu.LoadString(IDS_ABOUTBOX);
 		assert(bNameValid);
-		if (!strAboutMenu.IsEmpty())
-		{
+		if (!strAboutMenu.IsEmpty()) {
 			pSysMenu->AppendMenu(MF_SEPARATOR);
 			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
 		}
@@ -201,8 +194,7 @@ BOOL CAirspaceConverterDlg::OnInitDialog()
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
-void CAirspaceConverterDlg::OnSysCommand(UINT nID, LPARAM lParam)
-{
+void CAirspaceConverterDlg::OnSysCommand(UINT nID, LPARAM lParam) {
 	if (nID == SC_CLOSE && busy &&
 		MessageBox(_T("The conversion is still in progress...\nThe application will reamain anyway working in background.\nAre you really sure you want to exit now?"), _T("Exit"), MB_YESNO | MB_ICONWARNING) != IDYES)
 		return;
@@ -210,8 +202,7 @@ void CAirspaceConverterDlg::OnSysCommand(UINT nID, LPARAM lParam)
 	CDialog::OnSysCommand(nID, lParam);
 }
 
-void CAirspaceConverterDlg::OnBnClickedAbout()
-{
+void CAirspaceConverterDlg::OnBnClickedAbout() {
 	CAboutDlg dlgAbout;
 	dlgAbout.DoModal();
 }
@@ -219,8 +210,7 @@ void CAirspaceConverterDlg::OnBnClickedAbout()
 // If you add a minimize button to your dialog, you will need the code below
 //  to draw the icon.  For MFC applications using the document/view model,
 //  this is automatically done for you by the framework.
-void CAirspaceConverterDlg::OnPaint()
-{
+void CAirspaceConverterDlg::OnPaint() {
 	if (IsIconic()) {
 		CPaintDC dc(this); // device context for painting
 		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
@@ -231,13 +221,11 @@ void CAirspaceConverterDlg::OnPaint()
 }
 
 // The system calls this function to obtain the cursor to display while the user drags the minimized window.
-HCURSOR CAirspaceConverterDlg::OnQueryDragIcon()
-{
+HCURSOR CAirspaceConverterDlg::OnQueryDragIcon() {
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-void CAirspaceConverterDlg::StartBusy()
-{
+void CAirspaceConverterDlg::StartBusy() {
 	busy = true;
 	progressBar.ModifyStyle(0, PBS_MARQUEE);
 	progressBar.SetMarquee(TRUE, 1);
@@ -258,21 +246,18 @@ void CAirspaceConverterDlg::StartBusy()
 	CloseButton.EnableWindow(FALSE);
 }
 
-LRESULT CAirspaceConverterDlg::OnGeneralEndOperations(WPARAM, LPARAM)
-{
+LRESULT CAirspaceConverterDlg::OnGeneralEndOperations(WPARAM, LPARAM) {
 	EndBusy();
 	return LRESULT();
 }
 
-LRESULT CAirspaceConverterDlg::OnEndWriteKMLok(WPARAM, LPARAM)
-{
+LRESULT CAirspaceConverterDlg::OnEndWriteKMLok(WPARAM, LPARAM) {
 	conversionDone = true;
 	EndBusy();
 	return LRESULT();
 }
 
-LRESULT CAirspaceConverterDlg::OnEndWriteKMLwarningAGL(WPARAM, LPARAM)
-{
+LRESULT CAirspaceConverterDlg::OnEndWriteKMLwarningAGL(WPARAM, LPARAM) {
 	conversionDone = true;
 	EndBusy();
 	LogMessage(numRasterMapLoaded > 0 ?
@@ -281,8 +266,7 @@ LRESULT CAirspaceConverterDlg::OnEndWriteKMLwarningAGL(WPARAM, LPARAM)
 	return LRESULT();
 }
 
-void CAirspaceConverterDlg::UpdateOutputFilename()
-{
+void CAirspaceConverterDlg::UpdateOutputFilename() {
 	conversionDone = false;
 	if (outputFile.empty()) outputFileEditBox.SetWindowTextW(_T(""));
 	else {
@@ -312,8 +296,7 @@ void CAirspaceConverterDlg::UpdateOutputFilename()
 	}
 }
 
-void CAirspaceConverterDlg::LogMessage(const std::string& text, const bool isError /*= false*/)
-{	
+void CAirspaceConverterDlg::LogMessage(const std::string& text, const bool isError /*= false*/) {	
 	CString message(CA2T((text + '\n').c_str()));
 	CHARFORMAT cf = { 0 };
 	cf.cbSize = sizeof(CHARFORMAT);
@@ -327,8 +310,7 @@ void CAirspaceConverterDlg::LogMessage(const std::string& text, const bool isErr
 	if (linesToScroll > 0) LoggingBox.LineScroll(linesToScroll);
 }
 
-void CAirspaceConverterDlg::EndBusy()
-{
+void CAirspaceConverterDlg::EndBusy() {
 	if (processor != nullptr) {
 		processor->Join();
 		numAirspacesLoaded = processor->GetNumOfAirspaces();
@@ -361,8 +343,7 @@ void CAirspaceConverterDlg::EndBusy()
 	busy = false;
 }
 
-void CAirspaceConverterDlg::OnBnClickedInputFile()
-{
+void CAirspaceConverterDlg::OnBnClickedInputFile() {
 	CFileDialog dlg(TRUE, NULL, NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("All airspace files|*.txt; *.aip|OpenAIP|*.aip|OpenAir|*.txt||"), (CWnd*)this, 0, TRUE);
 	if (dlg.DoModal() == IDOK)
 	{
@@ -380,8 +361,7 @@ void CAirspaceConverterDlg::OnBnClickedInputFile()
 	}
 }
 
-void CAirspaceConverterDlg::OnBnClickedLoadDEM()
-{
+void CAirspaceConverterDlg::OnBnClickedLoadDEM() {
 	CFileDialog dlg(TRUE, _T("dem"), NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("Terrain raster map|*.dem||"), (CWnd*)this, 0, TRUE);
 	if (dlg.DoModal() == IDOK)
 	{
@@ -392,16 +372,14 @@ void CAirspaceConverterDlg::OnBnClickedLoadDEM()
 	}
 }
 
-void CAirspaceConverterDlg::OnBnClickedInputFolderBt()
-{
+void CAirspaceConverterDlg::OnBnClickedInputFolderBt() {
 	CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
 	if (dlgFolder.DoModal() == IDOK) {
 		outputFile.clear();
 		conversionDone = false;
 		boost::filesystem::path root(dlgFolder.GetFolderPath());
 		if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
-		for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it)
-		{
+		for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
 			if (!boost::filesystem::is_regular_file(*it)) continue;
 			if (processor->AddInputFile(it->path().string()) && outputFile.empty()) outputFile = it->path().string();
 		}
@@ -411,14 +389,12 @@ void CAirspaceConverterDlg::OnBnClickedInputFolderBt()
 	}
 }
 
-void CAirspaceConverterDlg::OnBnClickedLoadDemFolderBt()
-{
+void CAirspaceConverterDlg::OnBnClickedLoadDemFolderBt() {
 	CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
 	if (dlgFolder.DoModal() == IDOK) {
 		boost::filesystem::path root(dlgFolder.GetFolderPath());
 		if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
-		for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it)
-		{
+		for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
 			if (boost::filesystem::is_regular_file(*it) && boost::iequals(it->path().extension().string(), ".dem"))
 				processor->AddRasterMap(it->path().string());
 		}
@@ -427,8 +403,7 @@ void CAirspaceConverterDlg::OnBnClickedLoadDemFolderBt()
 	}
 }
 
-void CAirspaceConverterDlg::OnBnClickedClearInputBt()
-{
+void CAirspaceConverterDlg::OnBnClickedClearInputBt() {
 	if (processor->UnloadAirspaces()) {
 		numAirspacesLoaded = 0;
 		outputFile.clear();
@@ -439,8 +414,7 @@ void CAirspaceConverterDlg::OnBnClickedClearInputBt()
 	assert(numAirspacesLoaded == 0);
 }
 
-void CAirspaceConverterDlg::OnBnClickedClearMapsBt()
-{
+void CAirspaceConverterDlg::OnBnClickedClearMapsBt() {
 	if (processor->UnloadRasterMaps()) {
 		numRasterMapLoaded = 0;
 		LogMessage("Unloaded raster maps.");
@@ -449,8 +423,7 @@ void CAirspaceConverterDlg::OnBnClickedClearMapsBt()
 	assert(numRasterMapLoaded == 0);
 }
 
-void CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt()
-{
+void CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt() {
 	assert(!outputFile.empty());
 	boost::filesystem::path outputPath(outputFile);
 	std::string ext(outputPath.extension().string()); // This should be the same as type from the dialog combo box, preselect this type in the open file dlg
@@ -491,8 +464,7 @@ void CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt()
 	}
 }
 
-void CAirspaceConverterDlg::OnBnClickedOutputTypeCombo()
-{
+void CAirspaceConverterDlg::OnBnClickedOutputTypeCombo() {
 	UpdateOutputFilename();
 	BOOL isKmlKmzFile(OutputTypeCombo.GetCurSel() <= AirspaceConverter::KML);
 	loadDEMfileBt.EnableWindow(isKmlKmzFile);
@@ -502,8 +474,7 @@ void CAirspaceConverterDlg::OnBnClickedOutputTypeCombo()
 	UpdateData(FALSE);
 }
 
-void CAirspaceConverterDlg::OnBnClickedConvert()
-{
+void CAirspaceConverterDlg::OnBnClickedConvert() {
 	if (outputFile.empty()) return;
 	AirspaceConverter::OutputType type = (AirspaceConverter::OutputType)OutputTypeCombo.GetCurSel();
 	assert(type >= AirspaceConverter::KMZ && type < AirspaceConverter::NumOfOutputTypes);
@@ -544,14 +515,12 @@ void CAirspaceConverterDlg::OnBnClickedConvert()
 	}
 }
 
-void CAirspaceConverterDlg::OnBnClickedOpenOutputFile()
-{
+void CAirspaceConverterDlg::OnBnClickedOpenOutputFile() {
 	if (outputFile.empty()) return;
 	ShellExecute(0, 0, CString(outputFile.c_str()), 0, 0, SW_SHOW);
 }
 
-void CAirspaceConverterDlg::OnBnClickedOpenOutputFolder()
-{
+void CAirspaceConverterDlg::OnBnClickedOpenOutputFolder() {
 	if (outputFile.empty()) return;
 	ITEMIDLIST* pidl = ILCreateFromPath(CString(outputFile.c_str()));
 	if (pidl != nullptr) {

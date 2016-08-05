@@ -11,7 +11,6 @@
 //============================================================================
 
 #pragma once
-
 #include <string>
 #include <map>
 #include <fstream>
@@ -19,11 +18,11 @@
 
 class Airspace;
 
-class OpenAir
-{
+class OpenAir {
 friend class Point;
 friend class Circle;
 friend class Sector;
+
 public:
 	OpenAir(std::multimap<int, Airspace>& airspacesMap);
 	inline ~OpenAir() {}
@@ -35,7 +34,6 @@ private:
 	static std::string& RemoveComments(std::string &s);
 	static bool ParseDegrees(const std::string& dddmmss, double& deg);
 	static bool ParseCoordinates(const std::string& text, Geometry::LatLon& point);
-
 	bool ParseAC(const std::string& line, Airspace& airspace);
 	bool ParseAN(const std::string& line, Airspace& airspace);
 	bool ParseAltitude(const std::string& line, const bool isTop, Airspace& airspace);

@@ -11,13 +11,11 @@
 //============================================================================
 
 #pragma once
-
 #include <string>
 #include <vector>
 #include "Geometry.h"
 
-class Altitude
-{
+class Altitude {
 public:
 	inline void SetAltFtMSL(const int ft) { refIsMsl = true; altMt = ft*FEET2METER; altFt = ft; fl = 0; }
 	inline void SetAltMtMSL(const double mt) { refIsMsl = true;  altFt = (int)(mt / FEET2METER); altMt = mt; fl = 0; }
@@ -47,8 +45,7 @@ private:
 	static double QNH;
 };
 
-class Airspace
-{
+class Airspace {
 public:
 	typedef enum {
 		CLASSA = 0,

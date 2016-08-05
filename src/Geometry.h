@@ -11,20 +11,17 @@
 //============================================================================
 
 #pragma once
-
 #include <vector>
 
 class Airspace;
 class OpenAir;
 
-class Geometry
-{
+class Geometry {
 friend class Airspace;
 friend class OpenAir;
 
 public:
-	class LatLon
-	{
+	class LatLon {
 	public:
 		inline LatLon() : lat(UNDEF_LAT), lon(UNDEF_LON) {}
 		inline LatLon(const double& latitude, const double& longitude) : lat(latitude), lon(longitude) {}
@@ -89,9 +86,9 @@ private:
 	virtual void WriteOpenAirGeometry(OpenAir* openAir) const = 0;
 };
 
-class Point : public Geometry
-{
+class Point : public Geometry {
 friend class OpenAir;
+
 public:
 	inline Point(const LatLon& latlon) : Geometry(latlon) {}
 	inline Point(const double& lat, const double& lon) : Geometry(LatLon(lat,lon)) {}
@@ -100,12 +97,11 @@ public:
 
 private:
 	void WriteOpenAirGeometry(OpenAir* openAir) const;
-
 };
 
-class Sector : public Geometry
-{
+class Sector : public Geometry {
 friend class OpenAir;
+
 public:
 	Sector(const LatLon& center, const double& radiusNM, const double& dir1, const double& dir2, const bool& isClockwise);
 	Sector(const LatLon& center, const LatLon& pointStart, const LatLon& pointEnd, const bool& isClockwise);
@@ -126,9 +122,9 @@ private:
 	LatLon A, B;
 };
 
-class Circle : public Geometry
-{
+class Circle : public Geometry {
 friend class OpenAir;
+
 public:
 	Circle(const LatLon& center, const double& radiusNM);
 	inline ~Circle() {}
@@ -153,5 +149,4 @@ public:
 private:
 	double width;
 };
-
 */

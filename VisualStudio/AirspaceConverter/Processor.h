@@ -11,7 +11,6 @@
 //============================================================================
 
 #pragma once
-
 #include "../../src/AirspaceConverter.h"
 #include <thread>
 //#include <deque>
@@ -25,13 +24,10 @@
 
 class Airspace;
 
-class Processor
-{
-
+class Processor {
 public:
 	Processor(HWND hwnd);
 	~Processor();
-
 	bool AddInputFile(const std::string& inputFile);
 	inline void AddRasterMap(const std::string& rasterMapFile) { DEMfiles.push_back(rasterMapFile); }
 	bool LoadAirspacesFiles(const double& QNH);

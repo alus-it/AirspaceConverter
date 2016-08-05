@@ -11,7 +11,6 @@
 //============================================================================
 
 #pragma once
-
 #include <string>
 #include <map>
 #include <fstream>
@@ -22,15 +21,12 @@ class PFMwriter {
 public:
 	inline PFMwriter() {}
 	inline ~PFMwriter() {}
-
 	bool WriteFile(const std::string& filename, const std::multimap<int, Airspace>& airspaces);
 
 private:
 	void WriteHeader(const std::string& filename);
+
 	const static std::string MakeLabel(const Airspace& airspace);
-
 	//static const int types[];
-
 	std::ofstream file;
 };
-

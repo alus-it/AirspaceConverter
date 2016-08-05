@@ -168,8 +168,7 @@ void KMLwriter::WriteBaseOrTop(const Airspace& airspace, const std::vector<doubl
 	ClosePolygon();
 }
 
-void KMLwriter::WriteSideWalls(const Airspace& airspace)
-{
+void KMLwriter::WriteSideWalls(const Airspace& airspace) {
 	assert(airspace.GetTopAltitude().IsAMSL() == airspace.GetBaseAltitude().IsAMSL());
 
 	// Build closing wall between last and first point
@@ -201,8 +200,7 @@ void KMLwriter::WriteSideWalls(const Airspace& airspace)
 	}
 }
 
-void KMLwriter::WriteSideWalls(const Airspace& airspace, const std::vector<double>& altitudesAmsl)
-{
+void KMLwriter::WriteSideWalls(const Airspace& airspace, const std::vector<double>& altitudesAmsl) {
 	assert(airspace.GetTopAltitude().IsAMSL() != airspace.GetBaseAltitude().IsAMSL());
 	OpenPolygon(false, true);
 	assert(airspace.GetNumberOfPoints() == altitudesAmsl.size());
@@ -242,8 +240,7 @@ void KMLwriter::WriteSideWalls(const Airspace& airspace, const std::vector<doubl
 	}
 }
 
-bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, Airspace>& airspaces)
-{
+bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, Airspace>& airspaces) {
 	// If it's a KMZ we will have to compress
 	const bool compressAsKMZ = boost::iequals(boost::filesystem::path(filename).extension().string(), ".kmz");
 	
@@ -337,8 +334,7 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 	return compressAsKMZ ? CompressToKMZ(fileKML) : true;
 }
 
-bool KMLwriter::CompressToKMZ(const std::string& inputKMLfile, const bool deleteOriginal /* = true */)
-{
+bool KMLwriter::CompressToKMZ(const std::string& inputKMLfile, const bool deleteOriginal /* = true */) {
 #ifndef NOZIP
 	// The input file must be a KML
 	if (boost::filesystem::path(inputKMLfile).extension().string() != ".kml") {
