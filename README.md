@@ -83,6 +83,7 @@ Compiling AirspaceConverter on Linux
 ------------------------------------
 From the root of this project: `make all`  
 To build in debug: `make DEBUG=1 all`  
+To build without zip support (in case the right libzip2 isn't available): `make NOZIP=1 all`  
 The "AirspaceConverter" executable will be located in the "Release" or "Debug" folder
 
 Compiling AirspaceConverter on Windows
