@@ -26,7 +26,7 @@ So please, be advised that, what you will see in Google Earth will not exactly m
 
 LK8000 terrain raster map files
 -------------------------------
-This program uses the same terrain raster maps (.dem) of LK8000 to convert altitudes from AGL to ASML.  
+This program uses the same terrain raster maps (.dem) of LK8000 to convert altitudes from AGL to AMSL.  
 On the LK8000 website there is a wide terrain raster map collection: http://www.lk8000.it/download/maps.html  
 The part of this program reading and using the terrain maps has been derived and adapted from LK8000 project.  
 To know more about LK8000 project: http://www.lk8000.it  
