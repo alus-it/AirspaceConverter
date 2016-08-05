@@ -1,10 +1,11 @@
 AirspaceConverter
 =================
 Welcome to AirspaceConverter repository!  
-This is an open source, multi-platform  tool to convert OpenAir or OpenAIP airspace files to KML/KMZ for Google Earth or to OpenAir.
+This is an open source, multi-platform  tool to convert OpenAir or OpenAIP airspace files to KML/KMZ (for Google Earth) or back to OpenAir.
 This utility is also capable to output in PFM "Polish" format, as file .mp, for software like cGPSmapper.  
-AirspaceConverter is written entirely in C++11 can be ran both on Linux and on Windows.
-The Windows version has MFC user interface in order to be easy to use and immediately available.
+While converting to OpenAir this software estimates if the points entered are part of arcs or circumferences in order to make use of arc and circumference definitions of the OpeanAir format and so avoiding to output all points one by one.  
+AirspaceConverter is written in C++11 can be ran both on Linux and on Windows.
+The Windows version has MFC user interface in order to be immediately easy to use, while the Linux version works from command line to be usable also from shell scripts.  
 For more information's about this project: http://www.alus.it/AirspaceConverter  
 Contributors are, as usual, warmly welcome!
 
@@ -14,13 +15,14 @@ Airspace represented in 3D in Google Earth can help to visualize and better unde
 Not only, having the planned route or track of a flight (as GPX file), displayed as well in Google Earth will make easy to check for airspace crossed or to be avoided.  
 This software can also be useful for maintainers of OpenAir files, not only to visualize airspace but also to verify the syntax of OpenAir commands entered.  
 OpenAIP provide a free, worldwide and updated airspace repository but in his own format, while many devices and software support OpenAir airspace files.
-This software allows to convert also to OpenAir so making OpenAIP data available to many portable devices.
+This software can convert also to OpenAir so making OpenAIP data available to many portable devices.
 
 About KML format
 ----------------
 KML, used by Google Earth is probably a good format to define models of buildings but it is not exactly practical to define airspace. This because it not possible, at least from my understanding, to define in the same 3D object points at altitudes with different references: it is the typical case of an airspace with AGL floor and AMSL ceiling.  
-One possible solution is to translate, where necessary all the altitudes to the same reference but to do that we need the know the altitude of the terrain at every location.  
-Another limitation of KML is that surfaces which follow the terrain are possible only at terrain altitude.
+One possible solution is to translate, where necessary all the altitudes to the same reference but to do that we need the know the altitude of the terrain at every location, reason why this software uses terrain maps.  
+Another important limitation of KML is that surfaces which follow the terrain are possible only at terrain altitude.  
+So please, be advised that, what you will see in Google Earth will not exactly match how airspace definitions are really intended.
 
 LK8000 terrain raster map files
 -------------------------------
@@ -51,18 +53,20 @@ If you get the error about VCRUNTIME140.dll missing: it can be easily and quickl
 
 The Windows version has graphical user interface, this should be the default way to use it:
 
-1. If needed, specify the QNH to be used for calculating the height of flight levels.
-2. Select as input multiple OpenAir (.txt) and/or OpenAIP (.aip) files.
+1. Choose the desired output format
+2. If needed, specify the QNH to be used for calculating the height of flight levels.
+2. Select as input multiple OpenAir (.txt) and/or OpenAIP (.aip) files or the folder containing them.
 3. Optionally it is possible to load multiple raster map files (.dem) with the terrain altitude.
 4. Specify a default terrain altitude to be used for the points not under terrain raster map coverage.
-5. The output can be done in KML or directly compressed as KMZ.
+5. Press the button convert to start the conversion process.
 6. Verify if the output is correct and report any problem found.
 
 Disclaimer
 ----------
-WARNING: this program has been still not fully tested. The generated output files may contains mistakes.  
-By using this program you agree that the generated output files are just for demonstration purposes and they do not absolutely substitute the official AIP publications.  
-Please refer to official AIP publications for valid and updated airspace definitions.
+WARNING: this program has been still not fully tested. The generated output files may contains errors.
+In particular the output in OpenAir is untested, so please always verify the generated files before using in flight and report any error found.  
+By using this program you understand and completely agree that the generated output files (maybe wrong) are just for demonstration purposes and they do not absolutely substitute the official AIP publications.  
+Please always refer to official AIP publications for valid and updated airspace definitions.
 
 Downloads
 ---------
@@ -72,7 +76,7 @@ http://www.alus.it/AirspaceConverter
 Build dependencies
 ------------------
 In order to compile this project the following libraries are required:  
-- libzip2 (libzip-dev)
+- libzip2 (libzip-dev) and dependencies (zlib)
 - Boost libraries
 
 Compiling AirspaceConverter on Linux
