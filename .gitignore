@@ -51,6 +51,7 @@
 *.tlog
 *.db
 *.opendb
+*.tmp
 
 # Visual Studio folders
 /VisualStudio/.vs
