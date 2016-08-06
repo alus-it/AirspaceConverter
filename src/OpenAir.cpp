@@ -175,7 +175,7 @@ bool OpenAir::ReadFile(const std::string& fileName) {
 				break;
 			case 'Y': // DY
 				//ParseDY(sLine, airspace); // Airway not yet supported
-				AirspaceConverter::LogMessage(boost::str(boost::format("Warning: skipping airway segment (not yet supported) on line %1d: %2s") % linecount %sLine), false);
+				AirspaceConverter::LogMessage(boost::str(boost::format("Warning: skipping airway segment (not yet supported) on line %1d: %2s") %linecount %sLine), false);
 				lineParsedOK = false; 
 				break;
 			default:
@@ -197,7 +197,7 @@ bool OpenAir::ReadFile(const std::string& fileName) {
 			continue;
 		}
 		if (!lineParsedOK) {
-			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR: unable to parse line %1d: %2s") % linecount %sLine), true);
+			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR: unable to parse line %1d: %2s") %linecount %sLine), true);
 			allParsedOK = false;
 		}
 	}

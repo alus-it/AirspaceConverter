@@ -19,6 +19,7 @@
 #include "../../src/OpenAir.h"
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/format.hpp>
 
 Processor::Processor(HWND hwnd) :
 	window(hwnd),
@@ -130,10 +131,40 @@ void Processor::MakeOtherFileThread()
 			done = writer.WriteFile(outputFile, airspaces);
 		}
 		break;
+	case AirspaceConverter::Garmin:
+		{
+			boost::filesystem::path polishPath(outputFile);
+			polishPath.replace_extension(".mp");
+			const std::string polishFile(polishPath.string());
+			PFMwriter writer;
+			if(!writer.WriteFile(polishFile, airspaces)) break;
+			const std::string args(boost::str(boost::format("%1s -o %2s") %polishFile %outputFile));
+			SHELLEXECUTEINFO lpShellExecInfo = { 0 };
+			lpShellExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+			lpShellExecInfo.fMask = SEE_MASK_DOENVSUBST | SEE_MASK_NOCLOSEPROCESS;
+			lpShellExecInfo.hwnd = NULL;
+			lpShellExecInfo.lpVerb = NULL;
+			lpShellExecInfo.lpFile = _T(".\\cGPSmapper\\cgpsmapper.exe");
+
+			
+			
+
+			lpShellExecInfo.lpParameters = _com_util::ConvertStringToBSTR(args.c_str());
+			lpShellExecInfo.lpDirectory = NULL;
+			lpShellExecInfo.nShow = SW_SHOW;
+			lpShellExecInfo.hInstApp = (HINSTANCE)SE_ERR_DDEFAIL;
+			ShellExecuteEx(&lpShellExecInfo);
+			assert(lpShellExecInfo.hProcess != NULL);
+			if (lpShellExecInfo.hProcess == NULL) break;
+			WaitForSingleObject(lpShellExecInfo.hProcess, INFINITE);
+			CloseHandle(lpShellExecInfo.hProcess);
+
+			std::remove(polishFile.c_str()); // Delete polish file
+		}
+		break;
 	default:
 		assert(false);
 		break;
-	
 	}
 	PostMessage(window, done ? WM_WRITE_OUTPUT_OK : WM_GENERAL_WORK_DONE, 0, 0);
 }

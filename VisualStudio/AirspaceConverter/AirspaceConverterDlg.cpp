@@ -162,6 +162,7 @@ BOOL CAirspaceConverterDlg::OnInitDialog() {
 	OutputTypeCombo.InsertString(-1, _T("KML format for Google Earth"));
 	OutputTypeCombo.InsertString(-1, _T("OpenAir"));
 	OutputTypeCombo.InsertString(-1, _T("Polish format for cGPSmapper"));
+	OutputTypeCombo.InsertString(-1, _T("IMG file for Garmin devices"));
 	OutputTypeCombo.SetCurSel(AirspaceConverter::KMZ);
 
 	// Check if is running on Windows XP (v 5.2) or older
@@ -285,6 +286,9 @@ void CAirspaceConverterDlg::UpdateOutputFilename() {
 		case AirspaceConverter::Polish:
 			outputPath.replace_extension(".mp");
 			break;
+		case AirspaceConverter::Garmin:
+			outputPath.replace_extension(".img");
+			break;
 		default:
 			assert(false);
 			outputFile.clear();
@@ -345,8 +349,7 @@ void CAirspaceConverterDlg::EndBusy() {
 
 void CAirspaceConverterDlg::OnBnClickedInputFile() {
 	CFileDialog dlg(TRUE, NULL, NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("All airspace files|*.txt; *.aip|OpenAIP|*.aip|OpenAir|*.txt||"), (CWnd*)this, 0, TRUE);
-	if (dlg.DoModal() == IDOK)
-	{
+	if (dlg.DoModal() == IDOK) {
 		outputFile.clear();
 		conversionDone = false;
 		POSITION pos(dlg.GetStartPosition());
@@ -363,8 +366,7 @@ void CAirspaceConverterDlg::OnBnClickedInputFile() {
 
 void CAirspaceConverterDlg::OnBnClickedLoadDEM() {
 	CFileDialog dlg(TRUE, _T("dem"), NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("Terrain raster map|*.dem||"), (CWnd*)this, 0, TRUE);
-	if (dlg.DoModal() == IDOK)
-	{
+	if (dlg.DoModal() == IDOK) {
 		POSITION pos(dlg.GetStartPosition());
 		while (pos) processor->AddRasterMap(std::string(CT2CA(dlg.GetNextPathName(pos))));
 		if (processor != nullptr && processor->LoadDEMfiles()) StartBusy();
@@ -429,7 +431,7 @@ void CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt() {
 	std::string ext(outputPath.extension().string()); // This should be the same as type from the dialog combo box, preselect this type in the open file dlg
 	assert(ext.length() > 1);
 	assert(ext.at(0) == '.');
-	CFileDialog dlg(FALSE, NULL, CString(std::string("*" + ext).c_str()), OFN_HIDEREADONLY, _T("KMZ|*.kmz|KML|*.kml|OpenAir|*.txt|Polish|*.mp||"), (CWnd*)this, 0, TRUE);
+	CFileDialog dlg(FALSE, NULL, CString(std::string("*" + ext).c_str()), OFN_HIDEREADONLY, _T("KMZ|*.kmz|KML|*.kml|OpenAir|*.txt|Polish|*.mp|Garmin|*.img||"), (CWnd*)this, 0, TRUE);
 	if (dlg.DoModal() == IDOK) {
 		outputFile = CT2CA(dlg.GetPathName());
 		outputPath = outputFile;
@@ -438,6 +440,7 @@ void CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt() {
 		else if (boost::iequals(ext, ".kml")) OutputTypeCombo.SetCurSel(AirspaceConverter::KML);
 		else if (boost::iequals(ext, ".txt")) OutputTypeCombo.SetCurSel(AirspaceConverter::OpenAir);
 		else if (boost::iequals(ext, ".mp")) OutputTypeCombo.SetCurSel(AirspaceConverter::Polish);
+		else if (boost::iequals(ext, ".img")) OutputTypeCombo.SetCurSel(AirspaceConverter::Garmin);
 		else { // otherwise force it to the selected extension from the open file dialog
 			assert(dlg.GetOFN().nFilterIndex > AirspaceConverter::KMZ && dlg.GetOFN().nFilterIndex <= AirspaceConverter::NumOfOutputTypes);
 			AirspaceConverter::OutputType type = (AirspaceConverter::OutputType)(dlg.GetOFN().nFilterIndex - 1);
@@ -453,6 +456,9 @@ void CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt() {
 				break;
 			case AirspaceConverter::Polish:
 				outputFile = outputPath.replace_extension(".mp").string();
+				break;
+			case AirspaceConverter::Garmin:
+				outputFile = outputPath.replace_extension(".img").string();
 				break;
 			default:
 				assert(false);
@@ -496,7 +502,7 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 				if (MessageBox(msg, _T("Overwrite?"), MB_YESNO | MB_ICONINFORMATION) == IDYES) std::remove(kmlPath.string().c_str());
 				else return;
 			}
-		}
+		} // Fall trough
 	case AirspaceConverter::KML:
 		if (processor != nullptr && processor->MakeKMLfile(outputFile, defaultTerrainAlt)) StartBusy();
 		else MessageBox(_T("Error while starting KML output thread."), _T("Error"), MB_ICONERROR);
@@ -505,6 +511,17 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 		if (processor != nullptr && processor->MakeOtherFile(outputFile, type)) StartBusy();
 		else MessageBox(_T("Error while starting Polish output thread."), _T("Error"), MB_ICONERROR);
 		break;
+	case AirspaceConverter::Garmin:
+		{
+			boost::filesystem::path polishPath(outputPath);
+			polishPath.replace_extension(".mp");
+			if (boost::filesystem::exists(polishPath)) {
+				CString msg(polishPath.c_str());
+				msg += " already exists.\nIn order to make the IMG it needs to be overwritten. Continue?";
+					if (MessageBox(msg, _T("Overwrite?"), MB_YESNO | MB_ICONINFORMATION) == IDYES) std::remove(polishPath.string().c_str());
+				else return;
+			}
+		} // Fall trough
 	case AirspaceConverter::Polish:
 		if (processor != nullptr && processor->MakeOtherFile(outputFile, type)) StartBusy();
 		else MessageBox(_T("Error while starting Polish output thread."), _T("Error"), MB_ICONERROR);

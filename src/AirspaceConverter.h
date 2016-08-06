@@ -27,6 +27,7 @@ public:
 		KML,
 		OpenAir,
 		Polish,
+		Garmin,
 		NumOfOutputTypes
 	};
 
