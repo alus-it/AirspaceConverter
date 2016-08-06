@@ -12,6 +12,7 @@
 
 #include "stdafx.h"
 #include "Processor.h"
+#include "../../src/AirspaceConverter.h"
 #include "../../src/OpenAIPreader.h"
 #include "../../src/Airspace.h"
 #include "../../src/KMLwriter.h"
@@ -137,29 +138,31 @@ void Processor::MakeOtherFileThread()
 			polishPath.replace_extension(".mp");
 			const std::string polishFile(polishPath.string());
 			PFMwriter writer;
-			if(!writer.WriteFile(polishFile, airspaces)) break;
+			if(!writer.WriteFile(polishFile, airspaces)) break; // First make the Polish file
+			AirspaceConverter::LogMessage("Invoking cGPSmapper to make: " + outputFile, false);
+			
+			//TODO: add arguments to create files also for other software like Garmin BaseCamp
 			const std::string args(boost::str(boost::format("%1s -o %2s") %polishFile %outputFile));
+			
 			SHELLEXECUTEINFO lpShellExecInfo = { 0 };
 			lpShellExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
 			lpShellExecInfo.fMask = SEE_MASK_DOENVSUBST | SEE_MASK_NOCLOSEPROCESS;
 			lpShellExecInfo.hwnd = NULL;
 			lpShellExecInfo.lpVerb = NULL;
 			lpShellExecInfo.lpFile = _T(".\\cGPSmapper\\cgpsmapper.exe");
-
-			
-			
-
 			lpShellExecInfo.lpParameters = _com_util::ConvertStringToBSTR(args.c_str());
 			lpShellExecInfo.lpDirectory = NULL;
 			lpShellExecInfo.nShow = SW_SHOW;
 			lpShellExecInfo.hInstApp = (HINSTANCE)SE_ERR_DDEFAIL;
 			ShellExecuteEx(&lpShellExecInfo);
-			assert(lpShellExecInfo.hProcess != NULL);
-			if (lpShellExecInfo.hProcess == NULL) break;
+			if (lpShellExecInfo.hProcess == NULL) {
+				AirspaceConverter::LogMessage("ERROR: Failed to start cGPSmapper process.", true);
+				break;
+			}
 			WaitForSingleObject(lpShellExecInfo.hProcess, INFINITE);
 			CloseHandle(lpShellExecInfo.hProcess);
-
 			std::remove(polishFile.c_str()); // Delete polish file
+			done = true;
 		}
 		break;
 	default:
