@@ -163,19 +163,14 @@ int main(int argc, char *argv[]) {
 				if(flag) std::cout << "Warning: no terrain map loaded, using default terrain height for all applicable AGL points." << std::endl;
 
 				// Make KML file
-				KMLwriter writer;
-				flag = writer.WriteFile(outputFile, airspaces);
+				flag = KMLwriter().WriteFile(outputFile, airspaces);
 			}
 			break;
 		case AirspaceConverter::OpenAir:
 			flag = openAir.WriteFile(outputFile);
 			break;
 		case AirspaceConverter::Polish:
-			{
-				// Make Polish file
-				PFMwriter writer;
-				flag = writer.WriteFile(outputFile, airspaces);
-			}
+			flag = PFMwriter().WriteFile(outputFile, airspaces);
 			break;
 		case AirspaceConverter::Garmin:
 			{
@@ -183,8 +178,7 @@ int main(int argc, char *argv[]) {
 
 				// First make Polish file
 				const std::string polishFile(boost::filesystem::path(outputFile).replace_extension(".mp").string());
-				PFMwriter writer;
-				if(!writer.WriteFile(polishFile, airspaces)) break;
+				if(!PFMwriter().WriteFile(polishFile, airspaces)) break;
 
 				// Then call cGPSmapper
 				std::cout << "Invoking cGPSmapper to make: " << outputFile << std::endl << std::endl;
