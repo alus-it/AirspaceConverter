@@ -121,24 +121,15 @@ void Processor::MakeOtherFileThread()
 	bool done = false;
 	switch (outputType) {
 	case AirspaceConverter::OpenAir:
-		{
-			OpenAir writer(airspaces);
-			done = writer.WriteFile(outputFile);
-		}
+		done = OpenAir(airspaces).WriteFile(outputFile);
 		break;
 	case AirspaceConverter::Polish:
-		{
-			PFMwriter writer;
-			done = writer.WriteFile(outputFile, airspaces);
-		}
+		done = PFMwriter().WriteFile(outputFile, airspaces);
 		break;
 	case AirspaceConverter::Garmin:
 		{
-			boost::filesystem::path polishPath(outputFile);
-			polishPath.replace_extension(".mp");
-			const std::string polishFile(polishPath.string());
-			PFMwriter writer;
-			if(!writer.WriteFile(polishFile, airspaces)) break; // First make the Polish file
+			const std::string polishFile(boost::filesystem::path(outputFile).replace_extension(".mp").string());
+			if(!PFMwriter().WriteFile(polishFile, airspaces)) break; // First make the Polish file
 			AirspaceConverter::LogMessage("Invoking cGPSmapper to make: " + outputFile, false);
 			
 			//TODO: add arguments to create files also for other software like Garmin BaseCamp
