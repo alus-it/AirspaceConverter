@@ -20,6 +20,7 @@
 #include <cstring>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/format.hpp>
 
 void printHelp() {
 	std::cout << "Example usage: AirspaceConverter -q 1013 -a 35 -i inputFileOpenAir.txt -i inputFileOpenAIP.aip -m terrainMap.dem -o outputFile.kmz" << std::endl << std::endl;
@@ -28,7 +29,7 @@ void printHelp() {
 	std::cout << "-a: optional, specify a default terrain altitude in meters to calculate AGL heights of points not covered by loaded terrain map(s)" << std::endl;
 	std::cout << "-i: mandatory, multiple, input file(s) can be OpenAir (.txt) or OpenAIP (.aip)" << std::endl;
 	std::cout << "-m: optional, multiple, terrain map file(s) (.dem) used to lookup terrain height" << std::endl;
-	std::cout << "-o: optional, output file .kml, .kmz, .mp (Polish) or .txt (OpenAir) if not specified will be used the name of first input file as KMZ" << std::endl;
+	std::cout << "-o: optional, output file .kmz, .kml, .txt (OpenAir), .img (Garmin) or .mp (Polish). If not specified will be used the name of first input file as KMZ" << std::endl;
 	std::cout << "-v: print version number" << std::endl;
 	std::cout << "-h: print this guide" << std::endl << std::endl;
 }
@@ -95,7 +96,7 @@ int main(int argc, char *argv[]) {
 			if (argc == 2) return EXIT_SUCCESS;
 			break;
 		case 'v':
-			std::cout << "AirspaceConverter version: " << VERSION << std::endl;
+			std::cout << "AirspaceConverter version: " << VERSION << std::endl << std::endl;
 			if (argc == 2) return EXIT_SUCCESS;
 			break;
 		default:
@@ -115,10 +116,11 @@ int main(int argc, char *argv[]) {
 	// Prepare output filename if not entered by user
 	if (!outputFile.empty()) {
 		std::string outputExt(boost::filesystem::path(outputFile).extension().string());
-		if (boost::iequals(outputExt,".kmz")) { /* already KMZ by default */ }
-		else if(boost::iequals(outputExt,".kml")) outputType = AirspaceConverter::KML;
-		else if(boost::iequals(outputExt,".mp")) outputType = AirspaceConverter::Polish;
-		else if(boost::iequals(outputExt,".txt")) outputType = AirspaceConverter::OpenAir;
+		if (boost::iequals(outputExt, ".kmz")) { /* already KMZ by default */ }
+		else if(boost::iequals(outputExt, ".kml")) outputType = AirspaceConverter::KML;
+		else if(boost::iequals(outputExt, ".mp")) outputType = AirspaceConverter::Polish;
+		else if(boost::iequals(outputExt, ".txt")) outputType = AirspaceConverter::OpenAir;
+		else if(boost::iequals(outputExt, ".img")) outputType = AirspaceConverter::Garmin;
 		else {
 			std::cerr << "FATAL ERROR: Output file extension unknown." << std::endl;
 			return EXIT_FAILURE;
@@ -175,7 +177,27 @@ int main(int argc, char *argv[]) {
 				flag = writer.WriteFile(outputFile, airspaces);
 			}
 			break;
+		case AirspaceConverter::Garmin:
+			{
+				flag = false;
 
+				// First make Polish file
+				const std::string polishFile(boost::filesystem::path(outputFile).replace_extension(".mp").string());
+				PFMwriter writer;
+				if(!writer.WriteFile(polishFile, airspaces)) break;
+
+				// Then call cGPSmapper
+				std::cout << "Invoking cGPSmapper to make: " << outputFile << std::endl << std::endl;
+
+				//TODO: add arguments to create files also for other software like Garmin BaseCamp
+				const std::string cmd(boost::str(boost::format("./cGPSmapper/cgpsmapper-static %1s -o %2s") %polishFile %outputFile));
+
+				if(system(cmd.c_str()) == EXIT_SUCCESS) {
+					flag = true;
+					std::remove(polishFile.c_str()); // Delete polish file
+				} else std::cerr << std::endl << "ERROR: cGPSmapper returned an error." << std::endl;
+			}
+			break;
 		default:
 			assert(false);
 			break;
