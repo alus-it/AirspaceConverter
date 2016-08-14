@@ -174,27 +174,30 @@ bool OpenAIPreader::ReadFile(const std::string& fileName, std::multimap<int, Air
 
 				// Polygon (the only one supported for now)
 				str = node.get<std::string>("POLYGON");
+				double lat = Geometry::LatLon::UNDEF_LAT, lon = Geometry::LatLon::UNDEF_LON;
 				boost::char_separator<char> sep(", ");
 				boost::tokenizer<boost::char_separator<char> > tokens(str, sep);
 				bool expectedLon(true), error(false);
-				double lat = Geometry::LatLon::UNDEF_LAT, lon = Geometry::LatLon::UNDEF_LON;
 				for (const std::string& c : tokens) {
 					if (expectedLon) { // Beware that here the longitude comes first!
 						lon = std::stod(c);
-						error = lon < -180 || lon > 180;
-						if (error) break;
+						if(!Geometry::LatLon::IsValidLon(lon)) {
+							error = true;
+							break;
+						}
 						expectedLon = false;
 					} else {
 						lat = std::stod(c);
-						error = lat < -90 || lat > 90;
-						if (error) break;
+						if(!Geometry::LatLon::IsValidLat(lat)) {
+							error = true;
+							break;
+						}
 						expectedLon = true;
 						airspace.AddSinglePointOnly(lat, lon);
 					}
 				}
 				if (error || !expectedLon) {
 					AirspaceConverter::LogMessage("Warning: skipping invalid coordinates.", false);
-					assert(false);
 					continue;
 				}
 
@@ -205,7 +208,6 @@ bool OpenAIPreader::ReadFile(const std::string& fileName, std::multimap<int, Air
 				assert(airspace.GetNumberOfPoints() > 3);
 				if (airspace.GetNumberOfPoints() <= 3) {
 					AirspaceConverter::LogMessage("Warning: skipping airspace with less tha 3 points.", false);
-					assert(false);
 					continue;
 				}
 

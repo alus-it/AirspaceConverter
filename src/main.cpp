@@ -18,6 +18,7 @@
 #include "OpenAir.h"
 #include <iostream>
 #include <cstring>
+#include <chrono>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
@@ -110,6 +111,9 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
+	// Start the timer
+	const auto startTime = std::chrono::high_resolution_clock::now();
+
 	// Determine what kind of output is requested
 	AirspaceConverter::OutputType outputType = AirspaceConverter::KMZ;
 
@@ -196,6 +200,10 @@ int main(int argc, char *argv[]) {
 			assert(false);
 			break;
 	}
+
+	// Stop the timer
+	const double elapsedTimeSec = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - startTime).count() / 1e6;
+	std::cout<<"Total execution time: " << elapsedTimeSec << " sec." << std::endl << std::endl;
 
 	return flag ? EXIT_SUCCESS : EXIT_FAILURE;
 }

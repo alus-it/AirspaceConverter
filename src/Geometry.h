@@ -39,6 +39,8 @@ public:
 		inline void GetLonDegMin(int& deg, double& min) const { return convertDec2DegMin(lon, deg, min); }
 		inline char GetNorS() const { return lat > 0 ? 'N' : 'S'; }
 		inline char GetEorW() const { return lon > 0 ? 'E' : 'W'; }
+		inline static bool IsValidLat(const double& la) { return la >= -90 && la <= 90; }
+		inline static bool IsValidLon(const double& lo) { return lo >= -180 && lo <= 180; }
 
 		static const int UNDEF_LAT, UNDEF_LON;
 
