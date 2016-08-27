@@ -53,9 +53,9 @@ bool OpenAir::ParseCoordinates(const std::string& text, Geometry::LatLon& point)
 	boost::char_separator<char> sep(" ");
 	boost::tokenizer<boost::char_separator<char> > tokens(text, sep);
 	int i = 0;
-	double lat = 0, lon = 0;
-	for (const std::string& c : tokens)
-	{
+	double lat = Geometry::LatLon::UNDEF_LAT, lon = Geometry::LatLon::UNDEF_LON;
+	for (const std::string& c : tokens) {
+		if (i > 3) break;
 		if (c.empty()) return false;
 		switch (i) {
 		case 0:
@@ -78,8 +78,6 @@ bool OpenAir::ParseCoordinates(const std::string& text, Geometry::LatLon& point)
 				else if (EW != 'E' && EW != 'e') return false;
 			} else return false;
 			break;
-		default:
-			return false;
 		}
 		i++;
 	}
@@ -453,7 +451,6 @@ bool OpenAir::ParseDY(const std::string & line, Airspace& airspace)
 
 void OpenAir::ResetVar() {
 	varRotationClockwise = true;
-	varPoint.SetLatLon(Geometry::LatLon::UNDEF_LAT,Geometry::LatLon::UNDEF_LON);
 	//varWidth = 0;
 }
 
