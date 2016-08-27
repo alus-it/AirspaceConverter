@@ -120,8 +120,8 @@ int main(int argc, char *argv[]) {
 	// Prepare output filename if not entered by user
 	if (!outputFile.empty()) {
 		std::string outputExt(boost::filesystem::path(outputFile).extension().string());
-		if (boost::iequals(outputExt, ".kmz")) { /* already KMZ by default */ }
-		else if(boost::iequals(outputExt, ".kml")) outputType = AirspaceConverter::KML;
+		//if (boost::iequals(outputExt, ".kmz")) { /* already KMZ by default */ }
+		/*else*/ if(boost::iequals(outputExt, ".kml")) outputType = AirspaceConverter::KML;
 		else if(boost::iequals(outputExt, ".mp")) outputType = AirspaceConverter::Polish;
 		else if(boost::iequals(outputExt, ".txt")) outputType = AirspaceConverter::OpenAir;
 		else if(boost::iequals(outputExt, ".img")) outputType = AirspaceConverter::Garmin;
@@ -129,7 +129,8 @@ int main(int argc, char *argv[]) {
 			std::cerr << "FATAL ERROR: Output file extension unknown." << std::endl;
 			return EXIT_FAILURE;
 		}
-	}
+	} else outputFile = boost::filesystem::path(inputFiles.front()).replace_extension(".kmz").string(); // Default output as KMZ
+
 	// Set QNH
 	Altitude::SetQNH(QNH);
 
