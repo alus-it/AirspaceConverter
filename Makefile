@@ -9,7 +9,6 @@
 # This source file is part of AirspaceConverter project
 #============================================================================
 
-
 # Tools
 CXX = g++
 RM = rm -rf
@@ -33,6 +32,7 @@ else
 	CPPFLAGS += -O3
 	BIN = Release/
 endif
+$(shell mkdir -p $(BIN) >/dev/null)
 
 # Option to avoid using libzip, just for compiling anyaway in case of older zip.h
 NOZIP ?= 0
@@ -70,11 +70,6 @@ $(BIN)AirspaceConverter: $(OBJS)
 	@echo Linking: $@
 	@$(CXX) -L$(LIB) $(LFLAGS) $(OBJS) -o $@
 
-# Create output directory if missing
-$(OBJS): | $(BIN)
-$(BIN):
-	@mkdir -p $(BIN)
-
 # Compile
 $(BIN)%.o: $(SRC)%.cpp
 $(BIN)%.o: $(SRC)%.cpp $(DEPDIR)%.d
@@ -82,7 +77,7 @@ $(BIN)%.o: $(SRC)%.cpp $(DEPDIR)%.d
 	@$(CXX) $(DEPFLAGS) $(CPPFLAGS) -c $< -o $@
 	@mv -f $(DEPDIR)$*.Td $(DEPDIR)$*.d
 
-# Dependencies
+# Compile dependencies
 $(DEPDIR)%.d: ;
 .PRECIOUS: $(DEPDIR)%.d
 
@@ -90,6 +85,6 @@ $(DEPDIR)%.d: ;
 
 # Clean
 clean:
-	@echo $(CPPFLAGS)
+	@echo Cleaning all
 	@$(RM) $(BIN)*
 
