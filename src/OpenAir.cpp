@@ -573,7 +573,7 @@ void OpenAir::WriteCircle(const Circle* circle) {
 void OpenAir::WriteSector(const Sector* sector) {
 	assert(sector != nullptr);
 	if (sector == nullptr) return;
-	if (!sector->IsClockwise()) file << "X D=-\r\n";
+	if (!sector->IsClockwise()) file << "V D=-\r\n";
 	file << "V X=";
 	WriteLatLon(sector->GetCenterPoint());
 	file << "\r\nDB ";
