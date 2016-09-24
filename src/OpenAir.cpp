@@ -485,6 +485,9 @@ bool OpenAir::WriteFile(const std::string& fileName) {
 		assert(a.GetNumberOfPoints() > 3);
 		assert(a.GetFirstPoint()==a.GetLastPoint());
 
+		// Reset var
+		varRotationClockwise = true;
+
 		// Skip OpenAir not supported categories
 		if (!WriteCategory(a)) continue;
 		
@@ -573,7 +576,10 @@ void OpenAir::WriteCircle(const Circle* circle) {
 void OpenAir::WriteSector(const Sector* sector) {
 	assert(sector != nullptr);
 	if (sector == nullptr) return;
-	if (!sector->IsClockwise()) file << "V D=-\r\n";
+	if (varRotationClockwise != sector->IsClockwise()) { // Write var if changed
+		varRotationClockwise = !varRotationClockwise;
+		file << "V D=" << (varRotationClockwise ? "+" : "-") << "\r\n";
+	}
 	file << "V X=";
 	WriteLatLon(sector->GetCenterPoint());
 	file << "\r\nDB ";
