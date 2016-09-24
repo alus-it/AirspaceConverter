@@ -223,7 +223,10 @@ bool OpenAir::ParseAC(const std::string & line, Airspace& airspace) {
 		case 'W': type = Airspace::WAVE; break; // Wave Window
 	} else if (length == 6) {
 		if (line.at(3) == 'C' && line.at(4) == 'T' && line.at(5) == 'R') type = Airspace::CTR;
-		else if (line.at(3) == 'T' && line.at(4) == 'M' && line.at(5) == 'Z') type = Airspace::TMZ;
+		else if (line.at(4) == 'M' && line.at(5) == 'Z') {
+			if (line.at(3) == 'T') type = Airspace::TMZ;
+			else if (line.at(3) == 'R') type = Airspace::RMZ;
+		}
 	} else if (length == 5 && line.at(3)=='G' && line.at(4) == 'P') type = Airspace::NOGLIDER; //GP glider prohibited
 	if (type == Airspace::UNKNOWN) return false;
 	airspace.SetType(type);
