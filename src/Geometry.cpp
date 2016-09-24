@@ -270,7 +270,7 @@ void Point::WriteOpenAirGeometry(OpenAir* openAir) const {
 	openAir->WritePoint(this);
 }
 
-Sector::Sector(const LatLon& center, const double& radiusNM, const double& dir1, const double& dir2, const bool& isClockwise)
+Sector::Sector(const LatLon& center, const double radiusNM, const double dir1, const double dir2, const bool isClockwise)
 	: Geometry(center)
 	, clockwise(isClockwise)
 	, latc(center.LatRad())
@@ -283,7 +283,7 @@ Sector::Sector(const LatLon& center, const double& radiusNM, const double& dir1,
 	assert(radius > 0 && radius < PI_2);
 }
 
-Sector::Sector(const LatLon& center, const LatLon& pointStart, const LatLon& pointEnd, const bool& isClockwise)
+Sector::Sector(const LatLon& center, const LatLon& pointStart, const LatLon& pointEnd, const bool isClockwise)
 	: Geometry(center)
 	, clockwise(isClockwise)
 	, latc(center.LatRad())

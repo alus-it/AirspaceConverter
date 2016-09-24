@@ -205,6 +205,7 @@ bool OpenAir::ReadFile(const std::string& fileName) {
 }
 
 bool OpenAir::ParseAC(const std::string & line, Airspace& airspace) {
+	varRotationClockwise = true; // Reset var to default at beginning of new airspace segment
 	InsertAirspace(airspace); // If new airspace first store the actual one
 	assert(airspace.GetType() == Airspace::UNDEFINED);
 	Airspace::Type type = Airspace::UNDEFINED;
@@ -351,10 +352,7 @@ bool OpenAir::ParseV(const std::string & line, Airspace& airspace) {
 			const char c = line.at(4);
 			if (c == '+') varRotationClockwise = true;
 			else if(c == '-') varRotationClockwise = false;
-			else {
-				varRotationClockwise = true;
-				return false;
-			}
+			else return false;
 		}
 		break;
 	case 'X':
@@ -384,7 +382,7 @@ bool OpenAir::ParseDA(const std::string& line, Airspace& airspace) {
 	boost::char_separator<char> sep(",");
 	std::string data(line.substr(3));
 	boost::tokenizer<boost::char_separator<char>> tokens(data, sep);
-	double radius, angleStart, angleEnd;
+	double radius = 0, angleStart = 0, angleEnd = 0;
 	int i = 0;
 	for (const std::string& c : tokens) {
 		switch (i) {
@@ -453,11 +451,6 @@ bool OpenAir::ParseDY(const std::string & line, Airspace& airspace)
 }
 */
 
-void OpenAir::ResetVar() {
-	varRotationClockwise = true;
-	//varWidth = 0;
-}
-
 bool OpenAir::InsertAirspace(Airspace& airspace) {
 	assert(airspaces != nullptr);
 	if (airspaces == nullptr) return false;
@@ -467,7 +460,6 @@ bool OpenAir::InsertAirspace(Airspace& airspace) {
 		assert(airspace.GetNumberOfPoints() > 3);
 		airspaces->insert(std::pair<int, Airspace>(airspace.GetType(),std::move(airspace)));
 	} else airspace.Clear();
-	ResetVar();
 	return validAirspace;
 }
 

@@ -97,7 +97,9 @@ int main(int argc, char *argv[]) {
 			if (argc == 2) return EXIT_SUCCESS;
 			break;
 		case 'v':
-			std::cout << "AirspaceConverter version: " << VERSION << std::endl << std::endl;
+			std::cout << "AirspaceConverter version: " << VERSION << std::endl;
+			std::cout << "Copyright(C) 2016 Alberto Realis-Luc" << std::endl;
+			std::cout << "http://www.alus.it/AirspaceConverter" << std::endl << std::endl;
 			if (argc == 2) return EXIT_SUCCESS;
 			break;
 		default:

@@ -105,8 +105,8 @@ class Sector : public Geometry {
 friend class OpenAir;
 
 public:
-	Sector(const LatLon& center, const double& radiusNM, const double& dir1, const double& dir2, const bool& isClockwise);
-	Sector(const LatLon& center, const LatLon& pointStart, const LatLon& pointEnd, const bool& isClockwise);
+	Sector(const LatLon& center, const double radiusNM, const double dir1, const double dir2, const bool isClockwise);
+	Sector(const LatLon& center, const LatLon& pointStart, const LatLon& pointEnd, const bool isClockwise);
 	inline ~Sector() {}
 	bool Discretize(std::vector<LatLon>& output) const;
 	inline double GetRadiusNM() const { return RAD2NM * radius; }

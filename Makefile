@@ -29,7 +29,7 @@ ifeq ($(DEBUG),1)
 	CPPFLAGS += -O0 -g3 -DDEBUG
 	BIN = Debug/
 else
-	CPPFLAGS += -O3
+	CPPFLAGS += -O3 -DNDEBUG
 	BIN = Release/
 endif
 $(shell mkdir -p $(BIN) >/dev/null)
