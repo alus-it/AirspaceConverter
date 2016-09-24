@@ -39,7 +39,8 @@ const std::string KMLwriter::colors[][2] = {
 	{ "ff00aa55", "7f00e2e2" }, //GLIDING
 	{ "400000FF", "7fd4d4d4" }, //NOGLIDER
 	{ "403399ff", "7fd4d4d4" }, //WAVE
-	{ "40000000", "7fd4d4d4" }  //UNKNOWN
+	{ "40000000", "7fd4d4d4" }, //UNKNOWN
+	{ "40000000", "7fd4d4d4" }  //UNDEFINED
 };
 
 std::vector<RasterMap*> KMLwriter::terrainMaps;
@@ -107,7 +108,7 @@ void KMLwriter::WriteHeader() {
 		<< "<kml xmlns = \"http://www.opengis.net/kml/2.2\">\n"
 		<< "<Document>\n"
 		<< "<open>true</open>\n";
-		for (int t = Airspace::CLASSA; t <= Airspace::UNKNOWN; t++) {
+		for (int t = Airspace::CLASSA; t <= Airspace::UNDEFINED; t++) {
 			file << "<Style id = \"Style" << Airspace::CategoryName((Airspace::Type)t) << "\">\n"
 				<< "<LineStyle>\n"
 				<< "<color>" << colors[t][0] << "</color>\n"
@@ -265,7 +266,7 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 	WriteHeader();
 
 	// For each category
-	for (int t = Airspace::CLASSA; t <= Airspace::UNKNOWN; t++) {
+	for (int t = Airspace::CLASSA; t <= Airspace::UNDEFINED; t++) {
 		
 		// First verify if there are airspaces of that class
 		if (airspaces.count(t) == 0) continue;

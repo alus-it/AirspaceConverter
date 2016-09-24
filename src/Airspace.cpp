@@ -74,7 +74,8 @@ const bool Airspace::CATEGORY_VISIBILITY[] = {
 	false, //GLIDING
 	false, //NOGLIDER
 	false, //WAVE
-	false //UNKNOWN
+	false, //UNKNOWN
+	false  //UNDEFINED
 };
 
 const std::string Airspace::CATEGORY_NAMES[] = {
@@ -98,7 +99,8 @@ const std::string Airspace::CATEGORY_NAMES[] = {
 	"Gliding area", //GLIDING
 	"No glider", //NOGLIDER
 	"Wave window", //WAVE
-	"UNKNOWN" //UNKNOWN
+	"Unknown", //UNKNOWN
+	"UNDEFINED" //UNDEFINED
 };
 
 Airspace::Airspace(Airspace&& orig) // Move constructor
@@ -108,7 +110,7 @@ Airspace::Airspace(Airspace&& orig) // Move constructor
 	, points(std::move(orig.points))
 	, type(std::move(orig.type))
 	, name(std::move(orig.name)) {
-	orig.type = UNKNOWN;
+	orig.type = UNDEFINED;
 }
 
 Airspace::~Airspace() {
@@ -117,7 +119,7 @@ Airspace::~Airspace() {
 }
 
 void Airspace::Clear() {
-	type = UNKNOWN;
+	type = UNDEFINED;
 	name.clear();
 	for (const Geometry* g : geometries) delete g;
 	geometries.clear();

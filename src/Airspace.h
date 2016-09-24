@@ -68,10 +68,11 @@ public:
 		GLIDING,
 		NOGLIDER,
 		WAVE,
-		UNKNOWN //also the last one
+		UNKNOWN, // "UNKNOWN" can be used in OpenAir files
+		UNDEFINED // also the last one
 	} Type;
 
-	inline Airspace() : type(UNKNOWN) {}
+	inline Airspace() : type(UNDEFINED) {}
 	inline Airspace(Type category) : type(category) {}
 	Airspace(Airspace&& orig);
 	~Airspace();

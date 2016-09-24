@@ -40,7 +40,8 @@ const int PFMwriter::types[] = {
 	0x69, //GLIDING
 	0x62, //NOGLIDER
 	0x69, //WAVE
-	0x01  //UNKNOWN
+	0x01,  //UNKNOWN
+	0x01  //UNDEFINED
 };
 */
 

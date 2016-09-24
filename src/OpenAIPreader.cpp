@@ -95,7 +95,7 @@ bool OpenAIPreader::ReadFile(const std::string& fileName, std::multimap<int, Air
 			
 			// Airspace category
 			std::string str = asp.second.get_child("<xmlattr>").get<std::string>("CATEGORY");
-			Airspace::Type type = Airspace::UNKNOWN;
+			Airspace::Type type = Airspace::UNDEFINED;
 			int len = str.length();
 			if (len>0) switch (str.at(0)) {
 				case 'A':
@@ -148,8 +148,8 @@ bool OpenAIPreader::ReadFile(const std::string& fileName, std::multimap<int, Air
 				default:
 					break;
 				} else continue;
-				if (type == Airspace::UNKNOWN) {
-					AirspaceConverter::LogMessage("Warning: skipping ASP with unknown CATEGORY attribute: " + str, false);
+				if (type == Airspace::UNDEFINED) {
+					AirspaceConverter::LogMessage("Warning: skipping ASP with unknown/undefined CATEGORY attribute: " + str, false);
 					continue;
 				}
 				Airspace airspace(type);
