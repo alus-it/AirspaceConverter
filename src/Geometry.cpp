@@ -307,11 +307,13 @@ bool Sector::Discretize(std::vector<LatLon>& output) const {
 		const double step = FindStep(radius, AbsAngle(e - angleStart));
 		assert(angleStart <= e);
 		for (double a = angleStart; a < e; a += step) output.push_back(CalcRadialPoint(latc, lonc, a, radius));
+		output.push_back(CalcRadialPoint(latc, lonc, e, radius)); // Add the exact last point
 	} else {
 		const double s = angleStart >= angleEnd ? angleStart : angleStart + TWO_PI;
 		const double step = FindStep(radius, AbsAngle(s - angleEnd));
 		assert(s >= angleEnd);
 		for (double a = s; a > angleEnd; a -= step) output.push_back(CalcRadialPoint(latc, lonc, a, radius));
+		output.push_back(CalcRadialPoint(latc, lonc, angleEnd, radius)); // Add the exact last point
 	}
 	return true;
 }
