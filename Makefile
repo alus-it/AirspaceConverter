@@ -49,15 +49,18 @@ DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)$*.Td
 
 # List of C++ source files
 CPPFILES =              \
+	Airfield.cpp          \
 	Airspace.cpp          \
 	AirspaceConverter.cpp \
+	CUPreader.cpp         \
 	Geometry.cpp          \
 	KMLwriter.cpp         \
 	main.cpp              \
 	OpenAIPreader.cpp     \
 	OpenAir.cpp           \
 	PFMwriter.cpp         \
-	RasterMap.cpp
+	RasterMap.cpp         \
+	Waypoint.cpp
 
 # List of object files
 OBJS = $(patsubst %.cpp, $(BIN)%.o, $(CPPFILES))
