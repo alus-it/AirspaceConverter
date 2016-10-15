@@ -12,10 +12,12 @@
 
 #include "AirspaceConverter.h"
 #include "Airspace.h"
+#include "CUPreader.h"
 #include "OpenAIPreader.h"
 #include "KMLwriter.h"
 #include "PFMwriter.h"
 #include "OpenAir.h"
+#include "Waypoint.h"
 #include <iostream>
 #include <cstring>
 #include <chrono>
@@ -28,7 +30,7 @@ void printHelp() {
 	std::cout << "Possible options:" << std::endl;
 	std::cout << "-q: optional, specify the QNH in hPa used to calculate height of flight levels" << std::endl;
 	std::cout << "-a: optional, specify a default terrain altitude in meters to calculate AGL heights of points not covered by loaded terrain map(s)" << std::endl;
-	std::cout << "-i: mandatory, multiple, input file(s) can be OpenAir (.txt) or OpenAIP (.aip)" << std::endl;
+	std::cout << "-i: mandatory, multiple, input file(s) can be OpenAir (.txt), OpenAIP (.aip) or CUP waypoints (.cup)" << std::endl;
 	std::cout << "-m: optional, multiple, terrain map file(s) (.dem) used to lookup terrain height" << std::endl;
 	std::cout << "-o: optional, output file .kmz, .kml, .txt (OpenAir), .img (Garmin) or .mp (Polish). If not specified will be used the name of first input file as KMZ" << std::endl;
 	std::cout << "-v: print version number" << std::endl;
@@ -139,8 +141,9 @@ int main(int argc, char *argv[]) {
 	// Set default terrain altitude
 	KMLwriter::SetDefaultTerrainAltitude(defaultTerrainAlt);
 
-	// Initialize airspaces multimap
+	// Initialize airspaces and waypoints multimaps
 	std::multimap<int, Airspace> airspaces;
+	std::multimap<int, Waypoint> waypoints;
 
 	// Initialize OpenAir module
 	OpenAir openAir(airspaces);
@@ -153,6 +156,8 @@ int main(int argc, char *argv[]) {
 			if(openAir.ReadFile(inputFile)) flag = false;
 		} else if(boost::iequals(ext, ".aip")) {
 			if(OpenAIPreader::ReadFile(inputFile, airspaces)) flag = false;
+		} else if(boost::iequals(ext, ".cup")) {
+			if(CUPreader::ReadFile(inputFile, waypoints)) flag = false;
 		} else std::cerr << "ERROR: unknown extension: " << ext << "for input file" << std::endl;
 	}
 	if(flag) {
