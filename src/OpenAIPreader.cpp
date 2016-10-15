@@ -73,7 +73,7 @@ bool ReadAltitude(const ptree& node, Altitude& altitude) {
 bool OpenAIPreader::ReadFile(const std::string& fileName, std::multimap<int, Airspace>& output) {	
 	std::ifstream input(fileName);
 	if (!input.is_open() || input.bad()) {
-		AirspaceConverter::LogMessage("ERROR: Unable to open input file: " + fileName, true);
+		AirspaceConverter::LogMessage("ERROR: Unable to open OpenAIP input file: " + fileName, true);
 		return false;
 	}
 	AirspaceConverter::LogMessage("Reading OpenAIP file: " + fileName, false);
