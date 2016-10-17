@@ -195,7 +195,7 @@ bool OpenAir::ReadFile(const std::string& fileName) {
 			continue;
 		}
 		if (!lineParsedOK) {
-			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR: unable to parse line %1d: %2s") %linecount %sLine), true);
+			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR: unable to parse OpenAir line %1d: %2s") %linecount %sLine), true);
 			allParsedOK = false;
 		}
 	}

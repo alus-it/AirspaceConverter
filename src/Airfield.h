@@ -14,7 +14,19 @@
 
 class Airfield: public Waypoint {
 public:
-	Airfield();
-	virtual ~Airfield();
+	Airfield(std::string& longName, std::string& shortName, std::string& countryCode, double lat, double lon, double alt, int style, int rwyDir, int rwyLen, std::string& freq, std::string& descr)
+		: Waypoint(longName, shortName, countryCode, lat, lon, alt, style, descr)
+		, runwayDir(rwyDir)
+		, runwayLength(rwyLen)
+		, radioFreq(freq) {
+	}
+
+	virtual ~Airfield() {}
+
+private:
+	int runwayDir;    // [deg]
+	int runwayLength; // [m]
+	std::string radioFreq;
+
 };
 
