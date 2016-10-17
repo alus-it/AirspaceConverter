@@ -11,12 +11,5 @@
 
 #include "Airfield.h"
 
-Airfield::Airfield() {
-	// TODO Auto-generated constructor stub
 
-}
-
-Airfield::~Airfield() {
-	// TODO Auto-generated destructor stub
-}
 

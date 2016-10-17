@@ -11,12 +11,5 @@
 
 #include "Waypoint.h"
 
-Waypoint::Waypoint() {
-	// TODO Auto-generated constructor stub
 
-}
-
-Waypoint::~Waypoint() {
-	// TODO Auto-generated destructor stub
-}
 
