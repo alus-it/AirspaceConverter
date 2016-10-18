@@ -77,8 +77,7 @@ bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint
 
 		// Tokenize with quotes
 		boost::tokenizer<boost::escaped_list_separator<char> > tokens(sLine); // default separator:',', default quote:'"', default escape char:'\'
-		int numOfFields = std::distance(tokens.begin(),tokens.end());
-		if(numOfFields != 11) return false; // We expect only 11 fields
+		if(std::distance(tokens.begin(),tokens.end()) != 11) return false; // We expect only 11 fields
 
 		// Long name
 		boost::tokenizer<boost::escaped_list_separator<char> >::iterator token=tokens.begin();
