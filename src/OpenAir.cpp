@@ -24,27 +24,27 @@ std::string& OpenAir::RemoveComments(std::string &s) {
 }
 
 bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg) {
+	if(dddmmss.empty()) return false;
 	boost::char_separator<char> sep(":");
 	boost::tokenizer<boost::char_separator<char>> tokens(dddmmss, sep);
-	deg = 0;
-	int i = 0;
-	for (const std::string& c : tokens) {
-		assert(!c.empty());
-		if (!isDigit(c.front())) return false;
-		switch (i) {
-		case 0:
-			deg += std::stoi(c);
-			break;
-		case 1:
-			deg += std::stod(c) / 60;
-			break;
-		case 2:
-			deg += std::stod(c) / 3600;
-			break;
-		default:
-			return false;
+	const int fields = std::distance(tokens.begin(),tokens.end());
+	if(fields < 1 || fields > 3) return false; // We expect from 1 to 3 fields
+
+	// Degrees
+	boost::tokenizer<boost::char_separator<char>>::iterator token=tokens.begin();
+	if ((*token).empty() || !isDigit((*token).front())) return false;
+	deg = std::stoi(*token);
+
+	// Minutes
+	if (++token != tokens.end()) {
+		if ((*token).empty() || !isDigit((*token).front())) return false;
+		deg += std::stod(*token) / 60;
+
+		// Seconds
+		if (++token != tokens.end()) {
+			if ((*token).empty() || !isDigit((*token).front())) return false;
+			deg += std::stod(*token) / 3600;
 		}
-		i++;
 	}
 	return true;
 }
@@ -52,35 +52,33 @@ bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg) {
 bool OpenAir::ParseCoordinates(const std::string& text, Geometry::LatLon& point) {
 	boost::char_separator<char> sep(" ");
 	boost::tokenizer<boost::char_separator<char> > tokens(text, sep);
-	int i = 0;
+	if(std::distance(tokens.begin(),tokens.end()) < 4) return false; // We expect at least 4 fields
 	double lat = Geometry::LatLon::UNDEF_LAT, lon = Geometry::LatLon::UNDEF_LON;
-	for (const std::string& c : tokens) {
-		if (i > 3) break;
-		if (c.empty()) return false;
-		switch (i) {
-		case 0:
-			if (!ParseDegrees(c, lat)) return false;
-			break;
-		case 1:
-			if (c.length() == 1) {
-				const char NS = c.front();
-				if (NS == 'S' || NS == 's') lat = -lat;
-				else if (NS != 'N' && NS != 'n') return false;
-			} else return false;
-			break;
-		case 2:
-			if (!ParseDegrees(c, lon)) return false;
-			break;
-		case 3:
-			if (c.length() == 1) {
-				const char EW = c.front();
-				if (EW == 'W' || EW == 'w') lat = -lat;
-				else if (EW != 'E' && EW != 'e') return false;
-			} else return false;
-			break;
-		}
-		i++;
-	}
+
+	// Latitude degrees, minutes and seconds
+	boost::tokenizer<boost::char_separator<char>>::iterator token=tokens.begin();
+	if (!ParseDegrees((*token), lat)) return false;
+
+	// Latitude sign N or S
+	token++;
+	if ((*token).length() == 1) {
+		const char NS = (*token).front();
+		if (NS == 'S' || NS == 's') lat = -lat;
+		else if (NS != 'N' && NS != 'n') return false;
+	} else return false;
+
+	// Longitude degrees, minutes and seconds
+	token++;
+	if (!ParseDegrees((*token), lon)) return false;
+
+	// Longitude sign E or W
+	token++;
+	if ((*token).length() == 1) {
+		const char EW = (*token).front();
+		if (EW == 'W' || EW == 'w') lat = -lat;
+		else if (EW != 'E' && EW != 'e') return false;
+	} else return false;
+
 	point.SetLatLon(lat,lon);
 	return true;
 }
