@@ -55,6 +55,8 @@ public:
 	static inline void SetResolution(double resolutionNM) { resolution = resolutionNM * NM2RAD; }
 	inline const LatLon& GetCenterPoint() const { return point; }
 
+	static const double NM2M, MI2M;
+
 protected:
 	inline Geometry(const LatLon& center) : point(center) {}
 	const LatLon point;
@@ -65,7 +67,7 @@ protected:
 	static const double RAD2DEG;
 	static const double NM2RAD;
 	static const double RAD2NM;
-	static const double NM2M;
+
 	static double FindStep(const double& radius, const double& angle);
 	static double DeltaAngle(const double angle, const double reference);
 	static double AbsAngle(const double& angle);

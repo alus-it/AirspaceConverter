@@ -32,6 +32,7 @@ public:
 	const std::string ToString() const;
 	inline static void SetQNH(const double QNHmb) { QNH = QNHmb; }
 	inline static double GetQNH() { return QNH; }
+	static const double FEET2METER;
 
 private:
 	static double QNEaltitudeToStaticPressure(const double alt);
@@ -41,7 +42,7 @@ private:
 	bool refIsMsl;
 	double altMt;
 	int altFt, fl;
-	static const double FEET2METER, K1, K2, QNE;
+	static const double K1, K2, QNE;
 	static double QNH;
 };
 

@@ -11,7 +11,10 @@
 
 #include "CUPreader.h"
 #include "AirspaceConverter.h"
+#include "Waypoint.h"
 #include "Airfield.h"
+#include "Airspace.h"
+#include "Geometry.h"
 #include <fstream>
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
@@ -19,23 +22,66 @@
 #include <cassert>
 
 bool ParseLatitude(const std::string& text, double& lat) {
-	//TODO:...
-	return false;
+	if(text.length()!=9 || text.at(4)!='.') return false;
+	lat = std::stoi(text.substr(0,2));
+	lat += std::stod(text.substr(2,6))/60;
+	const char sign = text.at(8);
+	if (sign == 'S' || sign == 's') lat = -lat;
+	else if (sign != 'N' && sign != 'n') return false;
+	return true;
 }
 
 bool ParseLongitude(const std::string& text, double& lon) {
-	//TODO:...
-	return false;
+	if(text.length()!=10 || text.at(5)!='.') return false;
+	lon = std::stoi(text.substr(0,3));
+	lon += std::stod(text.substr(3,6))/60;
+	const char sign = text.at(8);
+	if (sign == 'W' || sign == 'w') lon = -lon;
+	else if (sign != 'E' && sign != 'e') return false;
+	return true;
 }
 
 bool ParseAltitude(const std::string& text, int& alt) {
-	//TODO:...
-	return false;
+	int pos = text.length()-1;
+	if(pos<1) return false;
+	bool feet = false;
+	if(text.back() == 't' || text.back() == 'T') pos--;
+	switch(text.at(pos)) {
+		case 'm':
+		case 'M':
+			break;
+		case 'f':
+		case 'F':
+			feet = true;
+			break;
+		default:
+			return false;
+	}
+	double altitude = std::stod(text.substr(0,pos));
+	if(feet) altitude *= Altitude::FEET2METER;
+	alt = round(altitude);
+	return true;
 }
 
 bool ParseLength(const std::string& text, int& len) {
-	//TODO:...
-	return false;
+	int pos = text.length()-1;
+	if(pos<2) return false;
+	bool nauticalMiles = false, statuteMiles = false;
+	if(text.back() == 'm' || text.back() == 'M') {
+		if(text.at(pos) == 'n' || text.at(pos) == 'N') {
+			pos--;
+			nauticalMiles = true;
+		}
+	} else if((text.at(pos-1) == 'm' || text.at(pos-1) == 'M') && (text.back() == 'l' || text.back() == 'L' || text.back() == 'i' || text.back() == 'I')) {
+		pos--;
+		statuteMiles = true;
+	} else return false;
+	double length = std::stod(text.substr(0,pos));
+	if (length < 0) return false;
+	if (nauticalMiles) length *= Geometry::NM2M;
+	else if (statuteMiles) length *= Geometry::MI2M;
+	len = round(length);
+	return true;
 }
 
 bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint>& output) {
@@ -50,9 +96,12 @@ bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint
 
 	while (!input.eof() && input.good())
 	{
+		// Get the line
 		std::string sLine;
 		std::getline(input, sLine);
-		++linecount;
+
+		// Skip eventual header
+		if(linecount++ == 0 && sLine == "name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc") continue;
 
 		// Directly skip empty lines
 		if (sLine.empty()) continue;
@@ -170,7 +219,7 @@ bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint
 			assert(token != tokens.end());
 			std::string description = *token;
 
-			// Build the airfield
+			// Build the waypoint
 			Waypoint waypoint(name, code, country, latitude, longitude, altitude, type, description);
 
 			// Add it to the multimap
