@@ -25,8 +25,9 @@ std::string& OpenAir::RemoveComments(std::string &s) {
 
 bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg) {
 	if(dddmmss.empty()) return false;
-	boost::char_separator<char> sep(":");
-	boost::tokenizer<boost::char_separator<char>> tokens(dddmmss, sep);
+
+	// Tokenize on colons
+	boost::tokenizer<boost::char_separator<char>> tokens(dddmmss, boost::char_separator<char>(":"));
 	const int fields = std::distance(tokens.begin(),tokens.end());
 	if(fields < 1 || fields > 3) return false; // We expect from 1 to 3 fields
 
@@ -50,35 +51,56 @@ bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg) {
 }
 
 bool OpenAir::ParseCoordinates(const std::string& text, Geometry::LatLon& point) {
-	boost::char_separator<char> sep(" ");
-	boost::tokenizer<boost::char_separator<char> > tokens(text, sep);
-	if(std::distance(tokens.begin(),tokens.end()) < 4) return false; // We expect at least 4 fields
-	double lat = Geometry::LatLon::UNDEF_LAT, lon = Geometry::LatLon::UNDEF_LON;
+	// Tokenize on spaces
+	boost::tokenizer<boost::char_separator<char> > tokens(text, boost::char_separator<char>(" "));
+	if(std::distance(tokens.begin(),tokens.end()) < 2) return false; // We expect at least 2 fields
 
 	// Latitude degrees, minutes and seconds
 	boost::tokenizer<boost::char_separator<char>>::iterator token=tokens.begin();
-	if (!ParseDegrees((*token), lat)) return false;
+	std::string coord(*token);
+	char sign;
+	if(coord.size()>1 && !isDigit(coord.back())) {
+		// The N or S is not spaced from the coordinates
+		sign = coord.back();
+		coord = coord.substr(0, coord.size()-1);
+	} else {
+		// Latitude sign N or S should be in the next token
+		token++; // here we know already that there are at least two tokens
+		if ((*token).length() == 1) sign = (*token).front();
+		else return false;
+	}
 
-	// Latitude sign N or S
-	token++;
-	if ((*token).length() == 1) {
-		const char NS = (*token).front();
-		if (NS == 'S' || NS == 's') lat = -lat;
-		else if (NS != 'N' && NS != 'n') return false;
-	} else return false;
+	// Parse the latitude
+	double lat = Geometry::LatLon::UNDEF_LAT;
+	if (!ParseDegrees(coord, lat)) return false;
+
+	// Apply latitude sign N or S
+	if (sign == 'S' || sign == 's') lat = -lat;
+	else if (sign != 'N' && sign != 'n') return false;
 
 	// Longitude degrees, minutes and seconds
-	token++;
-	if (!ParseDegrees((*token), lon)) return false;
+	if (++token == tokens.end()) return false;
+	coord = *token;
+	if(coord.size()>1 && !isDigit(coord.back())) {
+		// The E or W is not spaced from the coordinates
+		sign = coord.back();
+		coord = coord.substr(0, coord.size()-1);
+	} else {
+		// Longitude sign E or W should be in the next token
+		if (++token == tokens.end()) return false;
+		if ((*token).length() == 1) sign = (*token).front();
+		else return false;
+	}
 
-	// Longitude sign E or W
-	token++;
-	if ((*token).length() == 1) {
-		const char EW = (*token).front();
-		if (EW == 'W' || EW == 'w') lat = -lat;
-		else if (EW != 'E' && EW != 'e') return false;
-	} else return false;
+	// Parse the longitude
+	double lon = Geometry::LatLon::UNDEF_LON;
+	if (!ParseDegrees(coord, lon)) return false;
 
+	// Apply the longitude sign E or W
+	if (sign == 'W' || sign == 'w') lon = -lon;
+	else if (sign != 'E' && sign != 'e') return false;
+
+	// Finally set the poit coordinates
 	point.SetLatLon(lat,lon);
 	return true;
 }
