@@ -26,6 +26,7 @@ const double Geometry::RAD2DEG = 180.0 / PI;
 const double Geometry::NM2RAD = PI / (180 * 60);
 const double Geometry::RAD2NM = (180.0 * 60.0) / PI;
 const double Geometry::NM2M = 1852.0;
+const double Geometry::MI2M = 1609.344;
 const double Geometry::TOL = 1e-10;
 
 double Geometry::resolution = 0.3 * NM2RAD; // 0.3 NM = 555.6 m
