@@ -19,13 +19,14 @@
 class Altitude;
 class Airspace;
 class RasterMap;
+class Waypoint;
 
 class KMLwriter {
 public:
 	inline KMLwriter() : allAGLaltitudesCovered(true) {}
 	inline ~KMLwriter() {}
 
-	bool WriteFile(const std::string& filename, const std::multimap<int, Airspace>& airspaces);
+	bool WriteFile(const std::string& filename, const std::multimap<int, Airspace>& airspaces, const std::multimap<int, Waypoint*>& waypoints);
 	static bool AddTerrainMap(const std::string& filename);
 	inline static int GetNumOfRasterMaps() { return terrainMaps.size(); }
 	static void ClearTerrainMaps();
@@ -38,6 +39,7 @@ private:
 	static bool GetTerrainAltitudeMt(const double& lat, const double& lon, double&alt);
 	void WriteHeader();
 	void OpenPlacemark(const Airspace& airspace);
+	void OpenPlacemark(const Waypoint* waypoint);
 	void OpenPolygon(const bool extrude, const bool absolute);
 	void ClosePolygon();
 	void WriteSideWalls(const Airspace& airspace);

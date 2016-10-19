@@ -10,6 +10,13 @@
 //============================================================================
 
 #include "Airfield.h"
+#include <cassert>
 
-
+Airfield::Airfield(std::string& longName, std::string& shortName, std::string& countryCode, double lat, double lon, double alt, int style, int rwyDir, int rwyLen, std::string& freq, std::string& descr)
+	: Waypoint(longName, shortName, countryCode, lat, lon, alt, style, descr)
+	, runwayDir(rwyDir)
+	, runwayLength(rwyLen)
+	, radioFreq(freq) {
+	assert(IsAirfield());
+}
 

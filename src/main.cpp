@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
 
 	// Initialize airspaces and waypoints multimaps
 	std::multimap<int, Airspace> airspaces;
-	std::multimap<int, Waypoint> waypoints;
+	std::multimap<int, Waypoint*> waypoints;
 
 	// Initialize OpenAir module
 	OpenAir openAir(airspaces);
@@ -175,7 +175,7 @@ int main(int argc, char *argv[]) {
 				if(flag) std::cout << "Warning: no terrain map loaded, using default terrain height for all applicable AGL points." << std::endl;
 
 				// Make KML file
-				flag = KMLwriter().WriteFile(outputFile, airspaces);
+				flag = KMLwriter().WriteFile(outputFile, airspaces, waypoints);
 			}
 			break;
 		case AirspaceConverter::OpenAir:
@@ -208,6 +208,10 @@ int main(int argc, char *argv[]) {
 			assert(false);
 			break;
 	}
+
+	// Clear waypoints
+	for (const std::pair<const int, Waypoint*>& wpt : waypoints) delete wpt.second;
+	waypoints.clear();
 
 	// Stop the timer
 	const double elapsedTimeSec = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - startTime).count() / 1e6;

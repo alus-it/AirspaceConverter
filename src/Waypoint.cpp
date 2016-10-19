@@ -13,3 +13,23 @@
 
 
 
+const std::string Waypoint::TYPE_NAMES[] = {
+	"UNDEFINED",
+	"Normal",
+	"Airfield grass",
+	"Outlanding",
+	"Glider site",
+	"Airfield solid",
+	"Mount pass",
+	"Mount top",
+	"Antenna",
+	"VOR",
+	"NDB",
+	"Cool tower",
+	"Dam",
+	"Tunnel",
+	"Bridge",
+	"Power plant",
+	"Castle",
+	"Intersection"
+};
