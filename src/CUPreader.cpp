@@ -22,20 +22,30 @@
 #include <cassert>
 
 bool ParseLatitude(const std::string& text, double& lat) {
-	if(text.length()!=9 || text.at(4)!='.') return false;
-	lat = std::stoi(text.substr(0,2));
-	lat += std::stod(text.substr(2,6))/60;
-	const char sign = text.at(8);
+	const int len = text.length();
+	if(len < 5) return false;
+	try {
+		lat = std::stoi(text.substr(0,2));
+		lat += std::stod(text.substr(2,len-3))/60;
+	} catch(...) {
+		return false;
+	}
+	const char sign = text.back();
 	if (sign == 'S' || sign == 's') lat = -lat;
 	else if (sign != 'N' && sign != 'n') return false;
 	return true;
 }
 
 bool ParseLongitude(const std::string& text, double& lon) {
-	if(text.length()!=10 || text.at(5)!='.') return false;
-	lon = std::stoi(text.substr(0,3));
-	lon += std::stod(text.substr(3,6))/60;
-	const char sign = text.at(8);
+	const int len = text.length();
+	if(len < 6) return false;
+	try {
+		lon = std::stoi(text.substr(0,3));
+		lon += std::stod(text.substr(3,len-4))/60;
+	} catch (...) {
+		return false;
+	}
+	const char sign = text.back();
 	if (sign == 'W' || sign == 'w') lon = -lon;
 	else if (sign != 'E' && sign != 'e') return false;
 	return true;
@@ -43,6 +53,10 @@ bool ParseLongitude(const std::string& text, double& lon) {
 
 bool ParseAltitude(const std::string& text, int& alt) {
 	int pos = text.length()-1;
+	if(pos == 0 && text.front()=='0') {
+		alt = 0;
+		return true;
+	}
 	if(pos<1) return false;
 	bool feet = false;
 	if(text.back() == 't' || text.back() == 'T') pos--;
@@ -57,9 +71,13 @@ bool ParseAltitude(const std::string& text, int& alt) {
 		default:
 			return false;
 	}
-	double altitude = std::stod(text.substr(0,pos));
-	if(feet) altitude *= Altitude::FEET2METER;
-	alt = round(altitude);
+	try {
+		double altitude = std::stod(text.substr(0,pos));
+		if(feet) altitude *= Altitude::FEET2METER;
+		alt = round(altitude);
+	} catch(...) {
+		return false;
+	}
 	return true;
 }
 
@@ -76,15 +94,19 @@ bool ParseLength(const std::string& text, int& len) {
 		pos--;
 		statuteMiles = true;
 	} else return false;
-	double length = std::stod(text.substr(0,pos));
-	if (length < 0) return false;
-	if (nauticalMiles) length *= Geometry::NM2M;
-	else if (statuteMiles) length *= Geometry::MI2M;
-	len = round(length);
+	try {
+		double length = std::stod(text.substr(0,pos));
+		if (length < 0) return false;
+		if (nauticalMiles) length *= Geometry::NM2M;
+		else if (statuteMiles) length *= Geometry::MI2M;
+		len = round(length);
+	} catch (...) {
+		return false;
+	}
 	return true;
 }
 
-bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint>& output) {
+bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint*>& output) {
 	std::ifstream input(fileName);
 	if (!input.is_open() || input.bad()) {
 		AirspaceConverter::LogMessage("ERROR: Unable to open CUP input file: " + fileName, true);
@@ -101,7 +123,7 @@ bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint
 		std::getline(input, sLine);
 
 		// Skip eventual header
-		if(linecount++ == 0 && sLine == "name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc") continue;
+		if(++linecount == 1 && sLine.find("name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc") == 0) continue;
 
 		// Directly skip empty lines
 		if (sLine.empty()) continue;
@@ -126,13 +148,16 @@ bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint
 
 		// Tokenize with quotes
 		boost::tokenizer<boost::escaped_list_separator<char> > tokens(sLine); // default separator:',', default quote:'"', default escape char:'\'
-		if(std::distance(tokens.begin(),tokens.end()) != 11) return false; // We expect only 11 fields
+		if(std::distance(tokens.begin(),tokens.end()) != 11) { // We expect only 11 fields
+			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: expected 11 fields: %2s") %linecount %sLine), true);
+			continue;
+		}
 
 		// Long name
 		boost::tokenizer<boost::escaped_list_separator<char> >::iterator token=tokens.begin();
 		std::string name = *token;
 		if (name.empty()) {
-			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR: while parsing CUP line %1d a name must be present: %2s") %linecount %sLine), true);
+			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: a name must be present: %2s") %linecount %sLine), true);
 			continue;
 		}
 
@@ -148,7 +173,7 @@ bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint
 		token++;
 		double latitude;
 		if(!ParseLatitude(*token,latitude)) {
-			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR: while parsing CUP line %1d invalid latitude: %2s") %linecount %sLine), true);
+			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: invalid latitude: %2s") %linecount %(*token)), true);
 			continue;
 		}
 
@@ -156,43 +181,43 @@ bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint
 		token++;
 		double longitude;
 		if(!ParseLongitude(*token,longitude)) {
-			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR: while parsing CUP line %1d invalid longitude: %2s") %linecount %sLine), true);
+			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: invalid longitude: %2s") %linecount %(*token)), true);
 			continue;
 		}
 
 		// Elevation
 		token++;
-		int altitude;
-		if(!ParseAltitude(*token,altitude)) {
-			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR: while parsing CUP line %1d invalid elevation: %2s") %linecount %sLine), true);
-			continue;
-		}
+		int altitude = 0;
+		if(!ParseAltitude(*token,altitude))
+			AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %(*token)), false);
 
 		// Waypoint style
 		token++;
-		int type = std::stoi(*token);
+		int type = Waypoint::undefined;
+		try {
+			type = std::stoi(*token);
+		} catch(...) {}
 		if(type <= Waypoint::undefined || type >= Waypoint::numOfWaypointTypes) {
-			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR: while parsing CUP line %1d invalid waypoint style: %2s") %linecount %sLine), true);
-			continue;
+			AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid waypoint style: %2s, assuming normal") %linecount %(*token)), false);
+			type = Waypoint::normal;
 		}
 
 		// If it's an airfield...
-		if(type <= Waypoint::airfieldGrass && type >= Waypoint::airfieldSolid) {
+		if(Waypoint::IsTypeAirfield((Waypoint::WaypointType)type)) {
 			// Runway direction
 			token++;
-			int runwayDir = std::stoi(*token);
-			if(runwayDir < 0 || runwayDir > 360) {
-				AirspaceConverter::LogMessage(boost::str(boost::format("ERROR: while parsing CUP line %1d invalid runway direction: %2s") %linecount %sLine), true);
-				continue;
-			}
+			int runwayDir = -1;
+			try {
+				runwayDir = std::stoi(*token);
+			} catch(...) {}
+			if(runwayDir < 0 || runwayDir > 360)
+				AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid runway direction: %2s") %linecount %(*token)), true);
 
 			// Runway length
 			token++;
-			int runwayLength;
-			if(!ParseLength(*token,runwayLength)) {
-				AirspaceConverter::LogMessage(boost::str(boost::format("ERROR: while parsing CUP line %1d invalid runway length: %2s") %linecount %sLine), true);
-				continue;
-			}
+			int runwayLength = -1;
+			if(!ParseLength(*token,runwayLength))
+				AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid runway length: %2s") %linecount %(*token)), true);
 
 			// Radio frequency
 			token++;
@@ -204,10 +229,10 @@ bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint
 			std::string description = *token;
 
 			// Build the airfield
-			Airfield airfield(name, code, country, latitude, longitude, altitude, type, runwayDir, runwayLength, radioFreq, description);
+			Airfield* airfield = new Airfield(name, code, country, latitude, longitude, altitude, type, runwayDir, runwayLength, radioFreq, description);
 
 			// Add it to the multimap
-			output.insert(std::pair<int, Waypoint>(type, std::move(airfield)));
+			output.insert(std::pair<int, Waypoint*>(type, (Waypoint*)airfield));
 		} else {
 			// Skip the airfield's fields
 			token++;
@@ -220,11 +245,12 @@ bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint
 			std::string description = *token;
 
 			// Build the waypoint
-			Waypoint waypoint(name, code, country, latitude, longitude, altitude, type, description);
+			Waypoint* waypoint = new Waypoint(name, code, country, latitude, longitude, altitude, type, description);
 
 			// Add it to the multimap
-			output.insert(std::pair<int, Waypoint>(type, std::move(waypoint)));
+			output.insert(std::pair<int, Waypoint*>(type, waypoint));
 		}
+
 	}
 	return true;
 }

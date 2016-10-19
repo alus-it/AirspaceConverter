@@ -14,6 +14,8 @@
 #include "Airspace.h"
 #include "RasterMap.h"
 #include "AirspaceConverter.h"
+#include "Waypoint.h"
+#include "Airfield.h"
 #include <zip.h>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -136,6 +138,31 @@ void KMLwriter::OpenPlacemark(const Airspace& airspace) {
 		<< "</ExtendedData>\n";
 }
 
+void KMLwriter::OpenPlacemark(const Waypoint* waypoint) {
+	const bool isAirfield = waypoint->IsAirfield();
+	const int altMt = waypoint->GetAltitude();
+	const int altFt = round(altMt / Altitude::FEET2METER);
+	file << "<Placemark>\n"
+		<< "<name>" << waypoint->GetName() << "</name>\n"
+		<< "<visibility>" << (isAirfield ? 1 : 0) << "</visibility>\n"
+		<< "<ExtendedData>\n"
+		<< "<SchemaData>\n"
+		<< "<SimpleData name=\"Name\">" << waypoint->GetName() << "</SimpleData>\n"
+		<< "<SimpleData name=\"Type\">" << waypoint->GetTypeName() << "</SimpleData>\n"
+		<< "<SimpleData name=\"Code\">" << waypoint->GetCode() << "</SimpleData>\n"
+		<< "<SimpleData name=\"Country\">" << waypoint->GetCountry() << "</SimpleData>\n"
+		<< "<SimpleData name=\"Altitude\">" << altMt << " m - " << altFt << " ft" << "</SimpleData>\n";
+	if(isAirfield) {
+		const Airfield* airfield = (const Airfield*)waypoint;
+		file << "<SimpleData name=\"Runway direction\">" << airfield->GetRunwayDir() << "°</SimpleData>\n"
+		<< "<SimpleData name=\"Runway length\">" << airfield->GetRunwayLength() << " m</SimpleData>\n"
+		<< "<SimpleData name=\"Radio frequency\">" << airfield->GetRadioFrequency() << " MHz</SimpleData>\n";
+	}
+	file << "<SimpleData name=\"Description\">" << waypoint->GetDescription() << "</SimpleData>\n"
+		<< "</SchemaData>\n"
+		<< "</ExtendedData>\n";
+}
+
 void KMLwriter::OpenPolygon(const bool extrude, const bool absolute) {
 	file << "<Polygon>\n";
 	if (extrude) file << "<extrude>1</extrude>\n";
@@ -241,7 +268,9 @@ void KMLwriter::WriteSideWalls(const Airspace& airspace, const std::vector<doubl
 	}
 }
 
-bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, Airspace>& airspaces) {
+bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, Airspace>& airspaces, const std::multimap<int, Waypoint*>& waypoints) {
+	if(airspaces.empty() && waypoints.empty()) return false;
+
 	// If it's a KMZ we will have to compress
 	const bool compressAsKMZ = boost::iequals(boost::filesystem::path(filename).extension().string(), ".kmz");
 	
@@ -265,70 +294,126 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 
 	WriteHeader();
 
-	// For each category
-	for (int t = Airspace::CLASSA; t <= Airspace::UNDEFINED; t++) {
+	// If there are waypoints
+	if(!waypoints.empty()) {
 		
-		// First verify if there are airspaces of that class
-		if (airspaces.count(t) == 0) continue;
-		
-		// Prepare the folder
+		// Prepare a folder to group all the airspace
 		file << "<Folder>\n"
-			"<name>" << Airspace::CategoryName((Airspace::Type)t) << "</name>\n"
-			"<visibility>" << (Airspace::CategoryVisibleByDefault((Airspace::Type)t) ? 1 : 0) <<"</visibility>\n"
-			"<open>false</open>\n";
+		"<name>Waypoints</name>\n"
+		"<visibility>1</visibility>\n"
+		"<open>true</open>\n";
 		
-		const auto filtered = airspaces.equal_range(t);
-		for (auto it = filtered.first; it != filtered.second; ++it) {
+		// For each waypoint type
+		for (int t = Waypoint::normal; t < Waypoint::numOfWaypointTypes; t++) {
+
+			// First verify if there are waypoints of that kind
+			if (waypoints.count(t) == 0) continue;
+
+			const bool isAirfield = Waypoint::IsTypeAirfield((Waypoint::WaypointType)t);
+
+			// Prepare the folder
+			file << "<Folder>\n"
+				"<name>" << Waypoint::TypeName((Waypoint::WaypointType)t) << "</name>\n"
+				"<visibility>" << (isAirfield ? 1 : 0) <<"</visibility>\n"
+				"<open>false</open>\n";
 			
-			const Airspace& a = it->second;
+			const auto filtered = waypoints.equal_range(t);
+			for (auto it = filtered.first; it != filtered.second; ++it) {
 
-			assert(a.GetNumberOfPoints() > 3);
-			assert(a.GetFirstPoint()==a.GetLastPoint());
+				const Waypoint* w = it->second;
 
-			OpenPlacemark(a);
+				OpenPlacemark(w);
 
-			//TODO: if we have a terrain map for that area should be anyway better to get the AGL altitudes converted to AMSL
-			if (a.IsGNDbased()) WriteBaseOrTop(a, a.GetTopAltitude(), true); // then that's easy!
-			else { // otherwise we have to abuse KML which is not properly done to draw middle air aispaces
-				file << "<MultiGeometry>\n";
+				// Make the point
+				file << "<Point>\n"
+				<< "<extrude>0</extrude>\n"
+				<< "<altitudeMode>" << (t != Waypoint::normal ? "clampToGround" : "absolute") << "</altitudeMode>\n" // Except "normal" are all objects on the ground
+				<< "<coordinates>" << w->GetLongitude() << "," << w->GetLatitude() << "," << w->GetAltitude() << "</coordinates>\n"
+				<< "</Point>\n";
 
-				if (a.GetTopAltitude().IsAMSL() == a.GetBaseAltitude().IsAMSL()) { // same reference, still doable
-
-					// Top
-					WriteBaseOrTop(a, a.GetTopAltitude());
-
-					// Base
-					WriteBaseOrTop(a, a.GetBaseAltitude());
-
-					// Sides
-					WriteSideWalls(a);
-				}
-				else { // base and top altitudes not on the same reference: so find all absolute altitudes!
-					double altitudeAGLmt = (a.GetBaseAltitude().IsAGL() ? a.GetBaseAltitude() : a.GetTopAltitude()).GetAltMt();
-
-					// Try to get terrein altitude then add the AGL altitude to get AMSL altitude
-					std::vector<double> amslAltitudesMt;
-					for (const Geometry::LatLon& p : a.GetPoints()) {
-						double terrainHeightMt = defaultTerrainAltitudeMt;
-						allAGLaltitudesCovered = GetTerrainAltitudeMt(p.Lat(), p.Lon(), terrainHeightMt) && allAGLaltitudesCovered;
-						amslAltitudesMt.push_back(terrainHeightMt + altitudeAGLmt);
-					}
-
-					// Top or base, the one that is already defined as AMSL
-					WriteBaseOrTop(a, a.GetTopAltitude().IsAMSL() ? a.GetTopAltitude() : a.GetBaseAltitude());
-
-					// The other one where the altitude of the points has been reobtained as AMSL
-					WriteBaseOrTop(a, amslAltitudesMt);
-
-					// Sides, where the points with altitude AGL were reobtained as AMSL
-					WriteSideWalls(a, amslAltitudesMt);
-				}
-				file << "</MultiGeometry>\n";
+				file << "</Placemark>\n";
 			}
-			file << "</Placemark>\n";
-		}
+			file << "</Folder>\n";
+		} // for each category
 		file << "</Folder>\n";
-	}
+	} // if airspaces
+
+	// If there are airspaces
+	if(!airspaces.empty()) {
+
+		// Prepare a folder to group all the airspace
+		file << "<Folder>\n"
+		"<name>Airspace</name>\n"
+		"<visibility>1</visibility>\n"
+		"<open>true</open>\n";
+
+		// For each airspace category
+		for (int t = Airspace::CLASSA; t <= Airspace::UNDEFINED; t++) {
+
+			// First verify if there are airspaces of that class
+			if (airspaces.count(t) == 0) continue;
+
+			// Prepare the folder
+			file << "<Folder>\n"
+				"<name>" << Airspace::CategoryName((Airspace::Type)t) << "</name>\n"
+				"<visibility>" << (Airspace::CategoryVisibleByDefault((Airspace::Type)t) ? 1 : 0) <<"</visibility>\n"
+				"<open>false</open>\n";
+
+			const auto filtered = airspaces.equal_range(t);
+			for (auto it = filtered.first; it != filtered.second; ++it) {
+
+				const Airspace& a = it->second;
+
+				assert(a.GetNumberOfPoints() > 3);
+				assert(a.GetFirstPoint()==a.GetLastPoint());
+
+				OpenPlacemark(a);
+
+				//TODO: if we have a terrain map for that area should be anyway better to get the AGL altitudes converted to AMSL
+				if (a.IsGNDbased()) WriteBaseOrTop(a, a.GetTopAltitude(), true); // then that's easy!
+				else { // otherwise we have to abuse KML which is not properly done to draw middle air aispaces
+					file << "<MultiGeometry>\n";
+
+					if (a.GetTopAltitude().IsAMSL() == a.GetBaseAltitude().IsAMSL()) { // same reference, still doable
+
+						// Top
+						WriteBaseOrTop(a, a.GetTopAltitude());
+
+						// Base
+						WriteBaseOrTop(a, a.GetBaseAltitude());
+
+						// Sides
+						WriteSideWalls(a);
+					}
+					else { // base and top altitudes not on the same reference: so find all absolute altitudes!
+						double altitudeAGLmt = (a.GetBaseAltitude().IsAGL() ? a.GetBaseAltitude() : a.GetTopAltitude()).GetAltMt();
+
+						// Try to get terrein altitude then add the AGL altitude to get AMSL altitude
+						std::vector<double> amslAltitudesMt;
+						for (const Geometry::LatLon& p : a.GetPoints()) {
+							double terrainHeightMt = defaultTerrainAltitudeMt;
+							allAGLaltitudesCovered = GetTerrainAltitudeMt(p.Lat(), p.Lon(), terrainHeightMt) && allAGLaltitudesCovered;
+							amslAltitudesMt.push_back(terrainHeightMt + altitudeAGLmt);
+						}
+
+						// Top or base, the one that is already defined as AMSL
+						WriteBaseOrTop(a, a.GetTopAltitude().IsAMSL() ? a.GetTopAltitude() : a.GetBaseAltitude());
+
+						// The other one where the altitude of the points has been reobtained as AMSL
+						WriteBaseOrTop(a, amslAltitudesMt);
+
+						// Sides, where the points with altitude AGL were reobtained as AMSL
+						WriteSideWalls(a, amslAltitudesMt);
+					}
+					file << "</MultiGeometry>\n";
+				}
+				file << "</Placemark>\n";
+			}
+			file << "</Folder>\n";
+		} // for each category
+		file << "</Folder>\n";
+	} // if airspaces
+
 	file << "</Document>\n"
 		<< "</kml>\n";
 	file.close();
