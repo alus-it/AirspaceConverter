@@ -11,8 +11,6 @@
 
 #include "Waypoint.h"
 
-
-
 const std::string Waypoint::TYPE_NAMES[] = {
 	"UNDEFINED",
 	"Normal",

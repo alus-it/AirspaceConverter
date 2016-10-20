@@ -37,7 +37,7 @@ public:
 		numOfWaypointTypes
 	};
 
-	Waypoint(std::string& longName, std::string& shortName, std::string& countryCode, double lat, double lon, double alt, int style, std::string& descr)
+	Waypoint(const std::string& longName, const std::string& shortName, const std::string& countryCode, const double lat, const double lon, const int alt, const int style, const std::string& descr)
 		: name(longName)
 		, code(shortName)
 		, country(countryCode)

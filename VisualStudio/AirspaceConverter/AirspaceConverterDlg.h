@@ -39,10 +39,13 @@ private:
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnBnClickedAbout();
 	afx_msg void OnBnClickedInputFile();
+	afx_msg void OnBnClickedInputWaypoints();
 	afx_msg void OnBnClickedLoadDEM();
 	afx_msg void OnBnClickedInputFolderBt();
+	afx_msg void OnBnClickedInputWaypointsFolderBt();
 	afx_msg void OnBnClickedLoadDemFolderBt();
 	afx_msg void OnBnClickedClearInputBt();
+	afx_msg void OnBnClickedClearWaypointsBt();
 	afx_msg void OnBnClickedClearMapsBt();
 	afx_msg void OnBnClickedConvert();
 	afx_msg void OnBnClickedOpenOutputFile();
@@ -67,8 +70,11 @@ private:
 	CButton OpenOutputFolderBt;
 	CButton LoadAirspacesFolderBt;
 	CButton LoadRasterMapsFolderBt;
+	CButton loadWaypointsBt;
+	CButton loadWaypointsFolderBt;
 	CButton unloadAirspacesBt;
 	CButton unloadRasterMapsBt;
+	CButton unloadWaypointsBt;
 	CButton chooseOutputFileBt;
 	CButton CloseButton;
 	CEdit editQNHtextField;
@@ -83,6 +89,7 @@ private:
 	bool busy;
 	Processor* processor;
 	unsigned long numAirspacesLoaded;
+	unsigned long numWaypointsLoaded;
 	int numRasterMapLoaded;
 	bool isWinXPorOlder;
 	bool conversionDone;

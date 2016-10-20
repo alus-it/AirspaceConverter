@@ -74,7 +74,7 @@ bool ParseAltitude(const std::string& text, int& alt) {
 	try {
 		double altitude = std::stod(text.substr(0,pos));
 		if(feet) altitude *= Altitude::FEET2METER;
-		alt = round(altitude);
+		alt = (int)round(altitude);
 	} catch(...) {
 		return false;
 	}
@@ -99,7 +99,7 @@ bool ParseLength(const std::string& text, int& len) {
 		if (length < 0) return false;
 		if (nauticalMiles) length *= Geometry::NM2M;
 		else if (statuteMiles) length *= Geometry::MI2M;
-		len = round(length);
+		len = (int)round(length);
 	} catch (...) {
 		return false;
 	}
@@ -211,13 +211,13 @@ bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint
 				runwayDir = std::stoi(*token);
 			} catch(...) {}
 			if(runwayDir < 0 || runwayDir > 360)
-				AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid runway direction: %2s") %linecount %(*token)), true);
+				AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid runway direction: %2s") %linecount %(*token)), false);
 
 			// Runway length
 			token++;
 			int runwayLength = -1;
 			if(!ParseLength(*token,runwayLength))
-				AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid runway length: %2s") %linecount %(*token)), true);
+				AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid runway length: %2s") %linecount %(*token)), false);
 
 			// Radio frequency
 			token++;

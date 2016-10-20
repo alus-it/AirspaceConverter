@@ -59,6 +59,15 @@
     <ClInclude Include="..\..\src\Geometry.h">
       <Filter>Source Files\Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Airfield.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\CUPreader.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Waypoint.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AirspaceConverterDlg.cpp">
@@ -95,6 +104,15 @@
       <Filter>Source Files\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Geometry.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Airfield.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\CUPreader.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Waypoint.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
   </ItemGroup>
