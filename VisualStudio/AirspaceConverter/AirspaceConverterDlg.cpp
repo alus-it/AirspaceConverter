@@ -349,11 +349,11 @@ void CAirspaceConverterDlg::EndBusy() {
 	unloadAirspacesBt.EnableWindow(numAirspacesLoaded > 0 ? TRUE : FALSE);
 	unloadWaypointsBt.EnableWindow(numWaypointsLoaded > 0 ? TRUE : FALSE);
 	unloadRasterMapsBt.EnableWindow(numRasterMapLoaded > 0 ? TRUE : FALSE);
-	ConvertBt.EnableWindow(numAirspacesLoaded > 0 && !outputFile.empty() ? TRUE : FALSE);
+	ConvertBt.EnableWindow((numAirspacesLoaded > 0 || (isKmlKmzFile && numWaypointsLoaded > 0)) && !outputFile.empty() ? TRUE : FALSE);
 	OutputTypeCombo.EnableWindow(TRUE);
 	editQNHtextField.EnableWindow(isKmlKmzFile ? numAirspacesLoaded == 0 : FALSE);
 	editDefualtAltTextField.EnableWindow(isKmlKmzFile);
-	chooseOutputFileBt.EnableWindow(numAirspacesLoaded == 0 ? FALSE : TRUE);
+	chooseOutputFileBt.EnableWindow(numAirspacesLoaded > 0 || (isKmlKmzFile && numWaypointsLoaded > 0) ? TRUE : TRUE);
 	CloseButton.EnableWindow(TRUE);
 	progressBar.SetMarquee(FALSE, 1);
 	progressBar.ModifyStyle(PBS_MARQUEE, 0);
@@ -369,7 +369,7 @@ void CAirspaceConverterDlg::OnBnClickedInputFile() {
 		conversionDone = false;
 		POSITION pos(dlg.GetStartPosition());
 		while (pos) {
-			std::string inputFilename(CT2CA(dlg.GetNextPathName(pos)));
+			const std::string inputFilename(CT2CA(dlg.GetNextPathName(pos)));
 			if (!boost::filesystem::is_regular_file(inputFilename)) continue;
 			if(processor->AddInputFile(inputFilename) && outputFile.empty()) outputFile = inputFilename;
 		}
@@ -383,7 +383,13 @@ void CAirspaceConverterDlg::OnBnClickedInputWaypoints() {
 	CFileDialog dlg(TRUE, _T("cup"), NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("SeeYou waypoints|*.cup||"), (CWnd*)this, 0, TRUE);
 	if (dlg.DoModal() == IDOK) {
 		POSITION pos(dlg.GetStartPosition());
-		while (pos) processor->AddWaypointsFile(std::string(CT2CA(dlg.GetNextPathName(pos))));
+		while (pos) {
+			const std::string inputFilename(CT2CA(dlg.GetNextPathName(pos)));
+			if (!boost::filesystem::is_regular_file(inputFilename)) continue;
+			if(outputFile.empty()) outputFile = inputFilename;
+			processor->AddWaypointsFile(inputFilename);
+		}
+		UpdateOutputFilename();
 		if (processor != nullptr && processor->LoadWaypointsFiles()) StartBusy();
 		else MessageBox(_T("Error while starting read waypoints files thread."), _T("Error"), MB_ICONERROR);
 	}
@@ -393,7 +399,11 @@ void CAirspaceConverterDlg::OnBnClickedLoadDEM() {
 	CFileDialog dlg(TRUE, _T("dem"), NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("Terrain raster map|*.dem||"), (CWnd*)this, 0, TRUE);
 	if (dlg.DoModal() == IDOK) {
 		POSITION pos(dlg.GetStartPosition());
-		while (pos) processor->AddRasterMap(std::string(CT2CA(dlg.GetNextPathName(pos))));
+		while (pos) {
+			const std::string inputFilename(CT2CA(dlg.GetNextPathName(pos)));
+			if (!boost::filesystem::is_regular_file(inputFilename)) continue;
+			processor->AddRasterMap(inputFilename);
+		}
 		if (processor != nullptr && processor->LoadDEMfiles()) StartBusy();
 		else MessageBox(_T("Error while starting read raster maps thread."), _T("Error"), MB_ICONERROR);
 	}
@@ -422,9 +432,12 @@ void CAirspaceConverterDlg::OnBnClickedInputWaypointsFolderBt() {
 		boost::filesystem::path root(dlgFolder.GetFolderPath());
 		if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
 		for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
-			if (boost::filesystem::is_regular_file(*it) && boost::iequals(it->path().extension().string(), ".cup"))
+			if (boost::filesystem::is_regular_file(*it) && boost::iequals(it->path().extension().string(), ".cup")) {
 				processor->AddWaypointsFile(it->path().string());
+				if (outputFile.empty()) outputFile = it->path().string();
+			}
 		}
+		UpdateOutputFilename();
 		if (processor != nullptr && processor->LoadWaypointsFiles()) StartBusy();
 		else MessageBox(_T("Error while starting read waypoints files thread."), _T("Error"), MB_ICONERROR);
 	}
@@ -447,7 +460,7 @@ void CAirspaceConverterDlg::OnBnClickedLoadDemFolderBt() {
 void CAirspaceConverterDlg::OnBnClickedClearInputBt() {
 	if (processor->UnloadAirspaces()) {
 		numAirspacesLoaded = 0;
-		outputFile.clear();
+		if(numWaypointsLoaded == 0) outputFile.clear();
 		UpdateOutputFilename();
 		LogMessage("Unloaded input airspaces.");
 		EndBusy();
@@ -458,6 +471,7 @@ void CAirspaceConverterDlg::OnBnClickedClearInputBt() {
 void CAirspaceConverterDlg::OnBnClickedClearWaypointsBt() {
 	if (processor->UnloadWaypoints()) {
 		numWaypointsLoaded = 0;
+		if (numAirspacesLoaded == 0) outputFile.clear();
 		LogMessage("Unloaded input waypoints.");
 		EndBusy();
 	}

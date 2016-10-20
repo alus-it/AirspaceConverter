@@ -20,6 +20,7 @@ class Altitude;
 class Airspace;
 class RasterMap;
 class Waypoint;
+class Airfield;
 
 class KMLwriter {
 public:
@@ -48,6 +49,7 @@ private:
 	void WriteBaseOrTop(const Airspace& airspace, const std::vector<double>& altitudesAmsl);
 
 	static const std::string colors[][2];
+	static const std::string airfieldColors[][2];
 	static std::vector<RasterMap*> terrainMaps;
 	static double defaultTerrainAltitudeMt;	
 	std::ofstream file;

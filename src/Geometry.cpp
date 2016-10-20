@@ -27,6 +27,8 @@ const double Geometry::NM2RAD = PI / (180 * 60);
 const double Geometry::RAD2NM = (180.0 * 60.0) / PI;
 const double Geometry::NM2M = 1852.0;
 const double Geometry::MI2M = 1609.344;
+const double Geometry::M2RAD = NM2RAD / NM2M;
+
 const double Geometry::TOL = 1e-10;
 
 double Geometry::resolution = 0.3 * NM2RAD; // 0.3 NM = 555.6 m
@@ -260,6 +262,40 @@ double Geometry::AverageRadius(const Geometry::LatLon& center, const std::vector
 	double radius = 0;
 	for (const Geometry::LatLon* p : circlePoints) radius += CalcAngularDist(latc, lonc, p->LatRad(), p->LonRad());
 	return radius / circlePoints.size();
+}
+
+const bool Geometry::CalcAirfieldPolygon(const double lat, const double lon, const int length, const int dir, std::vector<LatLon>& polygon) {
+	static const double thrtyMeters = 30.0 * M2RAD;
+	assert(polygon.empty());
+	assert(length > 0);
+	assert(dir >= 0 && dir <= 360);
+	const double clat = lat * DEG2RAD;
+	const double clon = -lon * DEG2RAD;
+	const double fdir = dir * DEG2RAD;
+	const double bdir = AbsAngle(fdir + PI);
+	const double hlen = (length / 2) * M2RAD;
+
+	double llat, llon;
+	CalcRadialPoint(clat, clon, AbsAngle(fdir - PI_2), thrtyMeters, llat, llon);
+
+	double rlat, rlon;
+	CalcRadialPoint(clat, clon, AbsAngle(fdir + PI_2), thrtyMeters, rlat, rlon);
+
+	double plat, plon;
+	CalcRadialPoint(llat, llon, fdir, hlen, plat, plon);
+	polygon.push_back(LatLon::CreateFromRadiants(plat, plon));
+
+	CalcRadialPoint(rlat, rlon, fdir, hlen, plat, plon);
+	polygon.push_back(LatLon::CreateFromRadiants(plat, plon));
+
+	CalcRadialPoint(rlat, rlon, bdir, hlen, plat, plon);
+	polygon.push_back(LatLon::CreateFromRadiants(plat, plon));
+
+	CalcRadialPoint(llat, llon, bdir, hlen, plat, plon);
+	polygon.push_back(LatLon::CreateFromRadiants(plat, plon));
+
+	assert(polygon.size() == 4);
+	return true;
 }
 
 bool Point::Discretize(std::vector<LatLon>& output) const {

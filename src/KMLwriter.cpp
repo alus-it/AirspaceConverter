@@ -16,17 +16,18 @@
 #include "AirspaceConverter.h"
 #include "Waypoint.h"
 #include "Airfield.h"
+#include "Geometry.h"
 #include <zip.h>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 const std::string KMLwriter::colors[][2] = {
-	{ "509900ff", "7f9900ff" }, //CLASSA   
-	{ "50cc0000", "7fcc0000" }, //CLASSB   
-	{ "50cc3399", "7fcc3399" }, //CLASSC   
-	{ "50ff9900", "7fff9900" }, //CLASSD   
-	{ "50339900", "7f339900" }, //CLASSE   
-	{ "503399ff", "7f3399ff" }, //CLASSF   
+	{ "509900ff", "7f9900ff" }, //CLASSA
+	{ "50cc0000", "7fcc0000" }, //CLASSB
+	{ "50cc3399", "7fcc3399" }, //CLASSC
+	{ "50ff9900", "7fff9900" }, //CLASSD
+	{ "50339900", "7f339900" }, //CLASSE
+	{ "503399ff", "7f3399ff" }, //CLASSF
 	{ "50ff99ff", "7fff99ff" }, //CLASSG
 	{ "500000FF", "7F0000FF" }, //DANGER
 	{ "500000FF", "7F0000FF" }, //PROHIBITED
@@ -43,6 +44,15 @@ const std::string KMLwriter::colors[][2] = {
 	{ "403399ff", "7fd4d4d4" }, //WAVE
 	{ "40000000", "7fd4d4d4" }, //UNKNOWN
 	{ "40000000", "7fd4d4d4" }  //UNDEFINED
+};
+
+const std::string KMLwriter::airfieldColors[][2] = {
+	{ "509900ff", "7f9900ff" }, //UNDEFINED
+	{ "50cc0000", "7fcc0000" }, //Normal
+	{ "4b14F064", "3214F064" }, //AirfieldGrass
+	{ "4b143C64", "37143C64" }, //Outlanding
+	{ "4bFAFAFA", "37FAFAFA" }, //GliderSite
+	{ "4b6E6E6E", "376E6E6E" }, //AirfieldSolid
 };
 
 std::vector<RasterMap*> KMLwriter::terrainMaps;
@@ -121,6 +131,17 @@ void KMLwriter::WriteHeader() {
 				<< "</PolyStyle>\n"
 				<< "</Style>\n";
 		}
+		for (int t = Waypoint::airfieldGrass; t <= Waypoint::airfieldSolid; t++) {
+			file << "<Style id = \"Style" << Waypoint::TypeName((Waypoint::WaypointType)t) << "\">\n"
+				<< "<LineStyle>\n"
+				<< "<color>" << airfieldColors[t][0] << "</color>\n"
+				<< "<width>1.5</width>\n"
+				<< "</LineStyle>\n"
+				<< "<PolyStyle>\n"
+				<< "<color>" << airfieldColors[t][1] << "</color>\n"
+				<< "</PolyStyle>\n"
+				<< "</Style>\n";
+		}
 }
 
 void KMLwriter::OpenPlacemark(const Airspace& airspace) {
@@ -143,8 +164,9 @@ void KMLwriter::OpenPlacemark(const Waypoint* waypoint) {
 	const int altMt = waypoint->GetAltitude();
 	const int altFt = (int)round(altMt / Altitude::FEET2METER);
 	file << "<Placemark>\n"
-		<< "<name>" << waypoint->GetName() << "</name>\n"
-		<< "<visibility>" << (isAirfield ? 1 : 0) << "</visibility>\n"
+		<< "<name>" << waypoint->GetName() << "</name>\n";
+	if (isAirfield) file << "<styleUrl>#Style" << waypoint->GetTypeName() << "</styleUrl>\n";
+	file << "<visibility>" << (isAirfield ? 1 : 0) << "</visibility>\n"
 		<< "<ExtendedData>\n"
 		<< "<SchemaData>\n"
 		<< "<SimpleData name=\"Name\">" << waypoint->GetName() << "</SimpleData>\n"
@@ -154,7 +176,7 @@ void KMLwriter::OpenPlacemark(const Waypoint* waypoint) {
 		<< "<SimpleData name=\"Altitude\">" << altMt << " m - " << altFt << " ft" << "</SimpleData>\n";
 	if(isAirfield) {
 		const Airfield* airfield = (const Airfield*)waypoint;
-		file << "<SimpleData name=\"Runway direction\">" << airfield->GetRunwayDir() << "°</SimpleData>\n"
+		file << "<SimpleData name=\"Runway direction\">" << airfield->GetRunwayDir() << "</SimpleData>\n"
 		<< "<SimpleData name=\"Runway length\">" << airfield->GetRunwayLength() << " m</SimpleData>\n"
 		<< "<SimpleData name=\"Radio frequency\">" << airfield->GetRadioFrequency() << " MHz</SimpleData>\n";
 	}
@@ -280,9 +302,13 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 		return false;
 	}
 
+	// We need anyway to make a KML file also to compress it as KMZ
 	const std::string fileKML(compressAsKMZ ? boost::filesystem::path(filename).replace_extension(".kml").string() : filename);
 
+	// Make sure the file is not already open
 	if (file.is_open()) file.close();
+	
+	// Open the output file
 	file.open(fileKML, std::ios::out | std::ios::trunc | std::ios::binary);
 	if (!file.is_open() || file.bad()) {
 		AirspaceConverter::LogMessage("ERROR: Unable to open output file: " + filename, true);
@@ -292,6 +318,7 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 
 	allAGLaltitudesCovered = true;
 
+	// Write KML header
 	WriteHeader();
 
 	// If there are waypoints
@@ -319,18 +346,63 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 			
 			const auto filtered = waypoints.equal_range(t);
 			for (auto it = filtered.first; it != filtered.second; ++it) {
-
 				const Waypoint* w = it->second;
 
+				// Open placemark
 				OpenPlacemark(w);
 
-				// Make the point
-				file << "<Point>\n"
-				<< "<extrude>0</extrude>\n"
-				<< "<altitudeMode>" << (t != Waypoint::normal ? "clampToGround" : "absolute") << "</altitudeMode>\n" // Except "normal" are all objects on the ground
-				<< "<coordinates>" << w->GetLongitude() << "," << w->GetLatitude() << "," << w->GetAltitude() << "</coordinates>\n"
-				<< "</Point>\n";
+				// Flag to remember if the runway perimeter has been drawn
+				bool airfieldDrawn = false;
 
+				// If it is an airfield drw an estimation of the runway perimeter
+				if (isAirfield) {
+					
+					// Get the airfield
+					const Airfield* a = (const Airfield*)w;
+					
+					// Get its rinway length and direction
+					const int leng = a->GetRunwayLength();
+					const int dir = a->GetRunwayDir();
+
+					// If they are valid...
+					if (leng > 0 && dir >= 0 && dir <= 360) {
+
+						// Calculate the runway perimeter
+						std::vector<Geometry::LatLon> airfieldPerimeter;
+						if (Geometry::CalcAirfieldPolygon(a->GetLatitude(), a->GetLongitude(), leng, dir, airfieldPerimeter)) {
+							
+							// Open a polygon clamped onto the ground
+							file << "<Polygon>\n"
+								<< "<altitudeMode>clampToGround</altitudeMode>\n"
+								<< "<outerBoundaryIs>\n"
+								<< "<LinearRing>\n"
+								<< "<coordinates>\n";
+
+							// Add the four points
+							for (const Geometry::LatLon& p : airfieldPerimeter)
+								file << p.Lon() << "," << p.Lat() << "," << a->GetAltitude() << "\n";
+							
+							// Close the perimeter re-adding the first point 
+							file << airfieldPerimeter.front().Lon() << "," << airfieldPerimeter.front().Lat() << "," << a->GetAltitude() << "\n";
+
+							// Close the polygon
+							ClosePolygon();
+
+							// The airfield perimeter has been drawn
+							airfieldDrawn = true;
+						}
+					}
+				}
+
+				// If no airfield perimeter was drawn ...
+				if (!airfieldDrawn) //... draw the point marker
+					file << "<Point>\n"
+						<< "<extrude>0</extrude>\n"
+						<< "<altitudeMode>" << (t != Waypoint::normal ? "clampToGround" : "absolute") << "</altitudeMode>\n" // Except "normal" are all objects on the ground
+						<< "<coordinates>" << w->GetLongitude() << "," << w->GetLatitude() << "," << w->GetAltitude() << "</coordinates>\n"
+						<< "</Point>\n";
+				
+				// Close the placemark
 				file << "</Placemark>\n";
 			}
 			file << "</Folder>\n";
