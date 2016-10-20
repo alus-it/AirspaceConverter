@@ -74,6 +74,7 @@ CAirspaceConverterDlg::CAirspaceConverterDlg(CWnd* pParent /*=NULL*/)
 	, processor(nullptr)
 	, m_hIcon(AfxGetApp()->LoadIcon(IDR_MAINFRAME))
 	, numAirspacesLoaded(0)
+	, numWaypointsLoaded(0)
 	, numRasterMapLoaded(0)
 	, busy(false)
 	, isWinXPorOlder(false)
@@ -87,6 +88,7 @@ CAirspaceConverterDlg::~CAirspaceConverterDlg() {
 void CAirspaceConverterDlg::DoDataExchange(CDataExchange* pDX) {
 	CDialog::DoDataExchange(pDX);
 	DDX_Text(pDX, IDC_NUM_AIRSPACES, numAirspacesLoaded);
+	DDX_Text(pDX, IDC_NUM_WAYPOINTS, numWaypointsLoaded);
 	DDX_Text(pDX, IDC_NUM_RASTER_MAPS, numRasterMapLoaded);
 	DDX_Text(pDX, IDC_QNH_EDIT, QNH);
 	DDV_MinMaxDouble(pDX, QNH, 800, 1050);
@@ -94,6 +96,7 @@ void CAirspaceConverterDlg::DoDataExchange(CDataExchange* pDX) {
 	DDV_MinMaxDouble(pDX, defaultTerrainAlt, -100, 10000);
 	DDX_Control(pDX, IDC_PROGRESS_BAR, progressBar);
 	DDX_Control(pDX, IDC_INPUT_FILE_BT, loadInputFileBt);
+	DDX_Control(pDX, IDC_INPUT_WAYPOINTS_BT, loadWaypointsBt);
 	DDX_Control(pDX, IDC_LOAD_DEM_BT, loadDEMfileBt);
 	DDX_Control(pDX, IDC_CONVERT_BT, ConvertBt);
 	DDX_Control(pDX, IDC_OPEN_OUTPUT_FILE, OpenOutputFileBt);
@@ -101,10 +104,12 @@ void CAirspaceConverterDlg::DoDataExchange(CDataExchange* pDX) {
 	DDX_Control(pDX, IDOK, CloseButton);
 	DDX_Control(pDX, IDC_INPUT_FOLDER_BT, LoadAirspacesFolderBt);
 	DDX_Control(pDX, IDC_LOAD_DEM_FOLDER_BT, LoadRasterMapsFolderBt);
+	DDX_Control(pDX, IDC_INPUT_WAYPOINTS_FOLDER_BT, loadWaypointsFolderBt);
 	DDX_Control(pDX, IDC_QNH_EDIT, editQNHtextField);
 	DDX_Control(pDX, IDC_DEFAULT_TERRAIN_ALT_EDIT, editDefualtAltTextField);
 	DDX_Control(pDX, IDC_CLEAR_INPUT_BT, unloadAirspacesBt);
 	DDX_Control(pDX, IDC_CLEAR_MAPS_BT, unloadRasterMapsBt);
+	DDX_Control(pDX, IDC_CLEAR_WAYPOINTS_BT, unloadWaypointsBt);
 	DDX_Control(pDX, IDC_OUTPUT_FILE_BT, chooseOutputFileBt);
 	DDX_Control(pDX, IDC_EDIT_OUTPUT_FILENAME, outputFileEditBox);
 	DDX_Control(pDX, IDC_LOG, LoggingBox);
@@ -116,6 +121,7 @@ BEGIN_MESSAGE_MAP(CAirspaceConverterDlg, CDialog)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_INPUT_FILE_BT, &CAirspaceConverterDlg::OnBnClickedInputFile)
+	ON_BN_CLICKED(IDC_INPUT_WAYPOINTS_BT, &CAirspaceConverterDlg::OnBnClickedInputWaypoints)
 	ON_BN_CLICKED(IDC_LOAD_DEM_BT, &CAirspaceConverterDlg::OnBnClickedLoadDEM)
 	ON_BN_CLICKED(IDC_CONVERT_BT, &CAirspaceConverterDlg::OnBnClickedConvert)
 	ON_MESSAGE(WM_GENERAL_WORK_DONE, &CAirspaceConverterDlg::OnGeneralEndOperations)
@@ -125,8 +131,10 @@ BEGIN_MESSAGE_MAP(CAirspaceConverterDlg, CDialog)
 	ON_BN_CLICKED(IDC_OPEN_OUTPUT_FOLDER, &CAirspaceConverterDlg::OnBnClickedOpenOutputFolder)
 	ON_BN_CLICKED(IDC_ABOUT, &CAirspaceConverterDlg::OnBnClickedAbout)
 	ON_BN_CLICKED(IDC_INPUT_FOLDER_BT, &CAirspaceConverterDlg::OnBnClickedInputFolderBt)
+	ON_BN_CLICKED(IDC_INPUT_WAYPOINTS_FOLDER_BT, &CAirspaceConverterDlg::OnBnClickedInputWaypointsFolderBt)
 	ON_BN_CLICKED(IDC_LOAD_DEM_FOLDER_BT, &CAirspaceConverterDlg::OnBnClickedLoadDemFolderBt)
 	ON_BN_CLICKED(IDC_CLEAR_INPUT_BT, &CAirspaceConverterDlg::OnBnClickedClearInputBt)
+	ON_BN_CLICKED(IDC_CLEAR_WAYPOINTS_BT, &CAirspaceConverterDlg::OnBnClickedClearWaypointsBt)
 	ON_BN_CLICKED(IDC_CLEAR_MAPS_BT, &CAirspaceConverterDlg::OnBnClickedClearMapsBt)
 	ON_BN_CLICKED(IDC_OUTPUT_FILE_BT, &CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt)
 	ON_CBN_SELCHANGE(IDC_COMBO_OUTPUT_TYPE, &CAirspaceConverterDlg::OnBnClickedOutputTypeCombo)
@@ -231,14 +239,17 @@ void CAirspaceConverterDlg::StartBusy() {
 	progressBar.ModifyStyle(0, PBS_MARQUEE);
 	progressBar.SetMarquee(TRUE, 1);
 	loadInputFileBt.EnableWindow(FALSE);
+	loadWaypointsBt.EnableWindow(FALSE);
 	loadDEMfileBt.EnableWindow(FALSE);
 	if (!isWinXPorOlder) {
 		LoadAirspacesFolderBt.EnableWindow(FALSE);
+		loadWaypointsFolderBt.EnableWindow(FALSE);
 		LoadRasterMapsFolderBt.EnableWindow(FALSE);
 		OpenOutputFileBt.EnableWindow(FALSE);
 		OpenOutputFolderBt.EnableWindow(FALSE);
 	}
 	unloadAirspacesBt.EnableWindow(FALSE);
+	unloadWaypointsBt.EnableWindow(FALSE);
 	unloadRasterMapsBt.EnableWindow(FALSE);
 	OutputTypeCombo.EnableWindow(FALSE);
 	editQNHtextField.EnableWindow(FALSE);
@@ -318,6 +329,7 @@ void CAirspaceConverterDlg::EndBusy() {
 	if (processor != nullptr) {
 		processor->Join();
 		numAirspacesLoaded = processor->GetNumOfAirspaces();
+		numWaypointsLoaded = processor->GetNumOfWaypoints();
 		numRasterMapLoaded = processor->GetNumOfTerrainMaps();
 	} else {
 		numAirspacesLoaded = 0;
@@ -325,15 +337,18 @@ void CAirspaceConverterDlg::EndBusy() {
 	}
 	BOOL isKmlKmzFile(OutputTypeCombo.GetCurSel() <= AirspaceConverter::KML);
 	loadInputFileBt.EnableWindow(TRUE);
+	loadWaypointsBt.EnableWindow(isKmlKmzFile);
 	loadDEMfileBt.EnableWindow(isKmlKmzFile);
 	if (!isWinXPorOlder) {
 		LoadAirspacesFolderBt.EnableWindow(TRUE);
+		loadWaypointsFolderBt.EnableWindow(isKmlKmzFile);
 		LoadRasterMapsFolderBt.EnableWindow(isKmlKmzFile);
 		OpenOutputFileBt.EnableWindow(conversionDone);
 		OpenOutputFolderBt.EnableWindow(conversionDone);
 	}
 	unloadAirspacesBt.EnableWindow(numAirspacesLoaded > 0 ? TRUE : FALSE);
-	unloadRasterMapsBt.EnableWindow(numRasterMapLoaded  > 0 ? TRUE : FALSE);
+	unloadWaypointsBt.EnableWindow(numWaypointsLoaded > 0 ? TRUE : FALSE);
+	unloadRasterMapsBt.EnableWindow(numRasterMapLoaded > 0 ? TRUE : FALSE);
 	ConvertBt.EnableWindow(numAirspacesLoaded > 0 && !outputFile.empty() ? TRUE : FALSE);
 	OutputTypeCombo.EnableWindow(TRUE);
 	editQNHtextField.EnableWindow(isKmlKmzFile ? numAirspacesLoaded == 0 : FALSE);
@@ -364,6 +379,16 @@ void CAirspaceConverterDlg::OnBnClickedInputFile() {
 	}
 }
 
+void CAirspaceConverterDlg::OnBnClickedInputWaypoints() {
+	CFileDialog dlg(TRUE, _T("cup"), NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("SeeYou waypoints|*.cup||"), (CWnd*)this, 0, TRUE);
+	if (dlg.DoModal() == IDOK) {
+		POSITION pos(dlg.GetStartPosition());
+		while (pos) processor->AddWaypointsFile(std::string(CT2CA(dlg.GetNextPathName(pos))));
+		if (processor != nullptr && processor->LoadWaypointsFiles()) StartBusy();
+		else MessageBox(_T("Error while starting read waypoints files thread."), _T("Error"), MB_ICONERROR);
+	}
+}
+
 void CAirspaceConverterDlg::OnBnClickedLoadDEM() {
 	CFileDialog dlg(TRUE, _T("dem"), NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("Terrain raster map|*.dem||"), (CWnd*)this, 0, TRUE);
 	if (dlg.DoModal() == IDOK) {
@@ -391,6 +416,20 @@ void CAirspaceConverterDlg::OnBnClickedInputFolderBt() {
 	}
 }
 
+void CAirspaceConverterDlg::OnBnClickedInputWaypointsFolderBt() {
+	CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
+	if (dlgFolder.DoModal() == IDOK) {
+		boost::filesystem::path root(dlgFolder.GetFolderPath());
+		if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
+		for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
+			if (boost::filesystem::is_regular_file(*it) && boost::iequals(it->path().extension().string(), ".cup"))
+				processor->AddWaypointsFile(it->path().string());
+		}
+		if (processor != nullptr && processor->LoadWaypointsFiles()) StartBusy();
+		else MessageBox(_T("Error while starting read waypoints files thread."), _T("Error"), MB_ICONERROR);
+	}
+}
+
 void CAirspaceConverterDlg::OnBnClickedLoadDemFolderBt() {
 	CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
 	if (dlgFolder.DoModal() == IDOK) {
@@ -414,6 +453,15 @@ void CAirspaceConverterDlg::OnBnClickedClearInputBt() {
 		EndBusy();
 	}
 	assert(numAirspacesLoaded == 0);
+}
+
+void CAirspaceConverterDlg::OnBnClickedClearWaypointsBt() {
+	if (processor->UnloadWaypoints()) {
+		numWaypointsLoaded = 0;
+		LogMessage("Unloaded input waypoints.");
+		EndBusy();
+	}
+	assert(numWaypointsLoaded == 0);
 }
 
 void CAirspaceConverterDlg::OnBnClickedClearMapsBt() {
@@ -473,8 +521,12 @@ void CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt() {
 void CAirspaceConverterDlg::OnBnClickedOutputTypeCombo() {
 	UpdateOutputFilename();
 	BOOL isKmlKmzFile(OutputTypeCombo.GetCurSel() <= AirspaceConverter::KML);
+	loadWaypointsBt.EnableWindow(isKmlKmzFile);
 	loadDEMfileBt.EnableWindow(isKmlKmzFile);
-	if (!isWinXPorOlder) LoadRasterMapsFolderBt.EnableWindow(isKmlKmzFile);
+	if (!isWinXPorOlder) {
+		loadWaypointsFolderBt.EnableWindow(isKmlKmzFile);
+		LoadRasterMapsFolderBt.EnableWindow(isKmlKmzFile);
+	}
 	editQNHtextField.EnableWindow(isKmlKmzFile ? numAirspacesLoaded == 0 : FALSE);
 	editDefualtAltTextField.EnableWindow(isKmlKmzFile);
 	UpdateData(FALSE);

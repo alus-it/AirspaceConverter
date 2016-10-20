@@ -205,14 +205,17 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\Airfield.h" />
     <ClInclude Include="..\..\src\Airspace.h" />
     <ClInclude Include="..\..\src\AirspaceConverter.h" />
+    <ClInclude Include="..\..\src\CUPreader.h" />
     <ClInclude Include="..\..\src\Geometry.h" />
     <ClInclude Include="..\..\src\KMLwriter.h" />
     <ClInclude Include="..\..\src\OpenAIPreader.h" />
     <ClInclude Include="..\..\src\OpenAir.h" />
     <ClInclude Include="..\..\src\PFMwriter.h" />
     <ClInclude Include="..\..\src\RasterMap.h" />
+    <ClInclude Include="..\..\src\Waypoint.h" />
     <ClInclude Include="AirspaceConverterApp.h" />
     <ClInclude Include="AirspaceConverterDlg.h" />
     <ClInclude Include="Processor.h" />
@@ -221,14 +224,17 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Airfield.cpp" />
     <ClCompile Include="..\..\src\Airspace.cpp" />
     <ClCompile Include="..\..\src\AirspaceConverter.cpp" />
+    <ClCompile Include="..\..\src\CUPreader.cpp" />
     <ClCompile Include="..\..\src\Geometry.cpp" />
     <ClCompile Include="..\..\src\KMLwriter.cpp" />
     <ClCompile Include="..\..\src\OpenAIPreader.cpp" />
     <ClCompile Include="..\..\src\OpenAir.cpp" />
     <ClCompile Include="..\..\src\PFMwriter.cpp" />
     <ClCompile Include="..\..\src\RasterMap.cpp" />
+    <ClCompile Include="..\..\src\Waypoint.cpp" />
     <ClCompile Include="AirspaceConverterApp.cpp" />
     <ClCompile Include="AirspaceConverterDlg.cpp" />
     <ClCompile Include="Processor.cpp" />

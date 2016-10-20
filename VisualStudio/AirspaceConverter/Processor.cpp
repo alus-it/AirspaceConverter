@@ -18,6 +18,8 @@
 #include "../../src/KMLwriter.h"
 #include "../../src/PFMwriter.h"
 #include "../../src/OpenAir.h"
+#include "../../src/CUPreader.h"
+#include "../../src/Waypoint.h"
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
@@ -31,6 +33,7 @@ Processor::Processor(HWND hwnd) :
 Processor::~Processor() {
 	//Abort();
 	KMLwriter::ClearTerrainMaps();
+	UnloadWaypoints();
 }
 
 bool Processor::AddInputFile(const std::string& inputFile)
@@ -89,6 +92,26 @@ bool Processor::UnloadRasterMaps() {
 	return true;
 }
 
+bool Processor::LoadWaypointsFiles() {
+	if (workerThread.joinable() || CUPfiles.empty()) return false;
+	//abort = false;
+	workerThread = std::thread(std::bind(&Processor::LoadWaypointsFilesThread, this));
+	return true;
+}
+
+void Processor::LoadWaypointsFilesThread() {
+	for (const std::string& inputFile : CUPfiles) CUPreader::ReadFile(inputFile, waypoints);
+	CUPfiles.clear();
+	PostMessage(window, WM_GENERAL_WORK_DONE, 0, 0);
+}
+
+bool Processor::UnloadWaypoints() {
+	if (workerThread.joinable()) return false;
+	for (const std::pair<const int, Waypoint*>& wpt : waypoints) delete wpt.second;
+	waypoints.clear();
+	return true;
+}
+
 bool Processor::MakeKMLfile(const std::string& outputKMLfile, const double& defaultTerraninAltMt)
 {
 	if (workerThread.joinable()) return false;
@@ -102,7 +125,7 @@ bool Processor::MakeKMLfile(const std::string& outputKMLfile, const double& defa
 void Processor::MakeKMLfileThread()
 {
 	KMLwriter writer;
-	if (writer.WriteFile(outputFile, airspaces)) PostMessage(window, writer.WereAllAGLaltitudesCovered() ? WM_WRITE_OUTPUT_OK : WM_WRITE_KML_AGL_WARNING, 0, 0);
+	if (writer.WriteFile(outputFile, airspaces, waypoints)) PostMessage(window, writer.WereAllAGLaltitudesCovered() ? WM_WRITE_OUTPUT_OK : WM_WRITE_KML_AGL_WARNING, 0, 0);
 	else PostMessage(window, WM_GENERAL_WORK_DONE, 0, 0);
 }
 

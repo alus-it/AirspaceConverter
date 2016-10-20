@@ -23,21 +23,27 @@
 #define WM_WRITE_KML_AGL_WARNING	WM_USER+3
 
 class Airspace;
+class Waypoint;
 
 class Processor {
 public:
 	Processor(HWND hwnd);
 	~Processor();
 	bool AddInputFile(const std::string& inputFile);
+	inline void AddWaypointsFile(const std::string& waypointsFile) { CUPfiles.push_back(waypointsFile); }
 	inline void AddRasterMap(const std::string& rasterMapFile) { DEMfiles.push_back(rasterMapFile); }
 	bool LoadAirspacesFiles(const double& QNH);
 	bool LoadDEMfiles();
 	bool UnloadAirspaces();
 	bool UnloadRasterMaps();
+	bool LoadWaypointsFiles();
+	void LoadWaypointsFilesThread();
+	bool UnloadWaypoints();
 	bool MakeKMLfile(const std::string& outputKMLfile, const double& defaultTerraninAltMt);
 	bool MakeOtherFile(const std::string& outputFilename, const AirspaceConverter::OutputType type);
 	inline void SetWindow(HWND hwnd) { window = hwnd; }
 	inline unsigned long GetNumOfAirspaces() const { return airspaces.size(); }
+	inline unsigned long GetNumOfWaypoints() const { return waypoints.size(); }
 	int GetNumOfTerrainMaps() const;
 	inline void Join() { if (workerThread.joinable()) workerThread.join(); }
 	//inline void Abort() { abort = true; Join(); }
@@ -53,9 +59,10 @@ private:
 	//std::deque<std::string> queue;
 	//bool abort;
 	std::multimap<int, Airspace> airspaces;
+	std::multimap<int, Waypoint*> waypoints;
 	double QNH;
 	double defaultTerrainAlt;
 	std::string outputFile;
-	std::vector<std::string> openAIPinputFiles, openAirInputFiles, DEMfiles;
+	std::vector<std::string> openAIPinputFiles, openAirInputFiles, DEMfiles, CUPfiles;
 	AirspaceConverter::OutputType outputType;
 };
