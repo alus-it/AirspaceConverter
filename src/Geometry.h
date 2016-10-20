@@ -52,7 +52,8 @@ public:
 
 	virtual ~Geometry() {}
 	virtual bool Discretize(std::vector<LatLon>& output) const = 0;
-	static inline void SetResolution(double resolutionNM) { resolution = resolutionNM * NM2RAD; }
+	static inline void SetResolution(const double resolutionNM) { resolution = resolutionNM * NM2RAD; }
+	static const bool CalcAirfieldPolygon(const double lat, const double lon, const int length, const int dir, std::vector<LatLon>& polygon);
 	inline const LatLon& GetCenterPoint() const { return point; }
 
 	static const double NM2M, MI2M;
@@ -67,6 +68,7 @@ protected:
 	static const double RAD2DEG;
 	static const double NM2RAD;
 	static const double RAD2NM;
+	static const double M2RAD;
 
 	static double FindStep(const double& radius, const double& angle);
 	static double DeltaAngle(const double angle, const double reference);
