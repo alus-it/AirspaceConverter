@@ -32,7 +32,7 @@ void printHelp() {
 	std::cout << "-a: optional, specify a default terrain altitude in meters to calculate AGL heights of points not covered by loaded terrain map(s)" << std::endl;
 	std::cout << "-i: mandatory, multiple, input file(s) can be OpenAir (.txt), OpenAIP (.aip) or CUP waypoints (.cup)" << std::endl;
 	std::cout << "-m: optional, multiple, terrain map file(s) (.dem) used to lookup terrain height" << std::endl;
-	std::cout << "-o: optional, output file .kmz, .kml, .txt (OpenAir), .img (Garmin) or .mp (Polish). If not specified will be used the name of first input file as KMZ" << std::endl;
+	std::cout << "-o: optional, output file .kmz, .txt (OpenAir), .img (Garmin) or .mp (Polish). If not specified will be used the name of first input file as KMZ" << std::endl;
 	std::cout << "-v: print version number" << std::endl;
 	std::cout << "-h: print this guide" << std::endl << std::endl;
 }
@@ -125,8 +125,7 @@ int main(int argc, char *argv[]) {
 	if (!outputFile.empty()) {
 		std::string outputExt(boost::filesystem::path(outputFile).extension().string());
 		//if (boost::iequals(outputExt, ".kmz")) { /* already KMZ by default */ }
-		/*else*/ if(boost::iequals(outputExt, ".kml")) outputType = AirspaceConverter::KML;
-		else if(boost::iequals(outputExt, ".mp")) outputType = AirspaceConverter::Polish;
+		/*else*/ if(boost::iequals(outputExt, ".mp")) outputType = AirspaceConverter::Polish;
 		else if(boost::iequals(outputExt, ".txt")) outputType = AirspaceConverter::OpenAir;
 		else if(boost::iequals(outputExt, ".img")) outputType = AirspaceConverter::Garmin;
 		else {
@@ -167,7 +166,6 @@ int main(int argc, char *argv[]) {
 	
 	switch(outputType) {
 		case AirspaceConverter::KMZ:
-		case AirspaceConverter::KML:
 			{
 				// Load terrain maps
 				flag = true; // all failed
