@@ -39,7 +39,7 @@ public:
 	bool LoadWaypointsFiles();
 	void LoadWaypointsFilesThread();
 	bool UnloadWaypoints();
-	bool MakeKMLfile(const std::string& outputKMLfile, const double& defaultTerraninAltMt);
+	bool MakeKMZfile(const std::string& outputKMZfile, const double& defaultTerraninAltMt);
 	bool MakeOtherFile(const std::string& outputFilename, const AirspaceConverter::OutputType type);
 	inline void SetWindow(HWND hwnd) { window = hwnd; }
 	inline unsigned long GetNumOfAirspaces() const { return airspaces.size(); }
@@ -51,7 +51,7 @@ public:
 private:
 	void LoadAirspacesfilesThread();
 	void LoadDEMfilesThread();
-	void MakeKMLfileThread();
+	void MakeKMZfileThread();
 	void MakeOtherFileThread();
 
 	HWND window;

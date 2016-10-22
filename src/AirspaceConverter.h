@@ -24,7 +24,6 @@ class AirspaceConverter {
 public:
 	enum OutputType {
 		KMZ = 0,
-		KML,
 		OpenAir,
 		Polish,
 		Garmin,

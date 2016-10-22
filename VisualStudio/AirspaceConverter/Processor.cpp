@@ -112,17 +112,17 @@ bool Processor::UnloadWaypoints() {
 	return true;
 }
 
-bool Processor::MakeKMLfile(const std::string& outputKMLfile, const double& defaultTerraninAltMt)
+bool Processor::MakeKMZfile(const std::string& outputKMZfile, const double& defaultTerraninAltMt)
 {
 	if (workerThread.joinable()) return false;
-	outputFile = outputKMLfile;
+	outputFile = outputKMZfile;
 	KMLwriter::SetDefaultTerrainAltitude(defaultTerraninAltMt);
 	//abort = false;
-	workerThread = std::thread(std::bind(&Processor::MakeKMLfileThread, this));
+	workerThread = std::thread(std::bind(&Processor::MakeKMZfileThread, this));
 	return true;
 }
 
-void Processor::MakeKMLfileThread()
+void Processor::MakeKMZfileThread()
 {
 	KMLwriter writer;
 	if (writer.WriteFile(outputFile, airspaces, waypoints)) PostMessage(window, writer.WereAllAGLaltitudesCovered() ? WM_WRITE_OUTPUT_OK : WM_WRITE_KML_AGL_WARNING, 0, 0);

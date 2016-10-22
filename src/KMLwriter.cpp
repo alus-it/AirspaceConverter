@@ -18,6 +18,7 @@
 #include "Airfield.h"
 #include "Geometry.h"
 #include <zip.h>
+#include <boost/filesystem.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -47,12 +48,33 @@ const std::string KMLwriter::colors[][2] = {
 };
 
 const std::string KMLwriter::airfieldColors[][2] = {
-	{ "509900ff", "7f9900ff" }, //UNDEFINED
-	{ "50cc0000", "7fcc0000" }, //Normal
+	{ "", "" }, //UNDEFINED
+	{ "", "" }, //Normal
 	{ "4b14F064", "3214F064" }, //AirfieldGrass
 	{ "4b143C64", "37143C64" }, //Outlanding
 	{ "4bFAFAFA", "37FAFAFA" }, //GliderSite
 	{ "4b6E6E6E", "376E6E6E" }, //AirfieldSolid
+};
+
+const std::string KMLwriter::waypointIcons[] = {
+	"undefined.png", //UNDEFINED
+	"normal.png", //Normal
+	"airfieldgrass.png", //AirfieldGrass
+	"outlanding.png", //Outlanding
+	"glidersite.png", //GliderSite
+	"airfieldsolid.png", //AirfieldSolid
+	"mountpass.png", // Mt pass
+	"mounttop.png", // Mt top
+	"sender.png", // Sender
+	"vor.png", // VOR
+	"ndb.png", // NDB
+	"cooltower.png", // CoolTower
+	"dam.png", // Dam
+	"tunnel.png", // Tunnel
+	"bridge.png", // Bridge
+	"powerplant.png", // PowerPlant
+	"castle.png", // Castle
+	"intersection.png" // Intersection
 };
 
 std::vector<RasterMap*> KMLwriter::terrainMaps;
@@ -131,16 +153,22 @@ void KMLwriter::WriteHeader() {
 				<< "</PolyStyle>\n"
 				<< "</Style>\n";
 		}
-		for (int t = Waypoint::airfieldGrass; t <= Waypoint::airfieldSolid; t++) {
+		for (int t = Waypoint::normal; t < Waypoint::numOfWaypointTypes; t++) {
 			file << "<Style id = \"Style" << Waypoint::TypeName((Waypoint::WaypointType)t) << "\">\n"
-				<< "<LineStyle>\n"
-				<< "<color>" << airfieldColors[t][0] << "</color>\n"
-				<< "<width>1.5</width>\n"
-				<< "</LineStyle>\n"
-				<< "<PolyStyle>\n"
-				<< "<color>" << airfieldColors[t][1] << "</color>\n"
-				<< "</PolyStyle>\n"
-				<< "</Style>\n";
+				<< "<IconStyle>\n"
+				<< "<Icon>\n"
+				<< "<href>icons/" << waypointIcons[t] <<"</href>\n"
+				<< "</Icon>\n"
+				<< "</IconStyle>\n";
+			if (Waypoint::IsTypeAirfield((Waypoint::WaypointType)t))
+				file << "<LineStyle>\n"
+					<< "<color>" << airfieldColors[t][0] << "</color>\n"
+					<< "<width>1.5</width>\n"
+					<< "</LineStyle>\n"
+					<< "<PolyStyle>\n"
+					<< "<color>" << airfieldColors[t][1] << "</color>\n"
+					<< "</PolyStyle>\n";
+			file << "</Style>\n";
 		}
 }
 
@@ -164,8 +192,8 @@ void KMLwriter::OpenPlacemark(const Waypoint* waypoint) {
 	const int altMt = waypoint->GetAltitude();
 	const int altFt = (int)round(altMt / Altitude::FEET2METER);
 	file << "<Placemark>\n"
-		<< "<name>" << waypoint->GetName() << "</name>\n";
-	if (isAirfield) file << "<styleUrl>#Style" << waypoint->GetTypeName() << "</styleUrl>\n";
+		<< "<name>" << waypoint->GetName() << "</name>\n"
+		<< "<styleUrl>#Style" << waypoint->GetTypeName() << "</styleUrl>\n";
 	file << "<visibility>" << (isAirfield ? 1 : 0) << "</visibility>\n"
 		<< "<ExtendedData>\n"
 		<< "<SchemaData>\n"
@@ -291,19 +319,16 @@ void KMLwriter::WriteSideWalls(const Airspace& airspace, const std::vector<doubl
 }
 
 bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, Airspace>& airspaces, const std::multimap<int, Waypoint*>& waypoints) {
-	if(airspaces.empty() && waypoints.empty()) return false;
-
-	// If it's a KMZ we will have to compress
-	const bool compressAsKMZ = boost::iequals(boost::filesystem::path(filename).extension().string(), ".kmz");
+	if((airspaces.empty() && waypoints.empty()) || filename.empty()) return false;
 	
-	// Otherwise must be a KML 
-	if (!compressAsKMZ && !boost::iequals(boost::filesystem::path(filename).extension().string(), ".kml")) {
-		AirspaceConverter::LogMessage("ERROR: Expected KML or KMZ extension but found: " + boost::filesystem::path(filename).extension().string(), true);
+	// The file must be a KMZ 
+	if (!boost::iequals(boost::filesystem::path(filename).extension().string(), ".kmz")) {
+		AirspaceConverter::LogMessage("ERROR: Expected KMZ extension but found: " + boost::filesystem::path(filename).extension().string(), true);
 		return false;
 	}
 
 	// We need anyway to make a KML file also to compress it as KMZ
-	const std::string fileKML(compressAsKMZ ? boost::filesystem::path(filename).replace_extension(".kml").string() : filename);
+	const std::string fileKML(boost::filesystem::path(filename).replace_extension(".kml").string());
 
 	// Make sure the file is not already open
 	if (file.is_open()) file.close();
@@ -354,7 +379,9 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 				// Flag to remember if the runway perimeter has been drawn
 				bool airfieldDrawn = false;
 
-				// If it is an airfield drw an estimation of the runway perimeter
+				int dir = -1;
+				
+				// If it is an airfield draw an estimation of the runway perimeter
 				if (isAirfield) {
 					
 					// Get the airfield
@@ -362,18 +389,19 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 					
 					// Get its rinway length and direction
 					const int leng = a->GetRunwayLength();
-					const int dir = a->GetRunwayDir();
+					dir = a->GetRunwayDir();
 
 					// If they are valid...
-					if (leng > 0 && dir >= 0 && dir <= 360) {
+					if (leng > 0 && dir >= 0) {
 
 						// Calculate the runway perimeter
 						std::vector<Geometry::LatLon> airfieldPerimeter;
 						if (Geometry::CalcAirfieldPolygon(a->GetLatitude(), a->GetLongitude(), leng, dir, airfieldPerimeter)) {
 							
-							// Open a polygon clamped onto the ground
-							file << "<Polygon>\n"
-								<< "<altitudeMode>clampToGround</altitudeMode>\n"
+							// Open a multigeometry with a polygon clamped onto the ground
+							file << "<MultiGeometry>\n"
+								<< "<Polygon>\n"
+								//<< "<altitudeMode>clampToGround</altitudeMode>\n" //this should be the default
 								<< "<outerBoundaryIs>\n"
 								<< "<LinearRing>\n"
 								<< "<coordinates>\n";
@@ -394,13 +422,23 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 					}
 				}
 
-				// If no airfield perimeter was drawn ...
-				if (!airfieldDrawn) //... draw the point marker
-					file << "<Point>\n"
-						<< "<extrude>0</extrude>\n"
-						<< "<altitudeMode>" << (t != Waypoint::normal ? "clampToGround" : "absolute") << "</altitudeMode>\n" // Except "normal" are all objects on the ground
-						<< "<coordinates>" << w->GetLongitude() << "," << w->GetLatitude() << "," << w->GetAltitude() << "</coordinates>\n"
-						<< "</Point>\n";
+				// Draw the waypoint marker
+				file << "<Point>\n"
+					<< "<extrude>0</extrude>\n"
+					<< "<altitudeMode>" << (t != Waypoint::normal ? "clampToGround" : "absolute") << "</altitudeMode>\n" // Except "normal" are all objects on the ground
+					<< "<coordinates>" << w->GetLongitude() << "," << w->GetLatitude() << "," << w->GetAltitude() << "</coordinates>\n"
+					<< "</Point>\n";
+
+				// If the perimeter was drawn the the multigeometry have to be closed
+				if (airfieldDrawn) file << "</MultiGeometry>\n";
+				
+				// If there is a valid direction set the orientation of the airport icon as the runway
+				if (dir > 0)
+					file << "<Style>\n"
+						<< "<IconStyle>\n"
+						<< "<heading>" << dir << "</heading>\n"
+						<< "</IconStyle>\n"
+						<< "</Style>\n";
 				
 				// Close the placemark
 				file << "</Placemark>\n";
@@ -489,14 +527,20 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 	file << "</Document>\n"
 		<< "</kml>\n";
 	file.close();
-	return compressAsKMZ ? CompressToKMZ(fileKML) : true;
+	return CompressToKMZ(fileKML, !waypoints.empty());
 }
 
-bool KMLwriter::CompressToKMZ(const std::string& inputKMLfile, const bool deleteOriginal /* = true */) {
+bool KMLwriter::CompressToKMZ(const std::string& inputKMLfile, const bool addIcons /* = false */) {
 #ifndef NOZIP
 	// The input file must be a KML
 	if (boost::filesystem::path(inputKMLfile).extension().string() != ".kml") {
 		AirspaceConverter::LogMessage("ERROR: Expected a KML file to be compressed but found: " + inputKMLfile, true);
+		return false;
+	}
+
+	// Of course the input KML must exist...
+	if (!boost::filesystem::exists(inputKMLfile)) {
+		AirspaceConverter::LogMessage("ERROR: Unable to find the KML file: " + inputKMLfile, true);
 		return false;
 	}
 
@@ -534,9 +578,41 @@ bool KMLwriter::CompressToKMZ(const std::string& inputKMLfile, const bool delete
 		return false;
 	}
 
+	// If it is necessary to add also the icons
+	if (addIcons) for (int i = Waypoint::undefined; i < Waypoint::numOfWaypointTypes; i++) {
+
+		// Get the icon PNG filename and prepare the path in the ZIP and the path from current dir
+		const std::string iconFile = "icons/" + waypointIcons[i];
+		const std::string iconPath = "./" + iconFile;
+
+		// Check if we can get that PNG file
+		if (!boost::filesystem::exists(iconPath)) {
+			AirspaceConverter::LogMessage("ERROR: Unable to find icon PNG file: " + iconPath, true);
+			continue;
+		}
+
+		// Create source buffer from KML file
+		source = zip_source_file(archive, (iconPath).c_str(), 0, 0);
+		if (source == nullptr) { // "failed to create source buffer. " << zip_strerror(archive)
+			zip_discard(archive);
+			AirspaceConverter::LogMessage("ERROR: Failed to create zip source buffer to read: " + iconPath, true);
+			return false;
+		}
+
+		// Add the buffer as KLM file in the ZIP
+		index = (int)zip_file_add(archive, iconFile.c_str(), source, ZIP_FL_OVERWRITE);
+		if (index < 0) // "failed to add file to archive. " << zip_strerror(archive)
+		{
+			zip_discard(archive);
+			zip_source_free(source); // The sorce buffer have to be freed in this case
+			AirspaceConverter::LogMessage("ERROR: While compressing, failed to add: " + iconFile, true);
+			return false;
+		}
+	}
+
 	// Close the zip
 	if (zip_close(archive) == 0) {
-		if (deleteOriginal) std::remove(inputKMLfile.c_str()); // Delete KML file
+		std::remove(inputKMLfile.c_str()); // Delete KML file
 		return true;
 	}
 	AirspaceConverter::LogMessage("ERROR: While finalizing the archive.", true);

@@ -189,7 +189,7 @@ bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint
 		token++;
 		int altitude = 0;
 		if(!ParseAltitude(*token,altitude))
-			AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %(*token)), false);
+			AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %(*token)), true);
 
 		// Waypoint style
 		token++;
@@ -198,7 +198,7 @@ bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint
 			type = std::stoi(*token);
 		} catch(...) {}
 		if(type <= Waypoint::undefined || type >= Waypoint::numOfWaypointTypes) {
-			AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid waypoint style: %2s, assuming normal") %linecount %(*token)), false);
+			AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid waypoint style: %2s, assuming normal") %linecount %(*token)), true);
 			type = Waypoint::normal;
 		}
 
@@ -210,14 +210,16 @@ bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint
 			try {
 				runwayDir = std::stoi(*token);
 			} catch(...) {}
-			if(runwayDir < 0 || runwayDir > 360)
-				AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid runway direction: %2s") %linecount %(*token)), false);
+			if(runwayDir < 0 || runwayDir > 360) {
+				runwayDir = -1; // make sure it is set at -1
+				AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid runway direction: %2s") % linecount % (*token)), true);
+			}
 
 			// Runway length
 			token++;
 			int runwayLength = -1;
 			if(!ParseLength(*token,runwayLength))
-				AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid runway length: %2s") %linecount %(*token)), false);
+				AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid runway length: %2s") %linecount %(*token)), true);
 
 			// Radio frequency
 			token++;
