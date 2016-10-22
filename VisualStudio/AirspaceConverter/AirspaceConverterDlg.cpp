@@ -535,6 +535,7 @@ void CAirspaceConverterDlg::OnBnClickedOutputTypeCombo() {
 	}
 	editQNHtextField.EnableWindow(isKmzFile ? numAirspacesLoaded == 0 : FALSE);
 	editDefualtAltTextField.EnableWindow(isKmzFile);
+	ConvertBt.EnableWindow((numAirspacesLoaded > 0 || (isKmzFile && numWaypointsLoaded > 0)) && !outputFile.empty() ? TRUE : FALSE);
 	UpdateData(FALSE);
 }
 
