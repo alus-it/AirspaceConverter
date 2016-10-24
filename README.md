@@ -32,6 +32,12 @@ The part of this program reading and using the terrain maps has been derived and
 To know more about LK8000 project: http://www.lk8000.it  
 The repository of LK8000 is available here: https://github.com/LK8000/LK8000
 
+Placemarks icons
+----------------
+Some of the placemark icons used for displaying the waypoints in Google Earth included in the produced KMZ file (and so used by this project) are coming from:  
+Maps Icons Collection  
+https://mapicons.mapsmarker.com  
+
 Linux version
 -------------
 The command line version works taking several arguments, for example:  

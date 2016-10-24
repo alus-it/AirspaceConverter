@@ -37,6 +37,10 @@ const std::vector<std::string> AirspaceConverter::disclaimer = {
 	"The use of AirspaceConverter is only at complete user's own risk.",
 	"Any commercial usage of AirspaceConverter is also strictly prohibited if not authorized by the author.",
 	"",
+	"Placemarks icons credits:",
+	"Some of the placemark icons used for displaying the waypoints in Google Earth included in the produced KMZ file (and so used by this project) are",
+	"coming from: \"Maps Icons Collection\" - https://mapicons.mapsmarker.com",
+	"",
 	"Error reports, complaints and suggestions please email to: info@alus.it",
 };
 
