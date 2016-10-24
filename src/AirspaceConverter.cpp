@@ -43,3 +43,34 @@ const std::vector<std::string> AirspaceConverter::disclaimer = {
 void AirspaceConverter::DefaultLogMessage(const std::string& msgText, const bool isError) {
 	(isError ? std::cerr : std::cout) << msgText << std::endl;
 }
+
+std::istream& AirspaceConverter::safeGetline(std::istream& is, std::string& line, bool& isCRLF)
+{
+	line.clear();
+	std::istream::sentry se(is, true);
+	std::streambuf* sb = is.rdbuf();
+	isCRLF = false;
+
+	for(;;) {
+		const int c = sb->sbumpc();
+		switch (c) {
+		case '\n':
+			return is;
+		case '\r':
+			if(sb->sgetc() == '\n') {
+				sb->sbumpc();
+				isCRLF = true;
+			}
+			return is;
+		case EOF:
+			// Also handle the case when the last line has no line ending
+			if(line.empty()) {
+				is.setstate(std::ios::eofbit);
+				isCRLF = true; // no problem in this case
+			}
+			return is;
+		default:
+			line += (char)c;
+		}
+	}
+}

@@ -19,6 +19,7 @@
 #include <functional>
 #include <string>
 #include <vector>
+#include <istream>
 
 class AirspaceConverter {
 public:
@@ -32,6 +33,7 @@ public:
 
 	static std::function<void(const std::string&, const bool)> LogMessage;
 	inline static void SetLogMessageFuntion(std::function<void(const std::string&, const bool)> func) { LogMessage = func; }
+	static std::istream& safeGetline(std::istream& is, std::string& line, bool& isCRLF);
 	static const std::vector<std::string> disclaimer;
 
 private:

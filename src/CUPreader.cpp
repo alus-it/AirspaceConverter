@@ -115,15 +115,22 @@ bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint
 	AirspaceConverter::LogMessage("Reading CUP file: " + fileName, false);
 
 	int linecount = 0;
+	std::string sLine;
+	bool isCRLF = false;
+
 
 	while (!input.eof() && input.good())
 	{
 		// Get the line
-		std::string sLine;
-		std::getline(input, sLine);
+		//std::getline(input, sLine);
+		AirspaceConverter::safeGetline(input, sLine, isCRLF);
+		linecount++;
+
+		// Verify line ending
+		if(!isCRLF) AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: not valid Windows style end of line (expected CR LF)") %linecount), true);
 
 		// Skip eventual header
-		if(++linecount == 1 && sLine.find("name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc") == 0) continue;
+		if(linecount == 1 && sLine.find("name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc") == 0) continue;
 
 		// Directly skip empty lines
 		if (sLine.empty()) continue;
