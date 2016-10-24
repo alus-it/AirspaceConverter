@@ -112,6 +112,7 @@ void CAirspaceConverterDlg::DoDataExchange(CDataExchange* pDX) {
 	DDX_Control(pDX, IDC_CLEAR_WAYPOINTS_BT, unloadWaypointsBt);
 	DDX_Control(pDX, IDC_OUTPUT_FILE_BT, chooseOutputFileBt);
 	DDX_Control(pDX, IDC_EDIT_OUTPUT_FILENAME, outputFileEditBox);
+	DDX_Control(pDX, IDC_CLEAR_LOG_BT, ClearLogBt);
 	DDX_Control(pDX, IDC_LOG, LoggingBox);
 	DDX_Control(pDX, IDC_COMBO_OUTPUT_TYPE, OutputTypeCombo);
 }
@@ -137,6 +138,7 @@ BEGIN_MESSAGE_MAP(CAirspaceConverterDlg, CDialog)
 	ON_BN_CLICKED(IDC_CLEAR_WAYPOINTS_BT, &CAirspaceConverterDlg::OnBnClickedClearWaypointsBt)
 	ON_BN_CLICKED(IDC_CLEAR_MAPS_BT, &CAirspaceConverterDlg::OnBnClickedClearMapsBt)
 	ON_BN_CLICKED(IDC_OUTPUT_FILE_BT, &CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt)
+	ON_BN_CLICKED(IDC_CLEAR_LOG_BT, &CAirspaceConverterDlg::OnBnClickedClearLogBt)
 	ON_CBN_SELCHANGE(IDC_COMBO_OUTPUT_TYPE, &CAirspaceConverterDlg::OnBnClickedOutputTypeCombo)
 END_MESSAGE_MAP()
 
@@ -254,6 +256,7 @@ void CAirspaceConverterDlg::StartBusy() {
 	editQNHtextField.EnableWindow(FALSE);
 	editDefualtAltTextField.EnableWindow(FALSE);
 	chooseOutputFileBt.EnableWindow(FALSE);
+	ClearLogBt.EnableWindow(FALSE);
 	CloseButton.EnableWindow(FALSE);
 }
 
@@ -321,6 +324,10 @@ void CAirspaceConverterDlg::LogMessage(const std::string& text, const bool isErr
 	if (linesToScroll > 0) LoggingBox.LineScroll(linesToScroll);
 }
 
+void CAirspaceConverterDlg::OnBnClickedClearLogBt() {
+	LoggingBox.SetWindowTextW(_T(""));
+}
+
 void CAirspaceConverterDlg::EndBusy() {
 	if (processor != nullptr) {
 		processor->Join();
@@ -350,6 +357,7 @@ void CAirspaceConverterDlg::EndBusy() {
 	editQNHtextField.EnableWindow(isKmzFile ? numAirspacesLoaded == 0 : FALSE);
 	editDefualtAltTextField.EnableWindow(isKmzFile);
 	chooseOutputFileBt.EnableWindow(numAirspacesLoaded > 0 || (isKmzFile && numWaypointsLoaded > 0) ? TRUE : TRUE);
+	ClearLogBt.EnableWindow(TRUE);
 	CloseButton.EnableWindow(TRUE);
 	progressBar.SetMarquee(FALSE, 1);
 	progressBar.ModifyStyle(PBS_MARQUEE, 0);
@@ -489,7 +497,7 @@ void CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt() {
 	std::string ext(outputPath.extension().string()); // This should be the same as type from the dialog combo box, preselect this type in the open file dlg
 	assert(ext.length() > 1);
 	assert(ext.at(0) == '.');
-	CFileDialog dlg(FALSE, NULL, CString(std::string("*" + ext).c_str()), OFN_HIDEREADONLY, _T("KMZ|*.kmz|KML|*.kml|OpenAir|*.txt|Polish|*.mp|Garmin|*.img||"), (CWnd*)this, 0, TRUE);
+	CFileDialog dlg(FALSE, NULL, CString(std::string("*" + ext).c_str()), OFN_HIDEREADONLY, _T("KMZ|*.kmz|OpenAir|*.txt|Polish|*.mp|Garmin|*.img||"), (CWnd*)this, 0, TRUE);
 	if (dlg.DoModal() == IDOK) {
 		outputFile = CT2CA(dlg.GetPathName());
 		outputPath = outputFile;

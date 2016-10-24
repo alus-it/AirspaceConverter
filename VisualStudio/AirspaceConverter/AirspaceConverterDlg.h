@@ -47,6 +47,7 @@ private:
 	afx_msg void OnBnClickedClearInputBt();
 	afx_msg void OnBnClickedClearWaypointsBt();
 	afx_msg void OnBnClickedClearMapsBt();
+	afx_msg void OnBnClickedClearLogBt();
 	afx_msg void OnBnClickedConvert();
 	afx_msg void OnBnClickedOpenOutputFile();
 	afx_msg void OnBnClickedOpenOutputFolder();
@@ -76,6 +77,7 @@ private:
 	CButton unloadRasterMapsBt;
 	CButton unloadWaypointsBt;
 	CButton chooseOutputFileBt;
+	CButton ClearLogBt;
 	CButton CloseButton;
 	CEdit editQNHtextField;
 	CEdit editDefualtAltTextField;
