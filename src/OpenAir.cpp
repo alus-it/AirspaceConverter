@@ -115,20 +115,24 @@ OpenAir::OpenAir(std::multimap<int, Airspace>& airspacesMap)
 bool OpenAir::ReadFile(const std::string& fileName) {
 	assert(airspaces != nullptr);
 	if (airspaces == nullptr) return false;
-	std::ifstream input(fileName);
+	std::ifstream input(fileName, std::ios::binary);
 	if (!input.is_open() || input.bad()) {
 		AirspaceConverter::LogMessage("ERROR: Unable to open input file: " + fileName, true);
 		return false;
 	}
 	AirspaceConverter::LogMessage("Reading OpenAir file: " + fileName, false);
 	int linecount = 0;
-	bool allParsedOK = true;
+	std::string sLine;
+	bool allParsedOK = true, isCRLF = false;
 	Airspace airspace;
-	while (!input.eof() && input.good())
-	{
-		std::string sLine;
-		std::getline(input, sLine);
+	while (!input.eof() && input.good()) {
+
+		// Get the line
+		AirspaceConverter::safeGetline(input, sLine, isCRLF);
 		++linecount;
+
+		// Verify line ending
+		if (!isCRLF) AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: not valid Windows style end of line (expected CR LF)") % linecount), true);
 		
 		// Directly skip empty lines
 		if (sLine.empty()) continue;

@@ -107,22 +107,19 @@ bool ParseLength(const std::string& text, int& len) {
 }
 
 bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint*>& output) {
-	std::ifstream input(fileName);
+	std::ifstream input(fileName, std::ios::binary);
 	if (!input.is_open() || input.bad()) {
 		AirspaceConverter::LogMessage("ERROR: Unable to open CUP input file: " + fileName, true);
 		return false;
 	}
 	AirspaceConverter::LogMessage("Reading CUP file: " + fileName, false);
-
 	int linecount = 0;
 	std::string sLine;
 	bool isCRLF = false;
 
+	while (!input.eof() && input.good()) {
 
-	while (!input.eof() && input.good())
-	{
 		// Get the line
-		//std::getline(input, sLine);
 		AirspaceConverter::safeGetline(input, sLine, isCRLF);
 		linecount++;
 
@@ -259,7 +256,6 @@ bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint
 			// Add it to the multimap
 			output.insert(std::pair<int, Waypoint*>(type, waypoint));
 		}
-
 	}
 	return true;
 }
