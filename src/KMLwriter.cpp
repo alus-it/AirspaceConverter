@@ -134,7 +134,7 @@ bool KMLwriter::GetTerrainAltitudeMt(const double& lat, const double& lon, doubl
 	return false;
 }
 
-void KMLwriter::WriteHeader() {
+void KMLwriter::WriteHeader(const bool addIcons) {
 	file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 		<< "<!--\n";
 	for(const std::string& line: AirspaceConverter::disclaimer) file << line << "\n";
@@ -153,7 +153,7 @@ void KMLwriter::WriteHeader() {
 				<< "</PolyStyle>\n"
 				<< "</Style>\n";
 		}
-		for (int t = Waypoint::normal; t < Waypoint::numOfWaypointTypes; t++) {
+		if (addIcons) for (int t = Waypoint::normal; t < Waypoint::numOfWaypointTypes; t++) {
 			file << "<Style id = \"Style" << Waypoint::TypeName((Waypoint::WaypointType)t) << "\">\n"
 				<< "<IconStyle>\n"
 				<< "<Icon>\n"
@@ -319,7 +319,11 @@ void KMLwriter::WriteSideWalls(const Airspace& airspace, const std::vector<doubl
 }
 
 bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, Airspace>& airspaces, const std::multimap<int, Waypoint*>& waypoints) {
-	if((airspaces.empty() && waypoints.empty()) || filename.empty()) return false;
+	
+	// Verify presence of waypoints and airspaces
+	const bool airspacesPresent = !airspaces.empty();
+	const bool waypointsPresent = !waypoints.empty();
+	if((!airspacesPresent && !waypointsPresent) || filename.empty()) return false;
 	
 	// The file must be a KMZ 
 	if (!boost::iequals(boost::filesystem::path(filename).extension().string(), ".kmz")) {
@@ -341,20 +345,22 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 	}
 	AirspaceConverter::LogMessage("Writing output file: " + fileKML, false);
 
+	// Assume all points have AGL altitude covered (no point processed yet)
 	allAGLaltitudesCovered = true;
 
 	// Write KML header
-	WriteHeader();
+	WriteHeader(waypointsPresent);
 
 	// If there are waypoints
-	if(!waypoints.empty()) {
+	if (waypointsPresent) {
 		
-		// Prepare a folder to group all the airspace
-		file << "<Folder>\n"
-		"<name>Waypoints</name>\n"
-		"<visibility>1</visibility>\n"
-		"<open>true</open>\n";
-		
+		// If airspaces and waypoints are both present prepare a folder to group all the waypoints
+		if (airspacesPresent && waypointsPresent) 
+			file << "<Folder>\n"
+				"<name>Waypoints</name>\n"
+				"<visibility>1</visibility>\n"
+				"<open>true</open>\n";
+
 		// For each waypoint type
 		for (int t = Waypoint::normal; t < Waypoint::numOfWaypointTypes; t++) {
 
@@ -443,19 +449,24 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 				// Close the placemark
 				file << "</Placemark>\n";
 			}
+
+			// Close the category
 			file << "</Folder>\n";
 		} // for each category
-		file << "</Folder>\n";
+
+		// Close waypoints folder
+		if (airspacesPresent && waypointsPresent) file << "</Folder>\n";
 	} // if airspaces
 
 	// If there are airspaces
-	if(!airspaces.empty()) {
+	if(airspacesPresent) {
 
-		// Prepare a folder to group all the airspace
-		file << "<Folder>\n"
-		"<name>Airspace</name>\n"
-		"<visibility>1</visibility>\n"
-		"<open>true</open>\n";
+		// If airspaces and waypoints are both present prepare a folder to group all the airspace
+		if (airspacesPresent && waypointsPresent)
+			file << "<Folder>\n"
+				"<name>Airspace</name>\n"
+				"<visibility>1</visibility>\n"
+				"<open>true</open>\n";
 
 		// For each airspace category
 		for (int t = Airspace::CLASSA; t <= Airspace::UNDEFINED; t++) {
@@ -519,9 +530,13 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 				}
 				file << "</Placemark>\n";
 			}
+
+			// Close category folder
 			file << "</Folder>\n";
 		} // for each category
-		file << "</Folder>\n";
+
+		// Close airspaces folder
+		if (airspacesPresent && waypointsPresent) file << "</Folder>\n";
 	} // if airspaces
 
 	file << "</Document>\n"
