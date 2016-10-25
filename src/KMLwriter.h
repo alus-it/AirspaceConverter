@@ -38,7 +38,7 @@ public:
 
 private:
 	static bool GetTerrainAltitudeMt(const double& lat, const double& lon, double&alt);
-	void WriteHeader(const bool addIcons);
+	void WriteHeader(const bool airspace, const bool waypoints);
 	void OpenPlacemark(const Airspace& airspace);
 	void OpenPlacemark(const Waypoint* waypoint);
 	void OpenPolygon(const bool extrude, const bool absolute);

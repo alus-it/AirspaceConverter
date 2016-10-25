@@ -134,7 +134,8 @@ bool KMLwriter::GetTerrainAltitudeMt(const double& lat, const double& lon, doubl
 	return false;
 }
 
-void KMLwriter::WriteHeader(const bool addIcons) {
+void KMLwriter::WriteHeader(const bool airspace, const bool waypoints) {
+	assert(airspace || waypoints);
 	file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 		<< "<!--\n";
 	for(const std::string& line: AirspaceConverter::disclaimer) file << line << "\n";
@@ -142,7 +143,7 @@ void KMLwriter::WriteHeader(const bool addIcons) {
 		<< "<kml xmlns = \"http://www.opengis.net/kml/2.2\">\n"
 		<< "<Document>\n"
 		<< "<open>true</open>\n";
-		for (int t = Airspace::CLASSA; t <= Airspace::UNDEFINED; t++) {
+		if (airspace) for (int t = Airspace::CLASSA; t <= Airspace::UNDEFINED; t++) {
 			file << "<Style id = \"Style" << Airspace::CategoryName((Airspace::Type)t) << "\">\n"
 				<< "<LineStyle>\n"
 				<< "<color>" << colors[t][0] << "</color>\n"
@@ -153,7 +154,7 @@ void KMLwriter::WriteHeader(const bool addIcons) {
 				<< "</PolyStyle>\n"
 				<< "</Style>\n";
 		}
-		if (addIcons) for (int t = Waypoint::normal; t < Waypoint::numOfWaypointTypes; t++) {
+		if (waypoints) for (int t = Waypoint::normal; t < Waypoint::numOfWaypointTypes; t++) {
 			file << "<Style id = \"Style" << Waypoint::TypeName((Waypoint::WaypointType)t) << "\">\n"
 				<< "<IconStyle>\n"
 				<< "<Icon>\n"
@@ -349,7 +350,7 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 	allAGLaltitudesCovered = true;
 
 	// Write KML header
-	WriteHeader(waypointsPresent);
+	WriteHeader(airspacesPresent, waypointsPresent);
 
 	// If there are waypoints
 	if (waypointsPresent) {
