@@ -205,9 +205,9 @@ void KMLwriter::OpenPlacemark(const Waypoint* waypoint) {
 		<< "<SimpleData name=\"Altitude\">" << altMt << " m - " << altFt << " ft" << "</SimpleData>\n";
 	if(isAirfield) {
 		const Airfield* airfield = (const Airfield*)waypoint;
-		file << "<SimpleData name=\"Runway direction\">" << airfield->GetRunwayDir() << "</SimpleData>\n"
-		<< "<SimpleData name=\"Runway length\">" << airfield->GetRunwayLength() << " m</SimpleData>\n"
-		<< "<SimpleData name=\"Radio frequency\">" << airfield->GetRadioFrequency() << " MHz</SimpleData>\n";
+		file << "<SimpleData name=\"Runway direction\">" << (airfield->GetRunwayDir() != -1 ? std::string(airfield->GetRunwayDir() + " deg") : "UNKNOWN") << "</SimpleData>\n"
+		<< "<SimpleData name=\"Runway length\">" << (airfield->GetRunwayLength() != -1 ? std::string(airfield->GetRunwayLength() + " m") : "UNKNOWN") << "</SimpleData>\n"
+		<< "<SimpleData name=\"Radio frequency\">" << (airfield->GetRadioFrequency().empty() ? "UNKNOWN" : airfield->GetRadioFrequency() + " MHz") << "</SimpleData>\n";
 	}
 	file << "<SimpleData name=\"Description\">" << waypoint->GetDescription() << "</SimpleData>\n"
 		<< "</SchemaData>\n"
