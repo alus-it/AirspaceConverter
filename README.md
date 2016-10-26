@@ -13,7 +13,7 @@ Why this software?
 Airspace represented in 3D in Google Earth can help to visualize and better understand the airspace structure.
 Not only, having the planned route or track of a flight (as GPX file), displayed as well in Google Earth will make easy to check for airspace crossed or to be avoided.  
 This software can also be useful for maintainers of OpenAir airspace and SeeYou .CUP waypoints files, not only to visualize airspace and waypoints but also to verify the syntax of OpenAir and CUP commands entered.  
-For the "landable" waypoints in the CUP files an estimation of the runway perimeter is drawn on the earth surface, in order to do that not only the postion is used but also the runway orientatation and lenght. This is particularly useful to verify that the position of the airfield in the CUP file matches exactly the runway in Google Earth.  In software like LK8000 the airfield position is cosidered as the exact center of the runway, orientation and length are used to assist for landing with an HSI and glide slope indications thus the correctnes of position, orientation and length becomes really important.  
+For the "landable" waypoints in the CUP files an estimation of the runway perimeter is drawn on the earth surface, in order to do that not only the position is used but also the runway orientation and length. This is particularly useful to verify that the position of the airfield in the CUP file matches exactly the runway in Google Earth.  In software like LK8000 the airfield position is considered as the exact center of the runway, orientation and length are used to assist for landing with an HSI and glide slope indications thus the correctness of position, orientation and length becomes really important.  
 OpenAIP (http://www.openaip.net/) provides a free, worldwide and updated airspace repository but in his own format, while many devices and software support OpenAir airspace files.
 This software can convert also to OpenAir so making OpenAIP data available to many portable devices.
 
@@ -96,8 +96,8 @@ In the "VisualStudio" folder there is the VisualStudio solution and project file
 Placemarks icons credits
 ------------------------
 Some of the placemark icons used for displaying the waypoints in Google Earth included in the produced KMZ file (and so used by this project) are coming from:  
-Maps Icons Collection  
-https://mapicons.mapsmarker.com  
+Maps Icons Collection - https://mapicons.mapsmarker.com  
+The folder icons with the placemarks PNG icons must be kept in the same location of AirspaceConverter executable.
 
 Contacts
 --------
