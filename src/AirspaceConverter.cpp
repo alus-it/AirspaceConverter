@@ -16,7 +16,7 @@
 std::function<void(const std::string&, const bool)> AirspaceConverter::LogMessage = DefaultLogMessage;
 
 const std::vector<std::string> AirspaceConverter::disclaimer = {
-	"Airspace file produced with: \"AirspaceConverter\" Version: " VERSION,
+	"This file has been produced with: \"AirspaceConverter\" Version: " VERSION,
 	"For info visit: http://www.alus.it/AirspaceConverter",
 	"Copyrights(C) 2016 Alberto Realis-Luc",
 	"",
@@ -32,8 +32,8 @@ const std::vector<std::string> AirspaceConverter::disclaimer = {
 	"familiarization with and to illustrate air space structure. This airspace structure file does not replace the pilot's obligation for preflight",
 	"planning nor shall it be used as a means of support during flight. In particular, use of the this airspace structure file does not excuse the user",
 	"from the responsibility to observe the current issue of any relevant AIP, AIP Supplements, NOTAM and AICs.",
-	"The use of this airspace structure file takes place only at the user's total own risk.",
-	"Commercial use of the data provided via this airspace structure file is strictly prohibited.",
+	"The use of this airspace structure and/or waypoints file takes place only at the user's total own risk.",
+	"Commercial use of the data provided via this airspace structure and/or waypoints file is strictly prohibited.",
 	"The use of AirspaceConverter is only at complete user's own risk.",
 	"Any commercial usage of AirspaceConverter is also strictly prohibited if not authorized by the author.",
 	"",
@@ -58,7 +58,7 @@ std::istream& AirspaceConverter::safeGetline(std::istream& is, std::string& line
 		switch (c) {
 		case '\n':
 			return is;
-		case '\r':
+		case '\r': // Beware that to detect the CR under Windows it is necessary to read the file in binary mode
 			if(sb->sgetc() == '\n') {
 				sb->sbumpc();
 				isCRLF = true;

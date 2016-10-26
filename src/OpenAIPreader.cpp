@@ -178,23 +178,27 @@ bool OpenAIPreader::ReadFile(const std::string& fileName, std::multimap<int, Air
 				boost::char_separator<char> sep(", ");
 				boost::tokenizer<boost::char_separator<char> > tokens(str, sep);
 				bool expectedLon(true), error(false);
-				for (const std::string& c : tokens) {
-					if (expectedLon) { // Beware that here the longitude comes first!
-						lon = std::stod(c);
-						if(!Geometry::LatLon::IsValidLon(lon)) {
-							error = true;
-							break;
+				try {
+					for (const std::string& c : tokens) {
+						if (expectedLon) { // Beware that here the longitude comes first!
+							lon = std::stod(c);
+							if (!Geometry::LatLon::IsValidLon(lon)) {
+								error = true;
+								break;
+							}
+							expectedLon = false;
+						} else {
+							lat = std::stod(c);
+							if (!Geometry::LatLon::IsValidLat(lat)) {
+								error = true;
+								break;
+							}
+							expectedLon = true;
+							airspace.AddSinglePointOnly(lat, lon);
 						}
-						expectedLon = false;
-					} else {
-						lat = std::stod(c);
-						if(!Geometry::LatLon::IsValidLat(lat)) {
-							error = true;
-							break;
-						}
-						expectedLon = true;
-						airspace.AddSinglePointOnly(lat, lon);
 					}
+				} catch (...) {
+					error = true;
 				}
 				if (error || !expectedLon) {
 					AirspaceConverter::LogMessage("Warning: skipping invalid coordinates.", false);

@@ -33,19 +33,23 @@ bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg) {
 
 	// Degrees
 	boost::tokenizer<boost::char_separator<char>>::iterator token=tokens.begin();
-	if ((*token).empty() || !isDigit((*token).front())) return false;
-	deg = std::stoi(*token);
+	if ((*token).empty()) return false;
+	try {
+		deg = std::stoi(*token);
 
-	// Minutes
-	if (++token != tokens.end()) {
-		if ((*token).empty() || !isDigit((*token).front())) return false;
-		deg += std::stod(*token) / 60;
-
-		// Seconds
+		// Minutes
 		if (++token != tokens.end()) {
-			if ((*token).empty() || !isDigit((*token).front())) return false;
-			deg += std::stod(*token) / 3600;
+			if ((*token).empty()) return false;
+			deg += std::stod(*token) / 60;
+
+			// Seconds
+			if (++token != tokens.end()) {
+				if ((*token).empty()) return false;
+				deg += std::stod(*token) / 3600;
+			}
 		}
+	} catch (...) {
+		return false;
 	}
 	return true;
 }
@@ -294,7 +298,11 @@ bool OpenAir::ParseAltitude(const std::string& line, const bool isTop, Airspace&
 			const std::string str = isLast ? line.substr(s) : line.substr(s, i - s);
 			if (isNumber) {
 				if (!valueFound) {
-					value = std::stod(str);
+					try {
+						value = std::stod(str);
+					} catch (...) {
+						return false;
+					}
 					valueFound = true;
 				}
 				else return false;
@@ -392,13 +400,14 @@ bool OpenAir::ParseV(const std::string & line, Airspace& airspace) {
 		}
 		return false;
 	case 'W':
-		/*if (isDigit(line.at(4))) varWidth = std::stod(line.substr(4));
-		else {
+		/* try {
+			varWidth = std::stod(line.substr(4));
+		} catch(...) {
 			varWidth = 0;
 			return false;
 		}*/
 		break;
-	case 'Z': // ingnore it
+	case 'Z': // ignore it
 		break;
 	default:
 		return false;
@@ -409,61 +418,44 @@ bool OpenAir::ParseV(const std::string & line, Airspace& airspace) {
 bool OpenAir::ParseDA(const std::string& line, Airspace& airspace) {
 	if (airspace.GetType() == Airspace::UNDEFINED) return true;
 	if (varPoint.Lat() == Geometry::LatLon::UNDEF_LAT || line.length() < 8) return false;
-	boost::char_separator<char> sep(",");
-	std::string data(line.substr(3));
-	boost::tokenizer<boost::char_separator<char>> tokens(data, sep);
-	double radius = 0, angleStart = 0, angleEnd = 0;
-	int i = 0;
-	for (const std::string& c : tokens) {
-		switch (i) {
-		case 0:
-			radius = std::stod(c);
-			break;
-		case 1:
-			angleStart = std::stod(c);
-			break;
-		case 2:
-			angleEnd = std::stod(c);
-			break;
-		default:
-			break;
-		}
-		i++;
+	const std::string data(line.substr(3));
+	boost::tokenizer<boost::char_separator<char>> tokens(data, boost::char_separator<char>(","));
+	if (std::distance(tokens.begin(), tokens.end()) != 3) return false; // Make sure there are 3 fields
+	boost::tokenizer<boost::char_separator<char>>::iterator token = tokens.begin();
+	try {
+		double radius = std::stod(*token);
+		double angleStart = std::stod(*(++token));
+		double angleEnd = std::stod(*(++token));
+		airspace.AddGeometry(new Sector(varPoint, radius, angleStart, angleEnd, varRotationClockwise));
+	} catch (...) {
+		return false;
 	}
-	airspace.AddGeometry(new Sector(varPoint, radius, angleStart, angleEnd, varRotationClockwise));
 	return true;
 }
 
 bool OpenAir::ParseDB(const std::string& line, Airspace& airspace) {
 	if (airspace.GetType() == Airspace::UNDEFINED) return true;
 	if (varPoint.Lat() == Geometry::LatLon::UNDEF_LAT || line.length() < 26) return false;
-	boost::char_separator<char> sep(",");
-	std::string data(line.substr(3));
-	boost::tokenizer<boost::char_separator<char>> tokens(data, sep);
-	Geometry::LatLon p1, p2;
-	int i = 0;
-	for (const std::string& c : tokens) {
-		switch (i) {
-		case 0:
-			if (!ParseCoordinates(c, p1)) return false;
-			break;
-		case 1:
-			if (!ParseCoordinates(c, p2)) return false;
-			break;
-		default:
-			break;
-		}
-		i++;
-	}
+	const std::string data(line.substr(3));
+	boost::tokenizer<boost::char_separator<char>> tokens(data, boost::char_separator<char>(","));
+	if (std::distance(tokens.begin(), tokens.end()) != 2) return false; // Make sure there are 2 fields
+	boost::tokenizer<boost::char_separator<char>>::iterator token = tokens.begin();
+	Geometry::LatLon p1;
+	if (!ParseCoordinates(*token, p1)) return false;
+	Geometry::LatLon p2;
+	if (!ParseCoordinates(*(++token), p2)) return false;
 	airspace.AddGeometry(new Sector(varPoint, p1, p2, varRotationClockwise));
 	return true;
 }
 
 bool OpenAir::ParseDC(const std::string& line, Airspace& airspace) {
 	if (airspace.GetType() == Airspace::UNDEFINED) return true;
-	if (varPoint.Lat() == Geometry::LatLon::UNDEF_LAT || line.length() < 4 || !isDigit(line.at(3))) return false;
-	double radius = std::stod(line.substr(3));
-	airspace.AddGeometry(new Circle(varPoint, radius));
+	if (varPoint.Lat() == Geometry::LatLon::UNDEF_LAT || line.length() < 4) return false;
+	try {
+		airspace.AddGeometry(new Circle(varPoint, std::stod(line.substr(3))));
+	} catch (...) {
+		return false;
+	}
 	return true;
 }
 
