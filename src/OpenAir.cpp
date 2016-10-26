@@ -123,7 +123,7 @@ bool OpenAir::ReadFile(const std::string& fileName) {
 	AirspaceConverter::LogMessage("Reading OpenAir file: " + fileName, false);
 	int linecount = 0;
 	std::string sLine;
-	bool allParsedOK = true, isCRLF = false;
+	bool allParsedOK = true, isCRLF = false, CRLFwarningGiven = false;
 	Airspace airspace;
 	while (!input.eof() && input.good()) {
 
@@ -132,7 +132,13 @@ bool OpenAir::ReadFile(const std::string& fileName) {
 		++linecount;
 
 		// Verify line ending
-		if (!isCRLF) AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: not valid Windows style end of line (expected CR LF)") % linecount), true);
+		if (!CRLFwarningGiven && !isCRLF) {
+			AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: not valid Windows style end of line (expected CR LF).") % linecount), true);
+			AirspaceConverter::LogMessage("This warning will be not reapeated for furter lines not termintated with CR LF of this OpenAir file.", false);
+
+			// OpenAir files may contain thousends of lines we don't want to print this warning all the time
+			CRLFwarningGiven = true;
+		}
 		
 		// Directly skip empty lines
 		if (sLine.empty()) continue;

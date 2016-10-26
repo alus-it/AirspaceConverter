@@ -115,7 +115,7 @@ bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint
 	AirspaceConverter::LogMessage("Reading CUP file: " + fileName, false);
 	int linecount = 0;
 	std::string sLine;
-	bool isCRLF = false;
+	bool isCRLF = false, CRLFwarningGiven = false, firstWaypointLineFound = false;
 
 	while (!input.eof() && input.good()) {
 
@@ -124,10 +124,19 @@ bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint
 		linecount++;
 
 		// Verify line ending
-		if(!isCRLF) AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: not valid Windows style end of line (expected CR LF)") %linecount), true);
+		if (!CRLFwarningGiven && !isCRLF) {
+			AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: not valid Windows style end of line (expected CR LF).") % linecount), true);
+			AirspaceConverter::LogMessage("This warning will be not reapeated for furter lines not termintated with CR LF of this CUP file.", false);
+
+			// CUP files may contain thousends of WPs we don't want to print this warning all the time
+			CRLFwarningGiven = true;
+		}
 
 		// Skip eventual header
-		if(linecount == 1 && sLine.find("name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc") == 0) continue;
+		if (!firstWaypointLineFound && sLine.find("name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc") == 0) {
+			firstWaypointLineFound = true;
+			continue;
+		}
 
 		// Directly skip empty lines
 		if (sLine.empty()) continue;
@@ -256,6 +265,9 @@ bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint
 			// Add it to the multimap
 			output.insert(std::pair<int, Waypoint*>(type, waypoint));
 		}
+
+		// Make sure that at this point we already found a valid waypoint so the header is not anymore expected
+		if (!firstWaypointLineFound) firstWaypointLineFound = true;
 	}
 	return true;
 }
