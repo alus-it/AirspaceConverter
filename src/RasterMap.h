@@ -4,7 +4,7 @@
 // Author      : Alberto Realis-Luc <alberto.realisluc@gmail.com>
 // Web         : http://www.alus.it/AirspaceConverter
 // Repository  : https://github.com/alus-it/AirspaceConverter.git
-// Copyright   : (C) 2016 Alberto Realis-Luc, LK8000 team
+// Copyright   : (C) 2016-2017 Alberto Realis-Luc, LK8000 team
 // License     : GNU GPL v3
 //
 // The source code in this file was adopted from LK8000 project

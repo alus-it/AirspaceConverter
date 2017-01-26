@@ -4,7 +4,7 @@
 // Author      : Alberto Realis-Luc <alberto.realisluc@gmail.com>
 // Web         : http://www.alus.it/AirspaceConverter
 // Repository  : https://github.com/alus-it/AirspaceConverter.git
-// Copyright   : (C) 2016 Alberto Realis-Luc
+// Copyright   : (C) 2016-2017 Alberto Realis-Luc
 // License     : GNU GPL v3
 //
 // This source file is part of AirspaceConverter project
@@ -18,7 +18,7 @@ std::function<void(const std::string&, const bool)> AirspaceConverter::LogMessag
 const std::vector<std::string> AirspaceConverter::disclaimer = {
 	"This file has been produced with: \"AirspaceConverter\" Version: " VERSION,
 	"For info visit: http://www.alus.it/AirspaceConverter",
-	"Copyrights(C) 2016 Alberto Realis-Luc",
+	"Copyrights(C) 2016-2017 Alberto Realis-Luc",
 	"",
 	"WARNING:",
 	"This is a BETA version of AirspaceConverter!",
