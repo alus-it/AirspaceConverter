@@ -11,6 +11,7 @@
 
 # Tools
 CXX = g++
+STRIP = strip
 RM = rm -rf
 
 # Compiler options
@@ -18,7 +19,7 @@ CPPFLAGS = -std=c++0x -Wall -Werror -fmessage-length=0
 
 # Linker options
 LIB = /usr/lib/x86_64-linux-gnu
-LFLAGS = -lz -lzip -lboost_system -lboost_filesystem
+LFLAGS = -lzip -lboost_system -lboost_filesystem
 
 # Source path
 SRC = src/
@@ -33,12 +34,6 @@ else
 	BIN = Release/
 endif
 $(shell mkdir -p $(BIN) >/dev/null)
-
-# Option to avoid using libzip, just for compiling anyaway in case of older zip.h
-NOZIP ?= 0
-ifeq ($(NOZIP),1)
-	CPPFLAGS += -DNOZIP
-endif
 
 # Dependencies dir
 DEPDIR = $(BIN).d/
@@ -55,7 +50,6 @@ CPPFILES =              \
 	CUPreader.cpp         \
 	Geometry.cpp          \
 	KMLwriter.cpp         \
-	main.cpp              \
 	OpenAIPreader.cpp     \
 	OpenAir.cpp           \
 	PFMwriter.cpp         \
@@ -66,18 +60,30 @@ CPPFILES =              \
 OBJS = $(patsubst %.cpp, $(BIN)%.o, $(CPPFILES))
 
 # Build all
-all: $(BIN)AirspaceConverter
+all: $(BIN)airspaceconverter
 
-# Link
-$(BIN)AirspaceConverter: $(OBJS)
-	@echo Linking: $@
-	@$(CXX) -L$(LIB) $(LFLAGS) $(OBJS) -o $@
+# Build the command line program
+$(BIN)airspaceconverter: $(BIN)libairspaceconverter.so $(SRC)main.cpp
+	@echo Building: $@
+	@$(CXX) $(CPPFLAGS) -lboost_system -lboost_filesystem -L$(BIN) -lairspaceconverter $(SRC)main.cpp -o $@
+ifeq ($(DEBUG),0)
+	@$(STRIP) -S --strip-unneeded $@ -o $@
+endif
 
-# Compile
+# Build the shared library
+$(BIN)libairspaceconverter.so: $(OBJS)
+	@echo Building shared library: $@
+	@$(CXX) -L$(LIB) $(LFLAGS)  -Wl,-soname,libairspaceconverter.so -shared $(OBJS) -o $@
+ifeq ($(DEBUG),0)
+	@$(STRIP) -S --strip-unneeded $@ -o $@
+endif
+	@chmod a-x $@
+
+# Compile the sources of common shared library
 $(BIN)%.o: $(SRC)%.cpp
 $(BIN)%.o: $(SRC)%.cpp $(DEPDIR)%.d
 	@echo 'Compiling: $<'
-	@$(CXX) $(DEPFLAGS) $(CPPFLAGS) -c $< -o $@
+	@$(CXX) $(DEPFLAGS) $(CPPFLAGS) -fPIC -c $< -o $@
 	@mv -f $(DEPDIR)$*.Td $(DEPDIR)$*.d
 
 # Compile dependencies
