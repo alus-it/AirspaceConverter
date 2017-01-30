@@ -18,7 +18,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include "../../src/AirspaceConverter.h"
+#include "AirspaceConverter.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

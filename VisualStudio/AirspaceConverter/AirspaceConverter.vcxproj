@@ -75,8 +75,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\arl\boost_1_61_0;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\arl\boost_1_61_0\lib32;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\boost_1_61_0;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\boost_1_61_0\lib32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -85,8 +85,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\arl\boost_1_61_0;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\arl\boost_1_61_0\lib32;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\boost_1_61_0;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\boost_1_61_0\lib32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -102,6 +102,7 @@
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>..\..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -154,6 +155,7 @@
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>..\..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -202,20 +204,6 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\src\Airfield.h" />
-    <ClInclude Include="..\..\src\Airspace.h" />
-    <ClInclude Include="..\..\src\AirspaceConverter.h" />
-    <ClInclude Include="..\..\src\CUPreader.h" />
-    <ClInclude Include="..\..\src\Geometry.h" />
-    <ClInclude Include="..\..\src\KMLwriter.h" />
-    <ClInclude Include="..\..\src\OpenAIPreader.h" />
-    <ClInclude Include="..\..\src\OpenAir.h" />
-    <ClInclude Include="..\..\src\PFMwriter.h" />
-    <ClInclude Include="..\..\src\RasterMap.h" />
-    <ClInclude Include="..\..\src\Waypoint.h" />
     <ClInclude Include="AirspaceConverterApp.h" />
     <ClInclude Include="AirspaceConverterDlg.h" />
     <ClInclude Include="Processor.h" />
@@ -224,17 +212,6 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Airfield.cpp" />
-    <ClCompile Include="..\..\src\Airspace.cpp" />
-    <ClCompile Include="..\..\src\AirspaceConverter.cpp" />
-    <ClCompile Include="..\..\src\CUPreader.cpp" />
-    <ClCompile Include="..\..\src\Geometry.cpp" />
-    <ClCompile Include="..\..\src\KMLwriter.cpp" />
-    <ClCompile Include="..\..\src\OpenAIPreader.cpp" />
-    <ClCompile Include="..\..\src\OpenAir.cpp" />
-    <ClCompile Include="..\..\src\PFMwriter.cpp" />
-    <ClCompile Include="..\..\src\RasterMap.cpp" />
-    <ClCompile Include="..\..\src\Waypoint.cpp" />
     <ClCompile Include="AirspaceConverterApp.cpp" />
     <ClCompile Include="AirspaceConverterDlg.cpp" />
     <ClCompile Include="Processor.cpp" />
@@ -254,6 +231,11 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\AirspaceConverter.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AirspaceConverterLib\AirspaceConverterLib.vcxproj">
+      <Project>{1412bb18-5649-411d-b0a2-0a32e6402939}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -12,14 +12,14 @@
 
 #include "stdafx.h"
 #include "Processor.h"
-#include "../../src/AirspaceConverter.h"
-#include "../../src/OpenAIPreader.h"
-#include "../../src/Airspace.h"
-#include "../../src/KMLwriter.h"
-#include "../../src/PFMwriter.h"
-#include "../../src/OpenAir.h"
-#include "../../src/CUPreader.h"
-#include "../../src/Waypoint.h"
+#include "AirspaceConverter.h"
+#include "OpenAIPreader.h"
+#include "Airspace.h"
+#include "KMLwriter.h"
+#include "PFMwriter.h"
+#include "OpenAir.h"
+#include "CUPreader.h"
+#include "Waypoint.h"
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
