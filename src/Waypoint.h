@@ -50,18 +50,18 @@ public:
 
 	virtual ~Waypoint() {}
 
-	inline static const bool IsTypeAirfield(const WaypointType& kind) { return kind >= airfieldGrass && kind <= airfieldSolid; }
+	inline static bool IsTypeAirfield(const WaypointType& kind) { return kind >= airfieldGrass && kind <= airfieldSolid; }
 
 	inline const std::string& GetName() const { return name; }
 	inline const std::string& GetCode() const { return code; }
 	inline const std::string& GetCountry() const { return country; }
-	inline const double GetLatitude() const { return latitude; }
-	inline const double GetLongitude() const { return longitude; }
-	inline const int GetAltitude() const { return altitude; }
-	inline const WaypointType GetType() const { return type; }
+	inline double GetLatitude() const { return latitude; }
+	inline double GetLongitude() const { return longitude; }
+	inline int GetAltitude() const { return altitude; }
+	inline WaypointType GetType() const { return type; }
 	inline const std::string& GetTypeName() const { return TypeName(type); }
 	inline const std::string& GetDescription() const { return description; }
-	inline const bool IsAirfield() const { return IsTypeAirfield(type); }
+	inline bool IsAirfield() const { return IsTypeAirfield(type); }
 
 	inline static const std::string& TypeName(const WaypointType& type) { return TYPE_NAMES[type]; }
 

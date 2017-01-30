@@ -264,7 +264,7 @@ double Geometry::AverageRadius(const Geometry::LatLon& center, const std::vector
 	return radius / circlePoints.size();
 }
 
-const bool Geometry::CalcAirfieldPolygon(const double lat, const double lon, const int length, const int dir, std::vector<LatLon>& polygon) {
+bool Geometry::CalcAirfieldPolygon(const double lat, const double lon, const int length, const int dir, std::vector<LatLon>& polygon) {
 	static const double thrtyMeters = 30.0 * M2RAD;
 	assert(polygon.empty());
 	assert(length > 0);

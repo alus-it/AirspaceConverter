@@ -79,7 +79,7 @@ public:
 	~Airspace();
 
 	inline static const std::string& CategoryName(const Type& category) { return CATEGORY_NAMES[category]; }
-	static const bool CategoryVisibleByDefault(const Type& category) { return CATEGORY_VISIBILITY[category]; }
+	static bool CategoryVisibleByDefault(const Type& category) { return CATEGORY_VISIBILITY[category]; }
 	inline void SetType(const Type& category) { type = category; }
 	inline void SetTopAltitude(const Altitude& alt) { top = alt; }
 	inline void SetBaseAltitude(const Altitude& alt) { base = alt; }
@@ -95,15 +95,15 @@ public:
 	inline const Altitude& GetTopAltitude() const { return top; }
 	inline const Altitude& GetBaseAltitude() const { return base; }
 	inline const std::string& GetName() const { return name; }
-	inline const unsigned int GetNumberOfGeometries() const { return geometries.size(); }
+	inline unsigned int GetNumberOfGeometries() const { return geometries.size(); }
 	inline const Geometry* GetGeometryAt(unsigned int i) { return i < geometries.size() ? geometries.at(i) : nullptr; }
 	inline const std::vector<Geometry::LatLon>& GetPoints() const { return points; }
 	inline const Geometry::LatLon& GetFirstPoint() const { return points.front(); }
 	inline const Geometry::LatLon& GetLastPoint() const { return points.back(); }
-	inline const unsigned int GetNumberOfPoints() const { return points.size(); }
+	inline unsigned int GetNumberOfPoints() const { return points.size(); }
 	inline const Geometry::LatLon& GetPointAt(unsigned int pos) const { return points.at(pos); }
-	inline const bool IsGNDbased() const { return base.IsGND(); }
-	inline const bool IsVisibleByDefault() const { return CategoryVisibleByDefault(type); }
+	inline bool IsGNDbased() const { return base.IsGND(); }
+	inline bool IsVisibleByDefault() const { return CategoryVisibleByDefault(type); }
 
 private:
 	void EvaluateAndAddArc(std::vector<Geometry::LatLon*>& arcPoints, std::vector<std::pair<const double, const double>>& centerPoints, const bool& clockwise);

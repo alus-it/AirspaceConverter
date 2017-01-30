@@ -10,6 +10,12 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
+#ifdef __unix__
+#define ICONS_PATH "/usr/share/airspaceconverter/"
+#else
+#define ICONS_PATH "./"
+#endif
+
 #include "KMLwriter.h"
 #include "Airspace.h"
 #include "RasterMap.h"
@@ -547,7 +553,6 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 }
 
 bool KMLwriter::CompressToKMZ(const std::string& inputKMLfile, const bool addIcons /* = false */) {
-#ifndef NOZIP
 	// The input file must be a KML
 	if (boost::filesystem::path(inputKMLfile).extension().string() != ".kml") {
 		AirspaceConverter::LogMessage("ERROR: Expected a KML file to be compressed but found: " + inputKMLfile, true);
@@ -599,7 +604,7 @@ bool KMLwriter::CompressToKMZ(const std::string& inputKMLfile, const bool addIco
 
 		// Get the icon PNG filename and prepare the path in the ZIP and the path from current dir
 		const std::string iconFile = "icons/" + waypointIcons[i];
-		const std::string iconPath = "./" + iconFile;
+		const std::string iconPath = ICONS_PATH + iconFile;
 
 		// Check if we can get that PNG file
 		if (!boost::filesystem::exists(iconPath)) {
@@ -632,6 +637,5 @@ bool KMLwriter::CompressToKMZ(const std::string& inputKMLfile, const bool addIco
 		return true;
 	}
 	AirspaceConverter::LogMessage("ERROR: While finalizing the archive.", true);
-#endif
 	return false;
 }

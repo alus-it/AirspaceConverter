@@ -195,7 +195,7 @@ int main(int argc, char *argv[]) {
 				std::cout << "Invoking cGPSmapper to make: " << outputFile << std::endl << std::endl;
 
 				//TODO: add arguments to create files also for other software like Garmin BaseCamp
-				const std::string cmd(boost::str(boost::format("./cGPSmapper/cgpsmapper-static %1s -o %2s") %polishFile %outputFile));
+				const std::string cmd(boost::str(boost::format("cgpsmapper %1s -o %2s") %polishFile %outputFile));
 
 				if(system(cmd.c_str()) == EXIT_SUCCESS) {
 					flag = true;
