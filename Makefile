@@ -64,7 +64,7 @@ all: $(BIN)airspaceconverter
 
 # Build the command line program
 $(BIN)airspaceconverter: $(BIN)libairspaceconverter.so $(SRC)main.cpp
-	@echo Building: $@
+	@echo Building executable: $@
 	@$(CXX) $(CPPFLAGS) -lboost_system -lboost_filesystem -L$(BIN) -lairspaceconverter $(SRC)main.cpp -o $@
 ifeq ($(DEBUG),0)
 	@$(STRIP) -S --strip-unneeded $@ -o $@
@@ -93,7 +93,24 @@ $(DEPDIR)%.d: ;
 -include $(patsubst %,$(DEPDIR)%.d,$(basename $(CPPFILES)))
 
 # Clean
+.PHONY: clean
 clean:
 	@echo Cleaning all
 	@$(RM) $(BIN)*
 
+.PHONY: install
+install: $(BIN)airspaceconverter
+	@echo Installing AirspaceConverter...
+	@cp $< /usr/bin
+	@cp $(BIN)libairspaceconverter.so /usr/lib
+	@mkdir -p /usr/share/airspaceconverter/icons
+	@cp icons/* /usr/share/airspaceconverter/icons
+	@echo Done.
+
+.PHONY: uninstall
+uninstall:
+	@echo Uninstalling AirspaceConverter...
+	@rm -f /usr/bin/airspaceconverter
+	@rm -f /usr/lib/libairspaceconverter.so
+	@rm -rf /usr/share/airspaceconverter
+	@echo Done.
