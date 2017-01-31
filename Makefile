@@ -67,7 +67,7 @@ $(BIN)airspaceconverter: $(BIN)libairspaceconverter.so $(SRC)main.cpp
 	@echo Building executable: $@
 	@$(CXX) $(CPPFLAGS) -lboost_system -lboost_filesystem -L$(BIN) -lairspaceconverter $(SRC)main.cpp -o $@
 ifeq ($(DEBUG),0)
-	@$(STRIP) -S --strip-unneeded $@ -o $@
+	@$(STRIP) -S --strip-unneeded $@
 endif
 
 # Build the shared library
@@ -75,7 +75,7 @@ $(BIN)libairspaceconverter.so: $(OBJS)
 	@echo Building shared library: $@
 	@$(CXX) -L$(LIB) $(LFLAGS)  -Wl,-soname,libairspaceconverter.so -shared $(OBJS) -o $@
 ifeq ($(DEBUG),0)
-	@$(STRIP) -S --strip-unneeded $@ -o $@
+	@$(STRIP) -S --strip-unneeded $@
 endif
 	@chmod a-x $@
 
@@ -98,6 +98,7 @@ clean:
 	@echo Cleaning all
 	@$(RM) $(BIN)*
 
+# Install
 .PHONY: install
 install: $(BIN)airspaceconverter
 	@echo Installing AirspaceConverter...
@@ -107,6 +108,7 @@ install: $(BIN)airspaceconverter
 	@cp icons/* /usr/share/airspaceconverter/icons
 	@echo Done.
 
+# Uninstall
 .PHONY: uninstall
 uninstall:
 	@echo Uninstalling AirspaceConverter...
