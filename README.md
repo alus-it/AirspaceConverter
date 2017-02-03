@@ -80,15 +80,20 @@ Build dependencies
 ------------------
 In order to compile this project the following libraries are required:  
 - libzip2 (libzip-dev) and dependencies (zlib)
-- Boost libraries
+- Boost libraries (libboost-filesystem-dev)
 
 Compiling AirspaceConverter on Linux
 ------------------------------------
 From the root of this project: `make all`  
-To build in debug: `make DEBUG=1 all`   
+To build in debug: `make DEBUG=1 all`  
 The "AirspaceConverter" executable will be located in the "Release" or "Debug" folder
 
-Compiling AirspaceConverter on Windows
+Installing AirspaceConverter on Linux
+------------------------------------
+From the root of this project: `sudo make install`  
+To uninstall: `sudo make uninstall` 
+
+Compiling AirspaceConverter with MFC interface on Windows
 --------------------------------------
 In the "VisualStudio" folder there is the VisualStudio solution and project files
 
@@ -96,7 +101,7 @@ Placemarks icons credits
 ------------------------
 Some of the placemark icons used for displaying the waypoints in Google Earth included in the produced KMZ file (and so used by this project) are coming from:  
 Maps Icons Collection - https://mapicons.mapsmarker.com  
-The folder icons with the placemarks PNG icons must be kept in the same location of AirspaceConverter executable.
+On Windows, the folder `icons` with the placemarks PNG icons must be kept in the same location of AirspaceConverter executable.
 
 Contacts
 --------
