@@ -27,10 +27,13 @@
 *.out
 *.app
 
-# Ignore bin folder
+# Ignore bin and build folder
 /bin
 /Debug
 /Release
+*/Debug
+*/Release
+*/build*
 
 # Ignore Eclipse project files
 .project
@@ -55,11 +58,8 @@
 
 # Visual Studio folders
 /VisualStudio/.vs
-/VisualStudio/Debug
-/VisualStudio/Release
 /VisualStudio/packages
-/VisualStudio/AirspaceConverter/Debug
-/VisualStudio/AirspaceConverter/Release
-/VisualStudio/AirspaceConverter/x64
+/VisualStudio/*/x64
 
-
+# QT stuff
+*.user
