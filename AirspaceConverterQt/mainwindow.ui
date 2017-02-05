@@ -56,6 +56,9 @@
     </property>
    </widget>
    <widget class="QPushButton" name="unloadAirspacesButton">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>770</x>
@@ -340,6 +343,9 @@
     </property>
    </widget>
    <widget class="QPushButton" name="unloadWaypointsButton">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>770</x>
@@ -356,6 +362,9 @@
     </property>
    </widget>
    <widget class="QPushButton" name="unloadTerrainMapsButton">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>770</x>
@@ -380,8 +389,14 @@
       <height>31</height>
      </rect>
     </property>
+    <property name="maximum">
+     <number>100</number>
+    </property>
     <property name="value">
      <number>0</number>
+    </property>
+    <property name="textVisible">
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="QTextEdit" name="loggingTextBox">
@@ -516,6 +531,9 @@
     </property>
    </widget>
    <widget class="QPushButton" name="openOutputFolderButton">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>190</x>
@@ -529,6 +547,9 @@
     </property>
    </widget>
    <widget class="QPushButton" name="openOutputFileButton">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -555,6 +576,9 @@
     </property>
    </widget>
    <widget class="QPushButton" name="convertButton">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>20</x>

@@ -206,7 +206,7 @@ BOOL CAirspaceConverterDlg::OnInitDialog() {
 
 void CAirspaceConverterDlg::OnSysCommand(UINT nID, LPARAM lParam) {
 	if (nID == SC_CLOSE && busy &&
-		MessageBox(_T("The conversion is still in progress...\nThe application will reamain anyway working in background.\nAre you really sure you want to exit now?"), _T("Exit"), MB_YESNO | MB_ICONWARNING) != IDYES)
+		MessageBox(_T("The conversion is still in progress...\nThe application will remain anyway working in background.\nAre you really sure you want to exit now?"), _T("Exit"), MB_YESNO | MB_ICONWARNING) != IDYES)
 		return;
 	else if ((nID & 0xFFF0) == IDM_ABOUTBOX) OnBnClickedAbout();
 	CDialog::OnSysCommand(nID, lParam);

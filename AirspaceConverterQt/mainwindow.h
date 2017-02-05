@@ -5,15 +5,16 @@
 
 #include "aboutdialog.h"
 
+#include <chrono>
 #include "../src/Airspace.h"
 
 
 class Waypoint;
 class OpenAir;
-
+class QCloseEvent;
 
 namespace Ui {
-class MainWindow;
+    class MainWindow;
 }
 
 class MainWindow : public QMainWindow
@@ -25,17 +26,23 @@ public:
     ~MainWindow();
 
 private:
-    void logMessage(const std::string&, const bool isError = false);
-
+    virtual void closeEvent(QCloseEvent *event);
+    void logMessage(const std::string& message, const bool isError = false);
+    void log(const QString& message, const bool isError = false);
+    void startBusy();
+    void endBusy();
 
     Ui::MainWindow *ui;
     AboutDialog about;
+    std::chrono::high_resolution_clock::time_point startTime;
 
     std::multimap<int, Airspace> airspaces;
     std::multimap<int, Waypoint*> waypoints;
     OpenAir *openAir;
 
     std::string outputFile;
+    bool outputJustDone;
+    bool busy;
 
 
 private slots:
