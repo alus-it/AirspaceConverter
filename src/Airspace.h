@@ -95,12 +95,12 @@ public:
 	inline const Altitude& GetTopAltitude() const { return top; }
 	inline const Altitude& GetBaseAltitude() const { return base; }
 	inline const std::string& GetName() const { return name; }
-	inline unsigned int GetNumberOfGeometries() const { return geometries.size(); }
+	inline unsigned int GetNumberOfGeometries() const { return (unsigned int)geometries.size(); }
 	inline const Geometry* GetGeometryAt(unsigned int i) { return i < geometries.size() ? geometries.at(i) : nullptr; }
 	inline const std::vector<Geometry::LatLon>& GetPoints() const { return points; }
 	inline const Geometry::LatLon& GetFirstPoint() const { return points.front(); }
 	inline const Geometry::LatLon& GetLastPoint() const { return points.back(); }
-	inline unsigned int GetNumberOfPoints() const { return points.size(); }
+	inline unsigned int GetNumberOfPoints() const { return (unsigned int)points.size(); }
 	inline const Geometry::LatLon& GetPointAt(unsigned int pos) const { return points.at(pos); }
 	inline bool IsGNDbased() const { return base.IsGND(); }
 	inline bool IsVisibleByDefault() const { return CategoryVisibleByDefault(type); }

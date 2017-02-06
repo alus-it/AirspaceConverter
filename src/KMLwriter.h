@@ -29,7 +29,7 @@ public:
 
 	bool WriteFile(const std::string& filename, const std::multimap<int, Airspace>& airspaces, const std::multimap<int, Waypoint*>& waypoints);
 	static bool AddTerrainMap(const std::string& filename);
-	inline static int GetNumOfRasterMaps() { return terrainMaps.size(); }
+	inline static int GetNumOfRasterMaps() { return (int)terrainMaps.size(); }
 	static void ClearTerrainMaps();
 	inline static void SetDefaultTerrainAltitude(const double& defaultAltMt) { defaultTerrainAltitudeMt = defaultAltMt; }
 	inline static double GetDefaultTerrainAltitude() { return defaultTerrainAltitudeMt; }

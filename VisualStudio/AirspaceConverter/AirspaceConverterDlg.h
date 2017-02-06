@@ -93,6 +93,8 @@ private:
 	unsigned long numAirspacesLoaded;
 	unsigned long numWaypointsLoaded;
 	int numRasterMapLoaded;
+#ifndef _WIN64
 	bool isWinXPorOlder;
+#endif
 	bool conversionDone;
 };

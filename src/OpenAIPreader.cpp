@@ -96,7 +96,7 @@ bool OpenAIPreader::ReadFile(const std::string& fileName, std::multimap<int, Air
 			// Airspace category
 			std::string str = asp.second.get_child("<xmlattr>").get<std::string>("CATEGORY");
 			Airspace::Type type = Airspace::UNDEFINED;
-			int len = str.length();
+			int len = (int)str.length();
 			if (len>0) switch (str.at(0)) {
 				case 'A':
 					if (len == 1) type = Airspace::CLASSA; // A class airspace

@@ -154,7 +154,7 @@ bool Airspace::Undiscretize() {
 	if (!geometries.empty()) return true;
 	if (points.empty()) return false;
 	assert(points.size() >= 4);
-	unsigned int steps = points.size() - 3;
+	unsigned int steps = (unsigned int)points.size() - 3;
 	std::vector<Geometry::LatLon*> arcPoints;
 	std::vector<std::pair<const double, const double>> centerPoints;
 	bool alreadyOnArc = false;

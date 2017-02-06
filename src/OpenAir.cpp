@@ -28,7 +28,7 @@ bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg) {
 
 	// Tokenize on colons
 	boost::tokenizer<boost::char_separator<char>> tokens(dddmmss, boost::char_separator<char>(":"));
-	const int fields = std::distance(tokens.begin(),tokens.end());
+	const int fields = (int)std::distance(tokens.begin(),tokens.end());
 	if(fields < 1 || fields > 3) return false; // We expect from 1 to 3 fields
 
 	// Degrees
@@ -278,7 +278,7 @@ bool OpenAir::ParseAN(const std::string & line, Airspace& airspace) {
 
 bool OpenAir::ParseAltitude(const std::string& line, const bool isTop, Airspace& airspace) {
 	if (airspace.GetType() == Airspace::UNDEFINED) return true;
-	const int l = line.length();
+	const int l = (int)line.length();
 	if (l < 4) return false;
 	double value = 0;
 	bool isFL = false;

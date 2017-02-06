@@ -77,7 +77,9 @@ CAirspaceConverterDlg::CAirspaceConverterDlg(CWnd* pParent /*=NULL*/)
 	, numWaypointsLoaded(0)
 	, numRasterMapLoaded(0)
 	, busy(false)
+#ifndef _WIN64
 	, isWinXPorOlder(false)
+#endif
 	, conversionDone(false) {
 }
 
@@ -174,11 +176,13 @@ BOOL CAirspaceConverterDlg::OnInitDialog() {
 	OutputTypeCombo.InsertString(-1, _T("IMG file for Garmin devices"));
 	OutputTypeCombo.SetCurSel(AirspaceConverter::KMZ);
 
-	// Check if is running on Windows XP (v 5.2) or older
+	// Check if is running on Windows XP (v 5.2) or older. Only on the 32 bit version, on 64 bit we assume that we are using something newer than WinXP
+#ifndef _WIN64
 	OSVERSIONINFOEX osvi;
 	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
 	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
 	if (GetVersionEx((OSVERSIONINFO*)&osvi) && osvi.dwMajorVersion * 10 + osvi.dwMinorVersion <= 52) isWinXPorOlder = true;
+	
 
 	// In case of Windows XP disable button that can't be used
 	if (isWinXPorOlder) {
@@ -187,6 +191,7 @@ BOOL CAirspaceConverterDlg::OnInitDialog() {
 		OpenOutputFileBt.EnableWindow(FALSE);
 		OpenOutputFolderBt.EnableWindow(FALSE);
 	}
+#endif
 
 	// Initialize progress bar, necessary to do that that here to make it work properly also on WindowsXP
 	progressBar.SetPos(0);
@@ -242,13 +247,17 @@ void CAirspaceConverterDlg::StartBusy() {
 	loadInputFileBt.EnableWindow(FALSE);
 	loadWaypointsBt.EnableWindow(FALSE);
 	loadDEMfileBt.EnableWindow(FALSE);
+#ifndef _WIN64
 	if (!isWinXPorOlder) {
+#endif
 		LoadAirspacesFolderBt.EnableWindow(FALSE);
 		loadWaypointsFolderBt.EnableWindow(FALSE);
 		LoadRasterMapsFolderBt.EnableWindow(FALSE);
 		OpenOutputFileBt.EnableWindow(FALSE);
 		OpenOutputFolderBt.EnableWindow(FALSE);
+#ifndef _WIN64
 	}
+#endif
 	unloadAirspacesBt.EnableWindow(FALSE);
 	unloadWaypointsBt.EnableWindow(FALSE);
 	unloadRasterMapsBt.EnableWindow(FALSE);
@@ -342,13 +351,17 @@ void CAirspaceConverterDlg::EndBusy() {
 	loadInputFileBt.EnableWindow(TRUE);
 	loadWaypointsBt.EnableWindow(isKmzFile);
 	loadDEMfileBt.EnableWindow(isKmzFile);
+#ifndef _WIN64
 	if (!isWinXPorOlder) {
+#endif
 		LoadAirspacesFolderBt.EnableWindow(TRUE);
 		loadWaypointsFolderBt.EnableWindow(isKmzFile);
 		LoadRasterMapsFolderBt.EnableWindow(isKmzFile);
 		OpenOutputFileBt.EnableWindow(conversionDone);
 		OpenOutputFolderBt.EnableWindow(conversionDone);
+#ifndef _WIN64
 	}
+#endif
 	unloadAirspacesBt.EnableWindow(numAirspacesLoaded > 0 ? TRUE : FALSE);
 	unloadWaypointsBt.EnableWindow(numWaypointsLoaded > 0 ? TRUE : FALSE);
 	unloadRasterMapsBt.EnableWindow(numRasterMapLoaded > 0 ? TRUE : FALSE);
@@ -537,10 +550,14 @@ void CAirspaceConverterDlg::OnBnClickedOutputTypeCombo() {
 	BOOL isKmzFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::KMZ);
 	loadWaypointsBt.EnableWindow(isKmzFile);
 	loadDEMfileBt.EnableWindow(isKmzFile);
+#ifndef _WIN64
 	if (!isWinXPorOlder) {
+#endif
 		loadWaypointsFolderBt.EnableWindow(isKmzFile);
 		LoadRasterMapsFolderBt.EnableWindow(isKmzFile);
+#ifndef _WIN64
 	}
+#endif
 	editQNHtextField.EnableWindow(isKmzFile ? numAirspacesLoaded == 0 : FALSE);
 	editDefualtAltTextField.EnableWindow(isKmzFile);
 	ConvertBt.EnableWindow((numAirspacesLoaded > 0 || (isKmzFile && numWaypointsLoaded > 0)) && !outputFile.empty() ? TRUE : FALSE);
@@ -605,7 +622,7 @@ void CAirspaceConverterDlg::OnBnClickedOpenOutputFile() {
 
 void CAirspaceConverterDlg::OnBnClickedOpenOutputFolder() {
 	if (outputFile.empty()) return;
-	ITEMIDLIST* pidl = ILCreateFromPath(CString(outputFile.c_str()));
+	ITEMIDLIST* pidl = static_cast<ITEMIDLIST*>(ILCreateFromPathW(CString(outputFile.c_str())));
 	if (pidl != nullptr) {
 		SHOpenFolderAndSelectItems(pidl, 0, 0, 0);
 		ILFree(pidl);

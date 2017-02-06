@@ -42,8 +42,8 @@ public:
 	bool MakeKMZfile(const std::string& outputKMZfile, const double& defaultTerraninAltMt);
 	bool MakeOtherFile(const std::string& outputFilename, const AirspaceConverter::OutputType type);
 	inline void SetWindow(HWND hwnd) { window = hwnd; }
-	inline unsigned long GetNumOfAirspaces() const { return airspaces.size(); }
-	inline unsigned long GetNumOfWaypoints() const { return waypoints.size(); }
+	inline unsigned long GetNumOfAirspaces() const { return (unsigned long)airspaces.size(); }
+	inline unsigned long GetNumOfWaypoints() const { return (unsigned long)waypoints.size(); }
 	int GetNumOfTerrainMaps() const;
 	inline void Join() { if (workerThread.joinable()) workerThread.join(); }
 	//inline void Abort() { abort = true; Join(); }

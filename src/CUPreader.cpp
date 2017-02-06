@@ -22,7 +22,7 @@
 #include <cassert>
 
 bool ParseLatitude(const std::string& text, double& lat) {
-	const int len = text.length();
+	const int len = (int)text.length();
 	if(len < 5) return false;
 	try {
 		lat = std::stoi(text.substr(0,2));
@@ -37,7 +37,7 @@ bool ParseLatitude(const std::string& text, double& lat) {
 }
 
 bool ParseLongitude(const std::string& text, double& lon) {
-	const int len = text.length();
+	const int len = (int)text.length();
 	if(len < 6) return false;
 	try {
 		lon = std::stoi(text.substr(0,3));
@@ -52,7 +52,7 @@ bool ParseLongitude(const std::string& text, double& lon) {
 }
 
 bool ParseAltitude(const std::string& text, int& alt) {
-	int pos = text.length()-1;
+	int pos = (int)text.length() - 1;
 	if(pos == 0 && text.front()=='0') {
 		alt = 0;
 		return true;
@@ -82,7 +82,7 @@ bool ParseAltitude(const std::string& text, int& alt) {
 }
 
 bool ParseLength(const std::string& text, int& len) {
-	int pos = text.length()-1;
+	int pos = (int)text.length() - 1;
 	if(pos<2) return false;
 	bool nauticalMiles = false, statuteMiles = false;
 	if(text.back() == 'm' || text.back() == 'M') {

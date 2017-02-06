@@ -247,7 +247,7 @@ Geometry::LatLon Geometry::AveragePoints(const std::vector<std::pair<const doubl
 		latc += p.first;
 		lonc += p.second;
 	}
-	const int num = centerPoints.size();
+	const int num = (int)centerPoints.size();
 	latc /= num;
 	lonc /= num;
 	assert(latc >= -PI_2 && latc <= PI_2);

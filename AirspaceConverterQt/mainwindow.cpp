@@ -158,7 +158,7 @@ void MainWindow::on_loadAirspaceFileButton_clicked() {
     }
 
     // Set the numer of airspaces loaded in its spinBox
-    ui->numAirspacesLoadedSpinBox->setValue(airspaces.size());
+    ui->numAirspacesLoadedSpinBox->setValue((int)airspaces.size());
 
     // Eventually set the name of output file
     if(outputFile.empty())
@@ -187,7 +187,7 @@ void MainWindow::on_loadAirspaceFolderButton_clicked() {
     }
 
     // Set the numer of airspaces loaded in its spinBox
-    ui->numAirspacesLoadedSpinBox->setValue(airspaces.size());
+    ui->numAirspacesLoadedSpinBox->setValue((int)airspaces.size());
 
     endBusy();
 }
@@ -207,7 +207,7 @@ void MainWindow::on_loadWaypointFileButton_clicked() {
     for(const auto& file : filenames) CUPreader::ReadFile(file.toStdString(), waypoints);
 
     // Set the numer of waypoints loaded in its spinBox
-    ui->numWaypointsLoadedSpinBox->setValue(waypoints.size());
+    ui->numWaypointsLoadedSpinBox->setValue((int)waypoints.size());
 
     endBusy();
 }
@@ -225,7 +225,7 @@ void MainWindow::on_loadWaypointsFolderButton_clicked() {
     }
 
     // Set the numer of waypoints loaded in its spinBox
-    ui->numWaypointsLoadedSpinBox->setValue(waypoints.size());
+    ui->numWaypointsLoadedSpinBox->setValue((int)waypoints.size());
 
     endBusy();
 }
