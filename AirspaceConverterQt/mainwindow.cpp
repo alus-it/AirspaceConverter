@@ -289,8 +289,7 @@ void MainWindow::on_unloadTerrainMapsButton_clicked() {
     ui->numTerrainMapsLoadedSpinBox->setValue(0);
 }
 
-void MainWindow::on_convertButton_clicked()
-{
+void MainWindow::on_convertButton_clicked() {
     startBusy();
 
     // Set QNH

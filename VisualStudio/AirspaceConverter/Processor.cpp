@@ -12,7 +12,6 @@
 
 #include "stdafx.h"
 #include "Processor.h"
-#include "AirspaceConverter.h"
 #include "OpenAIPreader.h"
 #include "Airspace.h"
 #include "KMLwriter.h"
@@ -26,12 +25,10 @@
 
 Processor::Processor(HWND hwnd) :
 	window(hwnd),
-	//abort(false),
 	outputType(AirspaceConverter::NumOfOutputTypes) {
 }
 
 Processor::~Processor() {
-	//Abort();
 	KMLwriter::ClearTerrainMaps();
 	UnloadWaypoints();
 }
@@ -53,7 +50,6 @@ bool Processor::AddInputFile(const std::string& inputFile)
 bool Processor::LoadAirspacesFiles(const double& newQNH) {
 	if (workerThread.joinable() || (openAIPinputFiles.empty() && openAirInputFiles.empty())) return false;
 	Altitude::SetQNH(newQNH);
-	//abort = false;
 	workerThread = std::thread(std::bind(&Processor::LoadAirspacesfilesThread, this));
 	return true;
 }
@@ -75,7 +71,6 @@ bool Processor::UnloadAirspaces() {
 
 bool Processor::LoadDEMfiles() {
 	if (workerThread.joinable() || DEMfiles.empty()) return false;
-	//abort = false;
 	workerThread = std::thread(std::bind(&Processor::LoadDEMfilesThread, this));
 	return true;
 }
@@ -94,7 +89,6 @@ bool Processor::UnloadRasterMaps() {
 
 bool Processor::LoadWaypointsFiles() {
 	if (workerThread.joinable() || CUPfiles.empty()) return false;
-	//abort = false;
 	workerThread = std::thread(std::bind(&Processor::LoadWaypointsFilesThread, this));
 	return true;
 }
@@ -117,7 +111,6 @@ bool Processor::MakeKMZfile(const std::string& outputKMZfile, const double& defa
 	if (workerThread.joinable()) return false;
 	outputFile = outputKMZfile;
 	KMLwriter::SetDefaultTerrainAltitude(defaultTerraninAltMt);
-	//abort = false;
 	workerThread = std::thread(std::bind(&Processor::MakeKMZfileThread, this));
 	return true;
 }
@@ -134,7 +127,6 @@ bool Processor::MakeOtherFile(const std::string& outputFilename, AirspaceConvert
 	if (workerThread.joinable()) return false;
 	outputFile = outputFilename;
 	outputType = type;
-	//abort = false;
 	workerThread = std::thread(std::bind(&Processor::MakeOtherFileThread, this));
 	return true;
 }

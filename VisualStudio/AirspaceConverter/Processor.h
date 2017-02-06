@@ -11,9 +11,8 @@
 //============================================================================
 
 #pragma once
-#include "../../src/AirspaceConverter.h"
+#include "AirspaceConverter.h"
 #include <thread>
-//#include <deque>
 #include <map>
 #include <string>
 #include <vector>
@@ -46,7 +45,6 @@ public:
 	inline unsigned long GetNumOfWaypoints() const { return (unsigned long)waypoints.size(); }
 	int GetNumOfTerrainMaps() const;
 	inline void Join() { if (workerThread.joinable()) workerThread.join(); }
-	//inline void Abort() { abort = true; Join(); }
 	
 private:
 	void LoadAirspacesfilesThread();
@@ -56,8 +54,6 @@ private:
 
 	HWND window;
 	std::thread workerThread;
-	//std::deque<std::string> queue;
-	//bool abort;
 	std::multimap<int, Airspace> airspaces;
 	std::multimap<int, Waypoint*> waypoints;
 	double QNH;
