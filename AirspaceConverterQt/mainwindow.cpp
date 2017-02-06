@@ -5,19 +5,18 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 #include <QDesktopServices>
-#include "../src/AirspaceConverter.h"
-#include "../src/CUPreader.h"
-#include "../src/OpenAIPreader.h"
-#include "../src/KMLwriter.h"
-#include "../src/PFMwriter.h"
-#include "../src/OpenAir.h"
-#include "../src/Waypoint.h"
-
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
 #include <cassert>
+#include "AirspaceConverter.h"
+#include "CUPreader.h"
+#include "OpenAIPreader.h"
+#include "KMLwriter.h"
+#include "PFMwriter.h"
+#include "OpenAir.h"
+#include "Waypoint.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
