@@ -22,7 +22,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     openAir(nullptr),
-    outputJustDone(false),
     busy(false)
 {
     // Set the logging function (to write in the logging texbox)
@@ -38,7 +37,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow() {
     delete ui;
-
     delete openAir;
 
     // Clear waypoints
@@ -65,7 +63,6 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     }
     event->accept();
 }
-
 
 void MainWindow::startBusy() {
     busy = true;
@@ -97,10 +94,12 @@ void MainWindow::startBusy() {
     startTime = std::chrono::high_resolution_clock::now();
 }
 
-void MainWindow::endBusy() {
+void MainWindow::endBusy(bool conversionJustDone) {
     // Stop the timer
-    const double elapsedTimeSec = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - startTime).count() / 1e6;
-    logMessage(std::string(boost::str(boost::format("Execution time: %1f sec.") %elapsedTimeSec)));
+    if (busy) {
+        const double elapsedTimeSec = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - startTime).count() / 1e6;
+        logMessage(std::string(boost::str(boost::format("Execution time: %1f sec.") %elapsedTimeSec)));
+    }
 
     // Re-enable all specifically
     ui->outputFormatComboBox->setEnabled(true);
@@ -112,20 +111,22 @@ void MainWindow::endBusy() {
     ui->unloadWaypointsButton->setEnabled(!waypoints.empty());
     ui->loadRasterMapFileButton->setEnabled(true);
     ui->loadRasterMapFolderButton->setEnabled(true);
-    ui->unloadTerrainMapsButton->setEnabled(KMLwriter::GetNumOfRasterMaps()<0);
+    ui->unloadTerrainMapsButton->setEnabled(KMLwriter::GetNumOfRasterMaps()>0);
     ui->defaultAltSpinBox->setEnabled(true);
     ui->QNHspinBox->setEnabled(true);
     ui->chooseOutputFileButton->setEnabled(true);
     ui->convertButton->setEnabled(!airspaces.empty());
-    ui->openOutputFileButton->setEnabled(outputJustDone);
-    ui->openOutputFolderButton->setEnabled(outputJustDone);
+    ui->openOutputFileButton->setEnabled(conversionJustDone);
+    ui->openOutputFolderButton->setEnabled(conversionJustDone);
     ui->clearLogButton->setEnabled(true);
     ui->closeButton->setEnabled(true);
 
-    // Disable marquee progrees bar
-    ui->progressBar->setMaximum(100);
+    if (busy) {
+        // Disable marquee progrees bar
+        ui->progressBar->setMaximum(100);
 
-    busy = false;
+        busy = false;
+    }
 }
 
 void MainWindow::on_aboutButton_clicked() {
@@ -133,11 +134,41 @@ void MainWindow::on_aboutButton_clicked() {
 }
 
 void MainWindow::on_outputFormatComboBox_currentIndexChanged(int index) {
-    assert(index >= AirspaceConverter::KMZ && index < AirspaceConverter::NumOfOutputTypes);
+    updateOutputFileExtension(index);
+    endBusy();
+}
 
-    //TODO: set the output filename
-    if(!outputFile.empty()) {
+void MainWindow::updateOutputFileExtension(const int newExtIdx) {
+    if(outputFile.empty()) return;
+    boost::filesystem::path path(outputFile);
+    switch(newExtIdx) {
+        case AirspaceConverter::KMZ:
+            path.replace_extension(".kmz");
+            break;
+        case AirspaceConverter::OpenAir:
+            path.replace_extension(".txt");
+            break;
+        case AirspaceConverter::Polish:
+            path.replace_extension(".mp");
+            break;
+        case AirspaceConverter::Garmin:
+            path.replace_extension(".img");
+            break;
+        default:
+            assert(false);
+    }
+    outputFile = path.string();
+    ui->outputFileTextEdit->setPlainText(QString::fromStdString(outputFile));
+}
 
+void MainWindow::readSingleAirspaceFile(const std::string& inputFile, const std::string& ext) {
+    bool redOk(false);
+    if(boost::iequals(ext, ".txt")) redOk = openAir->ReadFile(inputFile);
+    else if(boost::iequals(ext, ".aip")) redOk = OpenAIPreader::ReadFile(inputFile, airspaces);
+    else return;
+    if (outputFile.empty() && redOk) {
+        outputFile = inputFile;
+        updateOutputFileExtension(ui->outputFormatComboBox->currentIndex());
     }
 }
 
@@ -149,20 +180,12 @@ void MainWindow::on_loadAirspaceFileButton_clicked() {
 
     // Load all the files
     for(const auto& file : filenames) {
-        std::string inputFile(file.toStdString());
-        std::string ext(boost::filesystem::path(inputFile).extension().string());
-        if(boost::iequals(ext, ".txt")) openAir->ReadFile(inputFile);
-        else if(boost::iequals(ext, ".aip")) OpenAIPreader::ReadFile(inputFile, airspaces);
-        else assert(false);
+        const std::string inputFile(file.toStdString());
+        readSingleAirspaceFile(inputFile, boost::filesystem::path(inputFile).extension().string());
     }
 
     // Set the numer of airspaces loaded in its spinBox
     ui->numAirspacesLoadedSpinBox->setValue((int)airspaces.size());
-
-    // Eventually set the name of output file
-    if(outputFile.empty())
-        outputFile = boost::filesystem::path(filenames.front().toStdString()).replace_extension(".kmz").string();
-    //TODO: set proper extension...
 
     endBusy();
 }
@@ -175,14 +198,7 @@ void MainWindow::on_loadAirspaceFolderButton_clicked() {
 
     for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
         if (!boost::filesystem::is_regular_file(*it)) continue;
-        std::string ext(it->path().extension().string());
-        bool redOk(false);
-        if(boost::iequals(ext, ".txt")) redOk = openAir->ReadFile(it->path().string());
-        else if(boost::iequals(ext, ".aip")) redOk = OpenAIPreader::ReadFile(it->path().string(), airspaces);
-        if (outputFile.empty() && redOk) {
-            outputFile = it->path().string();
-            //TODO: set proper extension...
-        }
+        readSingleAirspaceFile(it->path().string(), it->path().extension().string());
     }
 
     // Set the numer of airspaces loaded in its spinBox
@@ -194,6 +210,7 @@ void MainWindow::on_loadAirspaceFolderButton_clicked() {
 void MainWindow::on_unloadAirspacesButton_clicked() {
     airspaces.clear();
     ui->numAirspacesLoadedSpinBox->setValue(0);
+    endBusy();
 }
 
 void MainWindow::on_loadWaypointFileButton_clicked() {
@@ -282,6 +299,8 @@ void MainWindow::on_convertButton_clicked()
     // Set default terrain altitude
     KMLwriter::SetDefaultTerrainAltitude(ui->defaultAltSpinBox->value());
 
+    bool outputJustDone(false);
+
     switch(ui->outputFormatComboBox->currentIndex()) {
         case AirspaceConverter::KMZ:
             {
@@ -319,10 +338,9 @@ void MainWindow::on_convertButton_clicked()
             break;
         default:
             assert(false);
-            break;
     }
 
-    endBusy();
+    endBusy(outputJustDone);
 }
 
 void MainWindow::on_openOutputFileButton_clicked() {    
@@ -333,21 +351,25 @@ void MainWindow::on_openOutputFileButton_clicked() {
 void MainWindow::on_openOutputFolderButton_clicked() {
     //TODO: QDesktopServices???
 
-
     //boost::filesystem::path(outputFile)
 
     QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(outputFile)));
-
-
 }
 
 void MainWindow::on_chooseOutputFileButton_clicked() {
-    QString selectedFilter;
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Output file"), QDir::currentPath(), tr("Google Earth (*.kmz);;OpenAir (*.txt);;Polish (*.mp);;Garmin map (*.img)"), &selectedFilter);
+    // Prepare dialog to ask for output file, will be without extension if not manually typed by the user
+    QString selectedFilter; // this will conatin the selected type by the user in the dialog
+    outputFile = QFileDialog::getSaveFileName(this, tr("Output file"), QDir::currentPath(), tr("Google Earth (*.kmz);;OpenAir (*.txt);;Polish (*.mp);;Garmin map (*.img)"), &selectedFilter).toStdString();
 
-    //TODO: prcess the type: can be choosen also from here!!
-    log(selectedFilter);
+    // Determine which format is now selected
+    int desiredFormatIndex = AirspaceConverter::KMZ;
+    if (selectedFilter != "Google Earth (*.kmz)") {
+        if (selectedFilter == "OpenAir (*.txt)") desiredFormatIndex = AirspaceConverter::OpenAir;
+        else if (selectedFilter == "Polish (*.mp)") desiredFormatIndex = AirspaceConverter::Polish;
+        else if (selectedFilter == "Garmin map (*.img)") desiredFormatIndex = AirspaceConverter::Garmin;
+        else assert(false);
+    }
 
-    outputFile = fileName.toStdString();
-    ui->outputFileTextEdit->setPlainText(fileName);
+    // Reselect the desired format also in the combo box, he will take care of putting the right extension
+    ui->outputFormatComboBox->setCurrentIndex(desiredFormatIndex);
 }

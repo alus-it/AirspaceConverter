@@ -30,7 +30,9 @@ private:
     void logMessage(const std::string& message, const bool isError = false);
     void log(const QString& message, const bool isError = false);
     void startBusy();
-    void endBusy();
+    void endBusy(bool conversionDone = false);
+    void readSingleAirspaceFile(const std::string& inputFile, const std::string &ext);
+    void updateOutputFileExtension(const int newExt);
 
     Ui::MainWindow *ui;
     AboutDialog about;
@@ -41,9 +43,7 @@ private:
     OpenAir *openAir;
 
     std::string outputFile;
-    bool outputJustDone;
     bool busy;
-
 
 private slots:
     void on_aboutButton_clicked();
