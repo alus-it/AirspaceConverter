@@ -55,8 +55,8 @@ const std::vector<std::string> AirspaceConverter::disclaimer = {
 };
 
 AirspaceConverter::AirspaceConverter() :
-	conversionDone(false),
-	allAGLaltitudesCovered(false) {
+	outputType(OutputType::NumOfOutputTypes),
+	conversionDone(false) {
 }
 
 AirspaceConverter::~AirspaceConverter() {
@@ -95,26 +95,20 @@ std::istream& AirspaceConverter::SafeGetline(std::istream& is, std::string& line
 	}
 }
 
-bool AirspaceConverter::AddInputFile(const std::string& inputFile) {
-	std::string ext(boost::filesystem::path(inputFile).extension().string());
-	if (boost::iequals(ext, ".aip")) {
-		openAIPinputFiles.push_back(inputFile);
-		return true;
-	}
-	if (boost::iequals(ext, ".txt")) {
-		openAirInputFiles.push_back(inputFile);
-		return true;
-	}
-	return false;
-}
-
 void AirspaceConverter::LoadAirspaces() {
 	conversionDone = false;
-	for (const std::string& inputFile : openAIPinputFiles) OpenAIPreader::ReadFile(inputFile, airspaces);
-	openAIPinputFiles.clear();
 	OpenAir openAir(airspaces);
-	for (const std::string& inputFile : openAirInputFiles) openAir.ReadFile(inputFile);
-	openAirInputFiles.clear();
+	bool redOk(false);
+	for (const std::string& inputFile : airspaceFiles) {
+		const std::string ext(boost::filesystem::path(inputFile).extension().string());
+		if(boost::iequals(ext, ".txt")) redOk = openAir.ReadFile(inputFile);
+		else if (boost::iequals(ext, ".aip")) redOk = OpenAIPreader::ReadFile(inputFile, airspaces);
+
+		// Guess a default output file name if still not defined by the user
+		if (redOk && outputFile.empty())
+			outputFile = boost::filesystem::path(inputFile).replace_extension(".kmz").string(); // Default output as KMZ
+	}
+	airspaceFiles.clear();
 }
 
 void AirspaceConverter::UnloadAirspaces() {
@@ -124,8 +118,8 @@ void AirspaceConverter::UnloadAirspaces() {
 
 void AirspaceConverter::LoadTerrainRasterMaps() {
 	conversionDone = false;
-	for (const std::string& demFile : DEMfiles) KMLwriter::AddTerrainMap(demFile);
-	DEMfiles.clear();
+	for (const std::string& demFile : terrainRasterMapFiles) KMLwriter::AddTerrainMap(demFile);
+	terrainRasterMapFiles.clear();
 }
 
 void AirspaceConverter::UnloadRasterMaps() {
@@ -135,8 +129,8 @@ void AirspaceConverter::UnloadRasterMaps() {
 
 void AirspaceConverter::LoadWaypoints() {
 	conversionDone = false;
-	for (const std::string& inputFile : CUPfiles) CUPreader::ReadFile(inputFile, waypoints);
-	CUPfiles.clear();
+	for (const std::string& inputFile : waypointFiles) CUPreader::ReadFile(inputFile, waypoints);
+	waypointFiles.clear();
 }
 
 void AirspaceConverter::UnloadWaypoints() {
@@ -161,17 +155,31 @@ double AirspaceConverter::GetDefaultTearrainAlt() const {
 	return KMLwriter::GetDefaultTerrainAltitude();
 }
 
-bool AirspaceConverter::Convert(const std::string& outputFilename, AirspaceConverter::OutputType type) {
+bool AirspaceConverter::Convert() {
 	conversionDone = false;
-	outputFile = outputFilename;
+	if(outputFile.empty()) return false;
+
+	// Determine what kind of output is requested
+	outputType = AirspaceConverter::KMZ; // KMZ default
+	std::string outputExt(boost::filesystem::path(outputFile).extension().string());
+	if (!boost::iequals(outputExt, ".kmz")) {
+		if(boost::iequals(outputExt, ".mp")) outputType = AirspaceConverter::Polish;
+		else if(boost::iequals(outputExt, ".txt")) outputType = AirspaceConverter::OpenAir_Format;
+		else if(boost::iequals(outputExt, ".img")) outputType = AirspaceConverter::Garmin;
+		else {
+			AirspaceConverter::LogMessage("ERROR: Output file extension/type unknown.",true);
+			return false;
+		}
+	}
 	
-	switch (type) {
+	switch (outputType) {
 	case AirspaceConverter::KMZ:
 		{
 			KMLwriter writer;
 			if (writer.WriteFile(outputFile, airspaces, waypoints)) {
 				conversionDone = true;
-				allAGLaltitudesCovered = writer.WereAllAGLaltitudesCovered();
+				if(KMLwriter::GetNumOfRasterMaps() == 0) LogMessage("Warning: no raster terrain map loaded, used default terrain height for all applicable AGL points.", true);
+				else if(writer.WereAllAGLaltitudesCovered()) LogMessage("Warning: not all AGL altitudes were under coverage of the loaded terrain map(s).", true);
 			}
 		}
 		break;

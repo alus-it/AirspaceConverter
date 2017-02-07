@@ -42,9 +42,10 @@ public:
 	inline static void SetLogMessageFuntion(std::function<void(const std::string&, const bool)> func) { LogMessage = func; }
 	static std::istream& SafeGetline(std::istream& is, std::string& line, bool& isCRLF);
 
-	bool AddInputFile(const std::string& inputFile);
-	inline void AddWaypointsFile(const std::string& waypointsFile) { CUPfiles.push_back(waypointsFile); }
-	inline void AddTerrainRasterMapFile(const std::string& rasterMapFile) { DEMfiles.push_back(rasterMapFile); }
+	inline void AddAirspaceFile(const std::string& inputFile) { airspaceFiles.push_back(inputFile); }
+	inline void AddWaypointFile(const std::string& waypointsFile) { waypointFiles.push_back(waypointsFile); }
+	inline void AddTerrainRasterMapFile(const std::string& rasterMapFile) { terrainRasterMapFiles.push_back(rasterMapFile); }
+	inline int GetNumberOfAirspaceFiles() const { return (int)airspaceFiles.size(); }
 	void LoadAirspaces();
 	void LoadTerrainRasterMaps();
 	void UnloadAirspaces();
@@ -55,10 +56,11 @@ public:
 	double GetQNH() const;
 	void SetDefaultTearrainAlt(const double altMt);
 	double GetDefaultTearrainAlt() const;
-	bool Convert(const std::string& outputFilename, const AirspaceConverter::OutputType type);
-	inline bool ConversionDone() const { return conversionDone; }
-	inline bool WereAllAGLaltitudesCovered() const { return allAGLaltitudesCovered; }
-	inline std::string GetOutputFilename() const { return outputFile; }
+	bool Convert();
+	inline bool IsConversionDone() const { return conversionDone; }
+	inline OutputType GetOutputType() const { return outputType; }
+	inline void SetOutputFile(const std::string& outputFilename) { outputFile = outputFilename; }
+	inline std::string GetOutputFile() const { return outputFile; }
 	inline unsigned long GetNumOfAirspaces() const { return (unsigned long)airspaces.size(); }
 	inline unsigned long GetNumOfWaypoints() const { return (unsigned long)waypoints.size(); }
 	int GetNumOfTerrainMaps() const;
@@ -68,10 +70,10 @@ public:
 private:
 	static void DefaultLogMessage(const std::string&, const bool isError = false);
 
+	OutputType outputType;
 	std::multimap<int, Airspace> airspaces;
 	std::multimap<int, Waypoint*> waypoints;
 	std::string outputFile;
-	std::vector<std::string> openAIPinputFiles, openAirInputFiles, DEMfiles, CUPfiles;
+	std::vector<std::string> airspaceFiles, terrainRasterMapFiles, waypointFiles;
 	bool conversionDone;
-	bool allAGLaltitudesCovered;
 };

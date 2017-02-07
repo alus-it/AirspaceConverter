@@ -44,10 +44,7 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	double QNH = Altitude::GetQNH();
-	double defaultTerrainAlt = KMLwriter::GetDefaultTerrainAltitude();
-	std::string outputFile;
-	std::vector<std::string> inputFiles, mapFiles;
+	AirspaceConverter ac;
 
 	for(int i=1; i<argc; i++) {
 		int len=strlen(argv[i]);
@@ -60,39 +57,24 @@ int main(int argc, char *argv[]) {
 
 		switch (argv[i][1]) {
 		case 'q':
-			if(!hasValueAfter) {
-				std::cerr << "ERROR: QNH value not found, using default value: " << QNH << " hPa."<< std::endl;
-				continue;
-			}
-			QNH = std::stod(argv[++i]);
+			if(!hasValueAfter) std::cerr << "ERROR: QNH value not found, using default value: " << ac.GetQNH() << " hPa."<< std::endl;
+			else ac.SetQNH(std::stod(argv[++i]));
 			break;
 		case 'a':
-			if(!hasValueAfter) {
-				std::cerr << "ERROR: default altitude value not found, using default value: " << defaultTerrainAlt << " m."<< std::endl;
-				continue;
-			}
-			defaultTerrainAlt = std::stod(argv[++i]);
+			if(!hasValueAfter) std::cerr << "ERROR: default altitude value not found, using default value: " << ac.GetDefaultTearrainAlt() << " m."<< std::endl;
+			else ac.SetDefaultTearrainAlt(std::stod(argv[++i]));
 			break;
 		case 'i':
-			if(!hasValueAfter) {
-				std::cerr << "ERROR: input file path not found."<< std::endl;
-				continue;
-			}
-			inputFiles.push_back(argv[++i]);
+			if(!hasValueAfter) std::cerr << "ERROR: input file path not found."<< std::endl;
+			else ac.AddAirspaceFile(argv[++i]);
 			break;
 		case 'm':
-			if(!hasValueAfter) {
-				std::cerr << "ERROR: terrain map file path not found."<< std::endl;
-				continue;
-			}
-			mapFiles.push_back(argv[++i]);
+			if(!hasValueAfter) std::cerr << "ERROR: terrain map file path not found."<< std::endl;
+			ac.AddTerrainRasterMapFile(argv[++i]);
 			break;
 		case 'o':
-			if(!hasValueAfter) {
-				std::cerr << "ERROR: output file path not found."<< std::endl;
-				continue;
-			}
-			outputFile = argv[++i];
+			if(!hasValueAfter) std::cerr << "ERROR: output file path not found."<< std::endl;
+			else ac.SetOutputFile(argv[++i]);
 			break;
 		case 'h':
 			printHelp();
@@ -110,7 +92,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	if (inputFiles.empty()) {
+	if (ac.GetNumberOfAirspaceFiles() == 0) {
 		std::cerr << "FATAL ERROR: No input files specified." << std::endl;
 		return EXIT_FAILURE;
 	}
@@ -118,99 +100,35 @@ int main(int argc, char *argv[]) {
 	// Start the timer
 	const auto startTime = std::chrono::high_resolution_clock::now();
 
-	// Determine what kind of output is requested
-	AirspaceConverter::OutputType outputType = AirspaceConverter::KMZ;
-
-	// Prepare output filename if not entered by user
-	if (!outputFile.empty()) {
-		std::string outputExt(boost::filesystem::path(outputFile).extension().string());
-		if (!boost::iequals(outputExt, ".kmz")) {
-			if(boost::iequals(outputExt, ".mp")) outputType = AirspaceConverter::Polish;
-			else if(boost::iequals(outputExt, ".txt")) outputType = AirspaceConverter::OpenAir;
-			else if(boost::iequals(outputExt, ".img")) outputType = AirspaceConverter::Garmin;
-			else {
-				std::cerr << "FATAL ERROR: Output file extension unknown." << std::endl;
-				return EXIT_FAILURE;
-			}
-		}
-	} else outputFile = boost::filesystem::path(inputFiles.front()).replace_extension(".kmz").string(); // Default output as KMZ
-
-	// Set QNH
-	Altitude::SetQNH(QNH);
-
-	// Set default terrain altitude
-	KMLwriter::SetDefaultTerrainAltitude(defaultTerrainAlt);
-
-	// Initialize airspaces and waypoints multimaps
-	std::multimap<int, Airspace> airspaces;
-	std::multimap<int, Waypoint*> waypoints;
-
-	// Initialize OpenAir module
-	OpenAir openAir(airspaces);
-
 	// Process input files
-	bool flag = true; // all failed
-	for(const std::string& inputFile : inputFiles) {
-		std::string ext(boost::filesystem::path(inputFile).extension().string());
-		if(boost::iequals(ext, ".txt")) {
-			if(openAir.ReadFile(inputFile)) flag = false;
-		} else if(boost::iequals(ext, ".aip")) {
-			if(OpenAIPreader::ReadFile(inputFile, airspaces)) flag = false;
-		} else if(boost::iequals(ext, ".cup")) {
-			if(CUPreader::ReadFile(inputFile, waypoints)) flag = false;
-		} else std::cerr << "ERROR: unknown extension: " << ext << "for input file" << std::endl;
-	}
-	if(flag) {
+	ac.LoadAirspaces();
+	ac.LoadWaypoints();
+	ac.LoadTerrainRasterMaps();
+
+	if(ac.GetNumOfAirspaces() == 0 && ac.GetNumOfWaypoints() == 0) {
 		std::cerr << "FATAL ERROR: no input files loaded." << std::endl;
 		return EXIT_FAILURE;
 	}
 	
-	switch(outputType) {
-		case AirspaceConverter::KMZ:
-			{
-				// Load terrain maps
-				flag = true; // all failed
-				for(const std::string& mapFile : mapFiles) if(KMLwriter::AddTerrainMap(mapFile)) flag = false;
-				if(flag) std::cout << "Warning: no terrain map loaded, using default terrain height for all applicable AGL points." << std::endl;
+	// Convert!
+	bool flag = ac.Convert();
+	if (flag && ac.GetOutputType() == AirspaceConverter::Garmin) {
+		flag = false;
 
-				// Make KML file
-				flag = KMLwriter().WriteFile(outputFile, airspaces, waypoints);
-			}
-			break;
-		case AirspaceConverter::OpenAir:
-			flag = openAir.WriteFile(outputFile);
-			break;
-		case AirspaceConverter::Polish:
-			flag = PFMwriter().WriteFile(outputFile, airspaces);
-			break;
-		case AirspaceConverter::Garmin:
-			{
-				flag = false;
+		// Polish file already done by the lib
+		const std::string polishFile(boost::filesystem::path(ac.GetOutputFile()).replace_extension(".mp").string());
 
-				// First make Polish file
-				const std::string polishFile(boost::filesystem::path(outputFile).replace_extension(".mp").string());
-				if(!PFMwriter().WriteFile(polishFile, airspaces)) break;
+		// Then call cGPSmapper
+		std::cout << "Invoking cGPSmapper to make: " << ac.GetOutputFile() << std::endl << std::endl;
 
-				// Then call cGPSmapper
-				std::cout << "Invoking cGPSmapper to make: " << outputFile << std::endl << std::endl;
+		//TODO: add arguments to create files also for other software like Garmin BaseCamp
+		const std::string cmd(boost::str(boost::format("cgpsmapper %1s -o %2s") %polishFile %ac.GetOutputFile()));
 
-				//TODO: add arguments to create files also for other software like Garmin BaseCamp
-				const std::string cmd(boost::str(boost::format("cgpsmapper %1s -o %2s") %polishFile %outputFile));
-
-				if(system(cmd.c_str()) == EXIT_SUCCESS) {
-					flag = true;
-					std::remove(polishFile.c_str()); // Delete polish file
-				} else std::cerr << std::endl << "ERROR: cGPSmapper returned an error." << std::endl;
-			}
-			break;
-		default:
-			assert(false);
-			break;
+		if(system(cmd.c_str()) == EXIT_SUCCESS) {
+			flag = true;
+			std::remove(polishFile.c_str()); // Delete polish file
+		} else std::cerr << std::endl << "ERROR: cGPSmapper returned an error." << std::endl;
 	}
-
-	// Clear waypoints
-	for (const std::pair<const int, Waypoint*>& wpt : waypoints) delete wpt.second;
-	waypoints.clear();
 
 	// Stop the timer
 	const double elapsedTimeSec = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - startTime).count() / 1e6;
