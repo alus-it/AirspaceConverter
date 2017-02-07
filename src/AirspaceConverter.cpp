@@ -19,7 +19,6 @@
 #include "CUPreader.h"
 #include "Waypoint.h"
 #include <iostream>
-#include <csignal>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
@@ -56,7 +55,8 @@ const std::vector<std::string> AirspaceConverter::disclaimer = {
 };
 
 AirspaceConverter::AirspaceConverter() :
-	outputType(AirspaceConverter::NumOfOutputTypes) {
+	conversionDone(false),
+	allAGLaltitudesCovered(false) {
 }
 
 AirspaceConverter::~AirspaceConverter() {
@@ -68,7 +68,7 @@ void AirspaceConverter::DefaultLogMessage(const std::string& msgText, const bool
 	(isError ? std::cerr : std::cout) << msgText << std::endl;
 }
 
-std::istream& AirspaceConverter::safeGetline(std::istream& is, std::string& line, bool& isCRLF) {
+std::istream& AirspaceConverter::SafeGetline(std::istream& is, std::string& line, bool& isCRLF) {
 	line.clear();
 	std::istream::sentry se(is, true);
 	std::streambuf* sb = is.rdbuf();
@@ -95,8 +95,7 @@ std::istream& AirspaceConverter::safeGetline(std::istream& is, std::string& line
 	}
 }
 
-bool AirspaceConverter::AddInputFile(const std::string& inputFile)
-{
+bool AirspaceConverter::AddInputFile(const std::string& inputFile) {
 	std::string ext(boost::filesystem::path(inputFile).extension().string());
 	if (boost::iequals(ext, ".aip")) {
 		openAIPinputFiles.push_back(inputFile);
@@ -109,137 +108,97 @@ bool AirspaceConverter::AddInputFile(const std::string& inputFile)
 	return false;
 }
 
-bool AirspaceConverter::LoadAirspacesFiles() {
-	if (workerThread.joinable() || (openAIPinputFiles.empty() && openAirInputFiles.empty())) return false;
-	workerThread = std::thread(std::bind(&AirspaceConverter::LoadAirspacesfilesThread, this));
-	return true;
-}
-
-void AirspaceConverter::LoadAirspacesfilesThread() {
+void AirspaceConverter::LoadAirspaces() {
+	conversionDone = false;
 	for (const std::string& inputFile : openAIPinputFiles) OpenAIPreader::ReadFile(inputFile, airspaces);
 	openAIPinputFiles.clear();
 	OpenAir openAir(airspaces);
 	for (const std::string& inputFile : openAirInputFiles) openAir.ReadFile(inputFile);
 	openAirInputFiles.clear();
-	std::raise(SIGINT);
 }
 
-bool AirspaceConverter::UnloadAirspaces() {
-	if (workerThread.joinable()) return false;
+void AirspaceConverter::UnloadAirspaces() {
+	conversionDone = false;
 	airspaces.clear();
-	return true;
 }
 
-bool AirspaceConverter::LoadDEMfiles() {
-	if (workerThread.joinable() || DEMfiles.empty()) return false;
-	workerThread = std::thread(std::bind(&AirspaceConverter::LoadDEMfilesThread, this));
-	return true;
-}
-
-void AirspaceConverter::LoadDEMfilesThread() {
+void AirspaceConverter::LoadTerrainRasterMaps() {
+	conversionDone = false;
 	for (const std::string& demFile : DEMfiles) KMLwriter::AddTerrainMap(demFile);
 	DEMfiles.clear();
-	std::raise(SIGINT);
 }
 
-bool AirspaceConverter::UnloadRasterMaps() {
-	if (workerThread.joinable()) return false;
+void AirspaceConverter::UnloadRasterMaps() {
+	conversionDone = false;
 	KMLwriter::ClearTerrainMaps();
-	return true;
 }
 
-bool AirspaceConverter::LoadWaypointsFiles() {
-	if (workerThread.joinable() || CUPfiles.empty()) return false;
-	workerThread = std::thread(std::bind(&AirspaceConverter::LoadWaypointsFilesThread, this));
-	return true;
-}
-
-void AirspaceConverter::LoadWaypointsFilesThread() {
+void AirspaceConverter::LoadWaypoints() {
+	conversionDone = false;
 	for (const std::string& inputFile : CUPfiles) CUPreader::ReadFile(inputFile, waypoints);
 	CUPfiles.clear();
-	std::raise(SIGINT);
 }
 
-bool AirspaceConverter::UnloadWaypoints() {
-	if (workerThread.joinable()) return false;
+void AirspaceConverter::UnloadWaypoints() {
+	conversionDone = false;
 	for (const std::pair<const int, Waypoint*>& wpt : waypoints) delete wpt.second;
 	waypoints.clear();
-	return true;
 }
 
-bool AirspaceConverter::MakeKMZfile(const std::string& outputKMZfile, const double& defaultTerraninAltMt)
-{
-	if (workerThread.joinable()) return false;
-	outputFile = outputKMZfile;
-	KMLwriter::SetDefaultTerrainAltitude(defaultTerraninAltMt);
-	workerThread = std::thread(std::bind(&AirspaceConverter::MakeKMZfileThread, this));
-	return true;
+void AirspaceConverter::SetQNH(const double newQNHhPa) {
+	Altitude::SetQNH(newQNHhPa);
 }
 
-void AirspaceConverter::MakeKMZfileThread()
-{
-	KMLwriter writer;
-	if (writer.WriteFile(outputFile, airspaces, waypoints)) std::raise(writer.WereAllAGLaltitudesCovered() ? SIGUSR1 : SIGUSR2);
-	else std::raise(SIGINT);
+double AirspaceConverter::GetQNH() const {
+	return Altitude::GetQNH();
 }
 
-bool AirspaceConverter::MakeOtherFile(const std::string& outputFilename, AirspaceConverter::OutputType type)
-{
-	if (workerThread.joinable()) return false;
+void AirspaceConverter::SetDefaultTearrainAlt(const double altMt) {
+	KMLwriter::SetDefaultTerrainAltitude(altMt);
+}
+
+double AirspaceConverter::GetDefaultTearrainAlt() const {
+	return KMLwriter::GetDefaultTerrainAltitude();
+}
+
+bool AirspaceConverter::Convert(const std::string& outputFilename, AirspaceConverter::OutputType type) {
+	conversionDone = false;
 	outputFile = outputFilename;
-	outputType = type;
-	workerThread = std::thread(std::bind(&AirspaceConverter::MakeOtherFileThread, this));
-	return true;
-}
-
-void AirspaceConverter::MakeOtherFileThread()
-{
-	bool done = false;
-	switch (outputType) {
+	
+	switch (type) {
+	case AirspaceConverter::KMZ:
+		{
+			KMLwriter writer;
+			if (writer.WriteFile(outputFile, airspaces, waypoints)) {
+				conversionDone = true;
+				allAGLaltitudesCovered = writer.WereAllAGLaltitudesCovered();
+			}
+		}
+		break;
 	case AirspaceConverter::OpenAir_Format:
-		done = OpenAir(airspaces).WriteFile(outputFile);
+		conversionDone = OpenAir(airspaces).WriteFile(outputFile);
 		break;
 	case AirspaceConverter::Polish:
-		done = PFMwriter().WriteFile(outputFile, airspaces);
+		conversionDone = PFMwriter().WriteFile(outputFile, airspaces);
 		break;
-	case AirspaceConverter::Garmin:
+	case AirspaceConverter::Garmin: // For Garmin IMG will be necessary to call cGPSmapper
 		{
-/*			const std::string polishFile(boost::filesystem::path(outputFile).replace_extension(".mp").string());
-			if(!PFMwriter().WriteFile(polishFile, airspaces)) break; // First make the Polish file
-			AirspaceConverter::LogMessage("Invoking cGPSmapper to make: " + outputFile, false);
+			// First make the Polish file
+			const std::string polishFile(boost::filesystem::path(outputFile).replace_extension(".mp").string());
+			AirspaceConverter::LogMessage("Building Polish file: " + polishFile, false);
+			if(!PFMwriter().WriteFile(polishFile, airspaces)) break;
 
-			//TODO: add arguments to create files also for other software like Garmin BaseCamp
-			const std::string args(boost::str(boost::format("%1s -o %2s") %polishFile %outputFile));
-
-			SHELLEXECUTEINFO lpShellExecInfo = { 0 };
-			lpShellExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
-			lpShellExecInfo.fMask = SEE_MASK_DOENVSUBST | SEE_MASK_NOCLOSEPROCESS;
-			lpShellExecInfo.hwnd = NULL;
-			lpShellExecInfo.lpVerb = NULL;
-			lpShellExecInfo.lpFile = _T(".\\cGPSmapper\\cgpsmapper.exe");
-			lpShellExecInfo.lpParameters = _com_util::ConvertStringToBSTR(args.c_str());
-			lpShellExecInfo.lpDirectory = NULL;
-			lpShellExecInfo.nShow = SW_SHOW;
-			lpShellExecInfo.hInstApp = (HINSTANCE)SE_ERR_DDEFAIL;
-			ShellExecuteEx(&lpShellExecInfo);
-			if (lpShellExecInfo.hProcess == NULL) {
-				AirspaceConverter::LogMessage("ERROR: Failed to start cGPSmapper process.", true);
-				break;
-			}
-			WaitForSingleObject(lpShellExecInfo.hProcess, INFINITE);
-			CloseHandle(lpShellExecInfo.hProcess);
-			std::remove(polishFile.c_str()); // Delete polish file*/
-			done = true;
+			//TODO: here we should call cGPSmapper but dependes on which SO we are....
+			conversionDone = true;
 		}
 		break;
 	default:
 		assert(false);
 		break;
 	}
-	std::raise(done ? SIGUSR1 : SIGINT);
+	return conversionDone;
 }
 
-int AirspaceConverter::GetNumOfTerrainMaps() const
-{
+int AirspaceConverter::GetNumOfTerrainMaps() const {
 	return KMLwriter::GetNumOfRasterMaps();
 }

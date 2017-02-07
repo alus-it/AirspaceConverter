@@ -120,7 +120,7 @@ bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint
 	while (!input.eof() && input.good()) {
 
 		// Get the line
-		AirspaceConverter::safeGetline(input, sLine, isCRLF);
+		AirspaceConverter::SafeGetline(input, sLine, isCRLF);
 		linecount++;
 
 		// Verify line ending

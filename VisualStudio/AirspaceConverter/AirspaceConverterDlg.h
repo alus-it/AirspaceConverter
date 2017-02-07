@@ -15,6 +15,7 @@
 #include "afxwin.h"
 #include <string>
 
+class AirspaceConverter;
 class Processor;
 
 class CAirspaceConverterDlg : public CDialog {
@@ -53,10 +54,7 @@ private:
 	afx_msg void OnBnClickedOpenOutputFolder();
 	afx_msg void OnBnClickedChooseOutputFileBt();
 	afx_msg void OnBnClickedOutputTypeCombo();
-	
-	LRESULT OnGeneralEndOperations(WPARAM, LPARAM);
-	LRESULT OnEndWriteKMLok(WPARAM, LPARAM);
-	LRESULT OnEndWriteKMLwarningAGL(WPARAM, LPARAM);
+	LRESULT OnEndJob(WPARAM, LPARAM);
 
 	void LogMessage(const std::string& text, const bool isError = false);
 	void UpdateOutputFilename();
@@ -89,6 +87,7 @@ private:
 	double defaultTerrainAlt;
 	std::string outputFile;
 	bool busy;
+	AirspaceConverter* converter;
 	Processor* processor;
 	unsigned long numAirspacesLoaded;
 	unsigned long numWaypointsLoaded;

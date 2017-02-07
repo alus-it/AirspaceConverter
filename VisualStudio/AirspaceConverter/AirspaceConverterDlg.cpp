@@ -71,6 +71,7 @@ CAirspaceConverterDlg::CAirspaceConverterDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(IDD_AIRSPACECONVERTER_DIALOG, pParent)
 	, QNH(1013.25)
 	, defaultTerrainAlt(50)
+	, converter(nullptr)
 	, processor(nullptr)
 	, m_hIcon(AfxGetApp()->LoadIcon(IDR_MAINFRAME))
 	, numAirspacesLoaded(0)
@@ -84,6 +85,7 @@ CAirspaceConverterDlg::CAirspaceConverterDlg(CWnd* pParent /*=NULL*/)
 }
 
 CAirspaceConverterDlg::~CAirspaceConverterDlg() {
+	if (converter != nullptr) delete converter;
 	if (processor != nullptr) delete processor;
 }
 
@@ -127,9 +129,7 @@ BEGIN_MESSAGE_MAP(CAirspaceConverterDlg, CDialog)
 	ON_BN_CLICKED(IDC_INPUT_WAYPOINTS_BT, &CAirspaceConverterDlg::OnBnClickedInputWaypoints)
 	ON_BN_CLICKED(IDC_LOAD_DEM_BT, &CAirspaceConverterDlg::OnBnClickedLoadDEM)
 	ON_BN_CLICKED(IDC_CONVERT_BT, &CAirspaceConverterDlg::OnBnClickedConvert)
-	ON_MESSAGE(WM_GENERAL_WORK_DONE, &CAirspaceConverterDlg::OnGeneralEndOperations)
-	ON_MESSAGE(WM_WRITE_OUTPUT_OK, &CAirspaceConverterDlg::OnEndWriteKMLok)
-	ON_MESSAGE(WM_WRITE_KML_AGL_WARNING, &CAirspaceConverterDlg::OnEndWriteKMLwarningAGL)
+	ON_MESSAGE(WM_GENERAL_WORK_DONE, &CAirspaceConverterDlg::OnEndJob)
 	ON_BN_CLICKED(IDC_OPEN_OUTPUT_FILE, &CAirspaceConverterDlg::OnBnClickedOpenOutputFile)
 	ON_BN_CLICKED(IDC_OPEN_OUTPUT_FOLDER, &CAirspaceConverterDlg::OnBnClickedOpenOutputFolder)
 	ON_BN_CLICKED(IDC_ABOUT, &CAirspaceConverterDlg::OnBnClickedAbout)
@@ -202,9 +202,12 @@ BOOL CAirspaceConverterDlg::OnInitDialog() {
 	std::function<void(const std::string&, const bool)> func = std::bind(&CAirspaceConverterDlg::LogMessage, this, std::placeholders::_1, std::placeholders::_2);
 	AirspaceConverter::SetLogMessageFuntion(func);
 
+	// Buld the "converter"
+	converter = new AirspaceConverter();
+
 	// Buld the "processor"
-	processor = new Processor(this->GetSafeHwnd());	
-	if (processor == nullptr) MessageBox(_T("Fatal error while initilizing the application."), _T("Error"), MB_ICONERROR);
+	processor = new Processor(this->GetSafeHwnd(), converter);	
+	if (converter == nullptr || processor == nullptr) MessageBox(_T("Fatal error while initilizing the application."), _T("Error"), MB_ICONERROR);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -269,23 +272,13 @@ void CAirspaceConverterDlg::StartBusy() {
 	CloseButton.EnableWindow(FALSE);
 }
 
-LRESULT CAirspaceConverterDlg::OnGeneralEndOperations(WPARAM, LPARAM) {
+LRESULT CAirspaceConverterDlg::OnEndJob(WPARAM, LPARAM) {
+	conversionDone = converter->ConversionDone();
 	EndBusy();
-	return LRESULT();
-}
-
-LRESULT CAirspaceConverterDlg::OnEndWriteKMLok(WPARAM, LPARAM) {
-	conversionDone = true;
-	EndBusy();
-	return LRESULT();
-}
-
-LRESULT CAirspaceConverterDlg::OnEndWriteKMLwarningAGL(WPARAM, LPARAM) {
-	conversionDone = true;
-	EndBusy();
-	LogMessage(numRasterMapLoaded > 0 ?
-		"Warning: not all AGL altitudes were under coverage of the loaded terrain map(s)." :
-		"Warning: no terrain map loaded, used default terrain altitude for AGL altitudes.", true);
+	if (conversionDone && OutputTypeCombo.GetCurSel() == AirspaceConverter::KMZ && !converter->WereAllAGLaltitudesCovered())
+		LogMessage(numRasterMapLoaded > 0 ?
+			"Warning: not all AGL altitudes were under coverage of the loaded terrain map(s)." :
+			"Warning: no terrain map loaded, used default terrain altitude for AGL altitudes.", true);
 	return LRESULT();
 }
 
@@ -299,7 +292,7 @@ void CAirspaceConverterDlg::UpdateOutputFilename() {
 		case AirspaceConverter::KMZ:
 			outputPath.replace_extension(".kmz");
 			break;
-		case AirspaceConverter::OpenAir:
+		case AirspaceConverter::OpenAir_Format:
 			outputPath.replace_extension(".txt");
 			break;
 		case AirspaceConverter::Polish:
@@ -338,11 +331,13 @@ void CAirspaceConverterDlg::OnBnClickedClearLogBt() {
 }
 
 void CAirspaceConverterDlg::EndBusy() {
-	if (processor != nullptr) {
-		processor->Join();
-		numAirspacesLoaded = processor->GetNumOfAirspaces();
-		numWaypointsLoaded = processor->GetNumOfWaypoints();
-		numRasterMapLoaded = processor->GetNumOfTerrainMaps();
+	assert(converter != nullptr);
+	assert(processor != nullptr);
+	if (processor != nullptr) processor->Join();
+	if(converter != nullptr) {
+		numAirspacesLoaded = converter->GetNumOfAirspaces();
+		numWaypointsLoaded = converter->GetNumOfWaypoints();
+		numRasterMapLoaded = converter->GetNumOfTerrainMaps();
 	} else {
 		numAirspacesLoaded = 0;
 		numRasterMapLoaded = 0;
@@ -388,7 +383,7 @@ void CAirspaceConverterDlg::OnBnClickedInputFile() {
 		while (pos) {
 			const std::string inputFilename(CT2CA(dlg.GetNextPathName(pos)));
 			if (!boost::filesystem::is_regular_file(inputFilename)) continue;
-			if(processor->AddInputFile(inputFilename) && outputFile.empty()) outputFile = inputFilename;
+			if(converter->AddInputFile(inputFilename) && outputFile.empty()) outputFile = inputFilename;
 		}
 		UpdateOutputFilename();
 		if (processor != nullptr && processor->LoadAirspacesFiles(QNH)) StartBusy();
@@ -397,6 +392,8 @@ void CAirspaceConverterDlg::OnBnClickedInputFile() {
 }
 
 void CAirspaceConverterDlg::OnBnClickedInputWaypoints() {
+	assert(converter != nullptr);
+	assert(processor != nullptr);
 	CFileDialog dlg(TRUE, _T("cup"), NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("SeeYou waypoints|*.cup||"), (CWnd*)this, 0, TRUE);
 	if (dlg.DoModal() == IDOK) {
 		POSITION pos(dlg.GetStartPosition());
@@ -404,7 +401,7 @@ void CAirspaceConverterDlg::OnBnClickedInputWaypoints() {
 			const std::string inputFilename(CT2CA(dlg.GetNextPathName(pos)));
 			if (!boost::filesystem::is_regular_file(inputFilename)) continue;
 			if(outputFile.empty()) outputFile = inputFilename;
-			processor->AddWaypointsFile(inputFilename);
+			converter->AddWaypointsFile(inputFilename);
 		}
 		UpdateOutputFilename();
 		if (processor != nullptr && processor->LoadWaypointsFiles()) StartBusy();
@@ -413,13 +410,15 @@ void CAirspaceConverterDlg::OnBnClickedInputWaypoints() {
 }
 
 void CAirspaceConverterDlg::OnBnClickedLoadDEM() {
+	assert(converter != nullptr);
+	assert(processor != nullptr);
 	CFileDialog dlg(TRUE, _T("dem"), NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("Terrain raster map|*.dem||"), (CWnd*)this, 0, TRUE);
 	if (dlg.DoModal() == IDOK) {
 		POSITION pos(dlg.GetStartPosition());
 		while (pos) {
 			const std::string inputFilename(CT2CA(dlg.GetNextPathName(pos)));
 			if (!boost::filesystem::is_regular_file(inputFilename)) continue;
-			processor->AddRasterMap(inputFilename);
+			converter->AddTerrainRasterMapFile(inputFilename);
 		}
 		if (processor != nullptr && processor->LoadDEMfiles()) StartBusy();
 		else MessageBox(_T("Error while starting read raster maps thread."), _T("Error"), MB_ICONERROR);
@@ -427,6 +426,8 @@ void CAirspaceConverterDlg::OnBnClickedLoadDEM() {
 }
 
 void CAirspaceConverterDlg::OnBnClickedInputFolderBt() {
+	assert(converter != nullptr);
+	assert(processor != nullptr);
 	CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
 	if (dlgFolder.DoModal() == IDOK) {
 		outputFile.clear();
@@ -435,7 +436,7 @@ void CAirspaceConverterDlg::OnBnClickedInputFolderBt() {
 		if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
 		for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
 			if (!boost::filesystem::is_regular_file(*it)) continue;
-			if (processor->AddInputFile(it->path().string()) && outputFile.empty()) outputFile = it->path().string();
+			if (converter->AddInputFile(it->path().string()) && outputFile.empty()) outputFile = it->path().string();
 		}
 		UpdateOutputFilename();
 		if (processor != nullptr && processor->LoadAirspacesFiles(QNH)) StartBusy();	
@@ -444,13 +445,15 @@ void CAirspaceConverterDlg::OnBnClickedInputFolderBt() {
 }
 
 void CAirspaceConverterDlg::OnBnClickedInputWaypointsFolderBt() {
+	assert(converter != nullptr);
+	assert(processor != nullptr);
 	CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
 	if (dlgFolder.DoModal() == IDOK) {
 		boost::filesystem::path root(dlgFolder.GetFolderPath());
 		if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
 		for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
 			if (boost::filesystem::is_regular_file(*it) && boost::iequals(it->path().extension().string(), ".cup")) {
-				processor->AddWaypointsFile(it->path().string());
+				converter->AddWaypointsFile(it->path().string());
 				if (outputFile.empty()) outputFile = it->path().string();
 			}
 		}
@@ -461,13 +464,15 @@ void CAirspaceConverterDlg::OnBnClickedInputWaypointsFolderBt() {
 }
 
 void CAirspaceConverterDlg::OnBnClickedLoadDemFolderBt() {
+	assert(converter != nullptr);
+	assert(processor != nullptr);
 	CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
 	if (dlgFolder.DoModal() == IDOK) {
 		boost::filesystem::path root(dlgFolder.GetFolderPath());
 		if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
 		for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
 			if (boost::filesystem::is_regular_file(*it) && boost::iequals(it->path().extension().string(), ".dem"))
-				processor->AddRasterMap(it->path().string());
+				converter->AddTerrainRasterMapFile(it->path().string());
 		}
 		if (processor != nullptr && processor->LoadDEMfiles()) StartBusy();
 		else MessageBox(_T("Error while starting read raster maps thread."), _T("Error"), MB_ICONERROR);
@@ -475,33 +480,33 @@ void CAirspaceConverterDlg::OnBnClickedLoadDemFolderBt() {
 }
 
 void CAirspaceConverterDlg::OnBnClickedClearInputBt() {
-	if (processor->UnloadAirspaces()) {
-		numAirspacesLoaded = 0;
-		if(numWaypointsLoaded == 0) outputFile.clear();
-		UpdateOutputFilename();
-		LogMessage("Unloaded input airspaces.");
-		EndBusy();
-	}
-	assert(numAirspacesLoaded == 0);
+	assert(converter != nullptr);
+	converter->UnloadAirspaces();
+	numAirspacesLoaded = 0;
+	assert(numAirspacesLoaded == converter->GetNumOfAirspaces());
+	if(numWaypointsLoaded == 0) outputFile.clear();
+	UpdateOutputFilename();
+	LogMessage("Unloaded input airspaces.");
+	EndBusy();
 }
 
 void CAirspaceConverterDlg::OnBnClickedClearWaypointsBt() {
-	if (processor->UnloadWaypoints()) {
-		numWaypointsLoaded = 0;
-		if (numAirspacesLoaded == 0) outputFile.clear();
-		LogMessage("Unloaded input waypoints.");
-		EndBusy();
-	}
-	assert(numWaypointsLoaded == 0);
+	assert(converter != nullptr);
+	converter->UnloadWaypoints();
+	numWaypointsLoaded = 0;
+	assert(numWaypointsLoaded == converter->GetNumOfWaypoints());
+	if (numAirspacesLoaded == 0) outputFile.clear();
+	LogMessage("Unloaded input waypoints.");
+	EndBusy();
 }
 
 void CAirspaceConverterDlg::OnBnClickedClearMapsBt() {
-	if (processor->UnloadRasterMaps()) {
-		numRasterMapLoaded = 0;
-		LogMessage("Unloaded raster maps.");
-		EndBusy();
-	}
-	assert(numRasterMapLoaded == 0);
+	assert(converter != nullptr);
+	converter->UnloadRasterMaps();
+	numRasterMapLoaded = 0;
+	assert(numRasterMapLoaded == converter->GetNumOfTerrainMaps());
+	LogMessage("Unloaded raster maps.");
+	EndBusy();
 }
 
 void CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt() {
@@ -516,7 +521,7 @@ void CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt() {
 		outputPath = outputFile;
 		ext = outputPath.extension().string(); // Extension really typed in by the user
 		if (boost::iequals(ext, ".kmz")) OutputTypeCombo.SetCurSel(AirspaceConverter::KMZ);
-		else if (boost::iequals(ext, ".txt")) OutputTypeCombo.SetCurSel(AirspaceConverter::OpenAir);
+		else if (boost::iequals(ext, ".txt")) OutputTypeCombo.SetCurSel(AirspaceConverter::OpenAir_Format);
 		else if (boost::iequals(ext, ".mp")) OutputTypeCombo.SetCurSel(AirspaceConverter::Polish);
 		else if (boost::iequals(ext, ".img")) OutputTypeCombo.SetCurSel(AirspaceConverter::Garmin);
 		else { // otherwise force it to the selected extension from the open file dialog
@@ -526,7 +531,7 @@ void CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt() {
 			case AirspaceConverter::KMZ:
 				outputFile = outputPath.replace_extension(".kmz").string();
 				break;
-			case AirspaceConverter::OpenAir:
+			case AirspaceConverter::OpenAir_Format:
 				outputFile = outputPath.replace_extension(".txt").string();
 				break;
 			case AirspaceConverter::Polish:
@@ -575,6 +580,8 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 		if (MessageBox(msg, _T("Overwrite?"), MB_YESNO | MB_ICONINFORMATION) == IDYES) std::remove(outputFile.c_str());
 		else return;
 	}
+	assert(converter != nullptr);
+	assert(processor != nullptr);
 	switch (type) {
 	case AirspaceConverter::KMZ:
 		{
@@ -587,11 +594,12 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 				else return;
 			}
 		}
-		if (processor != nullptr && processor->MakeKMZfile(outputFile, defaultTerrainAlt)) StartBusy();
+		converter->SetDefaultTearrainAlt(defaultTerrainAlt);
+		if (processor != nullptr && processor->Convert(outputFile, type)) StartBusy();
 		else MessageBox(_T("Error while starting KML output thread."), _T("Error"), MB_ICONERROR);
 		break;
-	case AirspaceConverter::OpenAir:
-		if (processor != nullptr && processor->MakeOtherFile(outputFile, type)) StartBusy();
+	case AirspaceConverter::OpenAir_Format:
+		if (processor != nullptr && processor->Convert(outputFile, type)) StartBusy();
 		else MessageBox(_T("Error while starting Polish output thread."), _T("Error"), MB_ICONERROR);
 		break;
 	case AirspaceConverter::Garmin:
@@ -606,7 +614,7 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 			}
 		} // Fall trough
 	case AirspaceConverter::Polish:
-		if (processor != nullptr && processor->MakeOtherFile(outputFile, type)) StartBusy();
+		if (processor != nullptr && processor->Convert(outputFile, type)) StartBusy();
 		else MessageBox(_T("Error while starting Polish output thread."), _T("Error"), MB_ICONERROR);
 		break;
 	default:

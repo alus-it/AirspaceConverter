@@ -132,7 +132,7 @@ bool OpenAir::ReadFile(const std::string& fileName) {
 	while (!input.eof() && input.good()) {
 
 		// Get the line
-		AirspaceConverter::safeGetline(input, sLine, isCRLF);
+		AirspaceConverter::SafeGetline(input, sLine, isCRLF);
 		++linecount;
 
 		// Verify line ending
