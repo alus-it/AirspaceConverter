@@ -11,19 +11,9 @@
 //============================================================================
 
 #include "AirspaceConverter.h"
-#include "Airspace.h"
-#include "CUPreader.h"
-#include "OpenAIPreader.h"
-#include "KMLwriter.h"
-#include "PFMwriter.h"
-#include "OpenAir.h"
-#include "Waypoint.h"
 #include <iostream>
 #include <cstring>
 #include <chrono>
-#include <boost/filesystem/path.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/format.hpp>
 
 void printHelp() {
 	std::cout << "Example usage: AirspaceConverter -q 1013 -a 35 -i inputFileOpenAir.txt -i inputFileOpenAIP.aip -m terrainMap.dem -o outputFile.kmz" << std::endl << std::endl;
@@ -112,23 +102,6 @@ int main(int argc, char *argv[]) {
 	
 	// Convert!
 	bool flag = ac.Convert();
-	if (flag && ac.GetOutputType() == AirspaceConverter::Garmin) {
-		flag = false;
-
-		// Polish file already done by the lib
-		const std::string polishFile(boost::filesystem::path(ac.GetOutputFile()).replace_extension(".mp").string());
-
-		// Then call cGPSmapper
-		std::cout << "Invoking cGPSmapper to make: " << ac.GetOutputFile() << std::endl << std::endl;
-
-		//TODO: add arguments to create files also for other software like Garmin BaseCamp
-		const std::string cmd(boost::str(boost::format("cgpsmapper %1s -o %2s") %polishFile %ac.GetOutputFile()));
-
-		if(system(cmd.c_str()) == EXIT_SUCCESS) {
-			flag = true;
-			std::remove(polishFile.c_str()); // Delete polish file
-		} else std::cerr << std::endl << "ERROR: cGPSmapper returned an error." << std::endl;
-	}
 
 	// Stop the timer
 	const double elapsedTimeSec = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - startTime).count() / 1e6;
