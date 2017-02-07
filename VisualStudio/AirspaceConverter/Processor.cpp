@@ -59,27 +59,26 @@ void Processor::LoadWaypointsFilesThread() {
 	PostMessage(window, WM_GENERAL_WORK_DONE, 0, 0);
 }
 
-bool Processor::Convert(const std::string& outputFilename, const int type)
-{
+bool Processor::Convert() {
 	if (workerThread.joinable()) return false;
-	workerThread = std::thread(std::bind(&Processor::ConvertThread, this, outputFilename, type));
+	workerThread = std::thread(std::bind(&Processor::ConvertThread, this));
 	return true;
 }
 
-void Processor::ConvertThread(const std::string& outputFile, const int type)
+void Processor::ConvertThread()
 {
-	if (converter->Convert(outputFile, (AirspaceConverter::OutputType)type) && type == AirspaceConverter::Garmin) {
+	if (converter->Convert() && converter->GetOutputType() == AirspaceConverter::Garmin) {
 	
 		// Special case: Garmin IMG need to call cGPSmapper
 		// For now we have done only the Polish file in the lib...
-		const std::string polishFile(boost::filesystem::path(outputFile).replace_extension(".mp").string());
+		const std::string polishFile(boost::filesystem::path(converter->GetOutputFile()).replace_extension(".mp").string());
 		
 		// Here we call cGPSmapper in the Windows way....
 		// TODO: all that SO specific stuff the should be a function to be used directly in the lib with functional
-		AirspaceConverter::LogMessage("Invoking cGPSmapper to make: " + outputFile, false);
+		AirspaceConverter::LogMessage("Invoking cGPSmapper to make: " + converter->GetOutputFile(), false);
 		
 		//TODO: add arguments to create files also for other software like Garmin BaseCamp
-		const std::string args(boost::str(boost::format("%1s -o %2s") %polishFile %outputFile));
+		const std::string args(boost::str(boost::format("%1s -o %2s") %polishFile %converter->GetOutputFile()));
 		
 		SHELLEXECUTEINFO lpShellExecInfo = { 0 };
 		lpShellExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
