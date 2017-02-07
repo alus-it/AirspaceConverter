@@ -179,7 +179,7 @@ bool AirspaceConverter::Convert() {
 			if (writer.WriteFile(outputFile, airspaces, waypoints)) {
 				conversionDone = true;
 				if(KMLwriter::GetNumOfRasterMaps() == 0) LogMessage("Warning: no raster terrain map loaded, used default terrain height for all applicable AGL points.", true);
-				else if(writer.WereAllAGLaltitudesCovered()) LogMessage("Warning: not all AGL altitudes were under coverage of the loaded terrain map(s).", true);
+				else if(!writer.WereAllAGLaltitudesCovered()) LogMessage("Warning: not all AGL altitudes were under coverage of the loaded terrain map(s).", true);
 			}
 		}
 		break;

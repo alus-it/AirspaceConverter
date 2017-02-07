@@ -27,7 +27,7 @@ public:
 	bool LoadAirspacesFiles(const double& QNH);
 	bool LoadDEMfiles();
 	bool LoadWaypointsFiles();
-	bool Convert(const std::string& outputFilename, const int type);
+	bool Convert();
 	inline void SetWindow(HWND hwnd) { window = hwnd; }
 	inline void Join() { if (workerThread.joinable()) workerThread.join(); }
 	
@@ -35,7 +35,7 @@ private:
 	void LoadAirspacesFilesThread();
 	void LoadWaypointsFilesThread();
 	void LoadDEMfilesThread();
-	void ConvertThread(const std::string& outputFile, const int type);
+	void ConvertThread();
 
 	HWND window;
 	std::thread workerThread;

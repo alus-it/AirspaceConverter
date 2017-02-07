@@ -273,12 +273,8 @@ void CAirspaceConverterDlg::StartBusy() {
 }
 
 LRESULT CAirspaceConverterDlg::OnEndJob(WPARAM, LPARAM) {
-	conversionDone = converter->ConversionDone();
+	conversionDone = converter->IsConversionDone();
 	EndBusy();
-	if (conversionDone && OutputTypeCombo.GetCurSel() == AirspaceConverter::KMZ && !converter->WereAllAGLaltitudesCovered())
-		LogMessage(numRasterMapLoaded > 0 ?
-			"Warning: not all AGL altitudes were under coverage of the loaded terrain map(s)." :
-			"Warning: no terrain map loaded, used default terrain altitude for AGL altitudes.", true);
 	return LRESULT();
 }
 
@@ -383,7 +379,8 @@ void CAirspaceConverterDlg::OnBnClickedInputFile() {
 		while (pos) {
 			const std::string inputFilename(CT2CA(dlg.GetNextPathName(pos)));
 			if (!boost::filesystem::is_regular_file(inputFilename)) continue;
-			if(converter->AddInputFile(inputFilename) && outputFile.empty()) outputFile = inputFilename;
+			converter->AddAirspaceFile(inputFilename);
+			if(outputFile.empty()) outputFile = inputFilename;
 		}
 		UpdateOutputFilename();
 		if (processor != nullptr && processor->LoadAirspacesFiles(QNH)) StartBusy();
@@ -401,7 +398,7 @@ void CAirspaceConverterDlg::OnBnClickedInputWaypoints() {
 			const std::string inputFilename(CT2CA(dlg.GetNextPathName(pos)));
 			if (!boost::filesystem::is_regular_file(inputFilename)) continue;
 			if(outputFile.empty()) outputFile = inputFilename;
-			converter->AddWaypointsFile(inputFilename);
+			converter->AddWaypointFile(inputFilename);
 		}
 		UpdateOutputFilename();
 		if (processor != nullptr && processor->LoadWaypointsFiles()) StartBusy();
@@ -436,7 +433,8 @@ void CAirspaceConverterDlg::OnBnClickedInputFolderBt() {
 		if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
 		for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
 			if (!boost::filesystem::is_regular_file(*it)) continue;
-			if (converter->AddInputFile(it->path().string()) && outputFile.empty()) outputFile = it->path().string();
+			converter->AddAirspaceFile(it->path().string());
+			if (outputFile.empty()) outputFile = it->path().string();
 		}
 		UpdateOutputFilename();
 		if (processor != nullptr && processor->LoadAirspacesFiles(QNH)) StartBusy();	
@@ -453,7 +451,7 @@ void CAirspaceConverterDlg::OnBnClickedInputWaypointsFolderBt() {
 		if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
 		for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
 			if (boost::filesystem::is_regular_file(*it) && boost::iequals(it->path().extension().string(), ".cup")) {
-				converter->AddWaypointsFile(it->path().string());
+				converter->AddWaypointFile(it->path().string());
 				if (outputFile.empty()) outputFile = it->path().string();
 			}
 		}
@@ -582,6 +580,7 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 	}
 	assert(converter != nullptr);
 	assert(processor != nullptr);
+	converter->SetOutputFile(outputFile);
 	switch (type) {
 	case AirspaceConverter::KMZ:
 		{
@@ -595,11 +594,12 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 			}
 		}
 		converter->SetDefaultTearrainAlt(defaultTerrainAlt);
-		if (processor != nullptr && processor->Convert(outputFile, type)) StartBusy();
+		if (processor != nullptr && processor->Convert()) StartBusy();
 		else MessageBox(_T("Error while starting KML output thread."), _T("Error"), MB_ICONERROR);
 		break;
 	case AirspaceConverter::OpenAir_Format:
-		if (processor != nullptr && processor->Convert(outputFile, type)) StartBusy();
+		converter->SetOutputFile(outputFile);
+		if (processor != nullptr && processor->Convert()) StartBusy();
 		else MessageBox(_T("Error while starting Polish output thread."), _T("Error"), MB_ICONERROR);
 		break;
 	case AirspaceConverter::Garmin:
@@ -614,7 +614,7 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 			}
 		} // Fall trough
 	case AirspaceConverter::Polish:
-		if (processor != nullptr && processor->Convert(outputFile, type)) StartBusy();
+		if (processor != nullptr && processor->Convert()) StartBusy();
 		else MessageBox(_T("Error while starting Polish output thread."), _T("Error"), MB_ICONERROR);
 		break;
 	default:
