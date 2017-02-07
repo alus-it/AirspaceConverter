@@ -14,9 +14,6 @@
     <ClInclude Include="AirspaceConverterDlg.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Processor.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Resource.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -29,6 +26,9 @@
     <ClInclude Include="AirspaceConverterApp.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Processor.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AirspaceConverterDlg.cpp">
@@ -37,10 +37,10 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Processor.cpp">
+    <ClCompile Include="AirspaceConverterApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AirspaceConverterApp.cpp">
+    <ClCompile Include="Processor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
