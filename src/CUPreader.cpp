@@ -126,7 +126,7 @@ bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint
 		// Verify line ending
 		if (!CRLFwarningGiven && !isCRLF) {
 			AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: not valid Windows style end of line (expected CR LF).") % linecount), true);
-			AirspaceConverter::LogMessage("This warning will be not reapeated for furter lines not termintated with CR LF of this CUP file.", false);
+			AirspaceConverter::LogMessage("This warning will be not repeated for further lines not terminated with CR LF of this CUP file.", false);
 
 			// CUP files may contain thousends of WPs we don't want to print this warning all the time
 			CRLFwarningGiven = true;
