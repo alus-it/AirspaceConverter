@@ -2,16 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-
 #include "aboutdialog.h"
-
 #include <chrono>
-#include "../src/Airspace.h"
 
+class AirspaceConverter;
 
-class Waypoint;
-class OpenAir;
-class QCloseEvent;
 
 namespace Ui {
     class MainWindow;
@@ -31,18 +26,12 @@ private:
     void log(const QString& message, const bool isError = false);
     void startBusy();
     void endBusy(bool conversionDone = false);
-    void readSingleAirspaceFile(const std::string& inputFile, const std::string &ext);
     void updateOutputFileExtension(const int newExt);
 
     Ui::MainWindow *ui;
     AboutDialog about;
+    AirspaceConverter* converter;
     std::chrono::high_resolution_clock::time_point startTime;
-
-    std::multimap<int, Airspace> airspaces;
-    std::multimap<int, Waypoint*> waypoints;
-    OpenAir *openAir;
-
-    std::string outputFile;
     bool busy;
 
 private slots:

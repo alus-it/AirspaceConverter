@@ -5,43 +5,31 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 #include <QDesktopServices>
+
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
 #include <cassert>
 #include "AirspaceConverter.h"
-#include "CUPreader.h"
-#include "OpenAIPreader.h"
-#include "KMLwriter.h"
-#include "PFMwriter.h"
-#include "OpenAir.h"
-#include "Waypoint.h"
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    openAir(nullptr),
+    converter(new AirspaceConverter),
     busy(false)
 {
     // Set the logging function (to write in the logging texbox)
     std::function<void(const std::string&, const bool)> func = std::bind(&MainWindow::logMessage, this, std::placeholders::_1, std::placeholders::_2);
-    AirspaceConverter::SetLogMessageFuntion(func);
-
-    // Build OpenAir module
-    openAir = new OpenAir(airspaces);
-    assert(openAir != nullptr);
-
+    AirspaceConverter::SetLogMessageFunction(func);
+    assert(converter != nullptr);
     ui->setupUi(this);
 }
 
 MainWindow::~MainWindow() {
-    delete ui;
-    delete openAir;
-
-    // Clear waypoints
-    for (const std::pair<const int, Waypoint*>& wpt : waypoints) delete wpt.second;
-    waypoints.clear();
+    if (ui != nullptr) delete ui;
+    if (converter != nullptr) delete converter;
 }
 
 void MainWindow::logMessage(const std::string& message, const bool isError) {
@@ -105,17 +93,17 @@ void MainWindow::endBusy(bool conversionJustDone) {
     ui->outputFormatComboBox->setEnabled(true);
     ui->loadAirspaceFileButton->setEnabled(true);
     ui->loadAirspaceFolderButton->setEnabled(true);
-    ui->unloadAirspacesButton->setEnabled(!airspaces.empty());
+    ui->unloadAirspacesButton->setEnabled(converter->GetNumOfAirspaces()>0);
     ui->loadWaypointFileButton->setEnabled(true);
     ui->loadWaypointsFolderButton->setEnabled(true);
-    ui->unloadWaypointsButton->setEnabled(!waypoints.empty());
+    ui->unloadWaypointsButton->setEnabled(converter->GetNumOfWaypoints()>0);
     ui->loadRasterMapFileButton->setEnabled(true);
     ui->loadRasterMapFolderButton->setEnabled(true);
-    ui->unloadTerrainMapsButton->setEnabled(KMLwriter::GetNumOfRasterMaps()>0);
+    ui->unloadTerrainMapsButton->setEnabled(converter->GetNumOfTerrainMaps()>0);
     ui->defaultAltSpinBox->setEnabled(true);
     ui->QNHspinBox->setEnabled(true);
     ui->chooseOutputFileButton->setEnabled(true);
-    ui->convertButton->setEnabled(!airspaces.empty());
+    ui->convertButton->setEnabled(converter->GetNumOfAirspaces()>0 && !converter->GetOutputFile().empty());
     ui->openOutputFileButton->setEnabled(conversionJustDone);
     ui->openOutputFolderButton->setEnabled(conversionJustDone);
     ui->clearLogButton->setEnabled(true);
@@ -139,13 +127,14 @@ void MainWindow::on_outputFormatComboBox_currentIndexChanged(int index) {
 }
 
 void MainWindow::updateOutputFileExtension(const int newExtIdx) {
+    std::string outputFile(converter->GetOutputFile());
     if(outputFile.empty()) return;
     boost::filesystem::path path(outputFile);
     switch(newExtIdx) {
         case AirspaceConverter::KMZ:
             path.replace_extension(".kmz");
             break;
-        case AirspaceConverter::OpenAir:
+        case AirspaceConverter::OpenAir_Format:
             path.replace_extension(".txt");
             break;
         case AirspaceConverter::Polish:
@@ -159,33 +148,28 @@ void MainWindow::updateOutputFileExtension(const int newExtIdx) {
     }
     outputFile = path.string();
     ui->outputFileTextEdit->setPlainText(QString::fromStdString(outputFile));
-}
-
-void MainWindow::readSingleAirspaceFile(const std::string& inputFile, const std::string& ext) {
-    bool redOk(false);
-    if(boost::iequals(ext, ".txt")) redOk = openAir->ReadFile(inputFile);
-    else if(boost::iequals(ext, ".aip")) redOk = OpenAIPreader::ReadFile(inputFile, airspaces);
-    else return;
-    if (outputFile.empty() && redOk) {
-        outputFile = inputFile;
-        updateOutputFileExtension(ui->outputFormatComboBox->currentIndex());
-    }
+    converter->SetOutputFile(outputFile);
 }
 
 void MainWindow::on_loadAirspaceFileButton_clicked() {
     QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Airspace files"), QDir::currentPath(), tr("All airspace files (*.txt *.aip);;OpenAir (*.txt);;OpenAIP (*.aip);;") );
-    if(filenames.empty() || openAir == nullptr) return;
+    if(filenames.empty()) return;
 
     startBusy();
 
+    bool needToUpdateOtputFile = converter->GetOutputFile().empty();
+
+    // Set QNH
+    converter->SetQNH(ui->QNHspinBox->value());
+
     // Load all the files
-    for(const auto& file : filenames) {
-        const std::string inputFile(file.toStdString());
-        readSingleAirspaceFile(inputFile, boost::filesystem::path(inputFile).extension().string());
-    }
+    for(const auto& file : filenames) converter->AddAirspaceFile(file.toStdString());
+    converter->LoadAirspaces();
 
     // Set the numer of airspaces loaded in its spinBox
-    ui->numAirspacesLoadedSpinBox->setValue((int)airspaces.size());
+    ui->numAirspacesLoadedSpinBox->setValue(converter->GetNumOfAirspaces());
+
+    if(needToUpdateOtputFile) updateOutputFileExtension(ui->outputFormatComboBox->currentIndex());
 
     endBusy();
 }
@@ -196,19 +180,27 @@ void MainWindow::on_loadAirspaceFolderButton_clicked() {
 
     startBusy();
 
+    bool needToUpdateOtputFile = converter->GetOutputFile().empty();
+
+    // Set QNH
+    converter->SetQNH(ui->QNHspinBox->value());
+
     for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
         if (!boost::filesystem::is_regular_file(*it)) continue;
-        readSingleAirspaceFile(it->path().string(), it->path().extension().string());
+        converter->AddAirspaceFile(it->path().string());
     }
+    converter->LoadAirspaces();
 
     // Set the numer of airspaces loaded in its spinBox
-    ui->numAirspacesLoadedSpinBox->setValue((int)airspaces.size());
+    ui->numAirspacesLoadedSpinBox->setValue(converter->GetNumOfAirspaces());
+
+    if(needToUpdateOtputFile) updateOutputFileExtension(ui->outputFormatComboBox->currentIndex());
 
     endBusy();
 }
 
 void MainWindow::on_unloadAirspacesButton_clicked() {
-    airspaces.clear();
+    converter->UnloadAirspaces();
     ui->numAirspacesLoadedSpinBox->setValue(0);
     endBusy();
 }
@@ -220,10 +212,11 @@ void MainWindow::on_loadWaypointFileButton_clicked() {
     startBusy();
 
     // Load all the files
-    for(const auto& file : filenames) CUPreader::ReadFile(file.toStdString(), waypoints);
+    for(const auto& file : filenames) converter->AddWaypointFile(file.toStdString());
+    converter->LoadWaypoints();
 
     // Set the numer of waypoints loaded in its spinBox
-    ui->numWaypointsLoadedSpinBox->setValue((int)waypoints.size());
+    ui->numWaypointsLoadedSpinBox->setValue(converter->GetNumOfWaypoints());
 
     endBusy();
 }
@@ -236,18 +229,18 @@ void MainWindow::on_loadWaypointsFolderButton_clicked() {
 
     for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
         if (!boost::filesystem::is_regular_file(*it)) continue;
-        std::string ext(it->path().extension().string());
-        if(boost::iequals(ext, ".cup")) CUPreader::ReadFile(it->path().string(), waypoints);
+        if(boost::iequals(it->path().extension().string(), ".cup")) converter->AddWaypointFile(it->path().string());
     }
+    converter->LoadWaypoints();
 
     // Set the numer of waypoints loaded in its spinBox
-    ui->numWaypointsLoadedSpinBox->setValue((int)waypoints.size());
+    ui->numWaypointsLoadedSpinBox->setValue(converter->GetNumOfWaypoints());
 
     endBusy();
 }
 
 void MainWindow::on_unloadWaypointsButton_clicked() {
-    waypoints.clear();
+    converter->UnloadWaypoints();
     ui->numWaypointsLoadedSpinBox->setValue(0);
 }
 
@@ -258,10 +251,11 @@ void MainWindow::on_loadRasterMapFileButton_clicked() {
     startBusy();
 
     // Load terrain maps
-    for(const auto& mapFile : filenames) KMLwriter::AddTerrainMap(mapFile.toStdString());
+    for(const auto& mapFile : filenames) converter->AddTerrainRasterMapFile(mapFile.toStdString());
+    converter->LoadTerrainRasterMaps();
 
     // Set the numer of terrain raster map loaded in its spinBox
-    ui->numTerrainMapsLoadedSpinBox->setValue(KMLwriter::GetNumOfRasterMaps());
+    ui->numTerrainMapsLoadedSpinBox->setValue(converter->GetNumOfTerrainMaps());
 
     endBusy();
 }
@@ -274,77 +268,39 @@ void MainWindow::on_loadRasterMapFolderButton_clicked() {
 
     for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
         if (!boost::filesystem::is_regular_file(*it)) continue;
-        std::string ext(it->path().extension().string());
-        if(boost::iequals(ext, ".dem")) KMLwriter::AddTerrainMap(it->path().string());
+        if(boost::iequals(it->path().extension().string(), ".dem")) converter->AddTerrainRasterMapFile(it->path().string());
     }
+    converter->LoadTerrainRasterMaps();
 
     // Set the numer of terrain raster map loaded in its spinBox
-    ui->numTerrainMapsLoadedSpinBox->setValue(KMLwriter::GetNumOfRasterMaps());
+    ui->numTerrainMapsLoadedSpinBox->setValue(converter->GetNumOfTerrainMaps());
 
     endBusy();
 }
 
 void MainWindow::on_unloadTerrainMapsButton_clicked() {
-    KMLwriter::ClearTerrainMaps();
+    converter->UnloadRasterMaps();
     ui->numTerrainMapsLoadedSpinBox->setValue(0);
 }
 
 void MainWindow::on_convertButton_clicked() {
+    assert(converter->GetNumOfAirspaces() > 0);
+    assert(!converter->GetOutputFile().empty());
+    if(converter->GetNumOfAirspaces() ==0 || converter->GetOutputFile().empty()) return;
+
     startBusy();
 
-    // Set QNH
-    Altitude::SetQNH(ui->QNHspinBox->value());
-
     // Set default terrain altitude
-    KMLwriter::SetDefaultTerrainAltitude(ui->defaultAltSpinBox->value());
+    converter->SetDefaultTearrainAlt(ui->defaultAltSpinBox->value());
 
-    bool outputJustDone(false);
-
-    switch(ui->outputFormatComboBox->currentIndex()) {
-        case AirspaceConverter::KMZ:
-            {
-                if(KMLwriter::GetNumOfRasterMaps() == 0) log("Warning: no terrain map loaded, using default terrain height for all applicable AGL points.", true);
-
-                // Make KML file
-                outputJustDone = KMLwriter().WriteFile(outputFile, airspaces, waypoints);
-            }
-            break;
-        case AirspaceConverter::OpenAir:
-            if (openAir != nullptr) outputJustDone = openAir->WriteFile(outputFile);
-            break;
-        case AirspaceConverter::Polish:
-            outputJustDone = PFMwriter().WriteFile(outputFile, airspaces);
-            break;
-        case AirspaceConverter::Garmin:
-            {
-                outputJustDone = false;
-
-                // First make Polish file
-                const std::string polishFile(boost::filesystem::path(outputFile).replace_extension(".mp").string());
-                if(!PFMwriter().WriteFile(polishFile, airspaces)) break;
-
-                // Then call cGPSmapper
-                logMessage(std::string(boost::str(boost::format("Invoking cGPSmapper to make: %1s") %outputFile)));
-
-                //TODO: add arguments to create files also for other software like Garmin BaseCamp
-                const std::string cmd(boost::str(boost::format("./cGPSmapper/cgpsmapper-static %1s -o %2s") %polishFile %outputFile));
-
-                if(system(cmd.c_str()) == EXIT_SUCCESS) {
-                    std::remove(polishFile.c_str()); // Delete polish file
-                    outputJustDone = true;
-                } else log("ERROR: returned by cGPSmapper.", true);
-            }
-            break;
-        default:
-            assert(false);
-    }
+    bool outputJustDone = converter->Convert();
 
     endBusy(outputJustDone);
 }
 
 void MainWindow::on_openOutputFileButton_clicked() {    
     //TODO: QDesktopServices???
-    QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(outputFile)));
+    QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(converter->GetOutputFile())));
 }
 
 void MainWindow::on_openOutputFolderButton_clicked() {
@@ -352,18 +308,18 @@ void MainWindow::on_openOutputFolderButton_clicked() {
 
     //boost::filesystem::path(outputFile)
 
-    QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(outputFile)));
+    QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(converter->GetOutputFile())));
 }
 
 void MainWindow::on_chooseOutputFileButton_clicked() {
     // Prepare dialog to ask for output file, will be without extension if not manually typed by the user
     QString selectedFilter; // this will conatin the selected type by the user in the dialog
-    outputFile = QFileDialog::getSaveFileName(this, tr("Output file"), QDir::currentPath(), tr("Google Earth (*.kmz);;OpenAir (*.txt);;Polish (*.mp);;Garmin map (*.img)"), &selectedFilter).toStdString();
+    converter->SetOutputFile(QFileDialog::getSaveFileName(this, tr("Output file"), QDir::currentPath(), tr("Google Earth (*.kmz);;OpenAir (*.txt);;Polish (*.mp);;Garmin map (*.img)"), &selectedFilter).toStdString());
 
     // Determine which format is now selected
     int desiredFormatIndex = AirspaceConverter::KMZ;
     if (selectedFilter != "Google Earth (*.kmz)") {
-        if (selectedFilter == "OpenAir (*.txt)") desiredFormatIndex = AirspaceConverter::OpenAir;
+        if (selectedFilter == "OpenAir (*.txt)") desiredFormatIndex = AirspaceConverter::OpenAir_Format;
         else if (selectedFilter == "Polish (*.mp)") desiredFormatIndex = AirspaceConverter::Polish;
         else if (selectedFilter == "Garmin map (*.img)") desiredFormatIndex = AirspaceConverter::Garmin;
         else assert(false);

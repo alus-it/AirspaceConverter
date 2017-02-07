@@ -24,6 +24,7 @@
 #include <boost/format.hpp>
 
 std::function<void(const std::string&, const bool)> AirspaceConverter::LogMessage = DefaultLogMessage;
+std::function<bool(const std::string&, const std::string&)> AirspaceConverter::cGPSmapper = Default_cGPSmapper;
 
 const std::vector<std::string> AirspaceConverter::disclaimer = {
 	"This file has been produced with: \"AirspaceConverter\" Version: " VERSION,
@@ -55,7 +56,6 @@ const std::vector<std::string> AirspaceConverter::disclaimer = {
 };
 
 AirspaceConverter::AirspaceConverter() :
-	outputType(OutputType::NumOfOutputTypes),
 	conversionDone(false) {
 }
 
@@ -66,6 +66,21 @@ AirspaceConverter::~AirspaceConverter() {
 
 void AirspaceConverter::DefaultLogMessage(const std::string& msgText, const bool isError) {
 	(isError ? std::cerr : std::cout) << msgText << std::endl;
+}
+
+bool AirspaceConverter::Default_cGPSmapper(const std::string& polishFile, const std::string& outputFile) {
+	LogMessage("Invoking cGPSmapper to make: " + outputFile, false);
+
+	//TODO: add arguments to create files also for other software like Garmin BaseCamp
+	const std::string cmd(boost::str(boost::format("cgpsmapper %1s -o %2s") %polishFile %outputFile));
+
+	if(system(cmd.c_str()) == EXIT_SUCCESS) {
+		std::remove(polishFile.c_str()); // Delete polish file
+		return true;
+	}
+
+	LogMessage("ERROR: returned by cGPSmapper",true);
+	return false;
 }
 
 std::istream& AirspaceConverter::SafeGetline(std::istream& is, std::string& line, bool& isCRLF) {
@@ -160,7 +175,7 @@ bool AirspaceConverter::Convert() {
 	if(outputFile.empty()) return false;
 
 	// Determine what kind of output is requested
-	outputType = AirspaceConverter::KMZ; // KMZ default
+	OutputType outputType = AirspaceConverter::KMZ; // KMZ default
 	std::string outputExt(boost::filesystem::path(outputFile).extension().string());
 	if (!boost::iequals(outputExt, ".kmz")) {
 		if(boost::iequals(outputExt, ".mp")) outputType = AirspaceConverter::Polish;
@@ -196,8 +211,8 @@ bool AirspaceConverter::Convert() {
 			AirspaceConverter::LogMessage("Building Polish file: " + polishFile, false);
 			if(!PFMwriter().WriteFile(polishFile, airspaces)) break;
 
-			//TODO: here we should call cGPSmapper but dependes on which SO we are....
-			conversionDone = true;
+			// Then call cGPSmapper
+			conversionDone = cGPSmapper(polishFile, outputFile);
 		}
 		break;
 	default:

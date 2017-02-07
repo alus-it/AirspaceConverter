@@ -39,7 +39,10 @@ public:
 	~AirspaceConverter();
 
 	static std::function<void(const std::string&, const bool)> LogMessage;
-	inline static void SetLogMessageFuntion(std::function<void(const std::string&, const bool)> func) { LogMessage = func; }
+	static std::function<bool(const std::string&, const std::string&)> cGPSmapper;
+	inline static void SetLogMessageFunction(std::function<void(const std::string&, const bool)> func) { LogMessage = func; }
+	inline static void Set_cGPSmapperFunction(std::function<bool(const std::string&, const std::string&)> func) { cGPSmapper = func; }
+
 	static std::istream& SafeGetline(std::istream& is, std::string& line, bool& isCRLF);
 
 	inline void AddAirspaceFile(const std::string& inputFile) { airspaceFiles.push_back(inputFile); }
@@ -58,7 +61,6 @@ public:
 	double GetDefaultTearrainAlt() const;
 	bool Convert();
 	inline bool IsConversionDone() const { return conversionDone; }
-	inline OutputType GetOutputType() const { return outputType; }
 	inline void SetOutputFile(const std::string& outputFilename) { outputFile = outputFilename; }
 	inline std::string GetOutputFile() const { return outputFile; }
 	inline unsigned long GetNumOfAirspaces() const { return (unsigned long)airspaces.size(); }
@@ -69,8 +71,8 @@ public:
 
 private:
 	static void DefaultLogMessage(const std::string&, const bool isError = false);
+	static bool Default_cGPSmapper(const std::string& polishFile, const std::string& outputFile);
 
-	OutputType outputType;
 	std::multimap<int, Airspace> airspaces;
 	std::multimap<int, Waypoint*> waypoints;
 	std::string outputFile;
