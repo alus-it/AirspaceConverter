@@ -42,6 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // On Windows set the path and command of cGPSmapper that will be invoked by libAirspaceConverter
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
     converter->Set_cGPSmapperCommand(".\\cGPSmapper\\cgpsmapper.exe");
+    converter->SetIconsPath(".\\icons\\");
 #endif
 
     ui->setupUi(this);
@@ -299,4 +300,7 @@ void MainWindow::on_chooseOutputFileButton_clicked() {
 
     // Reselect the desired format also in the combo box, he will take care of putting the right extension
     ui->outputFormatComboBox->setCurrentIndex(desiredFormatIndex);
+
+    // Set properly the output file name in the texbox
+    ui->outputFileTextEdit->setPlainText(QString::fromStdString(converter->GetOutputFile()));
 }

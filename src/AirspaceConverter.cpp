@@ -84,6 +84,10 @@ bool AirspaceConverter::Default_cGPSmapper(const std::string& polishFile, const 
 	return false;
 }
 
+void AirspaceConverter::SetIconsPath(const std::string& iconsPath) {
+	KMLwriter::SetIconsPath(iconsPath);
+}
+
 std::istream& AirspaceConverter::SafeGetline(std::istream& is, std::string& line, bool& isCRLF) {
 	line.clear();
 	std::istream::sentry se(is, true);

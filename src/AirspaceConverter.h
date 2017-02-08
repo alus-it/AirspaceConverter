@@ -44,6 +44,7 @@ public:
 	inline static void SetLogMessageFunction(std::function<void(const std::string&, const bool)> func) { LogMessage = func; }
 	inline static void Set_cGPSmapperFunction(std::function<bool(const std::string&, const std::string&)> func) { cGPSmapper = func; }
 	inline static void Set_cGPSmapperCommand(const std::string& cGPSmapperCmd) { cGPSmapperCommand = cGPSmapperCmd; }
+	static void SetIconsPath(const std::string& iconsPath);
 	static std::istream& SafeGetline(std::istream& is, std::string& line, bool& isCRLF);
 	static OutputType DetermineType(const std::string& filename);
 	static bool PutTypeExtension(const OutputType type, std::string& filename);
