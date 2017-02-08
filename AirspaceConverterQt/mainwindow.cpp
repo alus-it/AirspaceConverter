@@ -1,3 +1,15 @@
+//============================================================================
+// AirspaceConverter
+// Since       : 14/6/2016
+// Author      : Alberto Realis-Luc <alberto.realisluc@gmail.com>
+// Web         : http://www.alus.it/AirspaceConverter
+// Repository  : https://github.com/alus-it/AirspaceConverter.git
+// Copyright   : (C) 2016-2017 Alberto Realis-Luc
+// License     : GNU GPL v3
+//
+// This source file is part of AirspaceConverter project
+//============================================================================
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -16,17 +28,20 @@
 #include <cassert>
 #include "AirspaceConverter.h"
 
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     converter(new AirspaceConverter),
     busy(false) {
-    // Set the logging function (to write in the logging texbox)
-    std::function<void(const std::string&, const bool)> func = std::bind(&MainWindow::logMessage, this, std::placeholders::_1, std::placeholders::_2);
-    AirspaceConverter::SetLogMessageFunction(func);
     assert(converter != nullptr);
     assert(ui != nullptr);
+
+    // Set the logging function (to write in the logging texbox)
+    AirspaceConverter::SetLogMessageFunction(std::function<void(const std::string&, const bool)>(std::bind(&MainWindow::logMessage, this, std::placeholders::_1, std::placeholders::_2)));
+
+    // Set the path and command of cGPSmapper that will be invoked by libAirspaceConverter
+    converter->Set_cGPSmapperCommand(".\\cGPSmapper\\cgpsmapper.exe");
+
     ui->setupUi(this);
     connect(&watcher, SIGNAL(finished()), this, SLOT(endBusy()));
 }
@@ -89,8 +104,7 @@ void MainWindow::startBusy() {
 }
 
 void MainWindow::endBusy() {
-    // Stop the timer
-    if (busy) {
+    if (busy) { // Stop the timer
         const double elapsedTimeSec = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - startTime).count() / 1e6;
         logMessage(std::string(boost::str(boost::format("Execution time: %1f sec.") %elapsedTimeSec)));
     }
@@ -132,9 +146,7 @@ void MainWindow::endBusy() {
     ui->closeButton->setEnabled(true);
 
     if (busy) {
-        // Disable marquee progrees bar
-        ui->progressBar->setMaximum(100);
-
+        ui->progressBar->setMaximum(100); // This will disable marquee progrees bar
         busy = false;
     }
 }

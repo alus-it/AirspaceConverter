@@ -74,7 +74,7 @@ bool AirspaceConverter::Default_cGPSmapper(const std::string& polishFile, const 
 
 	//TODO: add arguments to create files also for other software like Garmin BaseCamp
 	const std::string cmd(boost::str(boost::format("%1s %2s -o %3s") %cGPSmapperCommand %polishFile %outputFile));
-
+	LogMessage(cmd, false);
 	if(system(cmd.c_str()) == EXIT_SUCCESS) {
 		std::remove(polishFile.c_str()); // Delete polish file
 		return true;
