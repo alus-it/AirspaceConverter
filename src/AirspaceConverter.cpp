@@ -74,13 +74,13 @@ bool AirspaceConverter::Default_cGPSmapper(const std::string& polishFile, const 
 
 	//TODO: add arguments to create files also for other software like Garmin BaseCamp
 	const std::string cmd(boost::str(boost::format("%1s %2s -o %3s") %cGPSmapperCommand %polishFile %outputFile));
-	LogMessage(cmd, false);
+	LogMessage("Executing: " + cmd, false);
 	if(system(cmd.c_str()) == EXIT_SUCCESS) {
 		std::remove(polishFile.c_str()); // Delete polish file
 		return true;
 	}
 
-	LogMessage("ERROR: returned by cGPSmapper",true);
+	LogMessage("ERROR: returned by cGPSmapper.",true);
 	return false;
 }
 
@@ -109,6 +109,44 @@ std::istream& AirspaceConverter::SafeGetline(std::istream& is, std::string& line
 			line += (char)c;
 		}
 	}
+}
+
+AirspaceConverter::OutputType AirspaceConverter::DetermineType(const std::string& filename) {
+	if (filename.empty()) return OutputType::Unknown;
+	OutputType outputType = OutputType::KMZ; // KMZ default
+	std::string outputExt(boost::filesystem::path(filename).extension().string());
+	if (!boost::iequals(outputExt, ".kmz")) {
+		if (boost::iequals(outputExt, ".txt")) outputType = OutputType::OpenAir_Format;
+		else if (boost::iequals(outputExt, ".mp")) outputType = OutputType::Polish;
+		else if (boost::iequals(outputExt, ".img")) outputType = OutputType::Garmin;
+		else outputType = OutputType::Unknown;
+	}
+	return outputType;
+}
+
+bool AirspaceConverter::PutTypeExtension(const OutputType type, std::string& filename) {
+	if (filename.empty()) return false;
+	boost::filesystem::path outputPath(filename);
+	switch (type) {
+	case OutputType::KMZ:
+		outputPath.replace_extension(".kmz");
+		break;
+	case OutputType::OpenAir_Format:
+		outputPath.replace_extension(".txt");
+		break;
+	case OutputType::Polish:
+		outputPath.replace_extension(".mp");
+		break;
+	case OutputType::Garmin:
+		outputPath.replace_extension(".img");
+		break;
+	default:
+		assert(false);
+	case OutputType::Unknown:
+		return false;
+	}
+	filename = outputPath.string();
+	return true;
 }
 
 void AirspaceConverter::LoadAirspaces() {
@@ -173,23 +211,8 @@ double AirspaceConverter::GetDefaultTearrainAlt() const {
 
 bool AirspaceConverter::Convert() {
 	conversionDone = false;
-	if(outputFile.empty()) return false;
-
-	// Determine what kind of output is requested
-	OutputType outputType = AirspaceConverter::KMZ; // KMZ default
-	std::string outputExt(boost::filesystem::path(outputFile).extension().string());
-	if (!boost::iequals(outputExt, ".kmz")) {
-		if(boost::iequals(outputExt, ".mp")) outputType = AirspaceConverter::Polish;
-		else if(boost::iequals(outputExt, ".txt")) outputType = AirspaceConverter::OpenAir_Format;
-		else if(boost::iequals(outputExt, ".img")) outputType = AirspaceConverter::Garmin;
-		else {
-			AirspaceConverter::LogMessage("ERROR: Output file extension/type unknown.",true);
-			return false;
-		}
-	}
-	
-	switch (outputType) {
-	case AirspaceConverter::KMZ:
+	switch (GetOutputType()) {
+	case OutputType::KMZ:
 		{
 			KMLwriter writer;
 			if (writer.WriteFile(outputFile, airspaces, waypoints)) {
@@ -199,17 +222,17 @@ bool AirspaceConverter::Convert() {
 			}
 		}
 		break;
-	case AirspaceConverter::OpenAir_Format:
+	case OutputType::OpenAir_Format:
 		conversionDone = OpenAir(airspaces).WriteFile(outputFile);
 		break;
-	case AirspaceConverter::Polish:
+	case OutputType::Polish:
 		conversionDone = PFMwriter().WriteFile(outputFile, airspaces);
 		break;
-	case AirspaceConverter::Garmin: // For Garmin IMG will be necessary to call cGPSmapper
+	case OutputType::Garmin: // For Garmin IMG will be necessary to call cGPSmapper
 		{
 			// First make the Polish file
 			const std::string polishFile(boost::filesystem::path(outputFile).replace_extension(".mp").string());
-			AirspaceConverter::LogMessage("Building Polish file: " + polishFile, false);
+			LogMessage("Building Polish file: " + polishFile, false);
 			if(!PFMwriter().WriteFile(polishFile, airspaces)) break;
 
 			// Then call cGPSmapper
@@ -217,6 +240,7 @@ bool AirspaceConverter::Convert() {
 		}
 		break;
 	default:
+		LogMessage("ERROR: Output file extension/type unknown.", true);
 		assert(false);
 		break;
 	}

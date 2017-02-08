@@ -32,7 +32,7 @@ public:
 		OpenAir_Format,
 		Polish,
 		Garmin,
-		NumOfOutputTypes
+		Unknown
 	};
 
 	AirspaceConverter();
@@ -45,6 +45,8 @@ public:
 	inline static void Set_cGPSmapperFunction(std::function<bool(const std::string&, const std::string&)> func) { cGPSmapper = func; }
 	inline static void Set_cGPSmapperCommand(const std::string& cGPSmapperCmd) { cGPSmapperCommand = cGPSmapperCmd; }
 	static std::istream& SafeGetline(std::istream& is, std::string& line, bool& isCRLF);
+	static OutputType DetermineType(const std::string& filename);
+	static bool PutTypeExtension(const OutputType type, std::string& filename);
 
 	inline void AddAirspaceFile(const std::string& inputFile) { airspaceFiles.push_back(inputFile); }
 	inline void AddWaypointFile(const std::string& waypointsFile) { waypointFiles.push_back(waypointsFile); }
@@ -62,6 +64,8 @@ public:
 	double GetDefaultTearrainAlt() const;
 	bool Convert();
 	inline bool IsConversionDone() const { return conversionDone; }
+	inline OutputType GetOutputType() const { return DetermineType(outputFile); }
+	inline bool SetOutputType(const OutputType type) { return PutTypeExtension(type, outputFile); }
 	inline void SetOutputFile(const std::string& outputFilename) { outputFile = outputFilename; }
 	inline std::string GetOutputFile() const { return outputFile; }
 	inline unsigned long GetNumOfAirspaces() const { return (unsigned long)airspaces.size(); }

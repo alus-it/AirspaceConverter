@@ -18,6 +18,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/format.hpp>
 #include "AirspaceConverter.h"
 
 #ifdef _DEBUG
@@ -268,41 +269,23 @@ void CAirspaceConverterDlg::StartBusy() {
 	chooseOutputFileBt.EnableWindow(FALSE);
 	ClearLogBt.EnableWindow(FALSE);
 	CloseButton.EnableWindow(FALSE);
+
+	// Start the timer
+	startTime = std::chrono::high_resolution_clock::now();
 }
 
 LRESULT CAirspaceConverterDlg::OnEndJob(WPARAM, LPARAM) {
 	conversionDone = converter->IsConversionDone();
-	EndBusy();
+	EndBusy(true);
 	return LRESULT();
 }
 
 void CAirspaceConverterDlg::UpdateOutputFilename() {
 	conversionDone = false;
-	if (outputFile.empty()) outputFileEditBox.SetWindowTextW(_T(""));
+	if (AirspaceConverter::PutTypeExtension((AirspaceConverter::OutputType)OutputTypeCombo.GetCurSel(), outputFile)) outputFileEditBox.SetWindowTextW(CString(outputFile.c_str()));
 	else {
-		boost::filesystem::path outputPath(outputFile);
-		switch ((AirspaceConverter::OutputType)OutputTypeCombo.GetCurSel())
-		{
-		case AirspaceConverter::KMZ:
-			outputPath.replace_extension(".kmz");
-			break;
-		case AirspaceConverter::OpenAir_Format:
-			outputPath.replace_extension(".txt");
-			break;
-		case AirspaceConverter::Polish:
-			outputPath.replace_extension(".mp");
-			break;
-		case AirspaceConverter::Garmin:
-			outputPath.replace_extension(".img");
-			break;
-		default:
-			assert(false);
-			outputFile.clear();
-			outputFileEditBox.SetWindowTextW(_T(""));
-			return;
-		}
-		outputFile = outputPath.string();
-		outputFileEditBox.SetWindowTextW(CString(outputFile.c_str()));
+		outputFile.clear();
+		outputFileEditBox.SetWindowTextW(_T(""));
 	}
 }
 
@@ -324,10 +307,14 @@ void CAirspaceConverterDlg::OnBnClickedClearLogBt() {
 	LoggingBox.SetWindowTextW(_T(""));
 }
 
-void CAirspaceConverterDlg::EndBusy() {
+void CAirspaceConverterDlg::EndBusy(const bool takeTime /* = false */) {
 	assert(converter != nullptr);
 	assert(processor != nullptr);
 	if (processor != nullptr) processor->Join();
+	if (takeTime) {
+		const double elapsedTimeSec = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - startTime).count() / 1e6;
+		LogMessage(std::string(boost::str(boost::format("Execution time: %1f sec.") % elapsedTimeSec)));
+	}
 	if(converter != nullptr) {
 		numAirspacesLoaded = converter->GetNumOfAirspaces();
 		numWaypointsLoaded = converter->GetNumOfWaypoints();
@@ -515,31 +502,12 @@ void CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt() {
 	if (dlg.DoModal() == IDOK) {
 		outputFile = CT2CA(dlg.GetPathName());
 		outputPath = outputFile;
-		ext = outputPath.extension().string(); // Extension really typed in by the user
-		if (boost::iequals(ext, ".kmz")) OutputTypeCombo.SetCurSel(AirspaceConverter::KMZ);
-		else if (boost::iequals(ext, ".txt")) OutputTypeCombo.SetCurSel(AirspaceConverter::OpenAir_Format);
-		else if (boost::iequals(ext, ".mp")) OutputTypeCombo.SetCurSel(AirspaceConverter::Polish);
-		else if (boost::iequals(ext, ".img")) OutputTypeCombo.SetCurSel(AirspaceConverter::Garmin);
+		AirspaceConverter::OutputType type = AirspaceConverter::DetermineType(outputFile); // Extension really typed in by the user
+		if(type != AirspaceConverter::Unknown) OutputTypeCombo.SetCurSel(type);
 		else { // otherwise force it to the selected extension from the open file dialog
-			assert(dlg.GetOFN().nFilterIndex > AirspaceConverter::KMZ && dlg.GetOFN().nFilterIndex <= AirspaceConverter::NumOfOutputTypes);
-			AirspaceConverter::OutputType type = (AirspaceConverter::OutputType)(dlg.GetOFN().nFilterIndex - 1);
-			switch (type) {
-			case AirspaceConverter::KMZ:
-				outputFile = outputPath.replace_extension(".kmz").string();
-				break;
-			case AirspaceConverter::OpenAir_Format:
-				outputFile = outputPath.replace_extension(".txt").string();
-				break;
-			case AirspaceConverter::Polish:
-				outputFile = outputPath.replace_extension(".mp").string();
-				break;
-			case AirspaceConverter::Garmin:
-				outputFile = outputPath.replace_extension(".img").string();
-				break;
-			default:
-				assert(false);
-				return;
-			}
+			assert(dlg.GetOFN().nFilterIndex > AirspaceConverter::KMZ && dlg.GetOFN().nFilterIndex <= AirspaceConverter::Unknown);
+			type = (AirspaceConverter::OutputType)(dlg.GetOFN().nFilterIndex - 1);
+			AirspaceConverter::PutTypeExtension(type, outputFile);
 			OutputTypeCombo.SetCurSel(type);
 		}
 		OnBnClickedOutputTypeCombo();
@@ -568,7 +536,7 @@ void CAirspaceConverterDlg::OnBnClickedOutputTypeCombo() {
 void CAirspaceConverterDlg::OnBnClickedConvert() {
 	if (outputFile.empty()) return;
 	AirspaceConverter::OutputType type = (AirspaceConverter::OutputType)OutputTypeCombo.GetCurSel();
-	assert(type >= AirspaceConverter::KMZ && type < AirspaceConverter::NumOfOutputTypes);
+	assert(type >= AirspaceConverter::KMZ && type < AirspaceConverter::Unknown);
 	boost::filesystem::path outputPath(outputFile);
 	if (boost::filesystem::exists(outputPath)) { // check if file already exists
 		CString msg(outputFile.c_str());

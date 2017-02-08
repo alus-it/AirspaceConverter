@@ -14,6 +14,7 @@
 #include "afxcmn.h"
 #include "afxwin.h"
 #include <string>
+#include <chrono>
 
 class AirspaceConverter;
 class Processor;
@@ -58,7 +59,7 @@ private:
 
 	void LogMessage(const std::string& text, const bool isError = false);
 	void UpdateOutputFilename();
-	void EndBusy();
+	void EndBusy(const bool takeTime = false);
 	void StartBusy();
 	
 	CComboBox OutputTypeCombo;
@@ -96,4 +97,5 @@ private:
 	bool isWinXPorOlder;
 #endif
 	bool conversionDone;
+	std::chrono::high_resolution_clock::time_point startTime;
 };

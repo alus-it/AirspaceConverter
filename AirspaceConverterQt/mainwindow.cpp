@@ -39,8 +39,10 @@ MainWindow::MainWindow(QWidget *parent) :
     // Set the logging function (to write in the logging texbox)
     AirspaceConverter::SetLogMessageFunction(std::function<void(const std::string&, const bool)>(std::bind(&MainWindow::logMessage, this, std::placeholders::_1, std::placeholders::_2)));
 
-    // Set the path and command of cGPSmapper that will be invoked by libAirspaceConverter
+    // On Windows set the path and command of cGPSmapper that will be invoked by libAirspaceConverter
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
     converter->Set_cGPSmapperCommand(".\\cGPSmapper\\cgpsmapper.exe");
+#endif
 
     ui->setupUi(this);
     connect(&watcher, SIGNAL(finished()), this, SLOT(endBusy()));
@@ -118,10 +120,10 @@ void MainWindow::endBusy() {
         // Eventually update the output file
         if(ui->outputFileTextEdit->toPlainText().size() == 0) updateOutputFileExtension(ui->outputFormatComboBox->currentIndex());
 
-        // Set the numer of waypoints loaded in its spinBox
+        // Set the number of waypoints loaded in its spinBox
         ui->numWaypointsLoadedSpinBox->setValue(converter->GetNumOfWaypoints());
     
-        // Set the numer of terrain raster map loaded in its spinBox
+        // Set the number of terrain raster maps loaded in its spinBox
         ui->numTerrainMapsLoadedSpinBox->setValue(converter->GetNumOfTerrainMaps());
     }
 
@@ -161,28 +163,8 @@ void MainWindow::on_outputFormatComboBox_currentIndexChanged(int index) {
 }
 
 void MainWindow::updateOutputFileExtension(const int newExtIdx) {
-    std::string outputFile(converter->GetOutputFile());
-    if(outputFile.empty()) return;
-    boost::filesystem::path path(outputFile);
-    switch(newExtIdx) {
-        case AirspaceConverter::KMZ:
-            path.replace_extension(".kmz");
-            break;
-        case AirspaceConverter::OpenAir_Format:
-            path.replace_extension(".txt");
-            break;
-        case AirspaceConverter::Polish:
-            path.replace_extension(".mp");
-            break;
-        case AirspaceConverter::Garmin:
-            path.replace_extension(".img");
-            break;
-        default:
-            assert(false);
-    }
-    outputFile = path.string();
-    ui->outputFileTextEdit->setPlainText(QString::fromStdString(outputFile));
-    converter->SetOutputFile(outputFile);
+    if (!converter->SetOutputType((AirspaceConverter::OutputType)newExtIdx)) return;
+    ui->outputFileTextEdit->setPlainText(QString::fromStdString(converter->GetOutputFile()));
 }
 
 void MainWindow::on_loadAirspaceFileButton_clicked() {
@@ -312,13 +294,8 @@ void MainWindow::on_chooseOutputFileButton_clicked() {
     converter->SetOutputFile(QFileDialog::getSaveFileName(this, tr("Output file"), QDir::currentPath(), tr("Google Earth (*.kmz);;OpenAir (*.txt);;Polish (*.mp);;Garmin map (*.img)"), &selectedFilter).toStdString());
 
     // Determine which format is now selected
-    int desiredFormatIndex = AirspaceConverter::KMZ;
-    if (selectedFilter != "Google Earth (*.kmz)") {
-        if (selectedFilter == "OpenAir (*.txt)") desiredFormatIndex = AirspaceConverter::OpenAir_Format;
-        else if (selectedFilter == "Polish (*.mp)") desiredFormatIndex = AirspaceConverter::Polish;
-        else if (selectedFilter == "Garmin map (*.img)") desiredFormatIndex = AirspaceConverter::Garmin;
-        else assert(false);
-    }
+    int desiredFormatIndex = converter->GetOutputType();
+    assert(desiredFormatIndex != AirspaceConverter::Unknown);
 
     // Reselect the desired format also in the combo box, he will take care of putting the right extension
     ui->outputFormatComboBox->setCurrentIndex(desiredFormatIndex);
