@@ -25,6 +25,7 @@
 
 std::function<void(const std::string&, const bool)> AirspaceConverter::LogMessage = DefaultLogMessage;
 std::function<bool(const std::string&, const std::string&)> AirspaceConverter::cGPSmapper = Default_cGPSmapper;
+std::string AirspaceConverter::cGPSmapperCommand = "cgpsmapper";
 
 const std::vector<std::string> AirspaceConverter::disclaimer = {
 	"This file has been produced with: \"AirspaceConverter\" Version: " VERSION,
@@ -72,7 +73,7 @@ bool AirspaceConverter::Default_cGPSmapper(const std::string& polishFile, const 
 	LogMessage("Invoking cGPSmapper to make: " + outputFile, false);
 
 	//TODO: add arguments to create files also for other software like Garmin BaseCamp
-	const std::string cmd(boost::str(boost::format("cgpsmapper %1s -o %2s") %polishFile %outputFile));
+	const std::string cmd(boost::str(boost::format("%1s %2s -o %3s") %cGPSmapperCommand %polishFile %outputFile));
 
 	if(system(cmd.c_str()) == EXIT_SUCCESS) {
 		std::remove(polishFile.c_str()); // Delete polish file

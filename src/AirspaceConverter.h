@@ -40,9 +40,10 @@ public:
 
 	static std::function<void(const std::string&, const bool)> LogMessage;
 	static std::function<bool(const std::string&, const std::string&)> cGPSmapper;
+
 	inline static void SetLogMessageFunction(std::function<void(const std::string&, const bool)> func) { LogMessage = func; }
 	inline static void Set_cGPSmapperFunction(std::function<bool(const std::string&, const std::string&)> func) { cGPSmapper = func; }
-
+	inline static void Set_cGPSmapperCommand(const std::string& cGPSmapperCmd) { cGPSmapperCommand = cGPSmapperCmd; }
 	static std::istream& SafeGetline(std::istream& is, std::string& line, bool& isCRLF);
 
 	inline void AddAirspaceFile(const std::string& inputFile) { airspaceFiles.push_back(inputFile); }
@@ -73,6 +74,7 @@ private:
 	static void DefaultLogMessage(const std::string&, const bool isError = false);
 	static bool Default_cGPSmapper(const std::string& polishFile, const std::string& outputFile);
 
+	static std::string cGPSmapperCommand;
 	std::multimap<int, Airspace> airspaces;
 	std::multimap<int, Waypoint*> waypoints;
 	std::string outputFile;
