@@ -5,7 +5,9 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 #include <QDesktopServices>
-
+#include <QtConcurrent/QtConcurrent>
+#include <QFuture>
+#include <QFutureWatcher>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -18,13 +20,14 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     converter(new AirspaceConverter),
-    busy(false)
-{
+    busy(false) {
     // Set the logging function (to write in the logging texbox)
     std::function<void(const std::string&, const bool)> func = std::bind(&MainWindow::logMessage, this, std::placeholders::_1, std::placeholders::_2);
     AirspaceConverter::SetLogMessageFunction(func);
     assert(converter != nullptr);
+    assert(ui != nullptr);
     ui->setupUi(this);
+    connect(&watcher, SIGNAL(finished()), this, SLOT(endBusy()));
 }
 
 MainWindow::~MainWindow() {
@@ -82,11 +85,27 @@ void MainWindow::startBusy() {
     startTime = std::chrono::high_resolution_clock::now();
 }
 
-void MainWindow::endBusy(bool conversionJustDone) {
+void MainWindow::endBusy() {
     // Stop the timer
     if (busy) {
         const double elapsedTimeSec = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - startTime).count() / 1e6;
         logMessage(std::string(boost::str(boost::format("Execution time: %1f sec.") %elapsedTimeSec)));
+    }
+    
+    // All operartions to do after loading
+    if(!converter->IsConversionDone()) {
+
+        // Set the numer of airspaces loaded in its spinBox
+        ui->numAirspacesLoadedSpinBox->setValue(converter->GetNumOfAirspaces());
+
+        // Eventually update the output file
+        if(ui->outputFileTextEdit->toPlainText().size() == 0) updateOutputFileExtension(ui->outputFormatComboBox->currentIndex());
+
+        // Set the numer of waypoints loaded in its spinBox
+        ui->numWaypointsLoadedSpinBox->setValue(converter->GetNumOfWaypoints());
+    
+        // Set the numer of terrain raster map loaded in its spinBox
+        ui->numTerrainMapsLoadedSpinBox->setValue(converter->GetNumOfTerrainMaps());
     }
 
     // Re-enable all specifically
@@ -104,8 +123,8 @@ void MainWindow::endBusy(bool conversionJustDone) {
     ui->QNHspinBox->setEnabled(true);
     ui->chooseOutputFileButton->setEnabled(true);
     ui->convertButton->setEnabled(converter->GetNumOfAirspaces()>0 && !converter->GetOutputFile().empty());
-    ui->openOutputFileButton->setEnabled(conversionJustDone);
-    ui->openOutputFolderButton->setEnabled(conversionJustDone);
+    ui->openOutputFileButton->setEnabled(converter->IsConversionDone());
+    ui->openOutputFolderButton->setEnabled(converter->IsConversionDone());
     ui->clearLogButton->setEnabled(true);
     ui->closeButton->setEnabled(true);
 
@@ -157,21 +176,13 @@ void MainWindow::on_loadAirspaceFileButton_clicked() {
 
     startBusy();
 
-    bool needToUpdateOtputFile = converter->GetOutputFile().empty();
-
     // Set QNH
     converter->SetQNH(ui->QNHspinBox->value());
 
     // Load all the files
     for(const auto& file : filenames) converter->AddAirspaceFile(file.toStdString());
-    converter->LoadAirspaces();
 
-    // Set the numer of airspaces loaded in its spinBox
-    ui->numAirspacesLoadedSpinBox->setValue(converter->GetNumOfAirspaces());
-
-    if(needToUpdateOtputFile) updateOutputFileExtension(ui->outputFormatComboBox->currentIndex());
-
-    endBusy();
+    watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::LoadAirspaces));
 }
 
 void MainWindow::on_loadAirspaceFolderButton_clicked() {
@@ -180,8 +191,6 @@ void MainWindow::on_loadAirspaceFolderButton_clicked() {
 
     startBusy();
 
-    bool needToUpdateOtputFile = converter->GetOutputFile().empty();
-
     // Set QNH
     converter->SetQNH(ui->QNHspinBox->value());
 
@@ -189,14 +198,8 @@ void MainWindow::on_loadAirspaceFolderButton_clicked() {
         if (!boost::filesystem::is_regular_file(*it)) continue;
         converter->AddAirspaceFile(it->path().string());
     }
-    converter->LoadAirspaces();
 
-    // Set the numer of airspaces loaded in its spinBox
-    ui->numAirspacesLoadedSpinBox->setValue(converter->GetNumOfAirspaces());
-
-    if(needToUpdateOtputFile) updateOutputFileExtension(ui->outputFormatComboBox->currentIndex());
-
-    endBusy();
+    watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::LoadAirspaces));
 }
 
 void MainWindow::on_unloadAirspacesButton_clicked() {
@@ -213,12 +216,8 @@ void MainWindow::on_loadWaypointFileButton_clicked() {
 
     // Load all the files
     for(const auto& file : filenames) converter->AddWaypointFile(file.toStdString());
-    converter->LoadWaypoints();
 
-    // Set the numer of waypoints loaded in its spinBox
-    ui->numWaypointsLoadedSpinBox->setValue(converter->GetNumOfWaypoints());
-
-    endBusy();
+    watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::LoadWaypoints));
 }
 
 void MainWindow::on_loadWaypointsFolderButton_clicked() {
@@ -231,12 +230,8 @@ void MainWindow::on_loadWaypointsFolderButton_clicked() {
         if (!boost::filesystem::is_regular_file(*it)) continue;
         if(boost::iequals(it->path().extension().string(), ".cup")) converter->AddWaypointFile(it->path().string());
     }
-    converter->LoadWaypoints();
 
-    // Set the numer of waypoints loaded in its spinBox
-    ui->numWaypointsLoadedSpinBox->setValue(converter->GetNumOfWaypoints());
-
-    endBusy();
+    watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::LoadWaypoints));
 }
 
 void MainWindow::on_unloadWaypointsButton_clicked() {
@@ -252,12 +247,8 @@ void MainWindow::on_loadRasterMapFileButton_clicked() {
 
     // Load terrain maps
     for(const auto& mapFile : filenames) converter->AddTerrainRasterMapFile(mapFile.toStdString());
-    converter->LoadTerrainRasterMaps();
 
-    // Set the numer of terrain raster map loaded in its spinBox
-    ui->numTerrainMapsLoadedSpinBox->setValue(converter->GetNumOfTerrainMaps());
-
-    endBusy();
+    watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::LoadTerrainRasterMaps));
 }
 
 void MainWindow::on_loadRasterMapFolderButton_clicked() {
@@ -270,12 +261,8 @@ void MainWindow::on_loadRasterMapFolderButton_clicked() {
         if (!boost::filesystem::is_regular_file(*it)) continue;
         if(boost::iequals(it->path().extension().string(), ".dem")) converter->AddTerrainRasterMapFile(it->path().string());
     }
-    converter->LoadTerrainRasterMaps();
 
-    // Set the numer of terrain raster map loaded in its spinBox
-    ui->numTerrainMapsLoadedSpinBox->setValue(converter->GetNumOfTerrainMaps());
-
-    endBusy();
+    watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::LoadTerrainRasterMaps));
 }
 
 void MainWindow::on_unloadTerrainMapsButton_clicked() {
@@ -293,9 +280,7 @@ void MainWindow::on_convertButton_clicked() {
     // Set default terrain altitude
     converter->SetDefaultTearrainAlt(ui->defaultAltSpinBox->value());
 
-    bool outputJustDone = converter->Convert();
-
-    endBusy(outputJustDone);
+    watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::Convert));
 }
 
 void MainWindow::on_openOutputFileButton_clicked() {    
