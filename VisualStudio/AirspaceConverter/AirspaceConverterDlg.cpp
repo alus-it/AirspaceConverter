@@ -183,7 +183,6 @@ BOOL CAirspaceConverterDlg::OnInitDialog() {
 	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
 	if (GetVersionEx((OSVERSIONINFO*)&osvi) && osvi.dwMajorVersion * 10 + osvi.dwMinorVersion <= 52) isWinXPorOlder = true;
 	
-
 	// In case of Windows XP disable button that can't be used
 	if (isWinXPorOlder) {
 		LoadAirspacesFolderBt.EnableWindow(FALSE);
@@ -198,9 +197,8 @@ BOOL CAirspaceConverterDlg::OnInitDialog() {
 	progressBar.SetMarquee(FALSE, 1);
 	progressBar.ModifyStyle(PBS_MARQUEE, 0); // MARQUEE set here, not in the resource file
 
-	// Set the logging function (to write in the logging texbox)
-	std::function<void(const std::string&, const bool)> func = std::bind(&CAirspaceConverterDlg::LogMessage, this, std::placeholders::_1, std::placeholders::_2);
-	AirspaceConverter::SetLogMessageFuntion(func);
+	// Set the logging function (to write in the logging texbox... and not on the default Linux console)
+	AirspaceConverter::SetLogMessageFunction(std::function<void(const std::string&, const bool)>(std::bind(&CAirspaceConverterDlg::LogMessage, this, std::placeholders::_1, std::placeholders::_2)));
 
 	// Buld the "converter"
 	converter = new AirspaceConverter();

@@ -21,9 +21,40 @@ Processor::Processor(HWND hwnd, AirspaceConverter* airspaceConverter) :
 	window(hwnd) ,
 	converter(airspaceConverter) {
 	assert(converter != nullptr);
+
+	// Set the cGPSmapper invoker function (SO specific way to invoke cGPSmapper)
+	AirspaceConverter::Set_cGPSmapperFunction(std::function<bool(const std::string&, const std::string&)>(std::bind(&Processor::cGPSmapper, this, std::placeholders::_1, std::placeholders::_2)));
 }
 
 Processor::~Processor() {}
+
+bool Processor::cGPSmapper(const std::string& polishFile, const std::string& outputFile) const {
+	// Here we call cGPSmapper in the Windows way.... anyaway it works also with system(".\\cGPSmapper\\cgpsmapper.exe <args>"); on Windows as well
+	AirspaceConverter::LogMessage("Invoking cGPSmapper to make: " + outputFile, false);
+
+	//TODO: add arguments to create files also for other software like Garmin BaseCamp
+	const std::string args(boost::str(boost::format("%1s -o %2s") % polishFile %outputFile));
+
+	SHELLEXECUTEINFO lpShellExecInfo = { 0 };
+	lpShellExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+	lpShellExecInfo.fMask = SEE_MASK_DOENVSUBST | SEE_MASK_NOCLOSEPROCESS;
+	lpShellExecInfo.hwnd = NULL;
+	lpShellExecInfo.lpVerb = NULL;
+	lpShellExecInfo.lpFile = _T(".\\cGPSmapper\\cgpsmapper.exe");
+	lpShellExecInfo.lpParameters = _com_util::ConvertStringToBSTR(args.c_str());
+	lpShellExecInfo.lpDirectory = NULL;
+	lpShellExecInfo.nShow = SW_SHOW;
+	lpShellExecInfo.hInstApp = (HINSTANCE)SE_ERR_DDEFAIL;
+	ShellExecuteEx(&lpShellExecInfo);
+	if (lpShellExecInfo.hProcess != NULL) {
+		WaitForSingleObject(lpShellExecInfo.hProcess, INFINITE);
+		CloseHandle(lpShellExecInfo.hProcess);
+		std::remove(polishFile.c_str()); // Delete polish file
+		return true;
+	}
+	AirspaceConverter::LogMessage("ERROR: Failed to start cGPSmapper process.", true);
+	return false;
+}
 
 bool Processor::LoadAirspacesFiles(const double& newQNH) {
 	if (workerThread.joinable()) return false;
@@ -67,36 +98,6 @@ bool Processor::Convert() {
 
 void Processor::ConvertThread()
 {
-	if (converter->Convert() && converter->GetOutputType() == AirspaceConverter::Garmin) {
-	
-		// Special case: Garmin IMG need to call cGPSmapper
-		// For now we have done only the Polish file in the lib...
-		const std::string polishFile(boost::filesystem::path(converter->GetOutputFile()).replace_extension(".mp").string());
-		
-		// Here we call cGPSmapper in the Windows way....
-		// TODO: all that SO specific stuff the should be a function to be used directly in the lib with functional
-		AirspaceConverter::LogMessage("Invoking cGPSmapper to make: " + converter->GetOutputFile(), false);
-		
-		//TODO: add arguments to create files also for other software like Garmin BaseCamp
-		const std::string args(boost::str(boost::format("%1s -o %2s") %polishFile %converter->GetOutputFile()));
-		
-		SHELLEXECUTEINFO lpShellExecInfo = { 0 };
-		lpShellExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
-		lpShellExecInfo.fMask = SEE_MASK_DOENVSUBST | SEE_MASK_NOCLOSEPROCESS;
-		lpShellExecInfo.hwnd = NULL;
-		lpShellExecInfo.lpVerb = NULL;
-		lpShellExecInfo.lpFile = _T(".\\cGPSmapper\\cgpsmapper.exe");
-		lpShellExecInfo.lpParameters = _com_util::ConvertStringToBSTR(args.c_str());
-		lpShellExecInfo.lpDirectory = NULL;
-		lpShellExecInfo.nShow = SW_SHOW;
-		lpShellExecInfo.hInstApp = (HINSTANCE)SE_ERR_DDEFAIL;
-		ShellExecuteEx(&lpShellExecInfo);
-		if (lpShellExecInfo.hProcess == NULL) AirspaceConverter::LogMessage("ERROR: Failed to start cGPSmapper process.", true);
-		else {
-			WaitForSingleObject(lpShellExecInfo.hProcess, INFINITE);
-			CloseHandle(lpShellExecInfo.hProcess);
-			std::remove(polishFile.c_str()); // Delete polish file
-		}
-	}
+	converter->Convert();
 	PostMessage(window, WM_GENERAL_WORK_DONE, 0, 0);
 }

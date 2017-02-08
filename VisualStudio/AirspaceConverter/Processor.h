@@ -32,6 +32,7 @@ public:
 	inline void Join() { if (workerThread.joinable()) workerThread.join(); }
 	
 private:
+	bool cGPSmapper(const std::string& polishFile, const std::string& outputFile) const;
 	void LoadAirspacesFilesThread();
 	void LoadWaypointsFilesThread();
 	void LoadDEMfilesThread();
