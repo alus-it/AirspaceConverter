@@ -52,6 +52,7 @@ public:
 	inline void AddWaypointFile(const std::string& waypointsFile) { waypointFiles.push_back(waypointsFile); }
 	inline void AddTerrainRasterMapFile(const std::string& rasterMapFile) { terrainRasterMapFiles.push_back(rasterMapFile); }
 	inline int GetNumberOfAirspaceFiles() const { return (int)airspaceFiles.size(); }
+	inline int GetNumberOfWaypointFiles() const { return (int)waypointFiles.size(); }
 	void LoadAirspaces();
 	void LoadTerrainRasterMaps();
 	void UnloadAirspaces();

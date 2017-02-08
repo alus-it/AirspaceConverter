@@ -142,6 +142,7 @@ bool AirspaceConverter::PutTypeExtension(const OutputType type, std::string& fil
 		break;
 	default:
 		assert(false);
+		/* no break */
 	case OutputType::Unknown:
 		return false;
 	}
@@ -183,7 +184,10 @@ void AirspaceConverter::UnloadRasterMaps() {
 
 void AirspaceConverter::LoadWaypoints() {
 	conversionDone = false;
-	for (const std::string& inputFile : waypointFiles) CUPreader::ReadFile(inputFile, waypoints);
+	for (const std::string& inputFile : waypointFiles) {
+		bool redOk = CUPreader::ReadFile(inputFile, waypoints);
+		if (redOk && outputFile.empty()) outputFile = boost::filesystem::path(inputFile).replace_extension(".kmz").string(); // Default output as KMZ
+	}
 	waypointFiles.clear();
 }
 

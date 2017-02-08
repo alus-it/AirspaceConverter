@@ -33,6 +33,7 @@ public:
 	static void ClearTerrainMaps();
 	inline static void SetDefaultTerrainAltitude(const double& defaultAltMt) { defaultTerrainAltitudeMt = defaultAltMt; }
 	inline static double GetDefaultTerrainAltitude() { return defaultTerrainAltitudeMt; }
+	inline static void SetIconsPath(const std::string& path) { iconsPath = path; } // To set the directory containing the waypoints icons...
 	inline bool WereAllAGLaltitudesCovered() const { return allAGLaltitudesCovered; }
 	bool CompressToKMZ(const std::string& inputKMLfile, const bool addIcons = false);
 
@@ -52,7 +53,8 @@ private:
 	static const std::string airfieldColors[][2];
 	static const std::string waypointIcons[];
 	static std::vector<RasterMap*> terrainMaps;
-	static double defaultTerrainAltitudeMt;	
+	static double defaultTerrainAltitudeMt;
+	static std::string iconsPath;
 	std::ofstream file;
 	bool allAGLaltitudesCovered;
 };

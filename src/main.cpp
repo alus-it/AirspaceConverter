@@ -16,15 +16,18 @@
 #include <chrono>
 
 void printHelp() {
-	std::cout << "Example usage: AirspaceConverter -q 1013 -a 35 -i inputFileOpenAir.txt -i inputFileOpenAIP.aip -m terrainMap.dem -o outputFile.kmz" << std::endl << std::endl;
+	std::cout << "Example usage: AirspaceConverter -q 1013 -a 35 -i inputFileOpenAir.txt -i inputFileOpenAIP.aip -w waypoints.cup -m terrainMap.dem -o outputFile.kmz" << std::endl << std::endl;
 	std::cout << "Possible options:" << std::endl;
 	std::cout << "-q: optional, specify the QNH in hPa used to calculate height of flight levels" << std::endl;
 	std::cout << "-a: optional, specify a default terrain altitude in meters to calculate AGL heights of points not covered by loaded terrain map(s)" << std::endl;
-	std::cout << "-i: mandatory, multiple, input file(s) can be OpenAir (.txt), OpenAIP (.aip) or CUP waypoints (.cup)" << std::endl;
+	std::cout << "-i: multiple, input airspace file(s) can be OpenAir (.txt), OpenAIP (.aip) or CUP waypoints (.cup)" << std::endl;
+	std::cout << "-w: multiple, input waypoint file(s) in the SeeYou CUP format (.cup)" << std::endl;
 	std::cout << "-m: optional, multiple, terrain map file(s) (.dem) used to lookup terrain height" << std::endl;
 	std::cout << "-o: optional, output file .kmz, .txt (OpenAir), .img (Garmin) or .mp (Polish). If not specified will be used the name of first input file as KMZ" << std::endl;
 	std::cout << "-v: print version number" << std::endl;
 	std::cout << "-h: print this guide" << std::endl << std::endl;
+	std::cout << "At least one input airspace or waypoint file must be present." << std::endl;
+	std::cout << "Warning: any already existing output file will be overwritten." << std::endl << std::endl;
 }
 
 int main(int argc, char *argv[]) {
@@ -55,8 +58,12 @@ int main(int argc, char *argv[]) {
 			else ac.SetDefaultTearrainAlt(std::stod(argv[++i]));
 			break;
 		case 'i':
-			if(!hasValueAfter) std::cerr << "ERROR: input file path not found."<< std::endl;
+			if(!hasValueAfter) std::cerr << "ERROR: input airspace file path not found."<< std::endl;
 			else ac.AddAirspaceFile(argv[++i]);
+			break;
+		case 'w':
+			if(!hasValueAfter) std::cerr << "ERROR: input waypoint file path not found."<< std::endl;
+			else ac.AddWaypointFile(argv[++i]);
 			break;
 		case 'm':
 			if(!hasValueAfter) std::cerr << "ERROR: terrain map file path not found."<< std::endl;
@@ -82,8 +89,8 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	if (ac.GetNumberOfAirspaceFiles() == 0) {
-		std::cerr << "FATAL ERROR: No input files specified." << std::endl;
+	if (ac.GetNumberOfAirspaceFiles() == 0 && ac.GetNumberOfWaypointFiles() == 0) {
+		std::cerr << "ERROR: No input files (airspace or waypoint) specified." << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -96,7 +103,7 @@ int main(int argc, char *argv[]) {
 	ac.LoadTerrainRasterMaps();
 
 	if(ac.GetNumOfAirspaces() == 0 && ac.GetNumOfWaypoints() == 0) {
-		std::cerr << "FATAL ERROR: no input files loaded." << std::endl;
+		std::cerr << "ERROR: no usable data found in the input files specified." << std::endl;
 		return EXIT_FAILURE;
 	}
 	

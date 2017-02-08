@@ -10,12 +10,6 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
-#ifdef __unix__
-#define ICONS_PATH "/usr/share/airspaceconverter/"
-#else
-#define ICONS_PATH "./"
-#endif
-
 #include "KMLwriter.h"
 #include "Airspace.h"
 #include "RasterMap.h"
@@ -85,6 +79,7 @@ const std::string KMLwriter::waypointIcons[] = {
 
 std::vector<RasterMap*> KMLwriter::terrainMaps;
 double KMLwriter::defaultTerrainAltitudeMt = 20.842;
+std::string KMLwriter::iconsPath = "/usr/share/airspaceconverter/icons/"; // Default installed Linux location
 
 bool KMLwriter::AddTerrainMap(const std::string& filename) {
 	RasterMap* pTerrainMap = new RasterMap();
@@ -573,6 +568,9 @@ bool KMLwriter::CompressToKMZ(const std::string& inputKMLfile, const bool addIco
 
 	AirspaceConverter::LogMessage("Compressing into KMZ: " + kmzFile, false);
 
+	// To avoid problems it is better to delete the KMZ file if already existing, user has already been warned
+	if (boost::filesystem::exists(kmzFile)) std::remove(kmzFile.c_str()); // Delete KML file
+
 	// Open the ZIP file
 	int error = 0;
 	zip *archive = zip_open(kmzFile.c_str(), ZIP_CREATE, &error);
@@ -600,8 +598,7 @@ bool KMLwriter::CompressToKMZ(const std::string& inputKMLfile, const bool addIco
 #else
 	int index = (int)zip_add(archive, fileKML.c_str(), source);
 #endif
-	if (index < 0) // "failed to add file to archive. " << zip_strerror(archive)
-	{
+	if (index < 0) { // "failed to add file to archive. " << zip_strerror(archive)
 #ifdef ZIP_FL_OVERWRITE
 		zip_discard(archive);
 #else
@@ -613,46 +610,54 @@ bool KMLwriter::CompressToKMZ(const std::string& inputKMLfile, const bool addIco
 	}
 
 	// If it is necessary to add also the icons
-	if (addIcons) for (int i = Waypoint::undefined; i < Waypoint::numOfWaypointTypes; i++) {
+	if (addIcons) {
+		std::string path(iconsPath);
 
-		// Get the icon PNG filename and prepare the path in the ZIP and the path from current dir
-		const std::string iconFile = "icons/" + waypointIcons[i];
-		const std::string iconPath = ICONS_PATH + iconFile;
-
-		// Check if we can get that PNG file
-		if (!boost::filesystem::exists(iconPath)) {
-			AirspaceConverter::LogMessage("ERROR: Unable to find icon PNG file: " + iconPath, true);
-			continue;
+		// Check if the configured icons path exits, user may be wrong...
+		if (!boost::filesystem::exists(path)) {
+			// Don't be so inflexible... Please try again in the current directory...
+			path = std::string("./icons/");
+			if (!boost::filesystem::exists(path)) path = std::string("./");
 		}
+		for (int i = Waypoint::undefined; i < Waypoint::numOfWaypointTypes; i++) {
+			// Get the icon PNG filename and prepare the path in the ZIP and the path from current dir
+			const std::string iconPath = path + waypointIcons[i];
 
-		// Create source buffer from KML file
-		source = zip_source_file(archive, (iconPath).c_str(), 0, 0);
-		if (source == nullptr) { // "failed to create source buffer. " << zip_strerror(archive)
-#ifdef ZIP_FL_OVERWRITE
-			zip_discard(archive);
-#else
-			zip_close(archive);
-#endif
-			AirspaceConverter::LogMessage("ERROR: Failed to create zip source buffer to read: " + iconPath, true);
-			return false;
-		}
+			// Check if we can get that PNG file
+			if (!boost::filesystem::exists(iconPath)) {
+				AirspaceConverter::LogMessage("ERROR: Unable to find icon PNG file: " + iconPath, true);
+				continue;
+			}
 
-		// Add the buffer as KLM file in the ZIP
+			// Create source buffer from KML file
+			source = zip_source_file(archive, (iconPath).c_str(), 0, 0);
+			if (source == nullptr) { // "failed to create source buffer. " << zip_strerror(archive)
 #ifdef ZIP_FL_OVERWRITE
-		index = (int)zip_file_add(archive, iconFile.c_str(), source, ZIP_FL_OVERWRITE);
+				zip_discard(archive);
 #else
-		index = (int)zip_add(archive, iconFile.c_str(), source);
+				zip_close(archive);
 #endif
-		if (index < 0) // "failed to add file to archive. " << zip_strerror(archive)
-		{
+				AirspaceConverter::LogMessage("ERROR: Failed to create zip source buffer to read: " + iconPath, true);
+				return false;
+			}
+
+			// Add the buffer as PNG file in the ZIP
+			const std::string iconFile = "icons/" + waypointIcons[i];
 #ifdef ZIP_FL_OVERWRITE
-			zip_discard(archive);
+			index = (int)zip_file_add(archive, iconFile.c_str(), source, ZIP_FL_OVERWRITE);
 #else
-			zip_close(archive);
+			index = (int)zip_add(archive, iconFile.c_str(), source);
 #endif
-			zip_source_free(source); // The sorce buffer have to be freed in this case
-			AirspaceConverter::LogMessage("ERROR: While compressing, failed to add: " + iconFile, true);
-			return false;
+			if (index < 0) { // "failed to add file to archive. " << zip_strerror(archive)
+#ifdef ZIP_FL_OVERWRITE
+				zip_discard(archive);
+#else
+				zip_close(archive);
+#endif
+				zip_source_free(source); // The sorce buffer have to be freed in this case
+				AirspaceConverter::LogMessage("ERROR: While compressing, failed to add: " + iconFile, true);
+				return false;
+			}
 		}
 	}
 
