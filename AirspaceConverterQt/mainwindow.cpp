@@ -169,7 +169,7 @@ void MainWindow::updateOutputFileExtension(const int newExtIdx) {
 }
 
 void MainWindow::on_loadAirspaceFileButton_clicked() {
-    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Airspace files"), QDir::currentPath(), tr("All airspace files (*.txt *.aip);;OpenAir (*.txt);;OpenAIP (*.aip);;") );
+    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Airspace files"), QDir::currentPath(), tr("All airspace files(*.txt *.TXT *.aip *.AIP);;OpenAir(*.txt *.TXT);;OpenAIP(*.aip *.AIP);;") );
     if(filenames.empty()) return;
 
     startBusy();
@@ -207,7 +207,7 @@ void MainWindow::on_unloadAirspacesButton_clicked() {
 }
 
 void MainWindow::on_loadWaypointFileButton_clicked() {
-    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Waypoints files"), QDir::currentPath(), tr("CUP files(*.cup);;") );
+    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Waypoints files"), QDir::currentPath(), tr("CUP files(*.cup *.CUP);;") );
     if(filenames.empty()) return;
 
     startBusy();
@@ -238,7 +238,7 @@ void MainWindow::on_unloadWaypointsButton_clicked() {
 }
 
 void MainWindow::on_loadRasterMapFileButton_clicked() {
-    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Terrain raster map files"), QDir::currentPath(), tr("DEM files (*.dem);;"));
+    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Terrain raster map files"), QDir::currentPath(), tr("DEM files(*.dem *.DEM);;"));
     if(filenames.empty()) return;
 
     startBusy();
