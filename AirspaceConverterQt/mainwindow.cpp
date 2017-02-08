@@ -4,6 +4,7 @@
 #include <QFileDialog>
 #include <QCloseEvent>
 #include <QMessageBox>
+#include <QScrollBar>
 #include <QDesktopServices>
 #include <QtConcurrent/QtConcurrent>
 #include <QFuture>
@@ -40,8 +41,10 @@ void MainWindow::logMessage(const std::string& message, const bool isError) {
 }
 
 void MainWindow::log(const QString& message, const bool isError) {
+    // TODO: implement a message queue!!!
     ui->loggingTextBox->setTextColor(isError ? "red" : "black");
     ui->loggingTextBox->append(message);
+    ui->loggingTextBox->verticalScrollBar()->setValue(ui->loggingTextBox->verticalScrollBar()->maximum());
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -284,16 +287,11 @@ void MainWindow::on_convertButton_clicked() {
 }
 
 void MainWindow::on_openOutputFileButton_clicked() {    
-    //TODO: QDesktopServices???
     QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(converter->GetOutputFile())));
 }
 
 void MainWindow::on_openOutputFolderButton_clicked() {
-    //TODO: QDesktopServices???
-
-    //boost::filesystem::path(outputFile)
-
-    QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(converter->GetOutputFile())));
+    QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(boost::filesystem::path(converter->GetOutputFile()).parent_path().string())));
 }
 
 void MainWindow::on_chooseOutputFileButton_clicked() {
