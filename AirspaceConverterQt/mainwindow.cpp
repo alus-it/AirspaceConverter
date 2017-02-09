@@ -32,7 +32,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     converter(new AirspaceConverter()),
     busy(false),
-    suggestedInputDir(QDir::homePath()) {
+    suggestedInputDir(QDir::homePath()),
+    outputFileInsertedViaDialog(false) {
     assert(converter != nullptr);
     assert(ui != nullptr);
 
@@ -325,6 +326,9 @@ void MainWindow::on_chooseOutputFileButton_clicked() {
 
     // Set properly the output file name in the texbox
     ui->outputFileTextEdit->setPlainText(QString::fromStdString(converter->GetOutputFile()));
+
+    // Remember that the file was inserted via save as dialog in order to don't ask twice to overwrite it
+    outputFileInsertedViaDialog = true;
 }
 
 void MainWindow::on_convertButton_clicked() {
@@ -333,8 +337,22 @@ void MainWindow::on_convertButton_clicked() {
     if(converter->GetOutputFile().empty() || (converter->GetNumOfAirspaces()==0 && (ui->outputFormatComboBox->currentIndex() != AirspaceConverter::KMZ || converter->GetNumOfWaypoints()==0))) return;
 
 
-    // TODO: warn user of existing files to be overwritten!!!
+    // Ask confirmation to overwrite the output file
+    boost::filesystem::path path(converter->GetOutputFile());
+    if(!outputFileInsertedViaDialog && boost::filesystem::exists(path) &&
+            QMessageBox::warning(this, "Overwrite?", tr("Selected output file already exists. Overwrite?"), QMessageBox::Yes | QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) return;
 
+    // Ask confirmation to overwrite any other file that will be created during the conversion process
+    switch(converter->GetOutputType()) {
+    case AirspaceConverter::KMZ:
+        if(boost::filesystem::exists(path.replace_extension(".kml")) && QMessageBox::warning(this, "Overwrite?", tr("The already existing .KML file will be deleted, continue?"), QMessageBox::Yes | QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) return;
+        break;
+    case AirspaceConverter::Garmin:
+        if(boost::filesystem::exists(path.replace_extension(".mp")) && QMessageBox::warning(this, "Overwrite?", tr("The already existing .MP file will be deleted, continue?"), QMessageBox::Yes | QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) return;
+        break;
+    default:
+        break;
+    }
 
     // Start work...
     startBusy();

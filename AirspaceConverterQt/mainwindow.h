@@ -43,6 +43,7 @@ private:
     bool busy;
     QFutureWatcher<void> watcher;
     QString suggestedInputDir;
+    bool outputFileInsertedViaDialog;
 
 private slots:
     void on_aboutButton_clicked();
