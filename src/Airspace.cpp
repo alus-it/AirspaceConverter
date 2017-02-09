@@ -103,6 +103,15 @@ const std::string Airspace::CATEGORY_NAMES[] = {
 	"UNDEFINED" //UNDEFINED
 };
 
+Airspace::Airspace(const Airspace& orig) // Copy constructor
+	: top(orig.top)
+	, base(orig.base)
+	, geometries(orig.geometries)
+	, points(orig.points)
+	, type(orig.type)
+	, name(orig.name) {
+}
+
 Airspace::Airspace(Airspace&& orig) // Move constructor
 	: top(std::move(orig.top))
 	, base(std::move(orig.base))

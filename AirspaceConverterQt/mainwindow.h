@@ -32,8 +32,7 @@ public:
 
 private:
     virtual void closeEvent(QCloseEvent *event);
-    void logMessage(const std::string& message, const bool isError = false);
-    void log(const QString& message, const bool isError = false);
+    void postMessage(const std::string& message, const bool isError = false);
     void startBusy();
     void updateOutputFileExtension(const int newExt);
     void laodAirspacesThread();
@@ -62,4 +61,9 @@ private slots:
     void on_convertButton_clicked();
     void on_chooseOutputFileButton_clicked();
     void endBusy();
+    void logMessage(const QString& message, const bool& isError = false);
+
+signals:
+    void messagePosted(const QString& message, const bool& isError = false);
+
 };

@@ -10,9 +10,13 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
+//TODO list:
+// Warn if the oyput file are already existing!
+// Propose directory in the home of the user
+// Output dir propose already the path of output file if known
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
 #include <QFileDialog>
 #include <QCloseEvent>
 #include <QMessageBox>
@@ -31,13 +35,10 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    converter(new AirspaceConverter),
+    converter(new AirspaceConverter()),
     busy(false) {
     assert(converter != nullptr);
     assert(ui != nullptr);
-
-    // Set the logging function (to write in the logging texbox)
-    AirspaceConverter::SetLogMessageFunction(std::function<void(const std::string&, const bool)>(std::bind(&MainWindow::logMessage, this, std::placeholders::_1, std::placeholders::_2)));
 
     // On Windows set the path and command of cGPSmapper that will be invoked by libAirspaceConverter
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
@@ -45,8 +46,14 @@ MainWindow::MainWindow(QWidget *parent) :
     converter->SetIconsPath(".\\icons\\");
 #endif
 
+    // Set up UI and signals
     ui->setupUi(this);
+    connect(this, SIGNAL(messagePosted(QString,bool)), this, SLOT(logMessage(QString,bool)));
     connect(&watcher, SIGNAL(finished()), this, SLOT(endBusy()));
+
+    // Set the logging function (to write in the logging texbox)
+    AirspaceConverter::SetLogMessageFunction(std::function<void(const std::string&, const bool)>(std::bind(&MainWindow::postMessage, this, std::placeholders::_1, std::placeholders::_2)));
+
 }
 
 MainWindow::~MainWindow() {
@@ -54,15 +61,17 @@ MainWindow::~MainWindow() {
     if (converter != nullptr) delete converter;
 }
 
-void MainWindow::logMessage(const std::string& message, const bool isError) {
-    log(QString::fromStdString(message), isError);
-}
-
-void MainWindow::log(const QString& message, const bool isError) {
-    // TODO: implement a message queue!!!
+// This is the "local" MainWindow member functon to append a new message on the log
+void MainWindow::logMessage(const QString& message, const bool& isError) {
     ui->loggingTextBox->setTextColor(isError ? "red" : "black");
     ui->loggingTextBox->append(message);
     ui->loggingTextBox->verticalScrollBar()->setValue(ui->loggingTextBox->verticalScrollBar()->maximum());
+}
+
+// This is function that will be called by libAirspaceConverter from another thread to append a new message on the log
+void MainWindow::postMessage(const std::string& message, const bool isError /* = false */) {
+    // Emit the signal that a new message has to be posted on the log (multiple signals will be queued)
+    emit messagePosted(QString::fromStdString(message), isError);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -109,7 +118,7 @@ void MainWindow::startBusy() {
 void MainWindow::endBusy() {
     if (busy) { // Stop the timer
         const double elapsedTimeSec = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - startTime).count() / 1e6;
-        logMessage(std::string(boost::str(boost::format("Execution time: %1f sec.") %elapsedTimeSec)));
+        logMessage(QString::fromStdString(std::string(boost::str(boost::format("Execution time: %1f sec.") %elapsedTimeSec))));
     }
     
     // All operartions to do after loading
@@ -142,7 +151,7 @@ void MainWindow::endBusy() {
     ui->defaultAltSpinBox->setEnabled(true);
     ui->QNHspinBox->setEnabled(true);
     ui->chooseOutputFileButton->setEnabled(true);
-    ui->convertButton->setEnabled(converter->GetNumOfAirspaces()>0 && !converter->GetOutputFile().empty());
+    ui->convertButton->setEnabled(!converter->GetOutputFile().empty() && (converter->GetNumOfAirspaces()>0 || (ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ && converter->GetNumOfWaypoints()>0)));
     ui->openOutputFileButton->setEnabled(converter->IsConversionDone());
     ui->openOutputFolderButton->setEnabled(converter->IsConversionDone());
     ui->clearLogButton->setEnabled(true);
@@ -269,9 +278,10 @@ void MainWindow::on_unloadTerrainMapsButton_clicked() {
 }
 
 void MainWindow::on_convertButton_clicked() {
-    assert(converter->GetNumOfAirspaces() > 0);
     assert(!converter->GetOutputFile().empty());
-    if(converter->GetNumOfAirspaces() ==0 || converter->GetOutputFile().empty()) return;
+    assert(converter->GetNumOfAirspaces()>0 || (ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ && converter->GetNumOfWaypoints()>0));
+
+    if(converter->GetOutputFile().empty() || (converter->GetNumOfAirspaces()==0 && (ui->outputFormatComboBox->currentIndex() != AirspaceConverter::KMZ || converter->GetNumOfWaypoints()==0))) return;
 
     startBusy();
 

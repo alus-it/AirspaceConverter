@@ -75,6 +75,7 @@ public:
 
 	inline Airspace() : type(UNDEFINED) {}
 	inline Airspace(Type category) : type(category) {}
+	Airspace(const Airspace& orig);
 	Airspace(Airspace&& orig);
 	~Airspace();
 
