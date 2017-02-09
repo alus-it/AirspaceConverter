@@ -43,6 +43,7 @@ private:
     std::chrono::high_resolution_clock::time_point startTime;
     bool busy;
     QFutureWatcher<void> watcher;
+    QString suggestedInputDir;
 
 private slots:
     void on_aboutButton_clicked();

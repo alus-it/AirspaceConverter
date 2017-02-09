@@ -10,11 +10,6 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
-//TODO list:
-// Warn if the oyput file are already existing!
-// Propose directory in the home of the user
-// Output dir propose already the path of output file if known
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QFileDialog>
@@ -36,7 +31,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     converter(new AirspaceConverter()),
-    busy(false) {
+    busy(false),
+    suggestedInputDir(QDir::homePath()) {
     assert(converter != nullptr);
     assert(ui != nullptr);
 
@@ -178,34 +174,41 @@ void MainWindow::updateOutputFileExtension(const int newExtIdx) {
 }
 
 void MainWindow::on_loadAirspaceFileButton_clicked() {
-    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Airspace files"), QDir::currentPath(), tr("All airspace files(*.txt *.TXT *.aip *.AIP);;OpenAir(*.txt *.TXT);;OpenAIP(*.aip *.AIP);;") );
+    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Airspace files"), suggestedInputDir, tr("All airspace files(*.txt *.TXT *.aip *.AIP);;OpenAir(*.txt *.TXT);;OpenAIP(*.aip *.AIP);;") );
     if(filenames.empty()) return;
 
+    // Start to work
     startBusy();
+
+    // Remember the directory
+    suggestedInputDir = QString::fromStdString(boost::filesystem::path(filenames.front().toStdString()).parent_path().string());
 
     // Set QNH
     converter->SetQNH(ui->QNHspinBox->value());
 
     // Load all the files
     for(const auto& file : filenames) converter->AddAirspaceFile(file.toStdString());
-
     watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::LoadAirspaces));
 }
 
 void MainWindow::on_loadAirspaceFolderButton_clicked() {
-    boost::filesystem::path root(QFileDialog::getExistingDirectory(this, tr("Open airspace directory"), QDir::currentPath(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks).toStdString());
-    if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
+    const QString selectedDir = QFileDialog::getExistingDirectory(this, tr("Open airspace directory"), suggestedInputDir, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    if (selectedDir.isEmpty()) return;
 
+    // Start to work
     startBusy();
+
+    // Remember the directory
+    suggestedInputDir = selectedDir;
 
     // Set QNH
     converter->SetQNH(ui->QNHspinBox->value());
 
-    for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
+    // Load all the files in the folder
+    for (boost::filesystem::directory_iterator it(boost::filesystem::path(selectedDir.toStdString())), endit; it != endit; ++it) {
         if (!boost::filesystem::is_regular_file(*it)) continue;
         converter->AddAirspaceFile(it->path().string());
     }
-
     watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::LoadAirspaces));
 }
 
@@ -216,28 +219,35 @@ void MainWindow::on_unloadAirspacesButton_clicked() {
 }
 
 void MainWindow::on_loadWaypointFileButton_clicked() {
-    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Waypoints files"), QDir::currentPath(), tr("CUP files(*.cup *.CUP);;") );
+    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Waypoints files"), suggestedInputDir, tr("CUP files(*.cup *.CUP);;") );
     if(filenames.empty()) return;
 
+    // Start to work...
     startBusy();
+
+    // Remember the directory
+    suggestedInputDir = QString::fromStdString(boost::filesystem::path(filenames.front().toStdString()).parent_path().string());
 
     // Load all the files
     for(const auto& file : filenames) converter->AddWaypointFile(file.toStdString());
-
     watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::LoadWaypoints));
 }
 
 void MainWindow::on_loadWaypointsFolderButton_clicked() {
-    boost::filesystem::path root(QFileDialog::getExistingDirectory(this, tr("Open waypoints directory"), QDir::currentPath(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks).toStdString());
-    if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
+    const QString selectedDir = QFileDialog::getExistingDirectory(this, tr("Open waypoints directory"), suggestedInputDir, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    if (selectedDir.isEmpty()) return;
 
+    // Start to work...
     startBusy();
 
-    for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
+    // Remember the directory
+    suggestedInputDir = selectedDir;
+
+    // Load all the files in the folder (.cup only)
+    for (boost::filesystem::directory_iterator it(boost::filesystem::path(selectedDir.toStdString())), endit; it != endit; ++it) {
         if (!boost::filesystem::is_regular_file(*it)) continue;
         if(boost::iequals(it->path().extension().string(), ".cup")) converter->AddWaypointFile(it->path().string());
     }
-
     watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::LoadWaypoints));
 }
 
@@ -247,28 +257,35 @@ void MainWindow::on_unloadWaypointsButton_clicked() {
 }
 
 void MainWindow::on_loadRasterMapFileButton_clicked() {
-    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Terrain raster map files"), QDir::currentPath(), tr("DEM files(*.dem *.DEM);;"));
+    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Terrain raster map files"), suggestedInputDir, tr("DEM files(*.dem *.DEM);;"));
     if(filenames.empty()) return;
 
+    // Start to work...
     startBusy();
+
+    // Remember the directory
+    suggestedInputDir = QString::fromStdString(boost::filesystem::path(filenames.front().toStdString()).parent_path().string());
 
     // Load terrain maps
     for(const auto& mapFile : filenames) converter->AddTerrainRasterMapFile(mapFile.toStdString());
-
     watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::LoadTerrainRasterMaps));
 }
 
 void MainWindow::on_loadRasterMapFolderButton_clicked() {
-    boost::filesystem::path root(QFileDialog::getExistingDirectory(this, tr("Open raster terrain maps directory"), QDir::currentPath(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks).toStdString());
-    if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
+    const QString selectedDir = QFileDialog::getExistingDirectory(this, tr("Open raster terrain maps directory"), suggestedInputDir, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    if (selectedDir.isEmpty()) return;
 
+    // Start to work...
     startBusy();
 
-    for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
+    // Remember the directory
+    suggestedInputDir = selectedDir;
+
+    // Load all the .dem files in the folder
+    for (boost::filesystem::directory_iterator it(boost::filesystem::path(selectedDir.toStdString())), endit; it != endit; ++it) {
         if (!boost::filesystem::is_regular_file(*it)) continue;
         if(boost::iequals(it->path().extension().string(), ".dem")) converter->AddTerrainRasterMapFile(it->path().string());
     }
-
     watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::LoadTerrainRasterMaps));
 }
 
@@ -277,32 +294,16 @@ void MainWindow::on_unloadTerrainMapsButton_clicked() {
     ui->numTerrainMapsLoadedSpinBox->setValue(0);
 }
 
-void MainWindow::on_convertButton_clicked() {
-    assert(!converter->GetOutputFile().empty());
-    assert(converter->GetNumOfAirspaces()>0 || (ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ && converter->GetNumOfWaypoints()>0));
-
-    if(converter->GetOutputFile().empty() || (converter->GetNumOfAirspaces()==0 && (ui->outputFormatComboBox->currentIndex() != AirspaceConverter::KMZ || converter->GetNumOfWaypoints()==0))) return;
-
-    startBusy();
-
-    // Set default terrain altitude
-    converter->SetDefaultTearrainAlt(ui->defaultAltSpinBox->value());
-
-    watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::Convert));
-}
-
-void MainWindow::on_openOutputFileButton_clicked() {    
-    QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(converter->GetOutputFile())));
-}
-
-void MainWindow::on_openOutputFolderButton_clicked() {
-    QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(boost::filesystem::path(converter->GetOutputFile()).parent_path().string())));
-}
-
 void MainWindow::on_chooseOutputFileButton_clicked() {
     // Prepare dialog to ask for output file, will be without extension if not manually typed by the user
     QString selectedFilter; // this will conatin the selected type by the user in the dialog
-    converter->SetOutputFile(QFileDialog::getSaveFileName(this, tr("Output file"), QDir::currentPath(), tr("Google Earth (*.kmz);;OpenAir (*.txt);;Polish (*.mp);;Garmin map (*.img)"), &selectedFilter).toStdString());
+    QString desiredOutputFile = QFileDialog::getSaveFileName(this, tr("Output file"), QString::fromStdString(boost::filesystem::path(converter->GetOutputFile()).parent_path().string()), tr("Google Earth (*.kmz);;OpenAir (*.txt);;Polish (*.mp);;Garmin map (*.img)"), &selectedFilter);
+
+    // No file selected: do nothing
+    if(desiredOutputFile.isEmpty()) return;
+
+    // Set the output file
+    converter->SetOutputFile(desiredOutputFile.toStdString());
 
     // Determine which format is now selected
     int desiredFormatIndex = converter->GetOutputType();
@@ -313,4 +314,31 @@ void MainWindow::on_chooseOutputFileButton_clicked() {
 
     // Set properly the output file name in the texbox
     ui->outputFileTextEdit->setPlainText(QString::fromStdString(converter->GetOutputFile()));
+}
+
+void MainWindow::on_convertButton_clicked() {
+    assert(!converter->GetOutputFile().empty());
+    assert(converter->GetNumOfAirspaces()>0 || (ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ && converter->GetNumOfWaypoints()>0));
+    if(converter->GetOutputFile().empty() || (converter->GetNumOfAirspaces()==0 && (ui->outputFormatComboBox->currentIndex() != AirspaceConverter::KMZ || converter->GetNumOfWaypoints()==0))) return;
+
+
+    // TODO: warn user of existing files to be overwritten!!!
+
+
+    // Start work...
+    startBusy();
+
+    // Set default terrain altitude
+    converter->SetDefaultTearrainAlt(ui->defaultAltSpinBox->value());
+
+    // Let the libAirspaceConverter to do the work in a separate thread...
+    watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::Convert));
+}
+
+void MainWindow::on_openOutputFileButton_clicked() {    
+    QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(converter->GetOutputFile())));
+}
+
+void MainWindow::on_openOutputFolderButton_clicked() {
+    QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(boost::filesystem::path(converter->GetOutputFile()).parent_path().string())));
 }
