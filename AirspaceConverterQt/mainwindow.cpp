@@ -124,7 +124,7 @@ void MainWindow::endBusy() {
         ui->numAirspacesLoadedSpinBox->setValue(converter->GetNumOfAirspaces());
 
         // Eventually update the output file
-        if(ui->outputFileTextEdit->toPlainText().size() == 0) updateOutputFileExtension(ui->outputFormatComboBox->currentIndex());
+        if(ui->outputFileTextEdit->toPlainText().toStdString() != converter->GetOutputFile()) ui->outputFileTextEdit->setPlainText(QString::fromStdString(converter->GetOutputFile()));
 
         // Set the number of waypoints loaded in its spinBox
         ui->numWaypointsLoadedSpinBox->setValue(converter->GetNumOfWaypoints());
@@ -164,12 +164,7 @@ void MainWindow::on_aboutButton_clicked() {
 }
 
 void MainWindow::on_outputFormatComboBox_currentIndexChanged(int index) {
-    updateOutputFileExtension(index);
-    endBusy();
-}
-
-void MainWindow::updateOutputFileExtension(const int newExtIdx) {
-    if (!converter->SetOutputType((AirspaceConverter::OutputType)newExtIdx)) return;
+    if (!converter->SetOutputType((AirspaceConverter::OutputType)index)) return;
     ui->outputFileTextEdit->setPlainText(QString::fromStdString(converter->GetOutputFile()));
 }
 
@@ -297,20 +292,36 @@ void MainWindow::on_unloadTerrainMapsButton_clicked() {
 void MainWindow::on_chooseOutputFileButton_clicked() {
     // Prepare dialog to ask for output file, will be without extension if not manually typed by the user
     QString selectedFilter; // this will conatin the selected type by the user in the dialog
-    QString desiredOutputFile = QFileDialog::getSaveFileName(this, tr("Output file"), QString::fromStdString(boost::filesystem::path(converter->GetOutputFile()).parent_path().string()), tr("Google Earth (*.kmz);;OpenAir (*.txt);;Polish (*.mp);;Garmin map (*.img)"), &selectedFilter);
+    std::string desiredOutputFile = QFileDialog::getSaveFileName(this, tr("Output file"), QString::fromStdString(converter->GetOutputFile()), tr("Google Earth(*.kmz);;OpenAir(*.txt);;Polish(*.mp);;Garmin img(*.img)"), &selectedFilter).toStdString();
 
-    // No file selected: do nothing
-    if(desiredOutputFile.isEmpty()) return;
+    // If no file selected or entered: do nothing
+    if(desiredOutputFile.empty()) return;
+
+    // Get the type from the extension of selected or entered file
+    AirspaceConverter::OutputType desiredFormat = AirspaceConverter::DetermineType(desiredOutputFile);
+
+    // Verify if it is an acceptable extension (in Linux extension it is not added by the dialog if the user doesn't type it, or type it wrong)
+    if(desiredFormat == AirspaceConverter::OutputType::Unknown) {
+
+        // In this case, may be, the user typed just a name but selecting the extension in the save as combo box file type
+        desiredFormat = AirspaceConverter::KMZ; // KMZ default
+        if (selectedFilter != "Google Earth(*.kmz)") {
+            if (selectedFilter == "OpenAir(*.txt)") desiredFormat = AirspaceConverter::OpenAir_Format;
+            else if (selectedFilter == "Polish(*.mp)") desiredFormat = AirspaceConverter::Polish;
+            else if (selectedFilter == "Garmin img(*.img)") desiredFormat = AirspaceConverter::Garmin;
+            else assert(false);
+        }
+
+        // ... and use that extension
+        AirspaceConverter::PutTypeExtension(desiredFormat, desiredOutputFile);
+    }
 
     // Set the output file
-    converter->SetOutputFile(desiredOutputFile.toStdString());
+    converter->SetOutputFile(desiredOutputFile);
+    assert(converter->GetOutputType() == desiredFormat);
 
-    // Determine which format is now selected
-    int desiredFormatIndex = converter->GetOutputType();
-    assert(desiredFormatIndex != AirspaceConverter::Unknown);
-
-    // Reselect the desired format also in the combo box, he will take care of putting the right extension
-    ui->outputFormatComboBox->setCurrentIndex(desiredFormatIndex);
+    // Reselect the desired format also in the combo box, will trigger a signat that will update also the text box
+    ui->outputFormatComboBox->setCurrentIndex((int)desiredFormat);
 
     // Set properly the output file name in the texbox
     ui->outputFileTextEdit->setPlainText(QString::fromStdString(converter->GetOutputFile()));
