@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>397</width>
+    <width>420</width>
     <height>169</height>
    </rect>
   </property>
@@ -18,13 +18,13 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>397</width>
+    <width>420</width>
     <height>169</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>397</width>
+    <width>420</width>
     <height>169</height>
    </size>
   </property>
@@ -40,7 +40,7 @@
   <widget class="QPushButton" name="OKpushButton">
    <property name="geometry">
     <rect>
-     <x>290</x>
+     <x>310</x>
      <y>130</y>
      <width>95</width>
      <height>31</height>
@@ -152,7 +152,7 @@
     <rect>
      <x>80</x>
      <y>120</y>
-     <width>201</width>
+     <width>221</width>
      <height>16</height>
     </rect>
    </property>
