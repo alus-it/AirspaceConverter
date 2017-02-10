@@ -146,7 +146,7 @@ void MainWindow::endBusy() {
     ui->loadRasterMapFolderButton->setEnabled(true);
     ui->unloadTerrainMapsButton->setEnabled(converter->GetNumOfTerrainMaps()>0);
     ui->defaultAltSpinBox->setEnabled(true);
-    ui->QNHspinBox->setEnabled(true);
+    ui->QNHspinBox->setEnabled(converter->GetNumOfAirspaces()==0);
     ui->chooseOutputFileButton->setEnabled(true);
     ui->convertButton->setEnabled(!converter->GetOutputFile().empty() && (converter->GetNumOfAirspaces()>0 || (ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ && converter->GetNumOfWaypoints()>0)));
     ui->openOutputFileButton->setEnabled(converter->IsConversionDone());
@@ -211,6 +211,7 @@ void MainWindow::on_loadAirspaceFolderButton_clicked() {
 void MainWindow::on_unloadAirspacesButton_clicked() {
     converter->UnloadAirspaces();
     ui->numAirspacesLoadedSpinBox->setValue(0);
+    logMessage("Unloaded input airspaces.");
     endBusy();
 }
 
@@ -250,6 +251,7 @@ void MainWindow::on_loadWaypointsFolderButton_clicked() {
 void MainWindow::on_unloadWaypointsButton_clicked() {
     converter->UnloadWaypoints();
     ui->numWaypointsLoadedSpinBox->setValue(0);
+    logMessage("Unloaded input waypoints.");
 }
 
 void MainWindow::on_loadRasterMapFileButton_clicked() {
@@ -288,6 +290,7 @@ void MainWindow::on_loadRasterMapFolderButton_clicked() {
 void MainWindow::on_unloadTerrainMapsButton_clicked() {
     converter->UnloadRasterMaps();
     ui->numTerrainMapsLoadedSpinBox->setValue(0);
+    logMessage("Unloaded input terrain raster maps.");
 }
 
 void MainWindow::on_chooseOutputFileButton_clicked() {
@@ -345,7 +348,7 @@ void MainWindow::on_convertButton_clicked() {
     // Ask confirmation to overwrite any other file that will be created during the conversion process
     switch(converter->GetOutputType()) {
     case AirspaceConverter::KMZ:
-        if(boost::filesystem::exists(path.replace_extension(".kml")) && QMessageBox::warning(this, "Overwrite?", tr("The already existing .KML file will be deleted, continue?"), QMessageBox::Yes | QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) return;
+        if(boost::filesystem::exists(boost::filesystem::path(path.parent_path() / boost::filesystem::path("doc.kml"))) && QMessageBox::warning(this, "Overwrite?", tr("The already existing doc.kml file will be deleted, continue?"), QMessageBox::Yes | QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) return;
         break;
     case AirspaceConverter::Garmin:
         if(boost::filesystem::exists(path.replace_extension(".mp")) && QMessageBox::warning(this, "Overwrite?", tr("The already existing .MP file will be deleted, continue?"), QMessageBox::Yes | QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) return;

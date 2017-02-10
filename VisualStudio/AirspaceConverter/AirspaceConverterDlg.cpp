@@ -488,7 +488,7 @@ void CAirspaceConverterDlg::OnBnClickedClearMapsBt() {
 	converter->UnloadRasterMaps();
 	numRasterMapLoaded = 0;
 	assert(numRasterMapLoaded == converter->GetNumOfTerrainMaps());
-	LogMessage("Unloaded raster maps.");
+	LogMessage("Unloaded terrain raster maps.");
 	EndBusy();
 }
 
@@ -550,12 +550,9 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 	switch (type) {
 	case AirspaceConverter::KMZ:
 		{
-			boost::filesystem::path kmlPath(outputPath);
-			kmlPath.replace_extension(".kml");
+			boost::filesystem::path kmlPath(outputPath.parent_path() / boost::filesystem::path("doc.kml"));
 			if (boost::filesystem::exists(kmlPath)) {
-				CString msg(kmlPath.c_str());
-				msg += " already exists.\nIn order to make the KMZ it needs to be overwritten. Continue?";
-				if (MessageBox(msg, _T("Overwrite?"), MB_YESNO | MB_ICONINFORMATION) == IDYES) std::remove(kmlPath.string().c_str());
+				if (MessageBox(_T("In the output folder the file doc.kml already exists.\nIn order to make the KMZ it will be overwritten and deleted. Continue?"), _T("Overwrite?"), MB_YESNO | MB_ICONINFORMATION) == IDYES) std::remove(kmlPath.string().c_str());
 				else return;
 			}
 		}
@@ -574,7 +571,7 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 			polishPath.replace_extension(".mp");
 			if (boost::filesystem::exists(polishPath)) {
 				CString msg(polishPath.c_str());
-				msg += " already exists.\nIn order to make the IMG it needs to be overwritten. Continue?";
+				msg += " already exists.\nIn order to make the IMG it will be overwritten and deleted. Continue?";
 					if (MessageBox(msg, _T("Overwrite?"), MB_YESNO | MB_ICONINFORMATION) == IDYES) std::remove(polishPath.string().c_str());
 				else return;
 			}

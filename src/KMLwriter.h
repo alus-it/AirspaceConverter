@@ -35,7 +35,6 @@ public:
 	inline static double GetDefaultTerrainAltitude() { return defaultTerrainAltitudeMt; }
 	inline static void SetIconsPath(const std::string& path) { iconsPath = path; } // To set the directory containing the waypoints icons...
 	inline bool WereAllAGLaltitudesCovered() const { return allAGLaltitudesCovered; }
-	bool CompressToKMZ(const std::string& inputKMLfile, const bool addIcons = false);
 
 private:
 	static bool GetTerrainAltitudeMt(const double& lat, const double& lon, double&alt);

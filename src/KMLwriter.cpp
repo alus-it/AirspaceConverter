@@ -333,8 +333,8 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 		return false;
 	}
 
-	// We need anyway to make a KML file also to compress it as KMZ
-	const std::string fileKML(boost::filesystem::path(filename).replace_extension(".kml").string());
+	// Prepare pathname to the KML doc.kml; KMZ files should have the KML file name named as "doc.kml"
+	const std::string fileKML(boost::filesystem::path(boost::filesystem::path(filename).parent_path() / boost::filesystem::path("doc.kml")).string());
 
 	// Make sure the file is not already open
 	if (file.is_open()) file.close();
@@ -544,43 +544,24 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 	file << "</Document>\n"
 		<< "</kml>\n";
 	file.close();
-	return CompressToKMZ(fileKML, !waypoints.empty());
-}
 
-bool KMLwriter::CompressToKMZ(const std::string& inputKMLfile, const bool addIcons /* = false */) {
-	// The input file must be a KML
-	if (boost::filesystem::path(inputKMLfile).extension().string() != ".kml") {
-		AirspaceConverter::LogMessage("ERROR: Expected a KML file to be compressed but found: " + inputKMLfile, true);
-		return false;
-	}
-
-	// Of course the input KML must exist...
-	if (!boost::filesystem::exists(inputKMLfile)) {
-		AirspaceConverter::LogMessage("ERROR: Unable to find the KML file: " + inputKMLfile, true);
-		return false;
-	}
-
-	// Find the name of the output KMZ file
-	std::string kmzFile = boost::filesystem::path(inputKMLfile).replace_extension(".kmz").string();
-
-	// Put the name of KML file (without path) in the ZIP
-	std::string fileKML = boost::filesystem::path(inputKMLfile).filename().string();
-
-	AirspaceConverter::LogMessage("Compressing into KMZ: " + kmzFile, false);
+	// Compress (ZIP) and do make the KMZ file
+	AirspaceConverter::LogMessage("Compressing into KMZ: doc.kmz", false);
 
 	// To avoid problems it is better to delete the KMZ file if already existing, user has already been warned
-	if (boost::filesystem::exists(kmzFile)) std::remove(kmzFile.c_str()); // Delete KML file
+	if (boost::filesystem::exists(filename)) std::remove(filename.c_str()); // Delete KMZ file
 
 	// Open the ZIP file
 	int error = 0;
-	zip *archive = zip_open(kmzFile.c_str(), ZIP_CREATE, &error);
+	zip *archive = zip_open(filename.c_str(), ZIP_CREATE, &error);
 	if (error) {
-		AirspaceConverter::LogMessage("ERROR: Could not open or create archive: " + kmzFile, true);
+		AirspaceConverter::LogMessage("ERROR: Could not open or create archive: " + filename, true);
 		return false;
 	}
 
 	// Create source buffer from KML file
-	zip_source* source = zip_source_file(archive, inputKMLfile.c_str(), 0, 0);
+	assert(boost::filesystem::path(fileKML).filename().string() == "doc.kml");
+	zip_source* source = zip_source_file(archive, fileKML.c_str(), 0, 0);
 	if (source == nullptr) { // "failed to create source buffer. " << zip_strerror(archive)
 		// Discard zip file. In case ZIP_FL_OVERWRITE is not defined we are using an older libzib version such as 0.10.1, so we have to use the older functions
 #ifdef ZIP_FL_OVERWRITE
@@ -588,15 +569,15 @@ bool KMLwriter::CompressToKMZ(const std::string& inputKMLfile, const bool addIco
 #else
 		zip_close(archive);
 #endif
-		AirspaceConverter::LogMessage("ERROR: Failed to create zip source buffer to read: " + inputKMLfile, true);
+		AirspaceConverter::LogMessage("ERROR: Failed to create zip source buffer to read: " + fileKML, true);
 		return false;
 	}
 
 	// Add the buffer as KLM file in the ZIP
 #ifdef ZIP_FL_OVERWRITE
-	int index = (int)zip_file_add(archive, fileKML.c_str(), source, ZIP_FL_OVERWRITE);
+	int index = (int)zip_file_add(archive, "doc.kml", source, ZIP_FL_OVERWRITE);
 #else
-	int index = (int)zip_add(archive, fileKML.c_str(), source);
+	int index = (int)zip_add(archive, "doc,kml", source);
 #endif
 	if (index < 0) { // "failed to add file to archive. " << zip_strerror(archive)
 #ifdef ZIP_FL_OVERWRITE
@@ -605,12 +586,12 @@ bool KMLwriter::CompressToKMZ(const std::string& inputKMLfile, const bool addIco
 		zip_close(archive);
 #endif
 		zip_source_free(source); // The sorce buffer have to be freed in this case
-		AirspaceConverter::LogMessage("ERROR: While compressing, failed to add: " + fileKML, true);
+		AirspaceConverter::LogMessage("ERROR: While compressing, failed to add: doc.kml", true);
 		return false;
 	}
 
 	// If it is necessary to add also the icons
-	if (addIcons) {
+	if (!waypoints.empty()) {
 		std::string path(iconsPath);
 
 		// Check if the configured icons path exits, user may be wrong...
@@ -663,7 +644,7 @@ bool KMLwriter::CompressToKMZ(const std::string& inputKMLfile, const bool addIco
 
 	// Close the zip
 	if (zip_close(archive) == 0) {
-		std::remove(inputKMLfile.c_str()); // Delete KML file
+		std::remove(fileKML.c_str()); // Delete KML file
 		return true;
 	}
 	AirspaceConverter::LogMessage("ERROR: While finalizing the archive.", true);

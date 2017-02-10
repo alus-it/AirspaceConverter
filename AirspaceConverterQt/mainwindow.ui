@@ -281,7 +281,7 @@
    </widget>
    <widget class="QSpinBox" name="numAirspacesLoadedSpinBox">
     <property name="enabled">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
     <property name="geometry">
      <rect>
@@ -306,7 +306,7 @@
    </widget>
    <widget class="QSpinBox" name="numTerrainMapsLoadedSpinBox">
     <property name="enabled">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
     <property name="geometry">
      <rect>
@@ -331,7 +331,7 @@
    </widget>
    <widget class="QSpinBox" name="numWaypointsLoadedSpinBox">
     <property name="enabled">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
     <property name="geometry">
      <rect>
@@ -626,6 +626,9 @@
     </property>
    </widget>
    <widget class="QPlainTextEdit" name="outputFileTextEdit">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>180</x>
