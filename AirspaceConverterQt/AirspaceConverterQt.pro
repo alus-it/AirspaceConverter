@@ -20,6 +20,9 @@ TEMPLATE = app
 
 CONFIG += c++11
 
+RESOURCES += \
+    resources.qrc
+
 SOURCES += main.cpp\
     mainwindow.cpp \
     aboutdialog.cpp
@@ -87,8 +90,3 @@ win32:contains(QMAKE_HOST.arch, x86_64) {
     INCLUDEPATH += $$PWD/../VisualStudio/packages/libzip.1.1.2.7/build/native/include
     DEPENDPATH += $$PWD/../VisualStudio/packages/libzip.1.1.2.7/build/native/include
 }
-
-OTHER_FILES +=
-
-RESOURCES += \
-    resources.qrc
