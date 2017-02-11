@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>airspaceconverter128.xpm</file>
+    </qresource>
+</RCC>

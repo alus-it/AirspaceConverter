@@ -29,7 +29,11 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>AirspaceConverter</string>
+   <string>Airspace Converter</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/icons/airspaceconverter128.xpm</normaloff>:/icons/airspaceconverter128.xpm</iconset>
   </property>
   <property name="locale">
    <locale language="English" country="UnitedStates"/>
@@ -666,7 +670,9 @@
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>closeButton</sender>
