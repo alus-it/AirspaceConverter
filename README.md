@@ -1,7 +1,7 @@
 AirspaceConverter
 =================
 Welcome to AirspaceConverter repository!  
-This is an open source, multi-platform  tool to convert OpenAir or OpenAIP airspace files and SeeYou .CUP waypoint files to KMZ (for Google Earth). The airspace can be converted also back to OpenAir or to PFM "Polish" format, as file .mp, and then using cGPSmapper also to .img files for Garmin devices.  
+This is an open source, multi-platform tool to convert OpenAir or OpenAIP airspace files and SeeYou .CUP waypoint files to KMZ (for Google Earth). The airspace can be converted also back to OpenAir or to PFM "Polish" format, as file .mp, and then using cGPSmapper also to .img files for Garmin devices.  
 While converting to OpenAir this software estimates if the points entered are part of arcs or circumferences in order to make use of arc and circumference definitions of the OpeanAir format and so avoiding to output all points one by one.  
 AirspaceConverter is written in C++11 can be ran both on Linux and on Windows.
 The Windows version has MFC user interface in order to be immediately easy to use, while the Linux version works from command line to be usable also from shell scripts.  
@@ -33,23 +33,32 @@ The part of this program reading and using the terrain maps has been derived and
 To know more about LK8000 project: http://www.lk8000.it  
 The repository of LK8000 is available here: https://github.com/LK8000/LK8000
 
-Linux version
--------------
-The command line version works taking several arguments, for example:  
-`AirspaceConverter -q 1013 -a 35 -i inputFileOpenAir.txt -i inputFileOpenAIP.aip -m terrainMap.dem -o outputFile.kmz`  
+The common shared library
+-------------------------
+This software is designed to keep completely separated functionalities from the user interfaces.  
+All the reading, writing and conversion features are in a common shared library: libAirspaceConverter can be compiled under different platfoms and so used from different user interfaces.
+
+Linux command line version
+--------------------------
+The Linux command line version works taking several arguments, for example:  
+`AirspaceConverter -q 1013 -a 35 -i inputFileOpenAir.txt -i inputFileOpenAIP.aip -w waypoints.cup -m terrainMap.dem -o outputFile.kmz`  
 
 Possible options:  
   -q: optional, specify the QNH in hPa used to calculate height of flight levels  
   -a: optional, specify a default terrain altitude in meters to calculate AGL heights of points not covered by loaded terrain map(s)  
-  -i: mandatory, multiple, input file(s) can be OpenAir (.txt), OpenAIP (.aip) or SeeYou waypoints (.cup)  
-  -m: optional, multiple, terrain map file(s) (.dem) used to lookup terrain height  
+  -i: multiple, input file(s) can be OpenAir (.txt), OpenAIP (.aip)  
+  -w: multiple, input waypoint file(s) in the SeeYou CUP format (.cup)  
+  -m: optional, multiple, terrain map file(s) (.dem) used to lookup terrain heights  
   -o: optional, output file .kmz, .mp (Polish) or .txt (OpenAir) if not specified will be used the name of first input file as KMZ  
   -v: print version number  
-  -h: print this guide
+  -h: print this guide  
 
-Windows version
----------------
-The Windows executable needs just a couple of small DLLs: zip.dll zlib.dll to be kept in the same folder.  
+At least one input airspace or waypoint file must be present.  
+Warning: any already existing output file will be overwritten.
+
+Windows MFC user version
+------------------------
+The native Windows MFC executable needs just a couple of small DLLs: zip.dll zlib.dll to be kept in the same folder.  
 If you get the error about VCRUNTIME140.dll missing: it can be easily and quickly fixed installing the: MS VC++ redistributable, this will allow this software to run also on older Windows versions such us WindowsXP.  
 
 The Windows version has graphical user interface, this should be the default way to use it:
@@ -64,6 +73,10 @@ The Windows version has graphical user interface, this should be the default way
 8. Press the button convert to start the conversion process.
 9. Verify if the output is correct and report any problem found.
 
+Qt user interface
+-----------------
+In order to be porable, the graphical interface has been rewritten also in Qt and actually it can be compiled both under Linux and Windows.
+
 Disclaimer
 ----------
 WARNING: this program has been still not fully tested. The generated output files may contains errors.
@@ -75,6 +88,7 @@ Downloads
 ---------
 The already compiled executables for Linux and Windows can be downloaded from the project page:  
 http://www.alus.it/AirspaceConverter
+For the Linux distibutions based on Debian there is a also repository avalable. 
 
 Build dependencies
 ------------------
@@ -94,8 +108,12 @@ From the root of this project: `sudo make install`
 To uninstall: `sudo make uninstall` 
 
 Compiling AirspaceConverter with MFC interface on Windows
---------------------------------------
-In the "VisualStudio" folder there is the VisualStudio solution and project files
+---------------------------------------------------------
+In the "VisualStudio" folder there is the VisualStudio solution and project files.
+
+Compiling the Qt executable
+---------------------------
+In the "AirspaceConverterQt" folder there is the Qt project, it needs the shared library libAirspaceConverter already compiled for the same platform.
 
 Placemarks icons credits
 ------------------------
