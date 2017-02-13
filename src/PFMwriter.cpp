@@ -18,32 +18,42 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <cassert>
 
-/* TODO: customized types
-const int PFMwriter::types[] = {
-	0x60, //CLASSA
-	0x61, //CLASSB
-	0x69, //CLASSC
-	0x62, //CLASSD
-	0x66, //CLASSE
-	0x63, //CLASSF
-	0x69, //CLASSG
-	0x63, //DANGER
-	0x66, //PROHIBITED
-	0x61, //RESTRICTED
-	0x61, //CTR
-	0x64, //TMA
-	0x60, //TMZ
-	0x60, //RMZ
-	0x01, //FIR
-	0x01, //UIR
-	0x01, //OTH
-	0x69, //GLIDING
-	0x62, //NOGLIDER
-	0x69, //WAVE
-	0x01,  //UNKNOWN
-	0x01  //UNDEFINED
+
+const int PFMwriter::types[][2] = {
+	{ 0x02, 0x60 }, //CLASSA
+	{ 0x02, 0x60 }, //CLASSB
+	{ 0x04, 0x60 }, //CLASSC
+	{ 0x01, 0x60 }, //CLASSD
+	{ 0x01, 0x60 }, //CLASSE
+	{ 0x01, 0x60 }, //CLASSF
+	{ 0x06, 0x60 }, //CLASSG
+	{ 0x02, 0x67 }, //DANGER
+	{ 0x02, 0x66 }, //PROHIBITED
+	{ 0x02, 0x65 }, //RESTRICTED
+	{ 0x07, 0x61 }, //CTR
+	{ 0x01, 0x63 }, //TMA
+	{ 0x05, 0x60 }, //TMZ
+	{ 0x05, 0x60 }, //RMZ
+	{ 0x06, 0x60 }, //FIR
+	{ 0x06, 0x60 }, //UIR
+	{ 0x06, 0x60 }, //OTH
+	{ 0x03, 0x60 }, //GLIDING
+	{ 0x02, 0x60 }, //NOGLIDER
+	{ 0x03, 0x60 }, //WAVE
+	{ 0x06, 0x60 }, //UNKNOWN
+	{ 0x06, 0x60 } //UNDEFINED
 };
+
+/*
+Type=0x0201 Blue small
+Type=0x0202 Red
+Type=0x0203 Orange
+Type=0x0204 Blue big
+Type=0x0205 Black big
+Type=0x0206 Blacksmall
 */
+
+
 
 const std::string PFMwriter::MakeLabel(const Airspace& airspace) {
 	std::stringstream ss;
@@ -117,35 +127,52 @@ bool PFMwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 		assert(a.GetNumberOfPoints() > 3);
 		assert(a.GetFirstPoint()==a.GetLastPoint());
 
-		// Determine if it's a POLYGON or a POLYLINE
-		if (a.GetType() == Airspace::PROHIBITED || a.GetType() == Airspace::CTR || a.GetType() == Airspace::DANGER) {
-			file << "[POLYGON]\n"
-				//<< "Type="<< types[a.GetType()] <<"\n"; //TODO...
-				<< "Type=0x18" <<"\n";
-		} else {
-			file << "[POLYLINE]\n"
-				<< "Type=0x07\n"; //TODO....
-		}
 
-		// Add the label
-		file << "Label="<<MakeLabel(a)<<"\n";
 
-		file << "Levels=3\n";
+		file << "[POLYLINE]\n"
+				<< "Type="<< types[a.GetType()][0] <<"\n";
 
-		// Insert all the points
-		file << "Data0=";
-		double lat,lon;
-		for (unsigned int i=0; i<a.GetNumberOfPoints()-1; i++) {
-			a.GetPointAt(i).GetLatLon(lat,lon);
-			file << "(" << lat << "," << lon << "),";
-		}
-		a.GetLastPoint().GetLatLon(lat,lon);
-		file << "(" << lat << "," << lon << ")\n";
+						file << "Levels=3\n";
 
-		//file<< "EndLevel=4\n";
+						// Insert all the points
+						file << "Data0=";
+						double lat,lon;
+						for (unsigned int i=0; i<a.GetNumberOfPoints()-1; i++) {
+							a.GetPointAt(i).GetLatLon(lat,lon);
+							file << "(" << lat << "," << lon << "),";
+						}
+						a.GetLastPoint().GetLatLon(lat,lon);
+						file << "(" << lat << "," << lon << ")\n";
 
-		// Close the element
-		file << "[END]\n\n";
+						//file<< "EndLevel=4\n";
+
+						// Close the element
+						file << "[END]\n\n";
+
+
+				file << "[POLYGON]\n"
+					<< "Type="<< types[a.GetType()][1] <<"\n";
+
+				// Add the label
+				file << "Label="<<MakeLabel(a)<<"\n";
+
+				file << "Levels=3\n";
+
+				// Insert all the points
+				file << "Data0=";
+				//double lat,lon;
+				for (unsigned int i=0; i<a.GetNumberOfPoints()-1; i++) {
+					a.GetPointAt(i).GetLatLon(lat,lon);
+					file << "(" << lat << "," << lon << "),";
+				}
+				a.GetLastPoint().GetLatLon(lat,lon);
+				file << "(" << lat << "," << lon << ")\n";
+
+				//file<< "EndLevel=4\n";
+
+				// Close the element
+				file << "[END]\n\n";
+
 	}
 	file.close();
 	return true;

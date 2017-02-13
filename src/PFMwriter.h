@@ -27,6 +27,6 @@ private:
 	void WriteHeader(const std::string& filename);
 
 	const static std::string MakeLabel(const Airspace& airspace);
-	//static const int types[];
+	static const int types[][2];
 	std::ofstream file;
 };
