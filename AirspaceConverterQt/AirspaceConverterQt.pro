@@ -19,6 +19,7 @@ TARGET = airspaceconverter-gui
 TEMPLATE = app
 
 CONFIG += c++11
+#QMAKE_CXXFLAGS += -std=c++11 # Use this instead of the previous to compile with older Qt versions
 
 RESOURCES += \
     resources.qrc
