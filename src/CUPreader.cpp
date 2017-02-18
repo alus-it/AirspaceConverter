@@ -106,7 +106,7 @@ bool ParseLength(const std::string& text, int& len) {
 	return true;
 }
 
-bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint*>& output) {
+bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint>& output) {
 	std::ifstream input(fileName, std::ios::binary);
 	if (!input.is_open() || input.bad()) {
 		AirspaceConverter::LogMessage("ERROR: Unable to open CUP input file: " + fileName, true);
@@ -243,11 +243,8 @@ bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint
 			assert(token != tokens.end());
 			std::string description = *token;
 
-			// Build the airfield
-			Airfield* airfield = new Airfield(name, code, country, latitude, longitude, altitude, type, runwayDir, runwayLength, radioFreq, description);
-
-			// Add it to the multimap
-			output.insert(std::pair<int, Waypoint*>(type, (Waypoint*)airfield));
+			// Build the airfield and add it to the multimap
+			output.insert(std::pair<int, Waypoint>(type, (Waypoint)Airfield(Airfield(name, code, country, latitude, longitude, altitude, type, runwayDir, runwayLength, radioFreq, description))));
 		} else {
 			// Skip the airfield's fields
 			token++;
@@ -259,11 +256,8 @@ bool CUPreader::ReadFile(const std::string& fileName, std::multimap<int,Waypoint
 			assert(token != tokens.end());
 			std::string description = *token;
 
-			// Build the waypoint
-			Waypoint* waypoint = new Waypoint(name, code, country, latitude, longitude, altitude, type, description);
-
-			// Add it to the multimap
-			output.insert(std::pair<int, Waypoint*>(type, waypoint));
+			// Build the waypoint and add it to the multimap
+			output.insert(std::pair<int, Waypoint>(type, Waypoint(name, code, country, latitude, longitude, altitude, type, description)));
 		}
 
 		// Make sure that at this point we already found a valid waypoint so the header is not anymore expected

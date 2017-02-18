@@ -89,7 +89,7 @@ protected:
 private:
 	static const double PI;
 	static const double TOL;
-	virtual void WriteOpenAirGeometry(OpenAir* openAir) const = 0;
+	virtual void WriteOpenAirGeometry(OpenAir& openAir) const = 0;
 };
 
 class Point : public Geometry {
@@ -102,7 +102,7 @@ public:
 	bool Discretize(std::vector<LatLon>& output) const;
 
 private:
-	void WriteOpenAirGeometry(OpenAir* openAir) const;
+	void WriteOpenAirGeometry(OpenAir& openAir) const;
 };
 
 class Sector : public Geometry {
@@ -119,7 +119,7 @@ public:
 	inline const LatLon& GetEndPoint() const { return B; }
 
 private:
-	void WriteOpenAirGeometry(OpenAir* openAir) const;
+	void WriteOpenAirGeometry(OpenAir& openAir) const;
 
 	const bool clockwise;
 	const double latc, lonc; // [rad]
@@ -141,7 +141,7 @@ private:
 	const double radius; // [rad]
 	const double latc, lonc; // [rad]
 
-	void WriteOpenAirGeometry(OpenAir* openAir) const;
+	void WriteOpenAirGeometry(OpenAir& openAir) const;
 };
 
 /* Airway for now not supported

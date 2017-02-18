@@ -10,7 +10,7 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
-#include "KMLwriter.h"
+#include "KML.h"
 #include "Airspace.h"
 #include "RasterMap.h"
 #include "AirspaceConverter.h"
@@ -22,7 +22,11 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-const std::string KMLwriter::colors[][2] = {
+//#include <boost/property_tree/xml_parser.hpp>
+//#include <boost/property_tree/ptree.hpp>
+
+
+const std::string KML::colors[][2] = {
 	{ "509900ff", "7f9900ff" }, //CLASSA
 	{ "50cc0000", "7fcc0000" }, //CLASSB
 	{ "50cc3399", "7fcc3399" }, //CLASSC
@@ -47,7 +51,7 @@ const std::string KMLwriter::colors[][2] = {
 	{ "40000000", "7fd4d4d4" }  //UNDEFINED
 };
 
-const std::string KMLwriter::airfieldColors[][2] = {
+const std::string KML::airfieldColors[][2] = {
 	{ "", "" }, //UNDEFINED
 	{ "", "" }, //Normal
 	{ "4b14F064", "3214F064" }, //AirfieldGrass
@@ -56,7 +60,7 @@ const std::string KMLwriter::airfieldColors[][2] = {
 	{ "4b6E6E6E", "376E6E6E" }, //AirfieldSolid
 };
 
-const std::string KMLwriter::waypointIcons[] = {
+const std::string KML::waypointIcons[] = {
 	"undefined.png", //UNDEFINED
 	"normal.png", //Normal
 	"airfieldgrass.png", //AirfieldGrass
@@ -77,11 +81,11 @@ const std::string KMLwriter::waypointIcons[] = {
 	"intersection.png" // Intersection
 };
 
-std::vector<RasterMap*> KMLwriter::terrainMaps;
-double KMLwriter::defaultTerrainAltitudeMt = 20.842;
-std::string KMLwriter::iconsPath = "/usr/share/airspaceconverter/icons/"; // Default installed Linux location
+std::vector<RasterMap*> KML::terrainMaps;
+double KML::defaultTerrainAltitudeMt = 20.842;
+std::string KML::iconsPath = "/usr/share/airspaceconverter/icons/"; // Default installed Linux location
 
-bool KMLwriter::AddTerrainMap(const std::string& filename) {
+bool KML::AddTerrainMap(const std::string& filename) {
 	RasterMap* pTerrainMap = new RasterMap();
 	if (pTerrainMap == nullptr) return false;
 	if (!pTerrainMap->Open(filename)) {
@@ -92,12 +96,12 @@ bool KMLwriter::AddTerrainMap(const std::string& filename) {
 	return true;
 }
 
-void KMLwriter::ClearTerrainMaps() {
+void KML::ClearTerrainMaps() {
 	for (RasterMap* pTerreinMap : terrainMaps) if (pTerreinMap != nullptr) delete pTerreinMap;
 	terrainMaps.clear();
 }
 
-bool KMLwriter::GetTerrainAltitudeMt(const double& lat, const double& lon, double& alt) {
+bool KML::GetTerrainAltitudeMt(const double& lat, const double& lon, double& alt) {
 	if (terrainMaps.empty()) return false; // no maps no party...
 	const RasterMap* bestMap = terrainMaps.front();
 	if (terrainMaps.size() > 1)
@@ -135,17 +139,17 @@ bool KMLwriter::GetTerrainAltitudeMt(const double& lat, const double& lon, doubl
 	return false;
 }
 
-void KMLwriter::WriteHeader(const bool airspace, const bool waypoints) {
+void KML::WriteHeader(const bool airspace, const bool waypoints) {
 	assert(airspace || waypoints);
-	file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+	outputFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 		<< "<!--\n";
-	for(const std::string& line: AirspaceConverter::disclaimer) file << line << "\n";
-	file << "-->\n"
+	for(const std::string& line: AirspaceConverter::disclaimer) outputFile << line << "\n";
+	outputFile << "-->\n"
 		<< "<kml xmlns = \"http://www.opengis.net/kml/2.2\">\n"
 		<< "<Document>\n"
 		<< "<open>true</open>\n";
 		if (airspace) for (int t = Airspace::CLASSA; t <= Airspace::UNDEFINED; t++) {
-			file << "<Style id = \"Style" << Airspace::CategoryName((Airspace::Type)t) << "\">\n"
+			outputFile << "<Style id = \"Style" << Airspace::CategoryName((Airspace::Type)t) << "\">\n"
 				<< "<LineStyle>\n"
 				<< "<color>" << colors[t][0] << "</color>\n"
 				<< "<width>1.5</width>\n"
@@ -156,26 +160,26 @@ void KMLwriter::WriteHeader(const bool airspace, const bool waypoints) {
 				<< "</Style>\n";
 		}
 		if (waypoints) for (int t = Waypoint::normal; t < Waypoint::numOfWaypointTypes; t++) {
-			file << "<Style id = \"Style" << Waypoint::TypeName((Waypoint::WaypointType)t) << "\">\n"
+			outputFile << "<Style id = \"Style" << Waypoint::TypeName((Waypoint::WaypointType)t) << "\">\n"
 				<< "<IconStyle>\n"
 				<< "<Icon>\n"
 				<< "<href>icons/" << waypointIcons[t] <<"</href>\n"
 				<< "</Icon>\n"
 				<< "</IconStyle>\n";
 			if (Waypoint::IsTypeAirfield((Waypoint::WaypointType)t))
-				file << "<LineStyle>\n"
+				outputFile << "<LineStyle>\n"
 					<< "<color>" << airfieldColors[t][0] << "</color>\n"
 					<< "<width>1.5</width>\n"
 					<< "</LineStyle>\n"
 					<< "<PolyStyle>\n"
 					<< "<color>" << airfieldColors[t][1] << "</color>\n"
 					<< "</PolyStyle>\n";
-			file << "</Style>\n";
+			outputFile << "</Style>\n";
 		}
 }
 
-void KMLwriter::OpenPlacemark(const Airspace& airspace) {
-	file << "<Placemark>\n"
+void KML::OpenPlacemark(const Airspace& airspace) {
+	outputFile << "<Placemark>\n"
 		<< "<name>" << airspace.GetName() << "</name>\n"
 		<< "<styleUrl>#Style" << airspace.GetCategoryName() << "</styleUrl>\n"
 		<< "<visibility>" << (airspace.IsVisibleByDefault() ? 1 : 0) << "</visibility>\n"
@@ -189,66 +193,66 @@ void KMLwriter::OpenPlacemark(const Airspace& airspace) {
 		<< "</ExtendedData>\n";
 }
 
-void KMLwriter::OpenPlacemark(const Waypoint* waypoint) {
-	const bool isAirfield = waypoint->IsAirfield();
-	const int altMt = waypoint->GetAltitude();
+void KML::OpenPlacemark(const Waypoint& waypoint) {
+	const bool isAirfield = waypoint.IsAirfield();
+	const int altMt = waypoint.GetAltitude();
 	const int altFt = (int)round(altMt / Altitude::FEET2METER);
-	file << "<Placemark>\n"
-		<< "<name>" << waypoint->GetName() << "</name>\n"
-		<< "<styleUrl>#Style" << waypoint->GetTypeName() << "</styleUrl>\n";
-	file << "<visibility>" << (isAirfield ? 1 : 0) << "</visibility>\n"
+	outputFile << "<Placemark>\n"
+		<< "<name>" << waypoint.GetName() << "</name>\n"
+		<< "<styleUrl>#Style" << waypoint.GetTypeName() << "</styleUrl>\n";
+	outputFile << "<visibility>" << (isAirfield ? 1 : 0) << "</visibility>\n"
 		<< "<ExtendedData>\n"
 		<< "<SchemaData>\n"
-		<< "<SimpleData name=\"Name\">" << waypoint->GetName() << "</SimpleData>\n"
-		<< "<SimpleData name=\"Type\">" << waypoint->GetTypeName() << "</SimpleData>\n"
-		<< "<SimpleData name=\"Code\">" << waypoint->GetCode() << "</SimpleData>\n"
-		<< "<SimpleData name=\"Country\">" << waypoint->GetCountry() << "</SimpleData>\n"
+		<< "<SimpleData name=\"Name\">" << waypoint.GetName() << "</SimpleData>\n"
+		<< "<SimpleData name=\"Type\">" << waypoint.GetTypeName() << "</SimpleData>\n"
+		<< "<SimpleData name=\"Code\">" << waypoint.GetCode() << "</SimpleData>\n"
+		<< "<SimpleData name=\"Country\">" << waypoint.GetCountry() << "</SimpleData>\n"
 		<< "<SimpleData name=\"Altitude\">" << altMt << " m - " << altFt << " ft" << "</SimpleData>\n";
 	if(isAirfield) {
-		const Airfield* airfield = (const Airfield*)waypoint;
-		file << "<SimpleData name=\"Runway direction\">" << (airfield->GetRunwayDir() != -1 ? std::to_string(airfield->GetRunwayDir()) + " deg" : "UNKNOWN") << "</SimpleData>\n"
-		<< "<SimpleData name=\"Runway length\">" << (airfield->GetRunwayLength() != -1 ? std::to_string(airfield->GetRunwayLength()) + " m" : "UNKNOWN") << "</SimpleData>\n"
-		<< "<SimpleData name=\"Radio frequency\">" << (airfield->GetRadioFrequency().empty() ? "UNKNOWN" : airfield->GetRadioFrequency() + " MHz") << "</SimpleData>\n";
+		const Airfield& airfield = (const Airfield&)waypoint;
+		outputFile << "<SimpleData name=\"Runway direction\">" << (airfield.GetRunwayDir() != -1 ? std::to_string(airfield.GetRunwayDir()) + " deg" : "UNKNOWN") << "</SimpleData>\n"
+		<< "<SimpleData name=\"Runway length\">" << (airfield.GetRunwayLength() != -1 ? std::to_string(airfield.GetRunwayLength()) + " m" : "UNKNOWN") << "</SimpleData>\n"
+		<< "<SimpleData name=\"Radio frequency\">" << (airfield.GetRadioFrequency().empty() ? "UNKNOWN" : airfield.GetRadioFrequency() + " MHz") << "</SimpleData>\n";
 	}
-	file << "<SimpleData name=\"Description\">" << waypoint->GetDescription() << "</SimpleData>\n"
+	outputFile << "<SimpleData name=\"Description\">" << waypoint.GetDescription() << "</SimpleData>\n"
 		<< "</SchemaData>\n"
 		<< "</ExtendedData>\n";
 }
 
-void KMLwriter::OpenPolygon(const bool extrude, const bool absolute) {
-	file << "<Polygon>\n";
-	if (extrude) file << "<extrude>1</extrude>\n";
-	file << "<altitudeMode>" << (absolute ? "absolute" : "relativeToGround") << "</altitudeMode>\n"
+void KML::OpenPolygon(const bool extrude, const bool absolute) {
+	outputFile << "<Polygon>\n";
+	if (extrude) outputFile << "<extrude>1</extrude>\n";
+	outputFile << "<altitudeMode>" << (absolute ? "absolute" : "relativeToGround") << "</altitudeMode>\n"
 		<< "<outerBoundaryIs>\n"
 		<< "<LinearRing>\n"
 		<< "<coordinates>\n";
 }
 
-void KMLwriter::ClosePolygon() {
-	file << "</coordinates>\n"
+void KML::ClosePolygon() {
+	outputFile << "</coordinates>\n"
 		<< "</LinearRing>\n"
 		<< "</outerBoundaryIs>\n"
 		<< "</Polygon>\n";
 }
 
-void KMLwriter::WriteBaseOrTop(const Airspace& airspace, const Altitude& alt, const bool extrudeToGround /*= false*/) {
+void KML::WriteBaseOrTop(const Airspace& airspace, const Altitude& alt, const bool extrudeToGround /*= false*/) {
 	OpenPolygon(extrudeToGround, alt.IsAMSL());
 	double altitude = alt.GetAltMt();
-	for (const Geometry::LatLon& p : airspace.GetPoints()) file << p.Lon() << "," << p.Lat() << "," << altitude << "\n";
+	for (const Geometry::LatLon& p : airspace.GetPoints()) outputFile << p.Lon() << "," << p.Lat() << "," << altitude << "\n";
 	ClosePolygon();
 }
 
-void KMLwriter::WriteBaseOrTop(const Airspace& airspace, const std::vector<double>& altitudesAmsl) {
+void KML::WriteBaseOrTop(const Airspace& airspace, const std::vector<double>& altitudesAmsl) {
 	OpenPolygon(false, true);
 	assert(airspace.GetNumberOfPoints() == altitudesAmsl.size());
 	for (unsigned int i = 0; i < altitudesAmsl.size(); i++) {
 		const Geometry::LatLon p = airspace.GetPointAt(i);
-		file << p.Lon() << "," << p.Lat() << "," << altitudesAmsl.at(i) << "\n";
+		outputFile << p.Lon() << "," << p.Lat() << "," << altitudesAmsl.at(i) << "\n";
 	}
 	ClosePolygon();
 }
 
-void KMLwriter::WriteSideWalls(const Airspace& airspace) {
+void KML::WriteSideWalls(const Airspace& airspace) {
 	assert(airspace.GetTopAltitude().IsAMSL() == airspace.GetBaseAltitude().IsAMSL());
 
 	// Build closing wall between last and first point
@@ -259,7 +263,7 @@ void KMLwriter::WriteSideWalls(const Airspace& airspace) {
 	double lat1 = airspace.GetLastPoint().Lat();
 	double lon2 = airspace.GetFirstPoint().Lon();
 	double lat2 = airspace.GetFirstPoint().Lat();
-	file << lon1 << "," << lat1 << "," << top << "\n"
+	outputFile << lon1 << "," << lat1 << "," << top << "\n"
 		<< lon2 << "," << lat2 << "," << top << "\n"
 		<< lon2 << "," << lat2 << "," << base << "\n"
 		<< lon1 << "," << lat1 << "," << base << "\n"
@@ -271,7 +275,7 @@ void KMLwriter::WriteSideWalls(const Airspace& airspace) {
 		OpenPolygon(false, airspace.GetBaseAltitude().IsAMSL());
 		airspace.GetPointAt(i).GetLatLon(lat1, lon1);
 		airspace.GetPointAt(i + 1).GetLatLon(lat2, lon2);
-		file << lon1 << "," << lat1 << "," << top << "\n"
+		outputFile << lon1 << "," << lat1 << "," << top << "\n"
 			<< lon2 << "," << lat2 << "," << top << "\n"
 			<< lon2 << "," << lat2 << "," << base << "\n"
 			<< lon1 << "," << lat1 << "," << base << "\n"
@@ -280,7 +284,7 @@ void KMLwriter::WriteSideWalls(const Airspace& airspace) {
 	}
 }
 
-void KMLwriter::WriteSideWalls(const Airspace& airspace, const std::vector<double>& altitudesAmsl) {
+void KML::WriteSideWalls(const Airspace& airspace, const std::vector<double>& altitudesAmsl) {
 	assert(airspace.GetTopAltitude().IsAMSL() != airspace.GetBaseAltitude().IsAMSL());
 	OpenPolygon(false, true);
 	assert(airspace.GetNumberOfPoints() == altitudesAmsl.size());
@@ -295,7 +299,7 @@ void KMLwriter::WriteSideWalls(const Airspace& airspace, const std::vector<doubl
 	double lat1 = airspace.GetLastPoint().Lat();
 	double lon2 = airspace.GetFirstPoint().Lon();
 	double lat2 = airspace.GetFirstPoint().Lat();
-	file << lon1 << "," << lat1 << "," << top1 << "\n"
+	outputFile << lon1 << "," << lat1 << "," << top1 << "\n"
 		<< lon2 << "," << lat2 << "," << top2 << "\n"
 		<< lon2 << "," << lat2 << "," << base2 << "\n"
 		<< lon1 << "," << lat1 << "," << base1 << "\n"
@@ -311,7 +315,7 @@ void KMLwriter::WriteSideWalls(const Airspace& airspace, const std::vector<doubl
 		base2 = isBase ? altitudesAmsl.at(i+1) : airspace.GetBaseAltitude().GetAltMt();
 		airspace.GetPointAt(i).GetLatLon(lat1, lon1);
 		airspace.GetPointAt(i + 1).GetLatLon(lat2, lon2);
-		file << lon1 << "," << lat1 << "," << top1 << "\n"
+		outputFile << lon1 << "," << lat1 << "," << top1 << "\n"
 			<< lon2 << "," << lat2 << "," << top2 << "\n"
 			<< lon2 << "," << lat2 << "," << base2 << "\n"
 			<< lon1 << "," << lat1 << "," << base1 << "\n"
@@ -320,14 +324,14 @@ void KMLwriter::WriteSideWalls(const Airspace& airspace, const std::vector<doubl
 	}
 }
 
-bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, Airspace>& airspaces, const std::multimap<int, Waypoint*>& waypoints) {
+bool KML::Write(const std::string& filename) {
 	
 	// Verify presence of waypoints and airspaces
 	const bool airspacesPresent = !airspaces.empty();
 	const bool waypointsPresent = !waypoints.empty();
 	if((!airspacesPresent && !waypointsPresent) || filename.empty()) return false;
 	
-	// The file must be a KMZ 
+	// The file must be a KMZ
 	if (!boost::iequals(boost::filesystem::path(filename).extension().string(), ".kmz")) {
 		AirspaceConverter::LogMessage("ERROR: Expected KMZ extension but found: " + boost::filesystem::path(filename).extension().string(), true);
 		return false;
@@ -337,11 +341,11 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 	const std::string fileKML(boost::filesystem::path(boost::filesystem::path(filename).parent_path() / boost::filesystem::path("doc.kml")).string());
 
 	// Make sure the file is not already open
-	if (file.is_open()) file.close();
+	if (outputFile.is_open()) outputFile.close();
 	
 	// Open the output file
-	file.open(fileKML, std::ios::out | std::ios::trunc | std::ios::binary);
-	if (!file.is_open() || file.bad()) {
+	outputFile.open(fileKML, std::ios::out | std::ios::trunc | std::ios::binary);
+	if (!outputFile.is_open() || outputFile.bad()) {
 		AirspaceConverter::LogMessage("ERROR: Unable to open output file: " + filename, true);
 		return false;
 	}
@@ -358,7 +362,7 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 		
 		// If airspaces and waypoints are both present prepare a folder to group all the waypoints
 		if (airspacesPresent && waypointsPresent) 
-			file << "<Folder>\n"
+			outputFile << "<Folder>\n"
 				"<name>Waypoints</name>\n"
 				"<visibility>1</visibility>\n"
 				"<open>true</open>\n";
@@ -372,14 +376,15 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 			const bool isAirfield = Waypoint::IsTypeAirfield((Waypoint::WaypointType)t);
 
 			// Prepare the folder
-			file << "<Folder>\n"
+			outputFile << "<Folder>\n"
 				"<name>" << Waypoint::TypeName((Waypoint::WaypointType)t) << "</name>\n"
 				"<visibility>" << (isAirfield ? 1 : 0) <<"</visibility>\n"
 				"<open>false</open>\n";
 			
 			const auto filtered = waypoints.equal_range(t);
 			for (auto it = filtered.first; it != filtered.second; ++it) {
-				const Waypoint* w = it->second;
+				//const Waypoint* w = it->second;
+				const Waypoint& w = it->second;
 
 				// Open placemark
 				OpenPlacemark(w);
@@ -393,21 +398,21 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 				if (isAirfield) {
 					
 					// Get the airfield
-					const Airfield* a = (const Airfield*)w;
+					const Airfield& a = (const Airfield&)w;
 					
 					// Get its rinway length and direction
-					const int leng = a->GetRunwayLength();
-					dir = a->GetRunwayDir();
+					const int leng = a.GetRunwayLength();
+					dir = a.GetRunwayDir();
 
 					// If they are valid...
 					if (leng > 0 && dir >= 0) {
 
 						// Calculate the runway perimeter
 						std::vector<Geometry::LatLon> airfieldPerimeter;
-						if (Geometry::CalcAirfieldPolygon(a->GetLatitude(), a->GetLongitude(), leng, dir, airfieldPerimeter)) {
+						if (Geometry::CalcAirfieldPolygon(a.GetLatitude(), a.GetLongitude(), leng, dir, airfieldPerimeter)) {
 							
 							// Open a multigeometry with a polygon clamped onto the ground
-							file << "<MultiGeometry>\n"
+							outputFile << "<MultiGeometry>\n"
 								<< "<Polygon>\n"
 								//<< "<altitudeMode>clampToGround</altitudeMode>\n" //this should be the default
 								<< "<outerBoundaryIs>\n"
@@ -416,10 +421,10 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 
 							// Add the four points
 							for (const Geometry::LatLon& p : airfieldPerimeter)
-								file << p.Lon() << "," << p.Lat() << "," << a->GetAltitude() << "\n";
+								outputFile << p.Lon() << "," << p.Lat() << "," << a.GetAltitude() << "\n";
 							
 							// Close the perimeter re-adding the first point 
-							file << airfieldPerimeter.front().Lon() << "," << airfieldPerimeter.front().Lat() << "," << a->GetAltitude() << "\n";
+							outputFile << airfieldPerimeter.front().Lon() << "," << airfieldPerimeter.front().Lat() << "," << a.GetAltitude() << "\n";
 
 							// Close the polygon
 							ClosePolygon();
@@ -431,33 +436,33 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 				}
 
 				// Draw the waypoint marker
-				file << "<Point>\n"
+				outputFile << "<Point>\n"
 					<< "<extrude>0</extrude>\n"
 					<< "<altitudeMode>" << (t != Waypoint::normal ? "clampToGround" : "absolute") << "</altitudeMode>\n" // Except "normal" are all objects on the ground
-					<< "<coordinates>" << w->GetLongitude() << "," << w->GetLatitude() << "," << w->GetAltitude() << "</coordinates>\n"
+					<< "<coordinates>" << w.GetLongitude() << "," << w.GetLatitude() << "," << w.GetAltitude() << "</coordinates>\n"
 					<< "</Point>\n";
 
 				// If the perimeter was drawn the the multigeometry have to be closed
-				if (airfieldDrawn) file << "</MultiGeometry>\n";
+				if (airfieldDrawn) outputFile << "</MultiGeometry>\n";
 				
 				// If there is a valid direction set the orientation of the airport icon as the runway
 				if (dir > 0)
-					file << "<Style>\n"
+					outputFile << "<Style>\n"
 						<< "<IconStyle>\n"
 						<< "<heading>" << dir << "</heading>\n"
 						<< "</IconStyle>\n"
 						<< "</Style>\n";
 				
 				// Close the placemark
-				file << "</Placemark>\n";
+				outputFile << "</Placemark>\n";
 			}
 
 			// Close the category
-			file << "</Folder>\n";
+			outputFile << "</Folder>\n";
 		} // for each category
 
 		// Close waypoints folder
-		if (airspacesPresent && waypointsPresent) file << "</Folder>\n";
+		if (airspacesPresent && waypointsPresent) outputFile << "</Folder>\n";
 	} // if airspaces
 
 	// If there are airspaces
@@ -465,7 +470,7 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 
 		// If airspaces and waypoints are both present prepare a folder to group all the airspace
 		if (airspacesPresent && waypointsPresent)
-			file << "<Folder>\n"
+			outputFile << "<Folder>\n"
 				"<name>Airspace</name>\n"
 				"<visibility>1</visibility>\n"
 				"<open>true</open>\n";
@@ -477,7 +482,7 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 			if (airspaces.count(t) == 0) continue;
 
 			// Prepare the folder
-			file << "<Folder>\n"
+			outputFile << "<Folder>\n"
 				"<name>" << Airspace::CategoryName((Airspace::Type)t) << "</name>\n"
 				"<visibility>" << (Airspace::CategoryVisibleByDefault((Airspace::Type)t) ? 1 : 0) <<"</visibility>\n"
 				"<open>false</open>\n";
@@ -495,7 +500,7 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 				//TODO: if we have a terrain map for that area should be anyway better to get the AGL altitudes converted to AMSL
 				if (a.IsGNDbased()) WriteBaseOrTop(a, a.GetTopAltitude(), true); // then that's easy!
 				else { // otherwise we have to abuse KML which is not properly done to draw middle air aispaces
-					file << "<MultiGeometry>\n";
+					outputFile << "<MultiGeometry>\n";
 
 					if (a.GetTopAltitude().IsAMSL() == a.GetBaseAltitude().IsAMSL()) { // same reference, still doable
 
@@ -528,22 +533,22 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 						// Sides, where the points with altitude AGL were reobtained as AMSL
 						WriteSideWalls(a, amslAltitudesMt);
 					}
-					file << "</MultiGeometry>\n";
+					outputFile << "</MultiGeometry>\n";
 				}
-				file << "</Placemark>\n";
+				outputFile << "</Placemark>\n";
 			}
 
 			// Close category folder
-			file << "</Folder>\n";
+			outputFile << "</Folder>\n";
 		} // for each category
 
 		// Close airspaces folder
-		if (airspacesPresent && waypointsPresent) file << "</Folder>\n";
+		if (airspacesPresent && waypointsPresent) outputFile << "</Folder>\n";
 	} // if airspaces
 
-	file << "</Document>\n"
+	outputFile << "</Document>\n"
 		<< "</kml>\n";
-	file.close();
+	outputFile.close();
 
 	// Compress (ZIP) and do make the KMZ file
 	AirspaceConverter::LogMessage("Compressing into KMZ: doc.kmz", false);
@@ -648,5 +653,10 @@ bool KMLwriter::WriteFile(const std::string& filename, const std::multimap<int, 
 		return true;
 	}
 	AirspaceConverter::LogMessage("ERROR: While finalizing the archive.", true);
+	return false;
+}
+
+bool KML::Read(const std::string& filename) {
+	//TODO: to be implemented ...
 	return false;
 }

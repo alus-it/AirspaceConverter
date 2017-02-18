@@ -141,6 +141,7 @@ void Airspace::AddPoint(const Geometry::LatLon& point) {
 }
 
 void Airspace::AddGeometry(const Geometry* geometry) {
+	assert(geometry != nullptr);
 	geometries.push_back(geometry);
 	geometry->Discretize(points);
 }

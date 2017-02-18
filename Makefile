@@ -49,7 +49,7 @@ CPPFILES =              \
 	AirspaceConverter.cpp \
 	CUPreader.cpp         \
 	Geometry.cpp          \
-	KMLwriter.cpp         \
+	KML.cpp               \
 	OpenAIPreader.cpp     \
 	OpenAir.cpp           \
 	PFMwriter.cpp         \

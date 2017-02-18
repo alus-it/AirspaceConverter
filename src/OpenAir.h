@@ -24,10 +24,10 @@ friend class Circle;
 friend class Sector;
 
 public:
-	OpenAir(std::multimap<int, Airspace>& airspacesMap);
-	inline ~OpenAir() {}
-	bool ReadFile(const std::string& fileName);
-	bool WriteFile(const std::string& fileName);
+	OpenAir(std::multimap<int, Airspace>& airspacesMap): airspaces(airspacesMap), varRotationClockwise(true) {}
+	~OpenAir() {}
+	bool Read(const std::string& fileName);
+	bool Write(const std::string& fileName);
 
 private:
 	inline static bool isDigit(const char c) { return (c >= '0' && c <= '9'); }
@@ -49,11 +49,11 @@ private:
 	void WriteHeader();
 	bool WriteCategory(const Airspace& airsapce);
 	void WriteLatLon(const Geometry::LatLon& point);
-	void WritePoint(const Point* point);
-	void WriteCircle(const Circle* circle);
-	void WriteSector(const Sector* sector);
+	void WritePoint(const Point& point);
+	void WriteCircle(const Circle& circle);
+	void WriteSector(const Sector& sector);
 
-	std::multimap<int, Airspace>* airspaces;
+	std::multimap<int, Airspace>& airspaces;
 	bool varRotationClockwise;
 	Geometry::LatLon varPoint;
 	//double varWidth;

@@ -303,8 +303,8 @@ bool Point::Discretize(std::vector<LatLon>& output) const {
 	return true;
 }
 
-void Point::WriteOpenAirGeometry(OpenAir* openAir) const {
-	openAir->WritePoint(this);
+void Point::WriteOpenAirGeometry(OpenAir& openAir) const {
+	openAir.WritePoint(*this);
 }
 
 Sector::Sector(const LatLon& center, const double radiusNM, const double dir1, const double dir2, const bool isClockwise)
@@ -355,8 +355,8 @@ bool Sector::Discretize(std::vector<LatLon>& output) const {
 	return true;
 }
 
-void Sector::WriteOpenAirGeometry(OpenAir* openAir) const {
-	openAir->WriteSector(this);
+void Sector::WriteOpenAirGeometry(OpenAir& openAir) const {
+	openAir.WriteSector(*this);
 }
 
 Circle::Circle(const LatLon& center, const double& radiusNM)
@@ -373,8 +373,8 @@ bool Circle::Discretize(std::vector<LatLon>& output) const {
 	return true;
 }
 
-void Circle::WriteOpenAirGeometry(OpenAir* openAir) const {
-	openAir->WriteCircle(this);
+void Circle::WriteOpenAirGeometry(OpenAir& openAir) const {
+	openAir.WriteCircle(*this);
 }
 
 /* Airway not supported yet

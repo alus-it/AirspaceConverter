@@ -109,16 +109,8 @@ bool OpenAir::ParseCoordinates(const std::string& text, Geometry::LatLon& point)
 	return true;
 }
 
-OpenAir::OpenAir(std::multimap<int, Airspace>& airspacesMap)
-	: airspaces(&airspacesMap)
-	, varRotationClockwise(true)
-	/*, varWidth(0) */ {
-}
-
 // Reading and parsing OpenAir airspace file
-bool OpenAir::ReadFile(const std::string& fileName) {
-	assert(airspaces != nullptr);
-	if (airspaces == nullptr) return false;
+bool OpenAir::Read(const std::string& fileName) {
 	std::ifstream input(fileName, std::ios::binary);
 	if (!input.is_open() || input.bad()) {
 		AirspaceConverter::LogMessage("ERROR: Unable to open input file: " + fileName, true);
@@ -474,19 +466,16 @@ bool OpenAir::ParseDY(const std::string & line, Airspace& airspace)
 */
 
 bool OpenAir::InsertAirspace(Airspace& airspace) {
-	assert(airspaces != nullptr);
-	if (airspaces == nullptr) return false;
 	const bool validAirspace = airspace.GetType() != Airspace::UNDEFINED && !airspace.GetName().empty() && airspace.GetNumberOfGeometries() > 0 && !airspace.GetTopAltitude().IsGND();
 	if (validAirspace) {
 		airspace.ClosePoints();
 		assert(airspace.GetNumberOfPoints() > 3);
-		airspaces->insert(std::pair<int, Airspace>(airspace.GetType(),std::move(airspace)));
+		airspaces.insert(std::pair<int, Airspace>(airspace.GetType(),std::move(airspace)));
 	} else airspace.Clear();
 	return validAirspace;
 }
 
-bool OpenAir::WriteFile(const std::string& fileName) {
-	if (airspaces == nullptr) return false;
+bool OpenAir::Write(const std::string& fileName) {
 	if (file.is_open()) file.close();
 	file.open(fileName, std::ios::out | std::ios::trunc | std::ios::binary);
 	if (!file.is_open() || file.bad()) {
@@ -498,7 +487,7 @@ bool OpenAir::WriteFile(const std::string& fileName) {
 	WriteHeader();
 
 	// Go trough all airspace
-	for (std::pair<const int,Airspace>& pair : *airspaces)
+	for (std::pair<const int,Airspace>& pair : airspaces)
 	{
 		// Get the airspace
 		Airspace& a = pair.second;
@@ -531,7 +520,7 @@ bool OpenAir::WriteFile(const std::string& fileName) {
 		assert(numOfGeometries > 0);
 
 		// Write each geometry
-		for (unsigned int i = 0; i < numOfGeometries; i++) a.GetGeometryAt(i)->WriteOpenAirGeometry(this);
+		for (unsigned int i = 0; i < numOfGeometries; i++) a.GetGeometryAt(i)->WriteOpenAirGeometry(*this);
 
 		// Add an empty line at the end of the airspace
 		file << "\r\n";
@@ -579,34 +568,28 @@ void OpenAir::WriteLatLon(const Geometry::LatLon& point) {
 	file << deg << ":" << min << " " << point.GetEorW();
 }
 
-void OpenAir::WritePoint(const Point* point) {
-	assert(point != nullptr);
-	if (point == nullptr) return;
+void OpenAir::WritePoint(const Point& point) {
 	file << "DP ";
-	WriteLatLon(point->GetCenterPoint());
+	WriteLatLon(point.GetCenterPoint());
 	file << "\r\n";
 }
 
-void OpenAir::WriteCircle(const Circle* circle) {
-	assert(circle != nullptr);
-	if (circle == nullptr) return;
+void OpenAir::WriteCircle(const Circle& circle) {
 	file << "V X=";
-	WriteLatLon(circle->GetCenterPoint());
-	file << "\r\nDC " << circle->GetRadiusNM() << "\r\n";
+	WriteLatLon(circle.GetCenterPoint());
+	file << "\r\nDC " << circle.GetRadiusNM() << "\r\n";
 }
 
-void OpenAir::WriteSector(const Sector* sector) {
-	assert(sector != nullptr);
-	if (sector == nullptr) return;
-	if (varRotationClockwise != sector->IsClockwise()) { // Write var if changed
+void OpenAir::WriteSector(const Sector& sector) {
+	if (varRotationClockwise != sector.IsClockwise()) { // Write var if changed
 		varRotationClockwise = !varRotationClockwise;
 		file << "V D=" << (varRotationClockwise ? "+" : "-") << "\r\n";
 	}
 	file << "V X=";
-	WriteLatLon(sector->GetCenterPoint());
+	WriteLatLon(sector.GetCenterPoint());
 	file << "\r\nDB ";
-	WriteLatLon(sector->GetStartPoint());
+	WriteLatLon(sector.GetStartPoint());
 	file << ",";
-	WriteLatLon(sector->GetEndPoint());
+	WriteLatLon(sector.GetEndPoint());
 	file << "\r\n";
 }

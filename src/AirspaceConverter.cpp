@@ -11,9 +11,9 @@
 //============================================================================
 
 #include "AirspaceConverter.h"
+#include "KML.h"
 #include "OpenAIPreader.h"
 #include "Airspace.h"
-#include "KMLwriter.h"
 #include "PFMwriter.h"
 #include "OpenAir.h"
 #include "CUPreader.h"
@@ -60,8 +60,7 @@ AirspaceConverter::AirspaceConverter() :
 }
 
 AirspaceConverter::~AirspaceConverter() {
-	KMLwriter::ClearTerrainMaps();
-	UnloadWaypoints();
+	KML::ClearTerrainMaps();
 }
 
 void AirspaceConverter::DefaultLogMessage(const std::string& msgText, const bool isError) {
@@ -84,7 +83,7 @@ bool AirspaceConverter::Default_cGPSmapper(const std::string& polishFile, const 
 }
 
 void AirspaceConverter::SetIconsPath(const std::string& iconsPath) {
-	KMLwriter::SetIconsPath(iconsPath);
+	KML::SetIconsPath(iconsPath);
 }
 
 std::istream& AirspaceConverter::SafeGetline(std::istream& is, std::string& line, bool& isCRLF) {
@@ -159,7 +158,7 @@ void AirspaceConverter::LoadAirspaces() {
 	bool redOk(false);
 	for (const std::string& inputFile : airspaceFiles) {
 		const std::string ext(boost::filesystem::path(inputFile).extension().string());
-		if(boost::iequals(ext, ".txt")) redOk = openAir.ReadFile(inputFile);
+		if(boost::iequals(ext, ".txt")) redOk = openAir.Read(inputFile);
 		else if (boost::iequals(ext, ".aip")) redOk = OpenAIPreader::ReadFile(inputFile, airspaces);
 
 		// Guess a default output file name if still not defined by the user
@@ -176,13 +175,13 @@ void AirspaceConverter::UnloadAirspaces() {
 
 void AirspaceConverter::LoadTerrainRasterMaps() {
 	conversionDone = false;
-	for (const std::string& demFile : terrainRasterMapFiles) KMLwriter::AddTerrainMap(demFile);
+	for (const std::string& demFile : terrainRasterMapFiles) KML::AddTerrainMap(demFile);
 	terrainRasterMapFiles.clear();
 }
 
 void AirspaceConverter::UnloadRasterMaps() {
 	conversionDone = false;
-	KMLwriter::ClearTerrainMaps();
+	KML::ClearTerrainMaps();
 }
 
 void AirspaceConverter::LoadWaypoints() {
@@ -196,7 +195,6 @@ void AirspaceConverter::LoadWaypoints() {
 
 void AirspaceConverter::UnloadWaypoints() {
 	conversionDone = false;
-	for (const std::pair<const int, Waypoint*>& wpt : waypoints) delete wpt.second;
 	waypoints.clear();
 }
 
@@ -209,11 +207,11 @@ double AirspaceConverter::GetQNH() const {
 }
 
 void AirspaceConverter::SetDefaultTearrainAlt(const double altMt) {
-	KMLwriter::SetDefaultTerrainAltitude(altMt);
+	KML::SetDefaultTerrainAltitude(altMt);
 }
 
 double AirspaceConverter::GetDefaultTearrainAlt() const {
-	return KMLwriter::GetDefaultTerrainAltitude();
+	return KML::GetDefaultTerrainAltitude();
 }
 
 bool AirspaceConverter::Convert() {
@@ -221,16 +219,16 @@ bool AirspaceConverter::Convert() {
 	switch (GetOutputType()) {
 	case OutputType::KMZ:
 		{
-			KMLwriter writer;
-			if (writer.WriteFile(outputFile, airspaces, waypoints)) {
+			KML writer(airspaces, waypoints);
+			if (writer.Write(outputFile)) {
 				conversionDone = true;
-				if(KMLwriter::GetNumOfRasterMaps() == 0) LogMessage("Warning: no raster terrain map loaded, used default terrain height for all applicable AGL points.", true);
+				if(KML::GetNumOfRasterMaps() == 0) LogMessage("Warning: no raster terrain map loaded, used default terrain height for all applicable AGL points.", true);
 				else if(!writer.WereAllAGLaltitudesCovered()) LogMessage("Warning: not all AGL altitudes were under coverage of the loaded terrain map(s).", true);
 			}
 		}
 		break;
 	case OutputType::OpenAir_Format:
-		conversionDone = OpenAir(airspaces).WriteFile(outputFile);
+		conversionDone = OpenAir(airspaces).Write(outputFile);
 		break;
 	case OutputType::Polish:
 		conversionDone = PFMwriter().WriteFile(outputFile, airspaces);
@@ -255,5 +253,5 @@ bool AirspaceConverter::Convert() {
 }
 
 int AirspaceConverter::GetNumOfTerrainMaps() const {
-	return KMLwriter::GetNumOfRasterMaps();
+	return KML::GetNumOfRasterMaps();
 }
