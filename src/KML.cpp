@@ -656,71 +656,109 @@ bool KML::Write(const std::string& filename) {
 	return false;
 }
 
-
 bool KML::ReadKMZ(const std::string& filename) {
 	// Open the ZIP file
 	int error = 0;
 	zip* archive = zip_open(filename.c_str(), 0, &error);
 	if (error) {
-		AirspaceConverter::LogMessage("ERROR: Could open KMZ file: " + filename, true);
+		AirspaceConverter::LogMessage("ERROR: Could not open KMZ file: " + filename, true);
 		return false;
 	}
 
+	// Get the number of files in the ZIP
+	const long nFiles = zip_get_num_entries(archive, 0);
+	if(nFiles < 1) {
+		AirspaceConverter::LogMessage("ERROR: KMZ file seems empty or not valid: " + filename, true);
+		zip_close(archive);
+		return false;
+	}
+
+	std::string extractedKmlFile;
 	struct zip_stat sb;
 
+	// Iterate trough the contents: look for the first KML file in the root of the ZIP file
+	for (long i=0; i<nFiles; i++) {
+		if (zip_stat_index(archive, i, 0, &sb) != 0) {
+			AirspaceConverter::LogMessage("ERROR: while reading KMZ, unable to get details of a file in the ZIP.", true);
+			continue;
+		}
+		int len = strlen(sb.name);
 
-	// Iterate trough the contents
-	for (int i=0; i<zip_get_num_entries(archive, 0); i++) {
-		if (zip_stat_index(archive, i, 0, &sb) == 0) {
-			int len = strlen(sb.name);
-			AirspaceConverter::LogMessage("Found file: " + std::string(sb.name), true);
-			if (sb.name[len - 1] != '/') {
+		// Skip dirs
+		if (sb.name[len - 1] == '/') continue;
 
+		// Skip empty files
+		if(sb.size == 0) continue;
 
-				boost::filesystem::path zippedFilePath(sb.name);
-				if(zippedFilePath.parent_path().string().empty()) AirspaceConverter::LogMessage("Its in the root!!!", true);
-				if(boost::iequals(zippedFilePath.extension().string(),".kml")) AirspaceConverter::LogMessage("Found it!!!!!", true);
+		boost::filesystem::path zippedFilePath(sb.name);
 
+		// Skip files not in the root of the ZIP
+		if (!zippedFilePath.parent_path().string().empty()) continue;
 
-				//struct zip_file* zf = zip_fopen_index(za, i, 0);
-	                //if (!zf) {
-	                    //fprintf(stderr, "boese, boese/n");
-	                    //exit(100);
-	                //}
+		// Skip non KML files
+		if (!boost::iequals(zippedFilePath.extension().string(),".kml")) continue;
 
-	                //fd = open(sb.name, O_RDWR | O_TRUNC | O_CREAT, 0644);
-	                //if (fd < 0) {
-	                //    fprintf(stderr, "boese, boese/n");
-	                //    exit(101);
-	                //}
+		struct zip_file* zf = zip_fopen_index(archive, i, 0);
+		if (zf == nullptr) {
+			AirspaceConverter::LogMessage("ERROR: while extracting, unable to open KML file from KMZ: " + filename, true);
+			continue;
+		}
 
-	                /*sum = 0;
-	                while (sum != sb.size) {
-	                    len = zip_fread(zf, buf, 100);
-	                    if (len < 0) {
-	                        fprintf(stderr, "boese, boese/n");
-	                        exit(102);
-	                    }
-	                    write(fd, buf, len);
-	                    sum += len;
-	                }
-	                close(fd);
-	                zip_fclose(zf);*/
-	            }
-	        }
-	    }
+		// Prepare path and name of the kml file
+		extractedKmlFile = boost::filesystem::path(filename).parent_path().string() + sb.name;
 
+		// To avoid problems it is better to delete the KML file if already existing, user has already been warned
+		if (boost::filesystem::exists(extractedKmlFile)) std::remove(extractedKmlFile.c_str()); // Delete KML file
 
+		// Open the file to be extracted: open new file
+		std::ofstream kmlFile;
+		kmlFile.open(extractedKmlFile, std::ios::out | std::ios::trunc | std::ios::binary);
+		if (!kmlFile.is_open() || kmlFile.bad()) {
+			AirspaceConverter::LogMessage("ERROR: While extracting KML file, unable to write: " + extractedKmlFile, true);
+			zip_fclose(zf);
+			zip_close(archive);
+			return false;
+		}
 
+		// Read from the ZIP and write to the extracted file
+		char buf[8000]; // 8000, the size of this read buffer, is just quite big number which I like
+		unsigned long sum = 0;
+		while (sum < sb.size) {
+			len = zip_fread(zf, buf, 8000);
+			if (len < 0) {
+				AirspaceConverter::LogMessage("ERROR: While extracting KML file, unable read compressed data from: " + filename, true);
+				kmlFile.close();
+				zip_fclose(zf);
+				zip_close(archive);
+				return false;
+			}
+			kmlFile.write(buf, len);
+			sum += len;
+		}
 
+		// Close all
+		kmlFile.close();
+		zip_fclose(zf);
 
+		AirspaceConverter::LogMessage("Extracted KML file: " + std::string(sb.name), true);
 
+		// If we arrived at this point we assume that we just found and correctly extracted the KML file and so we don't need to go further in the KMZ
+		break;
+	}
 
+	// Close the ZIP archive
+	zip_close(archive);
 
+	// No KML... no party...
+	if(extractedKmlFile.empty()) return false;
 
-	    //And close the archive
-	    zip_close(archive);
-	    return true;
+	// So then ... let's try to read the KML file
+	bool retValue = ReadKML(extractedKmlFile);
+
+	// Delete the, probably huge, KML file because it already compressed inside the KMZ
+	std::remove(extractedKmlFile.c_str());
+
+	return retValue;
 }
 
 
