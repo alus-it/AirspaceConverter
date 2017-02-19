@@ -155,11 +155,14 @@ bool AirspaceConverter::PutTypeExtension(const OutputType type, std::string& fil
 void AirspaceConverter::LoadAirspaces() {
 	conversionDone = false;
 	OpenAir openAir(airspaces);
+	KML kml(airspaces, waypoints);
 	bool redOk(false);
 	for (const std::string& inputFile : airspaceFiles) {
 		const std::string ext(boost::filesystem::path(inputFile).extension().string());
 		if(boost::iequals(ext, ".txt")) redOk = openAir.Read(inputFile);
 		else if (boost::iequals(ext, ".aip")) redOk = OpenAIPreader::ReadFile(inputFile, airspaces);
+		else if (boost::iequals(ext, ".kmz")) redOk = kml.ReadKMZ(inputFile);
+		else if (boost::iequals(ext, ".kml")) redOk = kml.ReadKML(inputFile);
 
 		// Guess a default output file name if still not defined by the user
 		if (redOk && outputFile.empty())
