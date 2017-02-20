@@ -32,6 +32,8 @@ public:
 		inline double LonRad() const { return -lon * DEG2RAD; }
 		inline void GetLatLon(double& latitude, double& longitude) const { latitude = lat; longitude = lon; }
 		inline void SetLatLon(const double& latitude, const double& longitude) { lat = latitude; lon = longitude; }
+		inline void SetLat(const double& latitude) { lat = latitude; }
+		inline void SetLon(const double& longitude) { lon = longitude; }
 		inline void SetLatLonRad(const double latRad, const double lonRad) { lat = latRad * RAD2DEG; lon = -lonRad * RAD2DEG; }
 		inline bool operator==(const LatLon& other) const { return other.lat == lat && other.lon == lon; }
 		inline bool operator!=(const LatLon& other) const { return other.lat != lat || other.lon != lon; }

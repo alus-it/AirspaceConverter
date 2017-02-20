@@ -21,9 +21,9 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-
-//#include <boost/property_tree/xml_parser.hpp>
-//#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/tokenizer.hpp>
 
 
 const std::string KML::colors[][2] = {
@@ -763,158 +763,106 @@ bool KML::ReadKMZ(const std::string& filename) {
 
 
 bool KML::ReadKML(const std::string& filename) {
-	/*std::ifstream input(fileName);
+	std::ifstream input(filename);
 	if (!input.is_open() || input.bad()) {
-		AirspaceConverter::LogMessage("ERROR: Unable to open KMZ input file: " + fileName, true);
+		AirspaceConverter::LogMessage("ERROR: Unable to open KML file: " + filename, true);
 		return false;
 	}
-		AirspaceConverter::LogMessage("Reading OpenAIP file: " + fileName, false);
-		ptree tree;
-		read_xml(input, tree);
-		input.close();
-		ptree root;
-		try {
-			root = tree.get_child("OPENAIP");
-			double value = root.get_child("<xmlattr>").get<double>("DATAFORMAT");
-			if (value != 1.1) {
-				AirspaceConverter::LogMessage("ERROR: DATAFORMAT attribute missing or not at the expected version 1.1", true);
-				return false;
-			}
+	AirspaceConverter::LogMessage("Reading KML file: " + filename, false);
+	boost::property_tree::ptree tree;
+	boost::property_tree::read_xml(input, tree);
+	input.close();
+	try {
+		boost::property_tree::ptree root = tree.get_child("kml");
+		AirspaceConverter::LogMessage("Found the root of KML", false);
+		boost::property_tree::ptree doc = root.get_child("Document");
+		AirspaceConverter::LogMessage("Found the doc", false);
+		boost::property_tree::ptree airspfolder = doc.get_child("Folder");
+		AirspaceConverter::LogMessage("Found a folder in the doc", false);
+		std::string str = airspfolder.get<std::string>("name");
+		AirspaceConverter::LogMessage("The name is: " + str, false);
+		boost::property_tree::ptree folder2 = airspfolder.get_child("Folder");
+		AirspaceConverter::LogMessage("Found a folder in the folder", false);
+		str = folder2.get<std::string>("name");
+		AirspaceConverter::LogMessage("The name is: " + str, false);
 
-			// for all children of AIRSPACES tag
-			for (ptree::value_type const& asp : root.get_child("AIRSPACES")) {
-				if (asp.first != "ASP") continue;
+		//TODO: interate trough all category folders
+		boost::property_tree::ptree catfolder = folder2.get_child("Folder");
+		AirspaceConverter::LogMessage("Found a folder in the folder", false);
 
-				// Airspace category
-				std::string str = asp.second.get_child("<xmlattr>").get<std::string>("CATEGORY");
-				Airspace::Type type = Airspace::UNDEFINED;
-				int len = (int)str.length();
-				if (len>0) switch (str.at(0)) {
-					case 'A':
-						if (len == 1) type = Airspace::CLASSA; // A class airspace
+		//TODO: determine which category we are talking about
+		str = catfolder.get<std::string>("name");
+		AirspaceConverter::LogMessage("The name is: " + str, false);
+
+		int counter = 0;
+		for (boost::property_tree::ptree::value_type const& asp : catfolder) {
+			if (asp.first != "Placemark") continue;
+			str = asp.second.get<std::string>("name");
+			AirspaceConverter::LogMessage("Asp name: " + str, false);
+
+			//TODO: parse floor and celing altitudes...
+
+			boost::property_tree::ptree multigeometry = asp.second.get_child("MultiGeometry");
+			AirspaceConverter::LogMessage("Found MultiGeometry", false);
+			boost::property_tree::ptree poligon = multigeometry.get_child("Polygon");
+			boost::property_tree::ptree linearRing = poligon.get_child("outerBoundaryIs").get_child("LinearRing");
+			str = linearRing.get<std::string>("coordinates");
+			AirspaceConverter::LogMessage("Coord: " + str, false);
+
+			double lat = Geometry::LatLon::UNDEF_LAT, lon = Geometry::LatLon::UNDEF_LON;
+			double alt = -8000;
+			Airspace newairspace;
+			boost::char_separator<char> sep(", ");
+			boost::tokenizer<boost::char_separator<char> > tokens(str, sep);
+			bool error(false);
+			int expected = 0; // 0: longitude, 1: latitude, 2:altitude
+			try {
+				for (const std::string& c : tokens) {
+					const double value = std::stod(c);
+					switch(expected) {
+					case 0: // longitude
+						if (Geometry::LatLon::IsValidLon(value)) lon = value;
+						else error = true;
+						expected = 1;
 						break;
-					case 'B':
-						if (len == 1) type = Airspace::CLASSB; // B class airspace
+					case 1: // latitude
+						if (Geometry::LatLon::IsValidLat(value)) lat = value;
+						else error = true;
+						expected = 2;
 						break;
-					case 'C':
-						if (len == 1) type = Airspace::CLASSC; // C class airspace
-						else if (str == "CTR") type = Airspace::CTR; // CTR airspace
-						break;
-					case 'D':
-						if (len == 1) type = Airspace::CLASSD; // D class airspace
-						else if (str == "DANGER") type = Airspace::DANGER; // Dangerous area
-						break;
-					case 'E':
-						if (len == 1) type = Airspace::CLASSE; // E class airspace
-						break;
-					case 'F':
-						if (len == 1) type = Airspace::CLASSF; // F class airspace
-						else if (str == "FIR") type = Airspace::FIR; //FIR
-						break;
-					case 'G':
-						if (len == 1) type = Airspace::CLASSG; // G class airspace
-						else if (str == "GLIDING") type = Airspace::GLIDING;
-						break;
-					case 'O':
-						if (str == "OTH") type = Airspace::OTH;
-						break;
-					case 'P':
-						if (str == "PROHIBITED") type = Airspace::PROHIBITED; // Prohibited area
-						break;
-					case 'R':
-						if (str == "RESTRICTED") type = Airspace::RESTRICTED; // Restricted area
-						else if (str == "RMZ") type = Airspace::RMZ; //RMZ
-						break;
-					case 'T':
-						if (len == 3 && str.at(1) == 'M') {
-							if (str.at(2) == 'A') type = Airspace::TMA;
-							else if (str.at(2) == 'Z') type = Airspace::TMZ;
-						}
-						break;
-					case 'W':
-						if (str == "WAVE") type = Airspace::WAVE; //WAVE
-						break;
-					case 'U':
-						if (str == "UIR") type = Airspace::UIR; //UIR
+					case 2:
+						if(alt != -8000) {
+							if(value != alt) error = true; // make sure they are all at the same alt (here we don't want the "walls" of the airspace)
+							else newairspace.AddSinglePointOnly(lat,lon);
+						} else alt = value;
+						expected = 0;
 						break;
 					default:
-						break;
-					} else continue;
-					if (type == Airspace::UNDEFINED) {
-						AirspaceConverter::LogMessage("Warning: skipping ASP with unknown/undefined CATEGORY attribute: " + str, false);
-						continue;
-					}
-					Airspace airspace(type);
-
-					// Airspace name
-					str = asp.second.get<std::string>("NAME");
-					airspace.SetName(str);
-
-					// Airspace top altitude
-					ptree node = asp.second.get_child("ALTLIMIT_TOP");
-					Altitude alt;
-					if (ReadAltitude(node, alt)) airspace.SetTopAltitude(alt);
-					else return false;
-
-					// Airspace bottom altitude
-					node = asp.second.get_child("ALTLIMIT_BOTTOM");
-					if (ReadAltitude(node, alt)) airspace.SetBaseAltitude(alt);
-					else return false;
-
-					//Geometry
-					node = asp.second.get_child("GEOMETRY");
-
-					// Polygon (the only one supported for now)
-					str = node.get<std::string>("POLYGON");
-					double lat = Geometry::LatLon::UNDEF_LAT, lon = Geometry::LatLon::UNDEF_LON;
-					boost::char_separator<char> sep(", ");
-					boost::tokenizer<boost::char_separator<char> > tokens(str, sep);
-					bool expectedLon(true), error(false);
-					try {
-						for (const std::string& c : tokens) {
-							if (expectedLon) { // Beware that here the longitude comes first!
-								lon = std::stod(c);
-								if (!Geometry::LatLon::IsValidLon(lon)) {
-									error = true;
-									break;
-								}
-								expectedLon = false;
-							} else {
-								lat = std::stod(c);
-								if (!Geometry::LatLon::IsValidLat(lat)) {
-									error = true;
-									break;
-								}
-								expectedLon = true;
-								airspace.AddSinglePointOnly(lat, lon);
-							}
-						}
-					} catch (...) {
 						error = true;
 					}
-					if (error || !expectedLon) {
-						AirspaceConverter::LogMessage("Warning: skipping invalid coordinates.", false);
-						continue;
-					}
+					if (error) break;
+				}
+			} catch (...) {
+				error = true;
+			}
+			if (error || expected != 0) AirspaceConverter::LogMessage("Warning: skipping invalid coordinates.", false);
+			else {
 
-					// Ensure that the polygon is closed (it should be already but can happen).....
-					airspace.ClosePoints();
+				AirspaceConverter::LogMessage("OK we have the points!!!", false);
 
-					// The number of points must be at least 3+1 (plus the closing one)
-					assert(airspace.GetNumberOfPoints() > 3);
-					if (airspace.GetNumberOfPoints() <= 3) {
-						AirspaceConverter::LogMessage("Warning: skipping airspace with less tha 3 points.", false);
-						continue;
-					}
+				//TODO: Undiscretize
+				//TODO: Add the airspace...
 
-					// Add the new airspace
-					output.insert(std::pair<int, Airspace>(airspace.GetType(), std::move(airspace)));
-
-				} // for each ASP
-				return true;
-		} catch (...) {
-			AirspaceConverter::LogMessage("ERROR: Exception while parsing OpenAIP file.", true);
-			assert(false);
-		}*/
+			}
+			counter++;
+		}
+		std::stringstream stream;
+		stream << "Ho trovato: " << counter << " spazi aerei del primo tipo.";
+		AirspaceConverter::LogMessage(stream.str(), false);
+	} catch (...) {
+		AirspaceConverter::LogMessage("ERROR: Exception while parsing KML file.", true);
+		assert(false);
 		return false;
+	}
+	return true;
 }
