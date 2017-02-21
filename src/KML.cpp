@@ -139,8 +139,8 @@ bool KML::GetTerrainAltitudeMt(const double& lat, const double& lon, double& alt
 	return false;
 }
 
-void KML::WriteHeader(const bool airspace, const bool waypoints) {
-	assert(airspace || waypoints);
+void KML::WriteHeader(const bool airspacePresent, const bool waypointsPresent) {
+	assert(airspacePresent || waypointsPresent);
 	outputFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 		<< "<!--\n";
 	for(const std::string& line: AirspaceConverter::disclaimer) outputFile << line << "\n";
@@ -148,7 +148,7 @@ void KML::WriteHeader(const bool airspace, const bool waypoints) {
 		<< "<kml xmlns = \"http://www.opengis.net/kml/2.2\">\n"
 		<< "<Document>\n"
 		<< "<open>true</open>\n";
-		if (airspace) for (int t = Airspace::CLASSA; t <= Airspace::UNDEFINED; t++) {
+		if (airspacePresent) for (int t = Airspace::CLASSA; t <= Airspace::UNDEFINED; t++) {
 			outputFile << "<Style id = \"Style" << Airspace::CategoryName((Airspace::Type)t) << "\">\n"
 				<< "<LineStyle>\n"
 				<< "<color>" << colors[t][0] << "</color>\n"
@@ -159,7 +159,7 @@ void KML::WriteHeader(const bool airspace, const bool waypoints) {
 				<< "</PolyStyle>\n"
 				<< "</Style>\n";
 		}
-		if (waypoints) for (int t = Waypoint::normal; t < Waypoint::numOfWaypointTypes; t++) {
+		if (waypointsPresent) for (int t = Waypoint::normal; t < Waypoint::numOfWaypointTypes; t++) {
 			outputFile << "<Style id = \"Style" << Waypoint::TypeName((Waypoint::WaypointType)t) << "\">\n"
 				<< "<IconStyle>\n"
 				<< "<Icon>\n"
@@ -666,7 +666,7 @@ bool KML::ReadKMZ(const std::string& filename) {
 	}
 
 	// Get the number of files in the ZIP
-	const long nFiles = zip_get_num_entries(archive, 0);
+	const long nFiles = (long)zip_get_num_entries(archive, 0);
 	if(nFiles < 1) {
 		AirspaceConverter::LogMessage("ERROR: KMZ file seems empty or not valid: " + filename, true);
 		zip_close(archive);
@@ -682,7 +682,7 @@ bool KML::ReadKMZ(const std::string& filename) {
 			AirspaceConverter::LogMessage("ERROR: while reading KMZ, unable to get details of a file in the ZIP.", true);
 			continue;
 		}
-		int len = strlen(sb.name);
+		int len = (int)strlen(sb.name);
 
 		// Skip dirs
 		if (sb.name[len - 1] == '/') continue;
@@ -724,7 +724,7 @@ bool KML::ReadKMZ(const std::string& filename) {
 		char buf[8000]; // 8000, the size of this read buffer, is just quite big number which I like
 		unsigned long sum = 0;
 		while (sum < sb.size) {
-			len = zip_fread(zf, buf, 8000);
+			len = (int)zip_fread(zf, buf, 8000);
 			if (len < 0) {
 				AirspaceConverter::LogMessage("ERROR: While extracting KML file, unable read compressed data from: " + filename, true);
 				kmlFile.close();

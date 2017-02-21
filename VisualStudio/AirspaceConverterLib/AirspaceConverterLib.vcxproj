@@ -171,7 +171,7 @@
     <ClInclude Include="..\..\src\AirspaceConverter.h" />
     <ClInclude Include="..\..\src\CUPreader.h" />
     <ClInclude Include="..\..\src\Geometry.h" />
-    <ClInclude Include="..\..\src\KMLwriter.h" />
+    <ClInclude Include="..\..\src\KML.h" />
     <ClInclude Include="..\..\src\OpenAIPreader.h" />
     <ClInclude Include="..\..\src\OpenAir.h" />
     <ClInclude Include="..\..\src\PFMwriter.h" />
@@ -184,7 +184,7 @@
     <ClCompile Include="..\..\src\AirspaceConverter.cpp" />
     <ClCompile Include="..\..\src\CUPreader.cpp" />
     <ClCompile Include="..\..\src\Geometry.cpp" />
-    <ClCompile Include="..\..\src\KMLwriter.cpp" />
+    <ClCompile Include="..\..\src\KML.cpp" />
     <ClCompile Include="..\..\src\OpenAIPreader.cpp" />
     <ClCompile Include="..\..\src\OpenAir.cpp" />
     <ClCompile Include="..\..\src\PFMwriter.cpp" />
