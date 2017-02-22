@@ -171,7 +171,7 @@ void MainWindow::on_outputFormatComboBox_currentIndexChanged(int index) {
 }
 
 void MainWindow::on_loadAirspaceFileButton_clicked() {
-    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Airspace files"), suggestedInputDir, tr("All airspace files(*.txt *.TXT *.aip *.AIP);;OpenAir(*.txt *.TXT);;OpenAIP(*.aip *.AIP);;") );
+    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Airspace files"), suggestedInputDir, tr("All airspace files(*.txt *.TXT *.aip *.AIP *.kml *.KML *.kmz *.KMZ);;OpenAir(*.txt *.TXT);;OpenAIP(*.aip *.AIP);;Google Earth(*.kml *.KML *.kmz *.KMZ);;") );
     if(filenames.empty()) return;
 
     // Start to work

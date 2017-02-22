@@ -356,7 +356,7 @@ void CAirspaceConverterDlg::EndBusy(const bool takeTime /* = false */) {
 }
 
 void CAirspaceConverterDlg::OnBnClickedInputFile() {
-	CFileDialog dlg(TRUE, NULL, NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("All airspace files|*.txt; *.aip|OpenAIP|*.aip|OpenAir|*.txt||"), (CWnd*)this, 0, TRUE);
+	CFileDialog dlg(TRUE, NULL, NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("All airspace files|*.txt; *.aip; *.kmz; *.kml|OpenAIP|*.aip|OpenAir|*.txt|Google Earth|*.kmz; *.kml||"), (CWnd*)this, 0, TRUE);
 	if (dlg.DoModal() == IDOK) {
 		outputFile.clear();
 		conversionDone = false;
