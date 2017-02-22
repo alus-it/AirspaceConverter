@@ -793,25 +793,33 @@ bool KML::ReadKML(const std::string& filename) {
 		//TODO: determine which category we are talking about
 		str = catfolder.get<std::string>("name");
 		AirspaceConverter::LogMessage("The name is: " + str, false);
+		Airspace::Type type = Airspace::Type::RESTRICTED;
 
 		int counter = 0;
 		for (boost::property_tree::ptree::value_type const& asp : catfolder) {
 			if (asp.first != "Placemark") continue;
 			str = asp.second.get<std::string>("name");
+			Airspace airspace(type);
+			airspace.SetName(str);
 			AirspaceConverter::LogMessage("Asp name: " + str, false);
 
 			//TODO: parse floor and celing altitudes...
+			Altitude a;
+			a.SetAltFtGND(0);
+			airspace.SetBaseAltitude(a);
+			a.SetAltFtGND(8000);
+			airspace.SetTopAltitude(a);
 
 			boost::property_tree::ptree multigeometry = asp.second.get_child("MultiGeometry");
 			AirspaceConverter::LogMessage("Found MultiGeometry", false);
 			boost::property_tree::ptree poligon = multigeometry.get_child("Polygon");
 			boost::property_tree::ptree linearRing = poligon.get_child("outerBoundaryIs").get_child("LinearRing");
 			str = linearRing.get<std::string>("coordinates");
-			AirspaceConverter::LogMessage("Coord: " + str, false);
+			if (str.empty()) continue;
 
 			double lat = Geometry::LatLon::UNDEF_LAT, lon = Geometry::LatLon::UNDEF_LON;
 			double alt = -8000;
-			Airspace newairspace;
+			
 			boost::char_separator<char> sep(", ");
 			boost::tokenizer<boost::char_separator<char> > tokens(str, sep);
 			bool error(false);
@@ -830,10 +838,10 @@ bool KML::ReadKML(const std::string& filename) {
 						else error = true;
 						expected = 2;
 						break;
-					case 2:
+					case 2: // altitude
 						if(alt != -8000) {
 							if(value != alt) error = true; // make sure they are all at the same alt (here we don't want the "walls" of the airspace)
-							else newairspace.AddSinglePointOnly(lat,lon);
+							else airspace.AddSinglePointOnly(lat,lon);
 						} else alt = value;
 						expected = 0;
 						break;
@@ -847,17 +855,23 @@ bool KML::ReadKML(const std::string& filename) {
 			}
 			if (error || expected != 0) AirspaceConverter::LogMessage("Warning: skipping invalid coordinates.", false);
 			else {
+				// Ensure that the polygon is closed (it should be already but can happen).....
+				airspace.ClosePoints();
 
-				AirspaceConverter::LogMessage("OK we have the points!!!", false);
+				// The number of points must be at least 3+1 (plus the closing one)
+				assert(airspace.GetNumberOfPoints() > 3);
+				if (airspace.GetNumberOfPoints() <= 3) {
+					AirspaceConverter::LogMessage("Warning: skipping airspace with less than 3 points.", false);
+					continue;
+				}
 
-				//TODO: Undiscretize
-				//TODO: Add the airspace...
-
+				// Add the new airspace
+				airspaces.insert(std::pair<int, Airspace>(airspace.GetType(), std::move(airspace)));
 			}
 			counter++;
 		}
 		std::stringstream stream;
-		stream << "Ho trovato: " << counter << " spazi aerei del primo tipo.";
+		stream << "Found: " << counter << " airspaces of the first type.";
 		AirspaceConverter::LogMessage(stream.str(), false);
 	} catch (...) {
 		AirspaceConverter::LogMessage("ERROR: Exception while parsing KML file.", true);

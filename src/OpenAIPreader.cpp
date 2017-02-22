@@ -211,7 +211,7 @@ bool OpenAIPreader::ReadFile(const std::string& fileName, std::multimap<int, Air
 				// The number of points must be at least 3+1 (plus the closing one)
 				assert(airspace.GetNumberOfPoints() > 3);
 				if (airspace.GetNumberOfPoints() <= 3) {
-					AirspaceConverter::LogMessage("Warning: skipping airspace with less tha 3 points.", false);
+					AirspaceConverter::LogMessage("Warning: skipping airspace with less than 3 points.", false);
 					continue;
 				}
 
