@@ -9,7 +9,6 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
-#include "CUPreader.h"
 #include "AirspaceConverter.h"
 #include "Waypoint.h"
 #include "Airfield.h"
@@ -20,6 +19,7 @@
 #include <boost/tokenizer.hpp>
 #include <boost/format.hpp>
 #include <cassert>
+#include "SeeYou.h"
 
 bool ParseLatitude(const std::string& text, double& lat) {
 	const int len = (int)text.length();

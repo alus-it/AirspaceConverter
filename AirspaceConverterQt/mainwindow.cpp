@@ -149,7 +149,7 @@ void MainWindow::endBusy() {
     ui->defaultAltSpinBox->setEnabled(true);
     ui->QNHspinBox->setEnabled(converter->GetNumOfAirspaces()==0);
     ui->chooseOutputFileButton->setEnabled(true);
-    ui->convertButton->setEnabled(!converter->GetOutputFile().empty() && (converter->GetNumOfAirspaces()>0 || (ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ && converter->GetNumOfWaypoints()>0)));
+    ui->convertButton->setEnabled(!converter->GetOutputFile().empty() && (converter->GetNumOfAirspaces()>0 || (ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ_Format && converter->GetNumOfWaypoints()>0)));
     ui->openOutputFileButton->setEnabled(converter->IsConversionDone());
     ui->openOutputFolderButton->setEnabled(converter->IsConversionDone());
     ui->clearLogButton->setEnabled(true);
@@ -306,14 +306,14 @@ void MainWindow::on_chooseOutputFileButton_clicked() {
     AirspaceConverter::OutputType desiredFormat = AirspaceConverter::DetermineType(desiredOutputFile);
 
     // Verify if it is an acceptable extension (in Linux extension it is not added by the dialog if the user doesn't type it, or type it wrong)
-    if(desiredFormat == AirspaceConverter::OutputType::Unknown) {
+    if(desiredFormat == AirspaceConverter::OutputType::Unknown_Format) {
 
         // In this case, may be, the user typed just a name but selecting the extension in the save as combo box file type
-        desiredFormat = AirspaceConverter::KMZ; // KMZ default
+        desiredFormat = AirspaceConverter::KMZ_Format; // KMZ default
         if (selectedFilter != "Google Earth(*.kmz)") {
             if (selectedFilter == "OpenAir(*.txt)") desiredFormat = AirspaceConverter::OpenAir_Format;
-            else if (selectedFilter == "Polish(*.mp)") desiredFormat = AirspaceConverter::Polish;
-            else if (selectedFilter == "Garmin img(*.img)") desiredFormat = AirspaceConverter::Garmin;
+            else if (selectedFilter == "Polish(*.mp)") desiredFormat = AirspaceConverter::Polish_Format;
+            else if (selectedFilter == "Garmin img(*.img)") desiredFormat = AirspaceConverter::Garmin_Format;
             else assert(false);
         }
 
@@ -337,8 +337,8 @@ void MainWindow::on_chooseOutputFileButton_clicked() {
 
 void MainWindow::on_convertButton_clicked() {
     assert(!converter->GetOutputFile().empty());
-    assert(converter->GetNumOfAirspaces()>0 || (ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ && converter->GetNumOfWaypoints()>0));
-    if(converter->GetOutputFile().empty() || (converter->GetNumOfAirspaces()==0 && (ui->outputFormatComboBox->currentIndex() != AirspaceConverter::KMZ || converter->GetNumOfWaypoints()==0))) return;
+    assert(converter->GetNumOfAirspaces()>0 || (ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ_Format && converter->GetNumOfWaypoints()>0));
+    if(converter->GetOutputFile().empty() || (converter->GetNumOfAirspaces()==0 && (ui->outputFormatComboBox->currentIndex() != AirspaceConverter::KMZ_Format || converter->GetNumOfWaypoints()==0))) return;
 
 
     // Ask confirmation to overwrite the output file
@@ -348,10 +348,10 @@ void MainWindow::on_convertButton_clicked() {
 
     // Ask confirmation to overwrite any other file that will be created during the conversion process
     switch(converter->GetOutputType()) {
-    case AirspaceConverter::KMZ:
+    case AirspaceConverter::KMZ_Format:
         if(boost::filesystem::exists(boost::filesystem::path(path.parent_path() / boost::filesystem::path("doc.kml"))) && QMessageBox::warning(this, "Overwrite?", tr("The already existing doc.kml file will be deleted, continue?"), QMessageBox::Yes | QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) return;
         break;
-    case AirspaceConverter::Garmin:
+    case AirspaceConverter::Garmin_Format:
         if(boost::filesystem::exists(path.replace_extension(".mp")) && QMessageBox::warning(this, "Overwrite?", tr("The already existing .MP file will be deleted, continue?"), QMessageBox::Yes | QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) return;
         break;
     default:

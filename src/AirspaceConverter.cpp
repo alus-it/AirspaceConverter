@@ -11,17 +11,18 @@
 //============================================================================
 
 #include "AirspaceConverter.h"
-#include "KML.h"
-#include "OpenAIPreader.h"
 #include "Airspace.h"
-#include "PFMwriter.h"
-#include "OpenAir.h"
-#include "CUPreader.h"
 #include "Waypoint.h"
+#include "KML.h"
+#include "OpenAir.h"
+#include "SeeYou.h"
+#include "OpenAIP.h"
+#include "Polish.h"
 #include <iostream>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
+
 
 std::function<void(const std::string&, const bool)> AirspaceConverter::LogMessage = DefaultLogMessage;
 std::function<bool(const std::string&, const std::string&)> AirspaceConverter::cGPSmapper = Default_cGPSmapper;
@@ -114,14 +115,14 @@ std::istream& AirspaceConverter::SafeGetline(std::istream& is, std::string& line
 }
 
 AirspaceConverter::OutputType AirspaceConverter::DetermineType(const std::string& filename) {
-	if (filename.empty()) return OutputType::Unknown;
-	OutputType outputType = OutputType::KMZ; // KMZ default
+	if (filename.empty()) return OutputType::Unknown_Format;
+	OutputType outputType = OutputType::KMZ_Format; // KMZ default
 	std::string outputExt(boost::filesystem::path(filename).extension().string());
 	if (!boost::iequals(outputExt, ".kmz")) {
 		if (boost::iequals(outputExt, ".txt")) outputType = OutputType::OpenAir_Format;
-		else if (boost::iequals(outputExt, ".mp")) outputType = OutputType::Polish;
-		else if (boost::iequals(outputExt, ".img")) outputType = OutputType::Garmin;
-		else outputType = OutputType::Unknown;
+		else if (boost::iequals(outputExt, ".mp")) outputType = OutputType::Polish_Format;
+		else if (boost::iequals(outputExt, ".img")) outputType = OutputType::Garmin_Format;
+		else outputType = OutputType::Unknown_Format;
 	}
 	return outputType;
 }
@@ -130,22 +131,22 @@ bool AirspaceConverter::PutTypeExtension(const OutputType type, std::string& fil
 	if (filename.empty()) return false;
 	boost::filesystem::path outputPath(filename);
 	switch (type) {
-	case OutputType::KMZ:
+	case OutputType::KMZ_Format:
 		outputPath.replace_extension(".kmz");
 		break;
 	case OutputType::OpenAir_Format:
 		outputPath.replace_extension(".txt");
 		break;
-	case OutputType::Polish:
+	case OutputType::Polish_Format:
 		outputPath.replace_extension(".mp");
 		break;
-	case OutputType::Garmin:
+	case OutputType::Garmin_Format:
 		outputPath.replace_extension(".img");
 		break;
 	default:
 		assert(false);
 		/* no break */
-	case OutputType::Unknown:
+	case OutputType::Unknown_Format:
 		return false;
 	}
 	filename = outputPath.string();
@@ -160,7 +161,7 @@ void AirspaceConverter::LoadAirspaces() {
 	for (const std::string& inputFile : airspaceFiles) {
 		const std::string ext(boost::filesystem::path(inputFile).extension().string());
 		if(boost::iequals(ext, ".txt")) redOk = openAir.Read(inputFile);
-		else if (boost::iequals(ext, ".aip")) redOk = OpenAIPreader::ReadFile(inputFile, airspaces);
+		else if (boost::iequals(ext, ".aip")) redOk = OpenAIP::Read(inputFile, airspaces);
 		else if (boost::iequals(ext, ".kmz")) redOk = kml.ReadKMZ(inputFile);
 		else if (boost::iequals(ext, ".kml")) redOk = kml.ReadKML(inputFile);
 
@@ -220,7 +221,7 @@ double AirspaceConverter::GetDefaultTearrainAlt() const {
 bool AirspaceConverter::Convert() {
 	conversionDone = false;
 	switch (GetOutputType()) {
-	case OutputType::KMZ:
+	case OutputType::KMZ_Format:
 		{
 			KML writer(airspaces, waypoints);
 			if (writer.Write(outputFile)) {
@@ -233,15 +234,15 @@ bool AirspaceConverter::Convert() {
 	case OutputType::OpenAir_Format:
 		conversionDone = OpenAir(airspaces).Write(outputFile);
 		break;
-	case OutputType::Polish:
-		conversionDone = PFMwriter().WriteFile(outputFile, airspaces);
+	case OutputType::Polish_Format:
+		conversionDone = Polish().Write(outputFile, airspaces);
 		break;
-	case OutputType::Garmin: // For Garmin IMG will be necessary to call cGPSmapper
+	case OutputType::Garmin_Format: // For Garmin IMG will be necessary to call cGPSmapper
 		{
 			// First make the Polish file
 			const std::string polishFile(boost::filesystem::path(outputFile).replace_extension(".mp").string());
 			LogMessage("Building Polish file: " + polishFile, false);
-			if(!PFMwriter().WriteFile(polishFile, airspaces)) break;
+			if(!Polish().Write(polishFile, airspaces)) break;
 
 			// Then call cGPSmapper
 			conversionDone = cGPSmapper(polishFile, outputFile);

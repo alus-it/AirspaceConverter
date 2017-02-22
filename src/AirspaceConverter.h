@@ -28,11 +28,11 @@ class Waypoint;
 class AirspaceConverter {
 public:
 	enum OutputType {
-		KMZ = 0,
+		KMZ_Format = 0,
 		OpenAir_Format,
-		Polish,
-		Garmin,
-		Unknown
+		Polish_Format,
+		Garmin_Format,
+		Unknown_Format
 	};
 
 	AirspaceConverter();

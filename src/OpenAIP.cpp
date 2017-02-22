@@ -10,7 +10,7 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
-#include "OpenAIPreader.h"
+#include "OpenAIP.h"
 #include "Airspace.h"
 #include "AirspaceConverter.h"
 #include <fstream>
@@ -70,7 +70,7 @@ bool ReadAltitude(const ptree& node, Altitude& altitude) {
 	return false;
 }
 
-bool OpenAIPreader::ReadFile(const std::string& fileName, std::multimap<int, Airspace>& output) {	
+bool OpenAIP::Read(const std::string& fileName, std::multimap<int, Airspace>& output) {
 	std::ifstream input(fileName);
 	if (!input.is_open() || input.bad()) {
 		AirspaceConverter::LogMessage("ERROR: Unable to open OpenAIP input file: " + fileName, true);
