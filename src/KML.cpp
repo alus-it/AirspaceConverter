@@ -740,7 +740,7 @@ bool KML::ReadKMZ(const std::string& filename) {
 		kmlFile.close();
 		zip_fclose(zf);
 
-		AirspaceConverter::LogMessage("Extracted KML file: " + std::string(sb.name), true);
+		AirspaceConverter::LogMessage("Extracted KML file: " + std::string(sb.name), false);
 
 		// If we arrived at this point we assume that we just found and correctly extracted the KML file and so we don't need to go further in the KMZ
 		break;
@@ -761,6 +761,190 @@ bool KML::ReadKMZ(const std::string& filename) {
 	return retValue;
 }
 
+bool KML::ProcessFolder(const boost::property_tree::ptree& folder, const int upperCategory) {
+	
+	// Try to guess the category from the name of folder
+	const std::string categoryName = folder.get<std::string>("name");
+	int thisCategory = Airspace::Type::UNDEFINED;
+	unsigned int first = (unsigned int)categoryName.find('(');
+	if (first != std::string::npos) {
+		unsigned int last = (unsigned int)categoryName.find(')');
+		if (last != std::string::npos && first < last) {
+			const std::string shortCategory = categoryName.substr(first+1, last - first - 1);
+			if (shortCategory.length() == 1) {
+				switch (shortCategory.at(0)) {
+				case 'A': thisCategory = Airspace::Type::CLASSA; break;
+				case 'B': thisCategory = Airspace::Type::CLASSB; break;
+				case 'C': thisCategory = Airspace::Type::CLASSC; break;
+				case 'D': thisCategory = (categoryName == "Danger areas (D)") ? Airspace::Type::DANGER : Airspace::Type::CLASSD; break;
+				case 'E': thisCategory = Airspace::Type::CLASSE; break;
+				case 'F': thisCategory = Airspace::Type::CLASSF; break;
+				case 'G': thisCategory = Airspace::Type::CLASSG; break;
+				case 'P': thisCategory = Airspace::Type::PROHIBITED; break;
+				case 'R': thisCategory = Airspace::Type::RESTRICTED; break;					
+				default: break;
+				}
+			} else {
+				if (shortCategory == "CTA") thisCategory = Airspace::Type::CTR; //Control areas
+				else if (shortCategory == "TMA") thisCategory = Airspace::Type::TMA; //Terminal control areas
+				else if (shortCategory == "CTR") thisCategory = Airspace::Type::CTR; //Control zones
+				else if (shortCategory == "RMZ") thisCategory = Airspace::Type::RMZ; //Radio mandatory zones
+				else if (shortCategory == "TMZ") thisCategory = Airspace::Type::TMZ; //Transponder mandatory zones
+				else if (shortCategory == "TRA") thisCategory = Airspace::Type::RESTRICTED; //Temporary reserved airspaces
+				else if (shortCategory == "MTMA") thisCategory = Airspace::Type::TMA; // Military terminal control areas
+				else if (shortCategory == "MCTR") thisCategory = Airspace::Type::CTR; // Military control zones
+				else if (shortCategory == "MATZ") thisCategory = Airspace::Type::CTR; // Military aerodrome traffic zones
+				else if (shortCategory == "MTRA") thisCategory = Airspace::Type::RESTRICTED; // Military temporary reserved areas
+				else if (shortCategory == "MTA") thisCategory = Airspace::Type::DANGER;  // Military training areas
+			}
+		}
+	}
+	if (thisCategory == Airspace::Type::UNDEFINED) {
+		if (categoryName == "Gliding areas") thisCategory = Airspace::Type::GLIDING;
+		else if (categoryName == "Hang gliding and para gliding areas") thisCategory = Airspace::Type::GLIDING;
+		else if (categoryName == "Parachute jumping areas") thisCategory = Airspace::Type::DANGER;
+	}
+	if (thisCategory == Airspace::Type::UNDEFINED) thisCategory = upperCategory;
+	folderCategory = thisCategory;
+
+	// Visit the folder elements
+	try {
+		for (boost::property_tree::ptree::value_type const& element : folder) {
+			if (element.first == "Placemark") ProcessPlacemark(element.second); // To find a Placemark shoud be more frequent here
+			else if (element.first == "Folder") ProcessFolder(element.second, thisCategory);
+		}
+	}
+	catch (...) {
+		AirspaceConverter::LogMessage("ERROR: Exception while parsing Folder tag.", true);
+		folderCategory = upperCategory;
+		return false;
+	}
+
+	folderCategory = upperCategory;
+	return true;
+}
+
+bool ParseAltitude(const std::string& text, Altitude& alt) {
+	//TODO.... to be implemented!!!
+	if (text.empty()) alt.SetAltFtGND(0); // This is just to compile without warnings for now
+	/* Possible texts:
+	
+	1000 FT AGL
+	FL245
+	FL195
+	11000 FT AMSL but at least 1500 FT AGL
+	Jeweils die der Luftraumklasse D definierte Untergrenze.
+	
+	*/
+	return false;
+}
+
+bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
+	try {
+		std::string str = placemark.get<std::string>("name");
+
+		Airspace::Type category = Airspace::Type::UNKNOWN;
+
+		if (folderCategory != Airspace::Type::UNDEFINED) {
+			category = (Airspace::Type)folderCategory;
+		} else {
+			//TODO: find the category from inside placemark
+			AirspaceConverter::LogMessage("UNKNOWN airspace class! " + str, true); //////////////////////////TEST////
+		}
+
+		Airspace airspace(category);
+		airspace.SetName(str);
+		AirspaceConverter::LogMessage("Asp name: " + str, false); //////////////////////////TEST////
+
+		//TODO: parse floor and celing altitudes...
+		boost::property_tree::ptree schemaData = placemark.get_child("ExtendedData").get_child("SchemaData");
+		Altitude base, top;
+		bool basePresent(false), topPresent(false);
+		for (boost::property_tree::ptree::value_type const& simpleData : schemaData) {
+			if (simpleData.first != "SimpleData") continue;
+			str = simpleData.second.get_child("<xmlattr>").get<std::string>("name");
+			if (str == "Upper_Limit") topPresent = ParseAltitude(simpleData.second.data(), top);
+			else if (str == "Lower_Limit") basePresent = ParseAltitude(simpleData.second.data(), base);
+		}
+
+		base.SetAltFtGND(0); /////////////////////TEST////
+		top.SetAltFtGND(8000); ///////////////////TEST////
+		
+		if (!basePresent && !topPresent && base.GetAltFt() >= top.GetAltFt()) {
+			//TODO: No valid altitudes
+			// Guesstimate altitutes from the points.... 
+		}
+
+		airspace.SetBaseAltitude(base);
+		airspace.SetTopAltitude(top);
+
+		boost::property_tree::ptree multigeometry = placemark.get_child("MultiGeometry");
+
+		boost::property_tree::ptree poligon = multigeometry.get_child("Polygon");
+		boost::property_tree::ptree linearRing = poligon.get_child("outerBoundaryIs").get_child("LinearRing");
+		str = linearRing.get<std::string>("coordinates");
+		if (str.empty()) return false;
+
+		double lat = Geometry::LatLon::UNDEF_LAT, lon = Geometry::LatLon::UNDEF_LON;
+		double alt = -8000;
+
+		boost::char_separator<char> sep(", ");
+		boost::tokenizer<boost::char_separator<char> > tokens(str, sep);
+		bool error(false);
+		int expected = 0; // 0: longitude, 1: latitude, 2:altitude
+		try {
+			for (const std::string& c : tokens) {
+				const double value = std::stod(c);
+				switch (expected) {
+				case 0: // longitude
+					if (Geometry::LatLon::IsValidLon(value)) lon = value;
+					else error = true;
+					expected = 1;
+					break;
+				case 1: // latitude
+					if (Geometry::LatLon::IsValidLat(value)) lat = value;
+					else error = true;
+					expected = 2;
+					break;
+				case 2: // altitude
+					if (alt != -8000) {
+						if (value != alt) error = true; // make sure they are all at the same alt (here we don't want the "walls" of the airspace)
+						else airspace.AddSinglePointOnly(lat, lon);
+					}
+					else alt = value;
+					expected = 0;
+					break;
+				default:
+					error = true;
+				}
+				if (error) break;
+			}
+		}
+		catch (...) {
+			error = true;
+		}
+		if (error || expected != 0) AirspaceConverter::LogMessage("Warning: skipping invalid coordinates.", false);
+		else {
+			// Ensure that the polygon is closed (it should be already but can happen).....
+			airspace.ClosePoints();
+
+			// The number of points must be at least 3+1 (plus the closing one)
+			assert(airspace.GetNumberOfPoints() > 3);
+			if (airspace.GetNumberOfPoints() <= 3) {
+				AirspaceConverter::LogMessage("Warning: skipping airspace with less than 3 points.", false);
+				return false;
+			}
+
+			// Add the new airspace
+			airspaces.insert(std::pair<int, Airspace>(airspace.GetType(), std::move(airspace)));
+		}
+	}
+	catch (...) {
+		//AirspaceConverter::LogMessage("ERROR: Exception while parsing Placemark tag.", true); ///////////////////////////////////
+		return false;
+	}
+	return true;
+}
 
 bool KML::ReadKML(const std::string& filename) {
 	std::ifstream input(filename);
@@ -769,113 +953,17 @@ bool KML::ReadKML(const std::string& filename) {
 		return false;
 	}
 	AirspaceConverter::LogMessage("Reading KML file: " + filename, false);
-	boost::property_tree::ptree tree;
-	boost::property_tree::read_xml(input, tree);
+	boost::property_tree::ptree root;
+	boost::property_tree::read_xml(input, root);
 	input.close();
 	try {
-		boost::property_tree::ptree root = tree.get_child("kml");
-		AirspaceConverter::LogMessage("Found the root of KML", false);
-		boost::property_tree::ptree doc = root.get_child("Document");
-		AirspaceConverter::LogMessage("Found the doc", false);
-		boost::property_tree::ptree airspfolder = doc.get_child("Folder");
-		AirspaceConverter::LogMessage("Found a folder in the doc", false);
-		std::string str = airspfolder.get<std::string>("name");
-		AirspaceConverter::LogMessage("The name is: " + str, false);
-		boost::property_tree::ptree folder2 = airspfolder.get_child("Folder");
-		AirspaceConverter::LogMessage("Found a folder in the folder", false);
-		str = folder2.get<std::string>("name");
-		AirspaceConverter::LogMessage("The name is: " + str, false);
-
-		//TODO: interate trough all category folders
-		boost::property_tree::ptree catfolder = folder2.get_child("Folder");
-		AirspaceConverter::LogMessage("Found a folder in the folder", false);
-
-		//TODO: determine which category we are talking about
-		str = catfolder.get<std::string>("name");
-		AirspaceConverter::LogMessage("The name is: " + str, false);
-		Airspace::Type type = Airspace::Type::RESTRICTED;
-
-		int counter = 0;
-		for (boost::property_tree::ptree::value_type const& asp : catfolder) {
-			if (asp.first != "Placemark") continue;
-			str = asp.second.get<std::string>("name");
-			Airspace airspace(type);
-			airspace.SetName(str);
-			AirspaceConverter::LogMessage("Asp name: " + str, false);
-
-			//TODO: parse floor and celing altitudes...
-			Altitude a;
-			a.SetAltFtGND(0);
-			airspace.SetBaseAltitude(a);
-			a.SetAltFtGND(8000);
-			airspace.SetTopAltitude(a);
-
-			boost::property_tree::ptree multigeometry = asp.second.get_child("MultiGeometry");
-			AirspaceConverter::LogMessage("Found MultiGeometry", false);
-			boost::property_tree::ptree poligon = multigeometry.get_child("Polygon");
-			boost::property_tree::ptree linearRing = poligon.get_child("outerBoundaryIs").get_child("LinearRing");
-			str = linearRing.get<std::string>("coordinates");
-			if (str.empty()) continue;
-
-			double lat = Geometry::LatLon::UNDEF_LAT, lon = Geometry::LatLon::UNDEF_LON;
-			double alt = -8000;
-			
-			boost::char_separator<char> sep(", ");
-			boost::tokenizer<boost::char_separator<char> > tokens(str, sep);
-			bool error(false);
-			int expected = 0; // 0: longitude, 1: latitude, 2:altitude
-			try {
-				for (const std::string& c : tokens) {
-					const double value = std::stod(c);
-					switch(expected) {
-					case 0: // longitude
-						if (Geometry::LatLon::IsValidLon(value)) lon = value;
-						else error = true;
-						expected = 1;
-						break;
-					case 1: // latitude
-						if (Geometry::LatLon::IsValidLat(value)) lat = value;
-						else error = true;
-						expected = 2;
-						break;
-					case 2: // altitude
-						if(alt != -8000) {
-							if(value != alt) error = true; // make sure they are all at the same alt (here we don't want the "walls" of the airspace)
-							else airspace.AddSinglePointOnly(lat,lon);
-						} else alt = value;
-						expected = 0;
-						break;
-					default:
-						error = true;
-					}
-					if (error) break;
-				}
-			} catch (...) {
-				error = true;
-			}
-			if (error || expected != 0) AirspaceConverter::LogMessage("Warning: skipping invalid coordinates.", false);
-			else {
-				// Ensure that the polygon is closed (it should be already but can happen).....
-				airspace.ClosePoints();
-
-				// The number of points must be at least 3+1 (plus the closing one)
-				assert(airspace.GetNumberOfPoints() > 3);
-				if (airspace.GetNumberOfPoints() <= 3) {
-					AirspaceConverter::LogMessage("Warning: skipping airspace with less than 3 points.", false);
-					continue;
-				}
-
-				// Add the new airspace
-				airspaces.insert(std::pair<int, Airspace>(airspace.GetType(), std::move(airspace)));
-			}
-			counter++;
+		boost::property_tree::ptree doc = root.get_child("kml").get_child("Document");
+		for (boost::property_tree::ptree::value_type const& element : doc) {
+			if (element.first == "Folder") ProcessFolder(element.second, Airspace::Type::UNDEFINED);
+			else if (element.first == "Placemark") ProcessPlacemark(element.second);
 		}
-		std::stringstream stream;
-		stream << "Found: " << counter << " airspaces of the first type.";
-		AirspaceConverter::LogMessage(stream.str(), false);
 	} catch (...) {
-		AirspaceConverter::LogMessage("ERROR: Exception while parsing KML file.", true);
-		assert(false);
+		AirspaceConverter::LogMessage("ERROR: Exception while parsing basic elements of KML file.", true);
 		return false;
 	}
 	return true;

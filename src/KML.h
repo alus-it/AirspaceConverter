@@ -15,6 +15,7 @@
 #include <vector>
 #include <map>
 #include <fstream>
+#include <boost/property_tree/ptree_fwd.hpp>
 
 class Altitude;
 class Airspace;
@@ -51,6 +52,9 @@ private:
 	void WriteBaseOrTop(const Airspace& airspace, const Altitude& alt, const bool extrudeToGround = false);
 	void WriteBaseOrTop(const Airspace& airspace, const std::vector<double>& altitudesAmsl);
 
+	bool ProcessFolder(const boost::property_tree::ptree& folder, const int upperCategory);
+	bool ProcessPlacemark(const boost::property_tree::ptree& placemark);
+
 	static const std::string colors[][2];
 	static const std::string airfieldColors[][2];
 	static const std::string waypointIcons[];
@@ -61,4 +65,5 @@ private:
 	std::multimap<int, Waypoint>& waypoints;
 	std::ofstream outputFile;
 	bool allAGLaltitudesCovered;
+	int folderCategory;
 };
