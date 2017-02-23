@@ -175,7 +175,7 @@ BOOL CAirspaceConverterDlg::OnInitDialog() {
 	OutputTypeCombo.InsertString(-1, _T("OpenAir"));
 	OutputTypeCombo.InsertString(-1, _T("Polish format for cGPSmapper"));
 	OutputTypeCombo.InsertString(-1, _T("IMG file for Garmin devices"));
-	OutputTypeCombo.SetCurSel(AirspaceConverter::KMZ);
+	OutputTypeCombo.SetCurSel(AirspaceConverter::OutputType::KMZ_Format);
 
 	// Check if is running on Windows XP (v 5.2) or older. Only on the 32 bit version, on 64 bit we assume that we are using something newer than WinXP
 #ifndef _WIN64
@@ -323,7 +323,7 @@ void CAirspaceConverterDlg::EndBusy(const bool takeTime /* = false */) {
 		numAirspacesLoaded = 0;
 		numRasterMapLoaded = 0;
 	}
-	BOOL isKmzFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::KMZ);
+	BOOL isKmzFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::KMZ_Format);
 	loadInputFileBt.EnableWindow(TRUE);
 	loadWaypointsBt.EnableWindow(isKmzFile);
 	loadDEMfileBt.EnableWindow(isKmzFile);
@@ -503,7 +503,7 @@ void CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt() {
 		outputFile = CT2CA(dlg.GetPathName());
 		outputPath = outputFile;
 		AirspaceConverter::OutputType type = AirspaceConverter::DetermineType(outputFile); // Extension really typed in by the user
-		if(type != AirspaceConverter::Unknown) OutputTypeCombo.SetCurSel(type);
+		if(type != AirspaceConverter::OutputType::Unknown_Format) OutputTypeCombo.SetCurSel(type);
 		else { // otherwise force it to the selected extension from the open file dialog
 			assert(dlg.GetOFN().nFilterIndex > AirspaceConverter::KMZ && dlg.GetOFN().nFilterIndex <= AirspaceConverter::Unknown);
 			type = (AirspaceConverter::OutputType)(dlg.GetOFN().nFilterIndex - 1);
@@ -516,7 +516,7 @@ void CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt() {
 
 void CAirspaceConverterDlg::OnBnClickedOutputTypeCombo() {
 	UpdateOutputFilename();
-	BOOL isKmzFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::KMZ);
+	BOOL isKmzFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::KMZ_Format);
 	loadWaypointsBt.EnableWindow(isKmzFile);
 	loadDEMfileBt.EnableWindow(isKmzFile);
 #ifndef _WIN64
@@ -548,7 +548,7 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 	assert(processor != nullptr);
 	converter->SetOutputFile(outputFile);
 	switch (type) {
-	case AirspaceConverter::KMZ:
+	case AirspaceConverter::OutputType::KMZ_Format:
 		{
 			boost::filesystem::path kmlPath(outputPath.parent_path() / boost::filesystem::path("doc.kml"));
 			if (boost::filesystem::exists(kmlPath)) {
@@ -565,7 +565,7 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 		if (processor != nullptr && processor->Convert()) StartBusy();
 		else MessageBox(_T("Error while starting Polish output thread."), _T("Error"), MB_ICONERROR);
 		break;
-	case AirspaceConverter::Garmin:
+	case AirspaceConverter::OutputType::Garmin_Format:
 		{
 			boost::filesystem::path polishPath(outputPath);
 			polishPath.replace_extension(".mp");
@@ -576,7 +576,7 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 				else return;
 			}
 		} // Fall trough
-	case AirspaceConverter::Polish:
+	case AirspaceConverter::OutputType::Polish_Format:
 		if (processor != nullptr && processor->Convert()) StartBusy();
 		else MessageBox(_T("Error while starting Polish output thread."), _T("Error"), MB_ICONERROR);
 		break;
