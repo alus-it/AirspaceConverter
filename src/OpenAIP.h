@@ -16,6 +16,6 @@
 
 class Airspace;
 
-namespace OpenAIPreader {
-	bool ReadFile(const std::string& fileName, std::multimap<int,Airspace>& output);
+namespace OpenAIP {
+	bool Read(const std::string& fileName, std::multimap<int,Airspace>& output);
 };

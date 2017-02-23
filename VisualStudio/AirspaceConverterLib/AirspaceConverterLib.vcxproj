@@ -169,26 +169,26 @@
     <ClInclude Include="..\..\src\Airfield.h" />
     <ClInclude Include="..\..\src\Airspace.h" />
     <ClInclude Include="..\..\src\AirspaceConverter.h" />
-    <ClInclude Include="..\..\src\CUPreader.h" />
     <ClInclude Include="..\..\src\Geometry.h" />
-    <ClInclude Include="..\..\src\KMLwriter.h" />
-    <ClInclude Include="..\..\src\OpenAIPreader.h" />
+    <ClInclude Include="..\..\src\KML.h" />
+    <ClInclude Include="..\..\src\OpenAIP.h" />
     <ClInclude Include="..\..\src\OpenAir.h" />
-    <ClInclude Include="..\..\src\PFMwriter.h" />
+    <ClInclude Include="..\..\src\Polish.h" />
     <ClInclude Include="..\..\src\RasterMap.h" />
+    <ClInclude Include="..\..\src\SeeYou.h" />
     <ClInclude Include="..\..\src\Waypoint.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Airfield.cpp" />
     <ClCompile Include="..\..\src\Airspace.cpp" />
     <ClCompile Include="..\..\src\AirspaceConverter.cpp" />
-    <ClCompile Include="..\..\src\CUPreader.cpp" />
     <ClCompile Include="..\..\src\Geometry.cpp" />
-    <ClCompile Include="..\..\src\KMLwriter.cpp" />
-    <ClCompile Include="..\..\src\OpenAIPreader.cpp" />
+    <ClCompile Include="..\..\src\KML.cpp" />
+    <ClCompile Include="..\..\src\OpenAIP.cpp" />
     <ClCompile Include="..\..\src\OpenAir.cpp" />
-    <ClCompile Include="..\..\src\PFMwriter.cpp" />
+    <ClCompile Include="..\..\src\Polish.cpp" />
     <ClCompile Include="..\..\src\RasterMap.cpp" />
+    <ClCompile Include="..\..\src\SeeYou.cpp" />
     <ClCompile Include="..\..\src\Waypoint.cpp" />
   </ItemGroup>
   <ItemGroup>

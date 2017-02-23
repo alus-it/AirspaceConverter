@@ -43,16 +43,16 @@ $(shell mkdir -p $(DEPDIR) >/dev/null)
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)$*.Td
 
 # List of C++ source files
-CPPFILES =              \
+CPPFILES =                \
 	Airfield.cpp          \
 	Airspace.cpp          \
 	AirspaceConverter.cpp \
-	CUPreader.cpp         \
+	SeeYou.cpp            \
 	Geometry.cpp          \
-	KMLwriter.cpp         \
-	OpenAIPreader.cpp     \
+	KML.cpp               \
+	OpenAIP.cpp           \
 	OpenAir.cpp           \
-	PFMwriter.cpp         \
+	Polish.cpp            \
 	RasterMap.cpp         \
 	Waypoint.cpp
 

@@ -11,17 +11,18 @@
 //============================================================================
 
 #include "AirspaceConverter.h"
-#include "OpenAIPreader.h"
 #include "Airspace.h"
-#include "KMLwriter.h"
-#include "PFMwriter.h"
-#include "OpenAir.h"
-#include "CUPreader.h"
 #include "Waypoint.h"
+#include "KML.h"
+#include "OpenAir.h"
+#include "SeeYou.h"
+#include "OpenAIP.h"
+#include "Polish.h"
 #include <iostream>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
+
 
 std::function<void(const std::string&, const bool)> AirspaceConverter::LogMessage = DefaultLogMessage;
 std::function<bool(const std::string&, const std::string&)> AirspaceConverter::cGPSmapper = Default_cGPSmapper;
@@ -60,8 +61,7 @@ AirspaceConverter::AirspaceConverter() :
 }
 
 AirspaceConverter::~AirspaceConverter() {
-	KMLwriter::ClearTerrainMaps();
-	UnloadWaypoints();
+	KML::ClearTerrainMaps();
 }
 
 void AirspaceConverter::DefaultLogMessage(const std::string& msgText, const bool isError) {
@@ -84,7 +84,7 @@ bool AirspaceConverter::Default_cGPSmapper(const std::string& polishFile, const 
 }
 
 void AirspaceConverter::SetIconsPath(const std::string& iconsPath) {
-	KMLwriter::SetIconsPath(iconsPath);
+	KML::SetIconsPath(iconsPath);
 }
 
 std::istream& AirspaceConverter::SafeGetline(std::istream& is, std::string& line, bool& isCRLF) {
@@ -115,14 +115,14 @@ std::istream& AirspaceConverter::SafeGetline(std::istream& is, std::string& line
 }
 
 AirspaceConverter::OutputType AirspaceConverter::DetermineType(const std::string& filename) {
-	if (filename.empty()) return OutputType::Unknown;
-	OutputType outputType = OutputType::KMZ; // KMZ default
+	if (filename.empty()) return OutputType::Unknown_Format;
+	OutputType outputType = OutputType::KMZ_Format; // KMZ default
 	std::string outputExt(boost::filesystem::path(filename).extension().string());
 	if (!boost::iequals(outputExt, ".kmz")) {
 		if (boost::iequals(outputExt, ".txt")) outputType = OutputType::OpenAir_Format;
-		else if (boost::iequals(outputExt, ".mp")) outputType = OutputType::Polish;
-		else if (boost::iequals(outputExt, ".img")) outputType = OutputType::Garmin;
-		else outputType = OutputType::Unknown;
+		else if (boost::iequals(outputExt, ".mp")) outputType = OutputType::Polish_Format;
+		else if (boost::iequals(outputExt, ".img")) outputType = OutputType::Garmin_Format;
+		else outputType = OutputType::Unknown_Format;
 	}
 	return outputType;
 }
@@ -131,22 +131,22 @@ bool AirspaceConverter::PutTypeExtension(const OutputType type, std::string& fil
 	if (filename.empty()) return false;
 	boost::filesystem::path outputPath(filename);
 	switch (type) {
-	case OutputType::KMZ:
+	case OutputType::KMZ_Format:
 		outputPath.replace_extension(".kmz");
 		break;
 	case OutputType::OpenAir_Format:
 		outputPath.replace_extension(".txt");
 		break;
-	case OutputType::Polish:
+	case OutputType::Polish_Format:
 		outputPath.replace_extension(".mp");
 		break;
-	case OutputType::Garmin:
+	case OutputType::Garmin_Format:
 		outputPath.replace_extension(".img");
 		break;
 	default:
 		assert(false);
 		/* no break */
-	case OutputType::Unknown:
+	case OutputType::Unknown_Format:
 		return false;
 	}
 	filename = outputPath.string();
@@ -156,11 +156,14 @@ bool AirspaceConverter::PutTypeExtension(const OutputType type, std::string& fil
 void AirspaceConverter::LoadAirspaces() {
 	conversionDone = false;
 	OpenAir openAir(airspaces);
+	KML kml(airspaces, waypoints);
 	bool redOk(false);
 	for (const std::string& inputFile : airspaceFiles) {
 		const std::string ext(boost::filesystem::path(inputFile).extension().string());
-		if(boost::iequals(ext, ".txt")) redOk = openAir.ReadFile(inputFile);
-		else if (boost::iequals(ext, ".aip")) redOk = OpenAIPreader::ReadFile(inputFile, airspaces);
+		if(boost::iequals(ext, ".txt")) redOk = openAir.Read(inputFile);
+		else if (boost::iequals(ext, ".aip")) redOk = OpenAIP::Read(inputFile, airspaces);
+		else if (boost::iequals(ext, ".kmz")) redOk = kml.ReadKMZ(inputFile);
+		else if (boost::iequals(ext, ".kml")) redOk = kml.ReadKML(inputFile);
 
 		// Guess a default output file name if still not defined by the user
 		if (redOk && outputFile.empty())
@@ -176,13 +179,13 @@ void AirspaceConverter::UnloadAirspaces() {
 
 void AirspaceConverter::LoadTerrainRasterMaps() {
 	conversionDone = false;
-	for (const std::string& demFile : terrainRasterMapFiles) KMLwriter::AddTerrainMap(demFile);
+	for (const std::string& demFile : terrainRasterMapFiles) KML::AddTerrainMap(demFile);
 	terrainRasterMapFiles.clear();
 }
 
 void AirspaceConverter::UnloadRasterMaps() {
 	conversionDone = false;
-	KMLwriter::ClearTerrainMaps();
+	KML::ClearTerrainMaps();
 }
 
 void AirspaceConverter::LoadWaypoints() {
@@ -196,7 +199,6 @@ void AirspaceConverter::LoadWaypoints() {
 
 void AirspaceConverter::UnloadWaypoints() {
 	conversionDone = false;
-	for (const std::pair<const int, Waypoint*>& wpt : waypoints) delete wpt.second;
 	waypoints.clear();
 }
 
@@ -209,38 +211,38 @@ double AirspaceConverter::GetQNH() const {
 }
 
 void AirspaceConverter::SetDefaultTearrainAlt(const double altMt) {
-	KMLwriter::SetDefaultTerrainAltitude(altMt);
+	KML::SetDefaultTerrainAltitude(altMt);
 }
 
 double AirspaceConverter::GetDefaultTearrainAlt() const {
-	return KMLwriter::GetDefaultTerrainAltitude();
+	return KML::GetDefaultTerrainAltitude();
 }
 
 bool AirspaceConverter::Convert() {
 	conversionDone = false;
 	switch (GetOutputType()) {
-	case OutputType::KMZ:
+	case OutputType::KMZ_Format:
 		{
-			KMLwriter writer;
-			if (writer.WriteFile(outputFile, airspaces, waypoints)) {
+			KML writer(airspaces, waypoints);
+			if (writer.Write(outputFile)) {
 				conversionDone = true;
-				if(KMLwriter::GetNumOfRasterMaps() == 0) LogMessage("Warning: no raster terrain map loaded, used default terrain height for all applicable AGL points.", true);
+				if(KML::GetNumOfRasterMaps() == 0) LogMessage("Warning: no raster terrain map loaded, used default terrain height for all applicable AGL points.", true);
 				else if(!writer.WereAllAGLaltitudesCovered()) LogMessage("Warning: not all AGL altitudes were under coverage of the loaded terrain map(s).", true);
 			}
 		}
 		break;
 	case OutputType::OpenAir_Format:
-		conversionDone = OpenAir(airspaces).WriteFile(outputFile);
+		conversionDone = OpenAir(airspaces).Write(outputFile);
 		break;
-	case OutputType::Polish:
-		conversionDone = PFMwriter().WriteFile(outputFile, airspaces);
+	case OutputType::Polish_Format:
+		conversionDone = Polish().Write(outputFile, airspaces);
 		break;
-	case OutputType::Garmin: // For Garmin IMG will be necessary to call cGPSmapper
+	case OutputType::Garmin_Format: // For Garmin IMG will be necessary to call cGPSmapper
 		{
 			// First make the Polish file
 			const std::string polishFile(boost::filesystem::path(outputFile).replace_extension(".mp").string());
 			LogMessage("Building Polish file: " + polishFile, false);
-			if(!PFMwriter().WriteFile(polishFile, airspaces)) break;
+			if(!Polish().Write(polishFile, airspaces)) break;
 
 			// Then call cGPSmapper
 			conversionDone = cGPSmapper(polishFile, outputFile);
@@ -255,5 +257,96 @@ bool AirspaceConverter::Convert() {
 }
 
 int AirspaceConverter::GetNumOfTerrainMaps() const {
-	return KMLwriter::GetNumOfRasterMaps();
+	return KML::GetNumOfRasterMaps();
+}
+
+bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop, Airspace& airspace) {
+	if (text.empty()) return false;
+	const unsigned int l = (unsigned int)text.length();
+	double value = 0;
+	bool isFL = false;
+	bool isAGL = false;
+	bool isAMSL = true;
+	bool valueFound = false;
+	bool typeFound = false;
+	bool isMeter = false;
+	bool unitFound = false;
+	unsigned int s = 0;
+	bool isNumber = isDigit(text.at(s));
+	for (unsigned int i = 1; i < l; i++) {
+		const char c = text.at(i);
+		const bool isLast = (i == l - 1);
+		const bool isSep = (c == ' ' || c == '=');
+		if (isDigit(c) != isNumber || isSep || isLast) {
+			const std::string str = isLast ? text.substr(s) : text.substr(s, i - s);
+			if (isNumber) {
+				if (!valueFound) {
+					try {
+						value = std::stod(str);
+					}
+					catch (...) {
+						return false;
+					}
+					valueFound = true;
+				}
+				else return false;
+			}
+			else {
+				if (!typeFound) {
+					if (valueFound) {
+						if (boost::iequals(str, "AGL") || boost::iequals(str, "AGND") || boost::iequals(str, "ASFC") || boost::iequals(str, "GND") || boost::iequals(str, "SFC")) {
+							isAGL = true;
+							isAMSL = false;
+							typeFound = true;
+						}
+						else if (boost::iequals(str, "MSL") || boost::iequals(str, "AMSL") || boost::iequals(str, "ALT")) typeFound = true;
+						else if (!unitFound) {
+							if (boost::iequals(str, "FT") || boost::iequals(str, "F")) unitFound = true;
+							else if (boost::iequals(str, "M") || boost::iequals(str, "MT")) {
+								isMeter = true;
+								unitFound = true;
+							}
+						}
+					}
+					else {
+						if (boost::iequals(str, "FL")) {
+							isFL = true;
+							isAMSL = false;
+							typeFound = true;
+						}
+						else if (boost::iequals(str, "GND") || boost::iequals(str, "SFC")) {
+							isAGL = true;
+							isAMSL = false;
+							typeFound = true;
+							valueFound = true;
+							unitFound = true;
+						}
+						else if (boost::iequals(str, "UNLIM") || boost::iequals(str, "UNLIMITED") || boost::iequals(str, "UNL")) {
+							isAGL = false;
+							isAMSL = true;
+							typeFound = true;
+							valueFound = true;
+							unitFound = true;
+							value = 10000000;
+						}
+					}
+				}
+				else if (!unitFound && !typeFound) return false;
+			}
+			if (valueFound && typeFound && unitFound) break;
+			if (text.at(i) == ' ' || text.at(i) == '=') {
+				i++;
+				if (i < l) isNumber = isDigit(text.at(i));
+			}
+			else isNumber = !isNumber;
+			s = i;
+		}
+	}
+	if (!valueFound) return false;
+	Altitude alt;
+	if (isFL) alt.SetFlightLevel((int)value);
+	else if (isAMSL) isMeter ? alt.SetAltMtMSL(value) : alt.SetAltFtMSL((int)value);
+	else if (isAGL) isMeter ? alt.SetAltMtGND(value) : alt.SetAltFtGND((int)value);
+	isTop ? airspace.SetTopAltitude(alt) : airspace.SetBaseAltitude(alt);
+	return true;
 }

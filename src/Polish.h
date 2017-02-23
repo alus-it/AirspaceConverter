@@ -17,11 +17,11 @@
 
 class Airspace;
 
-class PFMwriter {
+class Polish {
 public:
-	inline PFMwriter() {}
-	inline ~PFMwriter() {}
-	bool WriteFile(const std::string& filename, const std::multimap<int, Airspace>& airspaces);
+	Polish() {}
+	~Polish() {}
+	bool Write(const std::string& filename, const std::multimap<int, Airspace>& airspaces);
 
 private:
 	void WriteHeader(const std::string& filename);

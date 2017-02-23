@@ -15,6 +15,7 @@
 #include <vector>
 #include <map>
 #include <fstream>
+#include <boost/property_tree/ptree_fwd.hpp>
 
 class Altitude;
 class Airspace;
@@ -22,12 +23,12 @@ class RasterMap;
 class Waypoint;
 class Airfield;
 
-class KMLwriter {
+class KML {
 public:
-	inline KMLwriter() : allAGLaltitudesCovered(true) {}
-	inline ~KMLwriter() {}
+	inline KML(std::multimap<int, Airspace>& airspacesMap, std::multimap<int, Waypoint>& waypointsMap): airspaces(airspacesMap), waypoints(waypointsMap), allAGLaltitudesCovered(true) {}
+	inline ~KML() {}
 
-	bool WriteFile(const std::string& filename, const std::multimap<int, Airspace>& airspaces, const std::multimap<int, Waypoint*>& waypoints);
+	bool Write(const std::string& filename);
 	static bool AddTerrainMap(const std::string& filename);
 	inline static int GetNumOfRasterMaps() { return (int)terrainMaps.size(); }
 	static void ClearTerrainMaps();
@@ -36,11 +37,14 @@ public:
 	inline static void SetIconsPath(const std::string& path) { iconsPath = path; } // To set the directory containing the waypoints icons...
 	inline bool WereAllAGLaltitudesCovered() const { return allAGLaltitudesCovered; }
 
+	bool ReadKMZ(const std::string& filename);
+	bool ReadKML(const std::string& filename);
+
 private:
 	static bool GetTerrainAltitudeMt(const double& lat, const double& lon, double&alt);
-	void WriteHeader(const bool airspace, const bool waypoints);
+	void WriteHeader(const bool airspacePresent, const bool waypointsPresent);
 	void OpenPlacemark(const Airspace& airspace);
-	void OpenPlacemark(const Waypoint* waypoint);
+	void OpenPlacemark(const Waypoint& waypoint);
 	void OpenPolygon(const bool extrude, const bool absolute);
 	void ClosePolygon();
 	void WriteSideWalls(const Airspace& airspace);
@@ -48,12 +52,18 @@ private:
 	void WriteBaseOrTop(const Airspace& airspace, const Altitude& alt, const bool extrudeToGround = false);
 	void WriteBaseOrTop(const Airspace& airspace, const std::vector<double>& altitudesAmsl);
 
+	bool ProcessFolder(const boost::property_tree::ptree& folder, const int upperCategory);
+	bool ProcessPlacemark(const boost::property_tree::ptree& placemark);
+
 	static const std::string colors[][2];
 	static const std::string airfieldColors[][2];
 	static const std::string waypointIcons[];
 	static std::vector<RasterMap*> terrainMaps;
 	static double defaultTerrainAltitudeMt;
 	static std::string iconsPath;
-	std::ofstream file;
+	std::multimap<int, Airspace>& airspaces;
+	std::multimap<int, Waypoint>& waypoints;
+	std::ofstream outputFile;
 	bool allAGLaltitudesCovered;
+	int folderCategory;
 };

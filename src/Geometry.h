@@ -23,8 +23,8 @@ friend class OpenAir;
 public:
 	class LatLon {
 	public:
-		inline LatLon() : lat(UNDEF_LAT), lon(UNDEF_LON) {}
-		inline LatLon(const double& latitude, const double& longitude) : lat(latitude), lon(longitude) {}
+		LatLon() : lat(UNDEF_LAT), lon(UNDEF_LON) {}
+		LatLon(const double& latitude, const double& longitude) : lat(latitude), lon(longitude) {}
 		inline static LatLon CreateFromRadiants(const double& latRad, const double& lonRad) { return LatLon(latRad * RAD2DEG, -lonRad * RAD2DEG); }
 		inline double Lat() const { return lat; }
 		inline double Lon() const { return lon; }
@@ -32,6 +32,8 @@ public:
 		inline double LonRad() const { return -lon * DEG2RAD; }
 		inline void GetLatLon(double& latitude, double& longitude) const { latitude = lat; longitude = lon; }
 		inline void SetLatLon(const double& latitude, const double& longitude) { lat = latitude; lon = longitude; }
+		inline void SetLat(const double& latitude) { lat = latitude; }
+		inline void SetLon(const double& longitude) { lon = longitude; }
 		inline void SetLatLonRad(const double latRad, const double lonRad) { lat = latRad * RAD2DEG; lon = -lonRad * RAD2DEG; }
 		inline bool operator==(const LatLon& other) const { return other.lat == lat && other.lon == lon; }
 		inline bool operator!=(const LatLon& other) const { return other.lat != lat || other.lon != lon; }
@@ -59,7 +61,7 @@ public:
 	static const double NM2M, MI2M;
 
 protected:
-	inline Geometry(const LatLon& center) : point(center) {}
+	Geometry(const LatLon& center) : point(center) {}
 	const LatLon point;
 	static double resolution; // [rad] maximun distance between points when discretizing
 	static const double TWO_PI;
@@ -89,20 +91,19 @@ protected:
 private:
 	static const double PI;
 	static const double TOL;
-	virtual void WriteOpenAirGeometry(OpenAir* openAir) const = 0;
+	virtual void WriteOpenAirGeometry(OpenAir& openAir) const = 0;
 };
 
 class Point : public Geometry {
 friend class OpenAir;
 
 public:
-	inline Point(const LatLon& latlon) : Geometry(latlon) {}
-	inline Point(const double& lat, const double& lon) : Geometry(LatLon(lat,lon)) {}
-	inline ~Point() {}
+	Point(const LatLon& latlon) : Geometry(latlon) {}
+	Point(const double& lat, const double& lon) : Geometry(LatLon(lat,lon)) {}
 	bool Discretize(std::vector<LatLon>& output) const;
 
 private:
-	void WriteOpenAirGeometry(OpenAir* openAir) const;
+	void WriteOpenAirGeometry(OpenAir& openAir) const;
 };
 
 class Sector : public Geometry {
@@ -111,7 +112,6 @@ friend class OpenAir;
 public:
 	Sector(const LatLon& center, const double radiusNM, const double dir1, const double dir2, const bool isClockwise);
 	Sector(const LatLon& center, const LatLon& pointStart, const LatLon& pointEnd, const bool isClockwise);
-	inline ~Sector() {}
 	bool Discretize(std::vector<LatLon>& output) const;
 	inline double GetRadiusNM() const { return RAD2NM * radius; }
 	inline bool IsClockwise() const { return clockwise; }
@@ -119,7 +119,7 @@ public:
 	inline const LatLon& GetEndPoint() const { return B; }
 
 private:
-	void WriteOpenAirGeometry(OpenAir* openAir) const;
+	void WriteOpenAirGeometry(OpenAir& openAir) const;
 
 	const bool clockwise;
 	const double latc, lonc; // [rad]
@@ -133,7 +133,6 @@ friend class OpenAir;
 
 public:
 	Circle(const LatLon& center, const double& radiusNM);
-	inline ~Circle() {}
 	bool Discretize(std::vector<LatLon>& output) const;
 	inline double GetRadiusNM() const { return RAD2NM * radius; }
 
@@ -141,15 +140,14 @@ private:
 	const double radius; // [rad]
 	const double latc, lonc; // [rad]
 
-	void WriteOpenAirGeometry(OpenAir* openAir) const;
+	void WriteOpenAirGeometry(OpenAir& openAir) const;
 };
 
 /* Airway for now not supported
 class AirwayPoint : public Geometry
 {
 public:
-	inline AirwayPoint(const double& lat, const double& lon, const double& widthNM) : Geometry(LatLon(lat, lon)), width(widthNM) {}
-	inline ~AirwayPoint() {}
+	AirwayPoint(const double& lat, const double& lon, const double& widthNM) : Geometry(LatLon(lat, lon)), width(widthNM) {}
 	bool Discretize(std::vector<LatLon>& output) const;
 
 private:

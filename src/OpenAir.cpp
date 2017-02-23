@@ -63,7 +63,7 @@ bool OpenAir::ParseCoordinates(const std::string& text, Geometry::LatLon& point)
 	boost::tokenizer<boost::char_separator<char>>::iterator token=tokens.begin();
 	std::string coord(*token);
 	char sign;
-	if(coord.size()>1 && !isDigit(coord.back())) {
+	if(coord.size()>1 && !AirspaceConverter::isDigit(coord.back())) {
 		// The N or S is not spaced from the coordinates
 		sign = coord.back();
 		coord = coord.substr(0, coord.size()-1);
@@ -85,7 +85,7 @@ bool OpenAir::ParseCoordinates(const std::string& text, Geometry::LatLon& point)
 	// Longitude degrees, minutes and seconds
 	if (++token == tokens.end()) return false;
 	coord = *token;
-	if(coord.size()>1 && !isDigit(coord.back())) {
+	if(coord.size()>1 && !AirspaceConverter::isDigit(coord.back())) {
 		// The E or W is not spaced from the coordinates
 		sign = coord.back();
 		coord = coord.substr(0, coord.size()-1);
@@ -109,16 +109,8 @@ bool OpenAir::ParseCoordinates(const std::string& text, Geometry::LatLon& point)
 	return true;
 }
 
-OpenAir::OpenAir(std::multimap<int, Airspace>& airspacesMap)
-	: airspaces(&airspacesMap)
-	, varRotationClockwise(true)
-	/*, varWidth(0) */ {
-}
-
 // Reading and parsing OpenAir airspace file
-bool OpenAir::ReadFile(const std::string& fileName) {
-	assert(airspaces != nullptr);
-	if (airspaces == nullptr) return false;
+bool OpenAir::Read(const std::string& fileName) {
 	std::ifstream input(fileName, std::ios::binary);
 	if (!input.is_open() || input.bad()) {
 		AirspaceConverter::LogMessage("ERROR: Unable to open input file: " + fileName, true);
@@ -278,86 +270,9 @@ bool OpenAir::ParseAN(const std::string & line, Airspace& airspace) {
 
 bool OpenAir::ParseAltitude(const std::string& line, const bool isTop, Airspace& airspace) {
 	if (airspace.GetType() == Airspace::UNDEFINED) return true;
-	const int l = (int)line.length();
+	const unsigned int l = (unsigned int)line.length();
 	if (l < 4) return false;
-	double value = 0;
-	bool isFL = false;
-	bool isAGL = false;
-	bool isAMSL = true;
-	bool valueFound = false;
-	bool typeFound = false;
-	bool isMeter = false;
-	bool unitFound = false;
-	int s = 3;
-	bool isNumber = isDigit(line.at(s));
-	for (int i = 4; i < l; i++) {
-		const char c = line.at(i);
-		const bool isLast = (i == l - 1);
-		const bool isSep = (c == ' ' || c == '=');
-		if (isDigit(c) != isNumber || isSep || isLast ) {
-			const std::string str = isLast ? line.substr(s) : line.substr(s, i - s);
-			if (isNumber) {
-				if (!valueFound) {
-					try {
-						value = std::stod(str);
-					} catch (...) {
-						return false;
-					}
-					valueFound = true;
-				}
-				else return false;
-			} else {
-				if (!typeFound) {
-					if (valueFound) {
-						if (boost::iequals(str,"AGL") || boost::iequals(str,"AGND") || boost::iequals(str,"ASFC") || boost::iequals(str,"GND") || boost::iequals(str,"SFC")) {
-							isAGL = true;
-							isAMSL = false;
-							typeFound = true;
-						} else if (boost::iequals(str, "MSL") || boost::iequals(str, "AMSL") || boost::iequals(str, "ALT")) typeFound = true;
-						else if (!unitFound) {
-							if (boost::iequals(str, "FT") || boost::iequals(str, "F")) unitFound = true;
-							else if (boost::iequals(str, "M") || boost::iequals(str, "MT")) {
-								isMeter = true;
-								unitFound = true;
-							}
-						} 	
-					} else {
-						if (boost::iequals(str, "FL")) {
-							isFL = true;
-							isAMSL = false;
-							typeFound = true;
-						} else if (boost::iequals(str, "GND") || boost::iequals(str, "SFC")) {
-							isAGL = true;
-							isAMSL = false;
-							typeFound = true;
-							valueFound = true;
-							unitFound = true;
-						} else if (boost::iequals(str, "UNLIM") || boost::iequals(str, "UNLIMITED")) {
-							isAGL = false;
-							isAMSL = true;
-							typeFound = true;
-							valueFound = true;
-							unitFound = true;
-							value = 10000000;
-						}
-					}
-				} else if (!unitFound && !typeFound) return false;
-			}
-			if (valueFound && typeFound && unitFound) break;
-			if (line.at(i) == ' ' || line.at(i) == '=') {
-				i++;
-				if (i < l) isNumber = isDigit(line.at(i));
-			}
-			else isNumber = !isNumber;
-			s = i;
-		}
-	}
-	Altitude alt;
-	if (isFL) alt.SetFlightLevel((int)value);
-	else if (isAMSL) isMeter ? alt.SetAltMtMSL(value) : alt.SetAltFtMSL((int)value);
-	else if (isAGL) isMeter ? alt.SetAltMtGND(value) : alt.SetAltFtGND((int)value);
-	isTop ? airspace.SetTopAltitude(alt) : airspace.SetBaseAltitude(alt);
-	return true;
+	return AirspaceConverter::ParseAltitude(line.substr(3,l-3), isTop, airspace);
 }
 
 bool OpenAir::ParseS(const std::string & line) {
@@ -474,19 +389,16 @@ bool OpenAir::ParseDY(const std::string & line, Airspace& airspace)
 */
 
 bool OpenAir::InsertAirspace(Airspace& airspace) {
-	assert(airspaces != nullptr);
-	if (airspaces == nullptr) return false;
 	const bool validAirspace = airspace.GetType() != Airspace::UNDEFINED && !airspace.GetName().empty() && airspace.GetNumberOfGeometries() > 0 && !airspace.GetTopAltitude().IsGND();
 	if (validAirspace) {
 		airspace.ClosePoints();
 		assert(airspace.GetNumberOfPoints() > 3);
-		airspaces->insert(std::pair<int, Airspace>(airspace.GetType(),std::move(airspace)));
+		airspaces.insert(std::pair<int, Airspace>(airspace.GetType(),std::move(airspace)));
 	} else airspace.Clear();
 	return validAirspace;
 }
 
-bool OpenAir::WriteFile(const std::string& fileName) {
-	if (airspaces == nullptr) return false;
+bool OpenAir::Write(const std::string& fileName) {
 	if (file.is_open()) file.close();
 	file.open(fileName, std::ios::out | std::ios::trunc | std::ios::binary);
 	if (!file.is_open() || file.bad()) {
@@ -498,7 +410,7 @@ bool OpenAir::WriteFile(const std::string& fileName) {
 	WriteHeader();
 
 	// Go trough all airspace
-	for (std::pair<const int,Airspace>& pair : *airspaces)
+	for (std::pair<const int,Airspace>& pair : airspaces)
 	{
 		// Get the airspace
 		Airspace& a = pair.second;
@@ -531,7 +443,7 @@ bool OpenAir::WriteFile(const std::string& fileName) {
 		assert(numOfGeometries > 0);
 
 		// Write each geometry
-		for (unsigned int i = 0; i < numOfGeometries; i++) a.GetGeometryAt(i)->WriteOpenAirGeometry(this);
+		for (unsigned int i = 0; i < numOfGeometries; i++) a.GetGeometryAt(i)->WriteOpenAirGeometry(*this);
 
 		// Add an empty line at the end of the airspace
 		file << "\r\n";
@@ -579,34 +491,28 @@ void OpenAir::WriteLatLon(const Geometry::LatLon& point) {
 	file << deg << ":" << min << " " << point.GetEorW();
 }
 
-void OpenAir::WritePoint(const Point* point) {
-	assert(point != nullptr);
-	if (point == nullptr) return;
+void OpenAir::WritePoint(const Point& point) {
 	file << "DP ";
-	WriteLatLon(point->GetCenterPoint());
+	WriteLatLon(point.GetCenterPoint());
 	file << "\r\n";
 }
 
-void OpenAir::WriteCircle(const Circle* circle) {
-	assert(circle != nullptr);
-	if (circle == nullptr) return;
+void OpenAir::WriteCircle(const Circle& circle) {
 	file << "V X=";
-	WriteLatLon(circle->GetCenterPoint());
-	file << "\r\nDC " << circle->GetRadiusNM() << "\r\n";
+	WriteLatLon(circle.GetCenterPoint());
+	file << "\r\nDC " << circle.GetRadiusNM() << "\r\n";
 }
 
-void OpenAir::WriteSector(const Sector* sector) {
-	assert(sector != nullptr);
-	if (sector == nullptr) return;
-	if (varRotationClockwise != sector->IsClockwise()) { // Write var if changed
+void OpenAir::WriteSector(const Sector& sector) {
+	if (varRotationClockwise != sector.IsClockwise()) { // Write var if changed
 		varRotationClockwise = !varRotationClockwise;
 		file << "V D=" << (varRotationClockwise ? "+" : "-") << "\r\n";
 	}
 	file << "V X=";
-	WriteLatLon(sector->GetCenterPoint());
+	WriteLatLon(sector.GetCenterPoint());
 	file << "\r\nDB ";
-	WriteLatLon(sector->GetStartPoint());
+	WriteLatLon(sector.GetStartPoint());
 	file << ",";
-	WriteLatLon(sector->GetEndPoint());
+	WriteLatLon(sector.GetEndPoint());
 	file << "\r\n";
 }

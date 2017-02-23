@@ -10,7 +10,7 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
-#include "PFMwriter.h"
+#include "Polish.h"
 #include "AirspaceConverter.h"
 #include "Airspace.h"
 #include <sstream>
@@ -45,7 +45,7 @@ const int PFMwriter::types[] = {
 };
 */
 
-const std::string PFMwriter::MakeLabel(const Airspace& airspace) {
+const std::string Polish::MakeLabel(const Airspace& airspace) {
 	std::stringstream ss;
 	ss << airspace.GetCategoryName() << " "
 		<< airspace.GetTopAltitude().ToString() << " - "
@@ -56,7 +56,7 @@ const std::string PFMwriter::MakeLabel(const Airspace& airspace) {
 	return label;
 }
 
-void PFMwriter::WriteHeader(const std::string& filename) {
+void Polish::WriteHeader(const std::string& filename) {
 	for(const std::string& line: AirspaceConverter::disclaimer) file << ";" << line << "\n";
 	file << "\n[IMG ID]\n" //section identifier
 		<< "ID=62831853\n" // unique identifier: 2 PI
@@ -90,7 +90,7 @@ void PFMwriter::WriteHeader(const std::string& filename) {
 		<< "[END]\n\n";
 }
 
-bool PFMwriter::WriteFile(const std::string& filename, const std::multimap<int, Airspace>& airspaces) {
+bool Polish::Write(const std::string& filename, const std::multimap<int, Airspace>& airspaces) {
 	// Check if has the right extension
 	if (!boost::iequals(boost::filesystem::path(filename).extension().string(), ".mp")) {
 		AirspaceConverter::LogMessage("ERROR: Expected MP extension but found: " + boost::filesystem::path(filename).extension().string(), true);
