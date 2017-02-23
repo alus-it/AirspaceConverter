@@ -827,19 +827,15 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 	try {
 		// First try to get the multigeometry, if it is not there it is not the kind of KML airspace we are looking now
 		boost::property_tree::ptree multigeometry = placemark.get_child("MultiGeometry");
+
+		// Initialize airspace category from the folder
+		Airspace::Type category = (Airspace::Type)folderCategory;
 		
-		std::string str = placemark.get<std::string>("name");
-
-		//TODO: this can be done better
-		Airspace::Type category = Airspace::Type::UNKNOWN;
-		if (folderCategory != Airspace::Type::UNDEFINED) {
-			category = (Airspace::Type)folderCategory;
-		} else {
-			//TODO: find the category from inside placemark
-			AirspaceConverter::LogMessage("UNKNOWN airspace class! " + str, true); //////////////////////////TEST////
-		}
-
+		// Buils the new airspace
 		Airspace airspace(category);
+
+		// Get and set the name
+		std::string str = placemark.get<std::string>("name");
 		airspace.SetName(str);
 
 		boost::property_tree::ptree schemaData = placemark.get_child("ExtendedData").get_child("SchemaData");
@@ -848,15 +844,46 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 		for (boost::property_tree::ptree::value_type const& simpleData : schemaData) {
 			if (simpleData.first != "SimpleData") continue;
 			str = simpleData.second.get_child("<xmlattr>").get<std::string>("name");
-			if (str == "Upper_Limit") {
+			if (str == "Upper_Limit" || str == "Top") {
 				topPresent = AirspaceConverter::ParseAltitude(simpleData.second.data(), true, airspace);
 				if(!topPresent) AirspaceConverter::LogMessage("ERROR: Failed to parse top altitude: " + simpleData.second.data(), true);
 			}
-			else if (str == "Lower_Limit") {
+			else if (str == "Lower_Limit" || str == "Base") {
 				basePresent = AirspaceConverter::ParseAltitude(simpleData.second.data(), false, airspace);
 				if(!basePresent) AirspaceConverter::LogMessage("ERROR: Failed to parse base altitude: " + simpleData.second.data(), true);
 			}
+			else if (str == "Category") {
+				if (simpleData.second.data() == "Class A") category = Airspace::Type::CLASSA;
+				else if (simpleData.second.data() == "Class B") category = Airspace::Type::CLASSB;
+				else if (simpleData.second.data() == "Class C") category = Airspace::Type::CLASSC;
+				else if (simpleData.second.data() == "Class D") category = Airspace::Type::CLASSD;
+				else if (simpleData.second.data() == "Class E") category = Airspace::Type::CLASSE;
+				else if (simpleData.second.data() == "Class F") category = Airspace::Type::CLASSF;
+				else if (simpleData.second.data() == "Class G") category = Airspace::Type::CLASSG;
+				else if (simpleData.second.data() == "Danger") category = Airspace::Type::DANGER;
+				else if (simpleData.second.data() == "Prohibited") category = Airspace::Type::PROHIBITED;
+				else if (simpleData.second.data() == "Restricted") category = Airspace::Type::RESTRICTED;
+				else if (simpleData.second.data() == "CTR") category = Airspace::Type::CTR;
+				else if (simpleData.second.data() == "TMA") category = Airspace::Type::TMA;
+				else if (simpleData.second.data() == "TMZ") category = Airspace::Type::TMZ;
+				else if (simpleData.second.data() == "RMZ") category = Airspace::Type::RMZ;
+				else if (simpleData.second.data() == "FIR") category = Airspace::Type::FIR;
+				else if (simpleData.second.data() == "UIR") category = Airspace::Type::UIR;
+				else if (simpleData.second.data() == "OTH") category = Airspace::Type::OTH;
+				else if (simpleData.second.data() == "Gliding area") category = Airspace::Type::GLIDING;
+				else if (simpleData.second.data() == "No glider") category = Airspace::Type::NOGLIDER;
+				else if (simpleData.second.data() == "Wave window") category = Airspace::Type::WAVE;
+				else if (simpleData.second.data() == "Unknown") category = Airspace::Type::UNKNOWN;
+				else {
+					category = Airspace::Type::UNDEFINED;
+					AirspaceConverter::LogMessage("ERROR: Undefined category of airspace. Skipping airspace: " + airspace.GetName(), true);
+				}
+			}
 		}
+
+		// If valid category make sure the new airspace is of that category
+		if (category != Airspace::Type::UNDEFINED) airspace.SetType(category);
+		else return false;
 
 		// If no altitude(s)
 		if (!basePresent || !topPresent) {
