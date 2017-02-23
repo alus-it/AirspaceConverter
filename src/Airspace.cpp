@@ -123,16 +123,24 @@ Airspace::Airspace(Airspace&& orig) // Move constructor
 }
 
 Airspace::~Airspace() {
-	for (const Geometry* g : geometries) delete g;
-	geometries.clear();
+	ClearGeometries();
 }
 
 void Airspace::Clear() {
 	type = UNDEFINED;
 	name.clear();
+	ClearPoints();
+}
+
+void Airspace::ClearPoints() {
+	ClearGeometries();
+	points.clear();
+}
+
+void Airspace::ClearGeometries() {
+	if (geometries.empty()) return;
 	for (const Geometry* g : geometries) delete g;
 	geometries.clear();
-	points.clear();
 }
 
 void Airspace::AddPoint(const Geometry::LatLon& point) {

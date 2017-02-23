@@ -87,7 +87,9 @@ public:
 	inline void SetBaseAltitude(const Altitude& alt) { base = alt; }
 	inline void SetName(const std::string& airspaceName) { name = airspaceName; }
 	inline void AddSinglePointOnly(const double& lat, const double& lon) { points.push_back(Geometry::LatLon(lat, lon)); }
-	void Clear();
+	void Clear(); // Clear name, type, points and geometries
+	void ClearPoints(); // Clear points and geometries
+	void ClearGeometries(); // Clear geometries only
 	void AddPoint(const Geometry::LatLon& point);
 	void AddGeometry(const Geometry* geometry);
 	inline void ClosePoints() { if (points.front() != points.back()) points.push_back(points.front()); }

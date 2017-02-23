@@ -25,7 +25,6 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/tokenizer.hpp>
 
-
 const std::string KML::colors[][2] = {
 	{ "509900ff", "7f9900ff" }, //CLASSA
 	{ "50cc0000", "7fcc0000" }, //CLASSB
@@ -828,9 +827,7 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 	try {
 		// First try to get the multigeometry, if it is not there it is not the kind of KML airspace we are looking now
 		boost::property_tree::ptree multigeometry = placemark.get_child("MultiGeometry");
-		boost::property_tree::ptree poligon = multigeometry.get_child("Polygon");
-		boost::property_tree::ptree linearRing = poligon.get_child("outerBoundaryIs").get_child("LinearRing");
-
+		
 		std::string str = placemark.get<std::string>("name");
 
 		//TODO: this can be done better
@@ -853,82 +850,110 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 			str = simpleData.second.get_child("<xmlattr>").get<std::string>("name");
 			if (str == "Upper_Limit") {
 				topPresent = AirspaceConverter::ParseAltitude(simpleData.second.data(), true, airspace);
-				if(!topPresent) AirspaceConverter::LogMessage("Failed to parse alt: " + simpleData.second.data(),true);
+				if(!topPresent) AirspaceConverter::LogMessage("ERROR: Failed to parse top altitude: " + simpleData.second.data(), true);
 			}
 			else if (str == "Lower_Limit") {
 				basePresent = AirspaceConverter::ParseAltitude(simpleData.second.data(), false, airspace);
-				if(!basePresent) AirspaceConverter::LogMessage("Failed to parse alt: " + simpleData.second.data(),true);
+				if(!basePresent) AirspaceConverter::LogMessage("ERROR: Failed to parse base altitude: " + simpleData.second.data(), true);
 			}
 		}
 
-		if (!basePresent || !topPresent || airspace.GetBaseAltitude().GetAltFt() >= airspace.GetTopAltitude().GetAltFt()) {
-			//TODO: No valid altitudes
+		// If no altitude(s)
+		if (!basePresent || !topPresent) {
 			//TODO: Guesstimate altitudes from the points....
-			AirspaceConverter::LogMessage("ERROR: unable to read altitude levels...",true); ////////////////////
+			AirspaceConverter::LogMessage("Warning: Assuming previous altitude as GND for airspace: " + airspace.GetName(), false);
 		}
 
-		str = linearRing.get<std::string>("coordinates");
-		if (str.empty()) return false;
+		// Check if the altitudes make sense
+		if (airspace.GetBaseAltitude().GetAltFt() >= airspace.GetTopAltitude().GetAltFt()) {
+			AirspaceConverter::LogMessage("ERROR: Base and top altitudes are inverted or equal. Skipping airspace: " + airspace.GetName(), true);
+			return false;
+		}
 
-		double lat = Geometry::LatLon::UNDEF_LAT, lon = Geometry::LatLon::UNDEF_LON;
-		double alt = -8000;
+		// Iterate trough all the polygons of multigeometry
+		bool pointsFound(false);
+		for (boost::property_tree::ptree::value_type const& polygon : multigeometry) {
+			if (polygon.first != "Polygon") continue;
+			boost::property_tree::ptree linearRing = polygon.second.get_child("outerBoundaryIs").get_child("LinearRing");
+			str = linearRing.get<std::string>("coordinates");
+			if (str.empty()) continue;
 
-		boost::char_separator<char> sep(", ");
-		boost::tokenizer<boost::char_separator<char> > tokens(str, sep);
-		bool error(false);
-		int expected = 0; // 0: longitude, 1: latitude, 2:altitude
-		try {
-			for (const std::string& c : tokens) {
-				const double value = std::stod(c);
-				switch (expected) {
-				case 0: // longitude
-					if (Geometry::LatLon::IsValidLon(value)) lon = value;
-					else error = true;
-					expected = 1;
-					break;
-				case 1: // latitude
-					if (Geometry::LatLon::IsValidLat(value)) lat = value;
-					else error = true;
-					expected = 2;
-					break;
-				case 2: // altitude
-					if (alt != -8000) {
-						if (value != alt) error = true; // make sure they are all at the same alt (here we don't want the "walls" of the airspace)
-						else airspace.AddSinglePointOnly(lat, lon);
+			// Before starting adding points make sure it is empty
+			assert(airspace.GetNumberOfPoints() == 0);
+
+			double lat = Geometry::LatLon::UNDEF_LAT, lon = Geometry::LatLon::UNDEF_LON;
+			double alt = -8000;
+			boost::char_separator<char> sep(", ");
+			boost::tokenizer<boost::char_separator<char> > tokens(str, sep);
+			bool error(false);
+			int expected = 0; // 0: longitude, 1: latitude, 2:altitude
+			try {
+				for (const std::string& c : tokens) {
+					const double value = std::stod(c);
+					switch (expected) {
+					case 0: // longitude
+						if (Geometry::LatLon::IsValidLon(value)) lon = value;
+						else error = true;
+						expected = 1;
+						break;
+					case 1: // latitude
+						if (Geometry::LatLon::IsValidLat(value)) lat = value;
+						else error = true;
+						expected = 2;
+						break;
+					case 2: // altitude
+						if (alt != -8000) {
+							if (value != alt) error = true; // make sure they are all at the same alt (here we don't want the "walls" of the airspace)
+							else airspace.AddSinglePointOnly(lat, lon);
+						}
+						else alt = value;
+						expected = 0;
+						break;
+					default:
+						error = true;
 					}
-					else alt = value;
-					expected = 0;
-					break;
-				default:
-					error = true;
+					if (error) break;
 				}
-				if (error) break;
+			}
+			catch (...) {
+				error = true;
+			}
+			if (error || expected != 0) {
+				// This is not the top or base poligon of the airspace, so clean the points, they are wrong...
+				airspace.ClearPoints();
+
+				// ... and try with the other polygons...
+				continue;
+			} else { // If we found it then we don't need to iterate trough all the remaining polygons, probably side walls
+				pointsFound = true;
+				break;
 			}
 		}
-		catch (...) {
-			error = true;
-		}
-		if (error || expected != 0) AirspaceConverter::LogMessage("Warning: skipping invalid coordinates.", false);
-		else {
-			// Ensure that the polygon is closed (it should be already but can happen).....
+
+		if (pointsFound) {
+			// Ensure that the polygon is closed (it should be already)...
 			airspace.ClosePoints();
 
 			// The number of points must be at least 3+1 (plus the closing one)
-			assert(airspace.GetNumberOfPoints() > 3);
 			if (airspace.GetNumberOfPoints() <= 3) {
-				AirspaceConverter::LogMessage("Warning: skipping airspace with less than 3 points.", false);
+				AirspaceConverter::LogMessage("Warning: skipping MultiGeometry with less than 3 points: " + airspace.GetName(), false);
 				return false;
 			}
 
 			// Add the new airspace
 			airspaces.insert(std::pair<int, Airspace>(airspace.GetType(), std::move(airspace)));
+			
+			return true;
+		} else {
+			AirspaceConverter::LogMessage("Warning: skipping MultiGeometry with invalid coordinates: " + airspace.GetName(), false);
+			return false;
 		}
 	}
 	catch (...) {
+		//TODO: Exception handling have to be done better here!
 		//AirspaceConverter::LogMessage("ERROR: Exception while parsing Placemark tag.", true); ///////////////////////////////////
 		return false;
 	}
-	return true;
 }
 
 bool KML::ReadKML(const std::string& filename) {
