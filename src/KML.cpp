@@ -824,51 +824,6 @@ bool KML::ProcessFolder(const boost::property_tree::ptree& folder, const int upp
 	return true;
 }
 
-bool ParseAltitude(const std::string& text, Altitude& alt) {
-	if (text.empty()) return false;
-	boost::char_separator<char> sep(" ");
-	boost::tokenizer<boost::char_separator<char> > tokens(text, sep);
-
-	switch(std::distance(tokens.begin(),tokens.end())) {
-	case 1:
-		if(text.at(0)=='F' && text.at(1)=='L' && text.length() > 2) {
-			try {
-				alt.SetFlightLevel(std::stoi(text.substr(2,text.length()-2)));
-			}
-			catch(...) {
-				return false;
-			}
-		} else {
-			if (text == "GND" || text == "SFC") alt.SetAltFtGND(0);
-			else return false;
-		}
-		break;
-	case 2:
-		return false;
-	case 3:
-	default:
-		{
-			auto itr = tokens.begin();
-			bool isFeet(false);
-			bool isAMSL(false);
-			int value=0;
-			try {
-				value = std::stoi(*itr);
-			}
-			catch(...) {
-				return false;
-			}
-			if (*(++itr) == "FT") isFeet = true;
-			else if(*itr != "M" && *itr != "MT") return false;
-			if (*(++itr) == "AMSL") isAMSL = true;
-			else if(*itr != "AGL") return false;
-			if(isAMSL) isFeet ? alt.SetAltFtMSL(value) : alt.SetAltMtMSL(value);
-			else isFeet ? alt.SetAltFtGND(value) : alt.SetAltMtGND(value);
-		}
-	}
-	return true;
-}
-
 bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 	try {
 		// First try to get the multigeometry, if it is not there it is not the kind of KML airspace we are looking now
@@ -891,32 +846,26 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 		airspace.SetName(str);
 
 		boost::property_tree::ptree schemaData = placemark.get_child("ExtendedData").get_child("SchemaData");
-		Altitude base, top;
+		
 		bool basePresent(false), topPresent(false);
 		for (boost::property_tree::ptree::value_type const& simpleData : schemaData) {
 			if (simpleData.first != "SimpleData") continue;
 			str = simpleData.second.get_child("<xmlattr>").get<std::string>("name");
 			if (str == "Upper_Limit") {
-				topPresent = ParseAltitude(simpleData.second.data(), top);
-				if(!topPresent) AirspaceConverter::LogMessage("Failed to parse alt: "+simpleData.second.data(),true);
+				topPresent = AirspaceConverter::ParseAltitude(simpleData.second.data(), true, airspace);
+				if(!topPresent) AirspaceConverter::LogMessage("Failed to parse alt: " + simpleData.second.data(),true);
 			}
 			else if (str == "Lower_Limit") {
-				basePresent = ParseAltitude(simpleData.second.data(), base);
-				if(!basePresent) AirspaceConverter::LogMessage("Failed to parse alt: "+simpleData.second.data(),true);
+				basePresent = AirspaceConverter::ParseAltitude(simpleData.second.data(), false, airspace);
+				if(!basePresent) AirspaceConverter::LogMessage("Failed to parse alt: " + simpleData.second.data(),true);
 			}
 		}
 
-		if (!basePresent || !topPresent || base.GetAltFt() >= top.GetAltFt()) {
+		if (!basePresent || !topPresent || airspace.GetBaseAltitude().GetAltFt() >= airspace.GetTopAltitude().GetAltFt()) {
 			//TODO: No valid altitudes
-			// Guesstimate altitudes from the points....
-
-			AirspaceConverter::LogMessage("ERROR: unable to read altitude levels...",true);
-
+			//TODO: Guesstimate altitudes from the points....
+			AirspaceConverter::LogMessage("ERROR: unable to read altitude levels...",true); ////////////////////
 		}
-
-		airspace.SetBaseAltitude(base);
-		airspace.SetTopAltitude(top);
-
 
 		str = linearRing.get<std::string>("coordinates");
 		if (str.empty()) return false;

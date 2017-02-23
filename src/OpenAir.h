@@ -30,16 +30,15 @@ public:
 	bool Write(const std::string& fileName);
 
 private:
-	inline static bool isDigit(const char c) { return (c >= '0' && c <= '9'); }
 	static std::string& RemoveComments(std::string &s);
 	static bool ParseDegrees(const std::string& dddmmss, double& deg);
 	static bool ParseCoordinates(const std::string& text, Geometry::LatLon& point);
+	static bool ParseAN(const std::string& line, Airspace& airspace);
+	static bool ParseAltitude(const std::string& line, const bool isTop, Airspace& airspace);
+	static bool ParseS (const std::string& line);
+	static bool ParseT (const std::string& line);
+	static bool ParseDP(const std::string& line, Airspace& airspace);
 	bool ParseAC(const std::string& line, Airspace& airspace);
-	bool ParseAN(const std::string& line, Airspace& airspace);
-	bool ParseAltitude(const std::string& line, const bool isTop, Airspace& airspace);
-	bool ParseS (const std::string& line);
-	bool ParseT (const std::string& line);
-	bool ParseDP(const std::string& line, Airspace& airspace);
 	bool ParseV(const std::string& line, Airspace& airspace);
 	bool ParseDA(const std::string& line, Airspace& airspace);
 	bool ParseDB(const std::string& line, Airspace& airspace);

@@ -259,3 +259,94 @@ bool AirspaceConverter::Convert() {
 int AirspaceConverter::GetNumOfTerrainMaps() const {
 	return KML::GetNumOfRasterMaps();
 }
+
+bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop, Airspace& airspace) {
+	if (text.empty()) return false;
+	const unsigned int l = (unsigned int)text.length();
+	double value = 0;
+	bool isFL = false;
+	bool isAGL = false;
+	bool isAMSL = true;
+	bool valueFound = false;
+	bool typeFound = false;
+	bool isMeter = false;
+	bool unitFound = false;
+	unsigned int s = 0;
+	bool isNumber = isDigit(text.at(s));
+	for (unsigned int i = 1; i < l; i++) {
+		const char c = text.at(i);
+		const bool isLast = (i == l - 1);
+		const bool isSep = (c == ' ' || c == '=');
+		if (isDigit(c) != isNumber || isSep || isLast) {
+			const std::string str = isLast ? text.substr(s) : text.substr(s, i - s);
+			if (isNumber) {
+				if (!valueFound) {
+					try {
+						value = std::stod(str);
+					}
+					catch (...) {
+						return false;
+					}
+					valueFound = true;
+				}
+				else return false;
+			}
+			else {
+				if (!typeFound) {
+					if (valueFound) {
+						if (boost::iequals(str, "AGL") || boost::iequals(str, "AGND") || boost::iequals(str, "ASFC") || boost::iequals(str, "GND") || boost::iequals(str, "SFC")) {
+							isAGL = true;
+							isAMSL = false;
+							typeFound = true;
+						}
+						else if (boost::iequals(str, "MSL") || boost::iequals(str, "AMSL") || boost::iequals(str, "ALT")) typeFound = true;
+						else if (!unitFound) {
+							if (boost::iequals(str, "FT") || boost::iequals(str, "F")) unitFound = true;
+							else if (boost::iequals(str, "M") || boost::iequals(str, "MT")) {
+								isMeter = true;
+								unitFound = true;
+							}
+						}
+					}
+					else {
+						if (boost::iequals(str, "FL")) {
+							isFL = true;
+							isAMSL = false;
+							typeFound = true;
+						}
+						else if (boost::iequals(str, "GND") || boost::iequals(str, "SFC")) {
+							isAGL = true;
+							isAMSL = false;
+							typeFound = true;
+							valueFound = true;
+							unitFound = true;
+						}
+						else if (boost::iequals(str, "UNLIM") || boost::iequals(str, "UNLIMITED") || boost::iequals(str, "UNL")) {
+							isAGL = false;
+							isAMSL = true;
+							typeFound = true;
+							valueFound = true;
+							unitFound = true;
+							value = 10000000;
+						}
+					}
+				}
+				else if (!unitFound && !typeFound) return false;
+			}
+			if (valueFound && typeFound && unitFound) break;
+			if (text.at(i) == ' ' || text.at(i) == '=') {
+				i++;
+				if (i < l) isNumber = isDigit(text.at(i));
+			}
+			else isNumber = !isNumber;
+			s = i;
+		}
+	}
+	if (!valueFound) return false;
+	Altitude alt;
+	if (isFL) alt.SetFlightLevel((int)value);
+	else if (isAMSL) isMeter ? alt.SetAltMtMSL(value) : alt.SetAltFtMSL((int)value);
+	else if (isAGL) isMeter ? alt.SetAltMtGND(value) : alt.SetAltFtGND((int)value);
+	isTop ? airspace.SetTopAltitude(alt) : airspace.SetBaseAltitude(alt);
+	return true;
+}

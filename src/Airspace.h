@@ -17,6 +17,7 @@
 
 class Altitude {
 public:
+	Altitude(): refIsMsl(false), altMt(0), altFt(0), fl(0) {}
 	inline void SetAltFtMSL(const int ft) { refIsMsl = true; altMt = ft*FEET2METER; altFt = ft; fl = 0; }
 	inline void SetAltMtMSL(const double mt) { refIsMsl = true;  altFt = (int)(mt / FEET2METER); altMt = mt; fl = 0; }
 	inline void SetAltFtGND(const int ft) { refIsMsl = false; altMt = ft*FEET2METER; altFt = ft; fl = 0; }
@@ -73,8 +74,8 @@ public:
 		UNDEFINED // also the last one
 	} Type;
 
-	inline Airspace() : type(UNDEFINED) {}
-	inline Airspace(Type category) : type(category) {}
+	Airspace() : type(UNDEFINED) {}
+	Airspace(Type category) : type(category) {}
 	Airspace(const Airspace& orig);
 	Airspace(Airspace&& orig);
 	~Airspace();

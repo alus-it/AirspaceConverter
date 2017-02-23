@@ -63,7 +63,7 @@ bool OpenAir::ParseCoordinates(const std::string& text, Geometry::LatLon& point)
 	boost::tokenizer<boost::char_separator<char>>::iterator token=tokens.begin();
 	std::string coord(*token);
 	char sign;
-	if(coord.size()>1 && !isDigit(coord.back())) {
+	if(coord.size()>1 && !AirspaceConverter::isDigit(coord.back())) {
 		// The N or S is not spaced from the coordinates
 		sign = coord.back();
 		coord = coord.substr(0, coord.size()-1);
@@ -85,7 +85,7 @@ bool OpenAir::ParseCoordinates(const std::string& text, Geometry::LatLon& point)
 	// Longitude degrees, minutes and seconds
 	if (++token == tokens.end()) return false;
 	coord = *token;
-	if(coord.size()>1 && !isDigit(coord.back())) {
+	if(coord.size()>1 && !AirspaceConverter::isDigit(coord.back())) {
 		// The E or W is not spaced from the coordinates
 		sign = coord.back();
 		coord = coord.substr(0, coord.size()-1);
@@ -270,86 +270,9 @@ bool OpenAir::ParseAN(const std::string & line, Airspace& airspace) {
 
 bool OpenAir::ParseAltitude(const std::string& line, const bool isTop, Airspace& airspace) {
 	if (airspace.GetType() == Airspace::UNDEFINED) return true;
-	const int l = (int)line.length();
+	const unsigned int l = (unsigned int)line.length();
 	if (l < 4) return false;
-	double value = 0;
-	bool isFL = false;
-	bool isAGL = false;
-	bool isAMSL = true;
-	bool valueFound = false;
-	bool typeFound = false;
-	bool isMeter = false;
-	bool unitFound = false;
-	int s = 3;
-	bool isNumber = isDigit(line.at(s));
-	for (int i = 4; i < l; i++) {
-		const char c = line.at(i);
-		const bool isLast = (i == l - 1);
-		const bool isSep = (c == ' ' || c == '=');
-		if (isDigit(c) != isNumber || isSep || isLast ) {
-			const std::string str = isLast ? line.substr(s) : line.substr(s, i - s);
-			if (isNumber) {
-				if (!valueFound) {
-					try {
-						value = std::stod(str);
-					} catch (...) {
-						return false;
-					}
-					valueFound = true;
-				}
-				else return false;
-			} else {
-				if (!typeFound) {
-					if (valueFound) {
-						if (boost::iequals(str,"AGL") || boost::iequals(str,"AGND") || boost::iequals(str,"ASFC") || boost::iequals(str,"GND") || boost::iequals(str,"SFC")) {
-							isAGL = true;
-							isAMSL = false;
-							typeFound = true;
-						} else if (boost::iequals(str, "MSL") || boost::iequals(str, "AMSL") || boost::iequals(str, "ALT")) typeFound = true;
-						else if (!unitFound) {
-							if (boost::iequals(str, "FT") || boost::iequals(str, "F")) unitFound = true;
-							else if (boost::iequals(str, "M") || boost::iequals(str, "MT")) {
-								isMeter = true;
-								unitFound = true;
-							}
-						} 	
-					} else {
-						if (boost::iequals(str, "FL")) {
-							isFL = true;
-							isAMSL = false;
-							typeFound = true;
-						} else if (boost::iequals(str, "GND") || boost::iequals(str, "SFC")) {
-							isAGL = true;
-							isAMSL = false;
-							typeFound = true;
-							valueFound = true;
-							unitFound = true;
-						} else if (boost::iequals(str, "UNLIM") || boost::iequals(str, "UNLIMITED")) {
-							isAGL = false;
-							isAMSL = true;
-							typeFound = true;
-							valueFound = true;
-							unitFound = true;
-							value = 10000000;
-						}
-					}
-				} else if (!unitFound && !typeFound) return false;
-			}
-			if (valueFound && typeFound && unitFound) break;
-			if (line.at(i) == ' ' || line.at(i) == '=') {
-				i++;
-				if (i < l) isNumber = isDigit(line.at(i));
-			}
-			else isNumber = !isNumber;
-			s = i;
-		}
-	}
-	Altitude alt;
-	if (isFL) alt.SetFlightLevel((int)value);
-	else if (isAMSL) isMeter ? alt.SetAltMtMSL(value) : alt.SetAltFtMSL((int)value);
-	else if (isAGL) isMeter ? alt.SetAltMtGND(value) : alt.SetAltFtGND((int)value);
-	isTop ? airspace.SetTopAltitude(alt) : airspace.SetBaseAltitude(alt);
-	return true;
+	return AirspaceConverter::ParseAltitude(line.substr(3,l-3), isTop, airspace);
 }
 
 bool OpenAir::ParseS(const std::string & line) {

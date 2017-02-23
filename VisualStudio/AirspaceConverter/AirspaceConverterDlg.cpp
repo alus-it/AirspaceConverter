@@ -505,7 +505,7 @@ void CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt() {
 		AirspaceConverter::OutputType type = AirspaceConverter::DetermineType(outputFile); // Extension really typed in by the user
 		if(type != AirspaceConverter::OutputType::Unknown_Format) OutputTypeCombo.SetCurSel(type);
 		else { // otherwise force it to the selected extension from the open file dialog
-			assert(dlg.GetOFN().nFilterIndex > AirspaceConverter::KMZ && dlg.GetOFN().nFilterIndex <= AirspaceConverter::Unknown);
+			assert(dlg.GetOFN().nFilterIndex > AirspaceConverter::OutputType::KMZ_Format && dlg.GetOFN().nFilterIndex <= AirspaceConverter::OutputType::Unknown_Format);
 			type = (AirspaceConverter::OutputType)(dlg.GetOFN().nFilterIndex - 1);
 			AirspaceConverter::PutTypeExtension(type, outputFile);
 			OutputTypeCombo.SetCurSel(type);
@@ -536,7 +536,7 @@ void CAirspaceConverterDlg::OnBnClickedOutputTypeCombo() {
 void CAirspaceConverterDlg::OnBnClickedConvert() {
 	if (outputFile.empty()) return;
 	AirspaceConverter::OutputType type = (AirspaceConverter::OutputType)OutputTypeCombo.GetCurSel();
-	assert(type >= AirspaceConverter::KMZ && type < AirspaceConverter::Unknown);
+	assert(type >= AirspaceConverter::OutputType::KMZ_Format && type < AirspaceConverter::OutputType::Unknown_Format);
 	boost::filesystem::path outputPath(outputFile);
 	if (boost::filesystem::exists(outputPath)) { // check if file already exists
 		CString msg(outputFile.c_str());

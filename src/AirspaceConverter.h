@@ -48,6 +48,8 @@ public:
 	static std::istream& SafeGetline(std::istream& is, std::string& line, bool& isCRLF);
 	static OutputType DetermineType(const std::string& filename);
 	static bool PutTypeExtension(const OutputType type, std::string& filename);
+	static bool ParseAltitude(const std::string& text, const bool isTop, Airspace& airspace);
+	inline static bool isDigit(const char c) { return (c >= '0' && c <= '9'); }
 
 	inline void AddAirspaceFile(const std::string& inputFile) { airspaceFiles.push_back(inputFile); }
 	inline void AddWaypointFile(const std::string& waypointsFile) { waypointFiles.push_back(waypointsFile); }
