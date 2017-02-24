@@ -57,4 +57,5 @@ private:
 	Geometry::LatLon varPoint;
 	//double varWidth;
 	std::ofstream file;
+	int lastACline;
 };

@@ -163,6 +163,7 @@ bool OpenAir::Read(const std::string& fileName) {
 			switch(sLine.at(1)) {
 			case 'C': //AC
 				lineParsedOK = ParseAC(sLine, airspace);
+				if (lineParsedOK) lastACline = linecount;
 				break;
 			case 'N': //AN
 				lineParsedOK = ParseAN(sLine, airspace);
@@ -225,7 +226,10 @@ bool OpenAir::Read(const std::string& fileName) {
 			allParsedOK = false;
 		}
 	}
+	
+	// Insert last airspace
 	InsertAirspace(airspace);
+
 	input.close();
 	return allParsedOK;
 }
@@ -264,8 +268,12 @@ bool OpenAir::ParseAC(const std::string & line, Airspace& airspace) {
 bool OpenAir::ParseAN(const std::string & line, Airspace& airspace) {
 	if (airspace.GetType() == Airspace::UNDEFINED) return true;
 	if (line.size() < 4) return false;
-	airspace.SetName(line.substr(3));
-	return true;
+	if (airspace.GetName().empty()) {
+		airspace.SetName(line.substr(3));
+		return true;
+	}
+	AirspaceConverter::LogMessage(boost::str(boost::format("ERROR: airspace %1s has already a name.") % airspace.GetName()), true);
+	return false;	
 }
 
 bool OpenAir::ParseAltitude(const std::string& line, const bool isTop, Airspace& airspace) {
@@ -389,13 +397,50 @@ bool OpenAir::ParseDY(const std::string & line, Airspace& airspace)
 */
 
 bool OpenAir::InsertAirspace(Airspace& airspace) {
-	const bool validAirspace = airspace.GetType() != Airspace::UNDEFINED && !airspace.GetName().empty() && airspace.GetNumberOfGeometries() > 0 && !airspace.GetTopAltitude().IsGND();
-	if (validAirspace) {
-		airspace.ClosePoints();
-		assert(airspace.GetNumberOfPoints() > 3);
-		airspaces.insert(std::pair<int, Airspace>(airspace.GetType(),std::move(airspace)));
-	} else airspace.Clear();
-	return validAirspace;
+	if (airspace.GetType() == Airspace::UNDEFINED || airspace.GetName().empty()) {
+		airspace.Clear();
+		return false;
+	}
+	
+	//TODO: the color table has no names so the following is disturbing...
+	// This should be just a warning
+	//if (airspace.GetName().empty()) {
+	//	AirspaceConverter::LogMessage(boost::str(boost::format("WARNING at line %1d: airspace without name.") % lastACline), true);
+	//}
+
+	// Let's be optimistic
+	bool validAirspace(true);
+
+	if (validAirspace && airspace.GetNumberOfGeometries() == 0) {
+		AirspaceConverter::LogMessage(boost::str(boost::format("ERROR at line %1d: skip airspace %2s with no geometries.") % lastACline % airspace.GetName()), true);
+		validAirspace = false;
+	}
+
+	if (validAirspace && airspace.GetTopAltitude().GetAltFt() <= airspace.GetBaseAltitude().GetAltFt()) {
+		AirspaceConverter::LogMessage(boost::str(boost::format("ERROR at line %1d: skip airspace %2s with top and base equal or inverted.") % lastACline % airspace.GetName()), true);
+		validAirspace = false;
+	}
+
+	if (validAirspace && airspace.GetTopAltitude().IsGND()) {
+		AirspaceConverter::LogMessage(boost::str(boost::format("ERROR at line %1d: skip airspace %2s with top at GND.") % lastACline % airspace.GetName()), true);
+		validAirspace = false;
+	}
+
+	// Ensure points are closed
+	airspace.ClosePoints();
+
+	if (validAirspace && airspace.GetNumberOfPoints() <= 3) {
+		AirspaceConverter::LogMessage(boost::str(boost::format("ERROR at line %1d: skip airspace %2s with less than 3 points.") % lastACline % airspace.GetName()), true);
+		validAirspace = false;
+	}
+
+	// If all OK insert the new airspace
+	if (validAirspace) airspaces.insert(std::pair<int, Airspace>(airspace.GetType(), std::move(airspace)));
+		
+	// Otherwise discard it
+	else airspace.Clear();
+
+	return validAirspace;	
 }
 
 bool OpenAir::Write(const std::string& fileName) {

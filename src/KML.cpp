@@ -831,7 +831,7 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 		// Initialize airspace category from the folder
 		Airspace::Type category = (Airspace::Type)folderCategory;
 		
-		// Buils the new airspace
+		// Build the new airspace
 		Airspace airspace(category);
 
 		// Get and set the name
@@ -913,6 +913,7 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 			boost::char_separator<char> sep(", ");
 			boost::tokenizer<boost::char_separator<char> > tokens(str, sep);
 			bool error(false);
+			bool allPointsAtSameAlt(true);
 			int expected = 0; // 0: longitude, 1: latitude, 2:altitude
 			try {
 				for (const std::string& c : tokens) {
@@ -929,11 +930,12 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 						expected = 2;
 						break;
 					case 2: // altitude
-						if (alt != -8000) {
-							if (value != alt) error = true; // make sure they are all at the same alt (here we don't want the "walls" of the airspace)
-							else airspace.AddSinglePointOnly(lat, lon);
+						if (allPointsAtSameAlt) {
+							if (alt != -8000) {
+								if (value != alt) allPointsAtSameAlt = false;
+							} else alt = value;
 						}
-						else alt = value;
+						airspace.AddSinglePointOnly(lat, lon);
 						expected = 0;
 						break;
 					default:
@@ -945,42 +947,43 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 			catch (...) {
 				error = true;
 			}
-			if (error || expected != 0) {
-				// This is not the top or base poligon of the airspace, so clean the points, they are wrong...
-				airspace.ClearPoints();
 
-				// ... and try with the other polygons...
-				continue;
-			} else { // If we found it then we don't need to iterate trough all the remaining polygons, probably side walls
-				pointsFound = true;
-				break;
+			//TODO: Make use of allPointsAtSameAlt flag
+
+			// If all OK erform additional checks
+			if (!error && expected == 0) {
+				 
+				// Ensure that the polygon is closed (it should be already)...
+				airspace.ClosePoints();
+
+				// Verify that all points are unique
+				if (airspace.ArePointsValid()) {
+					
+					// Found it!
+					pointsFound = true;
+					
+					// So no need to continue iterating all the other polygons...
+					break;
+				}	
 			}
+
+			// If we are here the poligon wasn't good: it is not the top or base poligon of the airspace, so clean the points
+			airspace.ClearPoints();
 		}
 
 		if (pointsFound) {
-			// Ensure that the polygon is closed (it should be already)...
-			airspace.ClosePoints();
-
-			// The number of points must be at least 3+1 (plus the closing one)
-			if (airspace.GetNumberOfPoints() <= 3) {
-				AirspaceConverter::LogMessage("Warning: skipping MultiGeometry with less than 3 points: " + airspace.GetName(), false);
-				return false;
-			}
-
 			// Add the new airspace
 			airspaces.insert(std::pair<int, Airspace>(airspace.GetType(), std::move(airspace)));
-			
 			return true;
 		} else {
 			AirspaceConverter::LogMessage("Warning: skipping MultiGeometry with invalid coordinates: " + airspace.GetName(), false);
-			return false;
 		}
 	}
 	catch (...) {
 		//TODO: Exception handling have to be done better here!
 		//AirspaceConverter::LogMessage("ERROR: Exception while parsing Placemark tag.", true); ///////////////////////////////////
-		return false;
 	}
+	return false;
 }
 
 bool KML::ReadKML(const std::string& filename) {

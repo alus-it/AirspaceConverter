@@ -148,6 +148,25 @@ void Airspace::AddPoint(const Geometry::LatLon& point) {
 	points.push_back(point);
 }
 
+bool Airspace::ArePointsValid() {
+	// Check if the number of points must be at least 3+1 (plus the closing one)
+	if (points.size() <= 3) return false;
+	
+	// Check if it is closed
+	if (points.front() != points.back()) return false;
+
+	// Except last one the points must be different from each other
+	const unsigned int l = (unsigned int)points.size() - 1;
+
+	// Usung a set with O(N log N) is faster in the generic case, but here this way should be faster in most of cases and requiring less memeory
+	for (unsigned int i = 0; i < l; i++) for (unsigned int j = i+1; j < l; j++) {
+		if (points.at(i) == points.at(j)) return false;
+	}
+	
+	// If we arrived here it is all OK
+	return true;
+}
+
 void Airspace::AddGeometry(const Geometry* geometry) {
 	assert(geometry != nullptr);
 	geometries.push_back(geometry);
