@@ -852,6 +852,9 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 				basePresent = AirspaceConverter::ParseAltitude(simpleData.second.data(), false, airspace);
 				if(!basePresent) AirspaceConverter::LogMessage("ERROR: Failed to parse base altitude: " + simpleData.second.data(), true);
 			}
+			else if (str == "NAM") {
+				if (!simpleData.second.data().empty()) airspace.SetName(simpleData.second.data());
+			}
 			else if (str == "Category") {
 				if (simpleData.second.data() == "Class A") category = Airspace::Type::CLASSA;
 				else if (simpleData.second.data() == "Class B") category = Airspace::Type::CLASSB;
