@@ -469,7 +469,7 @@ bool OpenAir::Write(const std::string& fileName) {
 
 		// Skip OpenAir not supported categories
 		if (!WriteCategory(a)) continue;
-		
+
 		// Write the name
 		file << "AN " << a.GetName() << "\r\n";
 		
@@ -508,6 +508,9 @@ bool OpenAir::WriteCategory(const Airspace& airspace) {
 		case Airspace::RESTRICTED:	openAirCategory = "R"; break;
 		case Airspace::DANGER:		openAirCategory = "Q"; break;
 		case Airspace::PROHIBITED:	openAirCategory = "P"; break;
+		case Airspace::TMA: // TMA is not an OpenAir definition but better to fall back on CTR
+			AirspaceConverter::LogMessage(boost::str(boost::format("Warning: TMA %1s written as CTR.") % airspace.GetName()), false);
+			/* no break */
 		case Airspace::CTR:			openAirCategory = "CTR"; break;
 		case Airspace::CLASSA:		openAirCategory = "A"; break;
 		case Airspace::CLASSB:		openAirCategory = "B"; break;
@@ -521,7 +524,9 @@ bool OpenAir::WriteCategory(const Airspace& airspace) {
 		case Airspace::TMZ:			openAirCategory = "TMZ"; break;
 		case Airspace::NOGLIDER:	openAirCategory = "GP"; break;
 		case Airspace::UNKNOWN:		openAirCategory = "UNKNOWN"; break;
-		default: return false; //cases not existent in OpenAir: TMA, FIR, UIR, OTH, GLIDING, UNDEFINED
+		default: // other cases not existent in OpenAir: FIR, UIR, OTH, GLIDING, UNDEFINED
+			AirspaceConverter::LogMessage(boost::str(boost::format("Warning: skipping airspace %1s of category %2s not existent in OpenAir.") % airspace.GetName() % Airspace::CategoryName(airspace.GetType())), false);
+			return false;
 	}
 	file << "AC " << openAirCategory << "\r\n";
 	return true;

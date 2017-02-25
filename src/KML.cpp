@@ -549,7 +549,7 @@ bool KML::Write(const std::string& filename) {
 	outputFile.close();
 
 	// Compress (ZIP) and do make the KMZ file
-	AirspaceConverter::LogMessage("Compressing into KMZ: doc.kmz", false);
+	AirspaceConverter::LogMessage("Compressing into KMZ: " + filename, false);
 
 	// To avoid problems it is better to delete the KMZ file if already existing, user has already been warned
 	if (boost::filesystem::exists(filename)) std::remove(filename.c_str()); // Delete KMZ file
@@ -703,7 +703,7 @@ bool KML::ReadKMZ(const std::string& filename) {
 		}
 
 		// Prepare path and name of the kml file
-		extractedKmlFile = boost::filesystem::path(filename).parent_path().string() + sb.name;
+		extractedKmlFile = boost::filesystem::path(boost::filesystem::path(filename).parent_path() / boost::filesystem::path(sb.name)).string();
 
 		// To avoid problems it is better to delete the KML file if already existing, user has already been warned
 		if (boost::filesystem::exists(extractedKmlFile)) std::remove(extractedKmlFile.c_str()); // Delete KML file
@@ -834,6 +834,7 @@ bool KML::ProcessPolygon(const boost::property_tree::ptree& polygon, Airspace& a
 		// Get extrude and altitudeMode contents
 		if (extruded && polygon.get<int>("extrude") != 1) extruded = false;
 		if (altRelToGnd && polygon.get<std::string>("altitudeMode") != "relativeToGround") altRelToGnd = false;
+		//TODO: do something with those... extrude should be a GND base...
 
 		// Then get the coordinates
 		std::string str = linearRing.get<std::string>("coordinates");
@@ -844,7 +845,7 @@ bool KML::ProcessPolygon(const boost::property_tree::ptree& polygon, Airspace& a
 
 		double lat = Geometry::LatLon::UNDEF_LAT, lon = Geometry::LatLon::UNDEF_LON;
 		double alt = -8000;
-		boost::char_separator<char> sep(", ");
+		boost::char_separator<char> sep(", \n");
 		boost::tokenizer<boost::char_separator<char> > tokens(str, sep);
 		bool error(false);
 		bool allPointsAtSameAlt(true);
@@ -882,11 +883,8 @@ bool KML::ProcessPolygon(const boost::property_tree::ptree& polygon, Airspace& a
 			error = true;
 		}
 
-		//TODO: Make use of allPointsAtSameAlt flag
-
 		// If all OK perform additional checks
 		if (!error && expected == 0) {
-
 			// Ensure that the polygon is closed (it should be already)...
 			airspace.ClosePoints();
 
@@ -894,14 +892,11 @@ bool KML::ProcessPolygon(const boost::property_tree::ptree& polygon, Airspace& a
 			if (allPointsAtSameAlt || airspace.ArePointsValid()) return true;
 		}
 
-		// If we are here the polygon wasn't good: it is not the top or base poligon of the airspace, so clean the points
+		// If we are here the polygon wasn't good: it is not the top or base polygon of the airspace, so clean the points
 		airspace.ClearPoints();
-	} catch(...) {
-		//TODO: Print a warning?
-	}
+	} catch(...) {}
 	return false;
 }
-
 
 bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 	// Check if it is a multi geometry
@@ -973,7 +968,7 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 
 		// If no altitude(s)
 		if (!basePresent || !topPresent) {
-			//TODO: Guesstimate altitudes from the points....
+			//TODO: Guesstimate altitudes from the points.... get altitude from polygons...
 			AirspaceConverter::LogMessage("Warning: Assuming previous altitude as GND for airspace: " + airspace.GetName(), false);
 		}
 
