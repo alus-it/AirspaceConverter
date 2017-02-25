@@ -496,9 +496,8 @@ bool KML::Write(const std::string& filename) {
 
 				OpenPlacemark(a);
 
-				//TODO: if we have a terrain map for that area should be anyway better to get the AGL altitudes converted to AMSL
 				if (a.IsGNDbased()) WriteBaseOrTop(a, a.GetTopAltitude(), true); // then that's easy!
-				else { // otherwise we have to abuse KML which is not properly done to draw middle air aispaces
+				else { // otherwise we have to abuse KML which is not properly done to draw middle air airspaces
 					outputFile << "<MultiGeometry>\n";
 
 					if (a.GetTopAltitude().IsAMSL() == a.GetBaseAltitude().IsAMSL()) { // same reference, still doable
@@ -823,105 +822,37 @@ bool KML::ProcessFolder(const boost::property_tree::ptree& folder, const int upp
 	return true;
 }
 
-bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
+bool KML::ProcessPolygon(const boost::property_tree::ptree& polygon, Airspace& airspace) {
+
+	/*
+	 *
+	 * o
+	"<extrude>1</extrude>\n";
+	"<altitudeMode>" << (absolute ? "absolute" : "relativeToGround") << "</altitudeMode>\n"
+	 *
+	 *
+	 * */
+
+
 	try {
-		// First try to get the multigeometry, if it is not there it is not the kind of KML airspace we are looking now
-		boost::property_tree::ptree multigeometry = placemark.get_child("MultiGeometry");
+		boost::property_tree::ptree linearRing = polygon.get_child("outerBoundaryIs").get_child("LinearRing");
+		std::string str = linearRing.get<std::string>("coordinates");
+		if (str.empty()) return false;
 
-		// Initialize airspace category from the folder
-		Airspace::Type category = (Airspace::Type)folderCategory;
-		
-		// Build the new airspace
-		Airspace airspace(category);
+		// Before starting adding points make sure it is empty
+		assert(airspace.GetNumberOfPoints() == 0);
 
-		// Get and set the name
-		std::string str = placemark.get<std::string>("name");
-		airspace.SetName(str);
-
-		boost::property_tree::ptree schemaData = placemark.get_child("ExtendedData").get_child("SchemaData");
-		
-		bool basePresent(false), topPresent(false);
-		for (boost::property_tree::ptree::value_type const& simpleData : schemaData) {
-			if (simpleData.first != "SimpleData") continue;
-			str = simpleData.second.get_child("<xmlattr>").get<std::string>("name");
-			if (str == "Upper_Limit" || str == "Top") {
-				topPresent = AirspaceConverter::ParseAltitude(simpleData.second.data(), true, airspace);
-				if(!topPresent) AirspaceConverter::LogMessage("ERROR: Failed to parse top altitude: " + simpleData.second.data(), true);
-			}
-			else if (str == "Lower_Limit" || str == "Base") {
-				basePresent = AirspaceConverter::ParseAltitude(simpleData.second.data(), false, airspace);
-				if(!basePresent) AirspaceConverter::LogMessage("ERROR: Failed to parse base altitude: " + simpleData.second.data(), true);
-			}
-			else if (str == "NAM") {
-				if (!simpleData.second.data().empty()) airspace.SetName(simpleData.second.data());
-			}
-			else if (str == "Category") {
-				if (simpleData.second.data() == "Class A") category = Airspace::Type::CLASSA;
-				else if (simpleData.second.data() == "Class B") category = Airspace::Type::CLASSB;
-				else if (simpleData.second.data() == "Class C") category = Airspace::Type::CLASSC;
-				else if (simpleData.second.data() == "Class D") category = Airspace::Type::CLASSD;
-				else if (simpleData.second.data() == "Class E") category = Airspace::Type::CLASSE;
-				else if (simpleData.second.data() == "Class F") category = Airspace::Type::CLASSF;
-				else if (simpleData.second.data() == "Class G") category = Airspace::Type::CLASSG;
-				else if (simpleData.second.data() == "Danger") category = Airspace::Type::DANGER;
-				else if (simpleData.second.data() == "Prohibited") category = Airspace::Type::PROHIBITED;
-				else if (simpleData.second.data() == "Restricted") category = Airspace::Type::RESTRICTED;
-				else if (simpleData.second.data() == "CTR") category = Airspace::Type::CTR;
-				else if (simpleData.second.data() == "TMA") category = Airspace::Type::TMA;
-				else if (simpleData.second.data() == "TMZ") category = Airspace::Type::TMZ;
-				else if (simpleData.second.data() == "RMZ") category = Airspace::Type::RMZ;
-				else if (simpleData.second.data() == "FIR") category = Airspace::Type::FIR;
-				else if (simpleData.second.data() == "UIR") category = Airspace::Type::UIR;
-				else if (simpleData.second.data() == "OTH") category = Airspace::Type::OTH;
-				else if (simpleData.second.data() == "Gliding area") category = Airspace::Type::GLIDING;
-				else if (simpleData.second.data() == "No glider") category = Airspace::Type::NOGLIDER;
-				else if (simpleData.second.data() == "Wave window") category = Airspace::Type::WAVE;
-				else if (simpleData.second.data() == "Unknown") category = Airspace::Type::UNKNOWN;
-				else {
-					category = Airspace::Type::UNDEFINED;
-					AirspaceConverter::LogMessage("ERROR: Undefined category of airspace. Skipping airspace: " + airspace.GetName(), true);
-				}
-			}
-		}
-
-		// If valid category make sure the new airspace is of that category
-		if (category != Airspace::Type::UNDEFINED) airspace.SetType(category);
-		else return false;
-
-		// If no altitude(s)
-		if (!basePresent || !topPresent) {
-			//TODO: Guesstimate altitudes from the points....
-			AirspaceConverter::LogMessage("Warning: Assuming previous altitude as GND for airspace: " + airspace.GetName(), false);
-		}
-
-		// Check if the altitudes make sense
-		if (airspace.GetBaseAltitude().GetAltFt() >= airspace.GetTopAltitude().GetAltFt()) {
-			AirspaceConverter::LogMessage("ERROR: Base and top altitudes are inverted or equal. Skipping airspace: " + airspace.GetName(), true);
-			return false;
-		}
-
-		// Iterate trough all the polygons of multigeometry
-		bool pointsFound(false);
-		for (boost::property_tree::ptree::value_type const& polygon : multigeometry) {
-			if (polygon.first != "Polygon") continue;
-			boost::property_tree::ptree linearRing = polygon.second.get_child("outerBoundaryIs").get_child("LinearRing");
-			str = linearRing.get<std::string>("coordinates");
-			if (str.empty()) continue;
-
-			// Before starting adding points make sure it is empty
-			assert(airspace.GetNumberOfPoints() == 0);
-
-			double lat = Geometry::LatLon::UNDEF_LAT, lon = Geometry::LatLon::UNDEF_LON;
-			double alt = -8000;
-			boost::char_separator<char> sep(", ");
-			boost::tokenizer<boost::char_separator<char> > tokens(str, sep);
-			bool error(false);
-			bool allPointsAtSameAlt(true);
-			int expected = 0; // 0: longitude, 1: latitude, 2:altitude
-			try {
-				for (const std::string& c : tokens) {
-					const double value = std::stod(c);
-					switch (expected) {
+		double lat = Geometry::LatLon::UNDEF_LAT, lon = Geometry::LatLon::UNDEF_LON;
+		double alt = -8000;
+		boost::char_separator<char> sep(", ");
+		boost::tokenizer<boost::char_separator<char> > tokens(str, sep);
+		bool error(false);
+		bool allPointsAtSameAlt(true);
+		int expected = 0; // 0: longitude, 1: latitude, 2:altitude
+		try {
+			for (const std::string& c : tokens) {
+				const double value = std::stod(c);
+				switch (expected) {
 					case 0: // longitude
 						if (Geometry::LatLon::IsValidLon(value)) lon = value;
 						else error = true;
@@ -943,43 +874,146 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 						break;
 					default:
 						error = true;
-					}
-					if (error) break;
 				}
+				if (error) break;
 			}
-			catch (...) {
-				error = true;
-			}
-
-			//TODO: Make use of allPointsAtSameAlt flag
-
-			// If all OK erform additional checks
-			if (!error && expected == 0) {
-				 
-				// Ensure that the polygon is closed (it should be already)...
-				airspace.ClosePoints();
-
-				// Verify that all points are unique
-				if (airspace.ArePointsValid()) {
-					
-					// Found it!
-					pointsFound = true;
-					
-					// So no need to continue iterating all the other polygons...
-					break;
-				}	
-			}
-
-			// If we are here the poligon wasn't good: it is not the top or base poligon of the airspace, so clean the points
-			airspace.ClearPoints();
+		}
+		catch (...) {
+			error = true;
 		}
 
-		if (pointsFound) {
-			// Add the new airspace
-			airspaces.insert(std::pair<int, Airspace>(airspace.GetType(), std::move(airspace)));
-			return true;
+		//TODO: Make use of allPointsAtSameAlt flag
+
+		// If all OK erform additional checks
+		if (!error && expected == 0) {
+
+			// Ensure that the polygon is closed (it should be already)...
+			airspace.ClosePoints();
+
+			// Verify that all points are unique
+			if (airspace.ArePointsValid()) {
+
+				// Found it!
+
+
+				// So no need to continue iterating all the other polygons...
+				return true;
+			}
+		}
+
+		// If we are here the poligon wasn't good: it is not the top or base poligon of the airspace, so clean the points
+		airspace.ClearPoints();
+	} catch(...) {
+
+	}
+	return false;
+}
+
+
+bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
+	// Check if it is a multi geometry
+	bool isMultiGeometry(placemark.count("MultiGeometry") == 1);
+
+	// If not must be a sigle polygon there
+	if(!isMultiGeometry && placemark.count("Polygon") != 1) return false;
+
+	try {
+		if(isMultiGeometry) {
+			// First try to get the multigeometry, if it is not there it is not the kind of KML airspace we are looking now
+			boost::property_tree::ptree multigeometry = placemark.get_child("MultiGeometry");
+
+			// Initialize airspace category from the folder
+			Airspace::Type category = (Airspace::Type)folderCategory;
+
+			// Build the new airspace
+			Airspace airspace(category);
+
+			// Get and set the name
+			std::string str = placemark.get<std::string>("name");
+			airspace.SetName(str);
+
+			boost::property_tree::ptree schemaData = placemark.get_child("ExtendedData").get_child("SchemaData");
+
+			bool basePresent(false), topPresent(false);
+			for (boost::property_tree::ptree::value_type const& simpleData : schemaData) {
+				if (simpleData.first != "SimpleData") continue;
+				str = simpleData.second.get_child("<xmlattr>").get<std::string>("name");
+				if (str == "Upper_Limit" || str == "Top") {
+					topPresent = AirspaceConverter::ParseAltitude(simpleData.second.data(), true, airspace);
+					if(!topPresent) AirspaceConverter::LogMessage("ERROR: Failed to parse top altitude: " + simpleData.second.data(), true);
+				}
+				else if (str == "Lower_Limit" || str == "Base") {
+					basePresent = AirspaceConverter::ParseAltitude(simpleData.second.data(), false, airspace);
+					if(!basePresent) AirspaceConverter::LogMessage("ERROR: Failed to parse base altitude: " + simpleData.second.data(), true);
+				}
+				else if (str == "NAM" || str == "name") {
+					if (!simpleData.second.data().empty()) airspace.SetName(simpleData.second.data());
+				}
+				else if (str == "Category") {
+					if (simpleData.second.data() == "Class A") category = Airspace::Type::CLASSA;
+					else if (simpleData.second.data() == "Class B") category = Airspace::Type::CLASSB;
+					else if (simpleData.second.data() == "Class C") category = Airspace::Type::CLASSC;
+					else if (simpleData.second.data() == "Class D") category = Airspace::Type::CLASSD;
+					else if (simpleData.second.data() == "Class E") category = Airspace::Type::CLASSE;
+					else if (simpleData.second.data() == "Class F") category = Airspace::Type::CLASSF;
+					else if (simpleData.second.data() == "Class G") category = Airspace::Type::CLASSG;
+					else if (simpleData.second.data() == "Danger") category = Airspace::Type::DANGER;
+					else if (simpleData.second.data() == "Prohibited") category = Airspace::Type::PROHIBITED;
+					else if (simpleData.second.data() == "Restricted") category = Airspace::Type::RESTRICTED;
+					else if (simpleData.second.data() == "CTR") category = Airspace::Type::CTR;
+					else if (simpleData.second.data() == "TMA") category = Airspace::Type::TMA;
+					else if (simpleData.second.data() == "TMZ") category = Airspace::Type::TMZ;
+					else if (simpleData.second.data() == "RMZ") category = Airspace::Type::RMZ;
+					else if (simpleData.second.data() == "FIR") category = Airspace::Type::FIR;
+					else if (simpleData.second.data() == "UIR") category = Airspace::Type::UIR;
+					else if (simpleData.second.data() == "OTH") category = Airspace::Type::OTH;
+					else if (simpleData.second.data() == "Gliding area") category = Airspace::Type::GLIDING;
+					else if (simpleData.second.data() == "No glider") category = Airspace::Type::NOGLIDER;
+					else if (simpleData.second.data() == "Wave window") category = Airspace::Type::WAVE;
+					else if (simpleData.second.data() == "Unknown") category = Airspace::Type::UNKNOWN;
+					else {
+						category = Airspace::Type::UNDEFINED;
+						AirspaceConverter::LogMessage("ERROR: Undefined category of airspace. Skipping airspace: " + airspace.GetName(), true);
+					}
+				}
+			}
+
+			// If valid category make sure the new airspace is of that category
+			if (category != Airspace::Type::UNDEFINED) airspace.SetType(category);
+			else return false;
+
+			// If no altitude(s)
+			if (!basePresent || !topPresent) {
+				//TODO: Guesstimate altitudes from the points....
+				AirspaceConverter::LogMessage("Warning: Assuming previous altitude as GND for airspace: " + airspace.GetName(), false);
+			}
+
+			// Check if the altitudes make sense
+			if (airspace.GetBaseAltitude().GetAltFt() >= airspace.GetTopAltitude().GetAltFt()) {
+				AirspaceConverter::LogMessage("ERROR: Base and top altitudes are inverted or equal. Skipping airspace: " + airspace.GetName(), true);
+				return false;
+			}
+
+			// Iterate trough all the polygons of multigeometry
+			bool pointsFound(false);
+			for (boost::property_tree::ptree::value_type const& polygon : multigeometry) {
+				if (polygon.first != "Polygon") continue;
+
+				pointsFound = ProcessPolygon(polygon.second, airspace);
+
+				// if found it, no need to continue iterating over all the other polygons...
+				if(pointsFound) break;
+			}
+
+			if (pointsFound) {
+				// Add the new airspace
+				airspaces.insert(std::pair<int, Airspace>(airspace.GetType(), std::move(airspace)));
+				return true;
+			} else {
+				AirspaceConverter::LogMessage("Warning: skipping MultiGeometry with invalid coordinates: " + airspace.GetName(), false);
+			}
 		} else {
-			AirspaceConverter::LogMessage("Warning: skipping MultiGeometry with invalid coordinates: " + airspace.GetName(), false);
+			//todo....
 		}
 	}
 	catch (...) {

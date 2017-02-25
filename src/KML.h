@@ -54,6 +54,7 @@ private:
 
 	bool ProcessFolder(const boost::property_tree::ptree& folder, const int upperCategory);
 	bool ProcessPlacemark(const boost::property_tree::ptree& placemark);
+	static bool ProcessPolygon(const boost::property_tree::ptree& polygon, Airspace& airspace);
 
 	static const std::string colors[][2];
 	static const std::string airfieldColors[][2];
