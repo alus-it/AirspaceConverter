@@ -115,7 +115,7 @@ bool SeeYou::ReadFile(const std::string& fileName, std::multimap<int,Waypoint*>&
 	AirspaceConverter::LogMessage("Reading CUP file: " + fileName, false);
 	int linecount = 0;
 	std::string sLine;
-	bool isCRLF = false, CRLFwarningGiven = false, firstWaypointLineFound = false;
+	bool isCRLF = false, CRLFwarningGiven = false, firstWaypointFound = false;
 
 	while (!input.eof() && input.good()) {
 
@@ -133,10 +133,7 @@ bool SeeYou::ReadFile(const std::string& fileName, std::multimap<int,Waypoint*>&
 		}
 
 		// Skip eventual header
-		if (!firstWaypointLineFound && sLine.find("name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc") == 0) {
-			firstWaypointLineFound = true;
-			continue;
-		}
+		if (!firstWaypointFound && sLine.find("name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc") == 0) continue;
 
 		// Directly skip empty lines
 		if (sLine.empty()) continue;
@@ -162,7 +159,7 @@ bool SeeYou::ReadFile(const std::string& fileName, std::multimap<int,Waypoint*>&
 		// Tokenize with quotes
 		boost::tokenizer<boost::escaped_list_separator<char> > tokens(sLine); // default separator:',', default quote:'"', default escape char:'\'
 		if(std::distance(tokens.begin(),tokens.end()) != 11) { // We expect only 11 fields
-			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: expected 11 fields: %2s") %linecount %sLine), true);
+			if (firstWaypointFound) AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: expected 11 fields: %2s") %linecount %sLine), true);
 			continue;
 		}
 
@@ -170,7 +167,7 @@ bool SeeYou::ReadFile(const std::string& fileName, std::multimap<int,Waypoint*>&
 		boost::tokenizer<boost::escaped_list_separator<char> >::iterator token=tokens.begin();
 		std::string name = *token;
 		if (name.empty()) {
-			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: a name must be present: %2s") %linecount %sLine), true);
+			if (firstWaypointFound) AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: a name must be present: %2s") %linecount %sLine), true);
 			continue;
 		}
 
@@ -186,7 +183,7 @@ bool SeeYou::ReadFile(const std::string& fileName, std::multimap<int,Waypoint*>&
 		token++;
 		double latitude;
 		if(!ParseLatitude(*token,latitude)) {
-			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: invalid latitude: %2s") %linecount %(*token)), true);
+			if (firstWaypointFound) AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: invalid latitude: %2s") %linecount %(*token)), true);
 			continue;
 		}
 
@@ -194,7 +191,7 @@ bool SeeYou::ReadFile(const std::string& fileName, std::multimap<int,Waypoint*>&
 		token++;
 		double longitude;
 		if(!ParseLongitude(*token,longitude)) {
-			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: invalid longitude: %2s") %linecount %(*token)), true);
+			if (firstWaypointFound) AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: invalid longitude: %2s") %linecount %(*token)), true);
 			continue;
 		}
 
@@ -202,7 +199,7 @@ bool SeeYou::ReadFile(const std::string& fileName, std::multimap<int,Waypoint*>&
 		token++;
 		int altitude = 0;
 		if(!ParseAltitude(*token,altitude))
-			AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %(*token)), true);
+			if (firstWaypointFound) AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %(*token)), true);
 
 		// Waypoint style
 		token++;
@@ -211,7 +208,7 @@ bool SeeYou::ReadFile(const std::string& fileName, std::multimap<int,Waypoint*>&
 			type = std::stoi(*token);
 		} catch(...) {}
 		if(type <= Waypoint::undefined || type >= Waypoint::numOfWaypointTypes) {
-			AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid waypoint style: %2s, assuming normal") %linecount %(*token)), true);
+			if (firstWaypointFound) AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid waypoint style: %2s, assuming normal") %linecount %(*token)), true);
 			type = Waypoint::normal;
 		}
 
@@ -225,14 +222,14 @@ bool SeeYou::ReadFile(const std::string& fileName, std::multimap<int,Waypoint*>&
 			} catch(...) {}
 			if(runwayDir < 0 || runwayDir > 360) {
 				runwayDir = -1; // make sure it is set at -1
-				AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid runway direction: %2s") % linecount % (*token)), true);
+				if (firstWaypointFound) AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid runway direction: %2s") % linecount % (*token)), true);
 			}
 
 			// Runway length
 			token++;
 			int runwayLength = -1;
 			if(!ParseLength(*token,runwayLength))
-				AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid runway length: %2s") %linecount %(*token)), true);
+				if (firstWaypointFound) AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid runway length: %2s") %linecount %(*token)), true);
 
 			// Radio frequency
 			token++;
@@ -267,7 +264,7 @@ bool SeeYou::ReadFile(const std::string& fileName, std::multimap<int,Waypoint*>&
 		}
 
 		// Make sure that at this point we already found a valid waypoint so the header is not anymore expected
-		if (!firstWaypointLineFound) firstWaypointLineFound = true;
+		if (!firstWaypointFound) firstWaypointFound = true;
 	}
 	return true;
 }
