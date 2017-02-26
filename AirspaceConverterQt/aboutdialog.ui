@@ -108,6 +108,9 @@
      <height>16</height>
     </rect>
    </property>
+   <property name="whatsThis">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;AirspaceConverter author&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
    <property name="text">
     <string>Written by: Alberto Realis-Luc</string>
    </property>
@@ -121,6 +124,12 @@
      <height>16</height>
     </rect>
    </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This is the version of the current installed AirspaceConverter.&lt;/p&gt;&lt;p&gt;Check the website for newer versions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="whatsThis">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
    <property name="text">
     <string/>
    </property>
@@ -133,6 +142,9 @@
      <width>241</width>
      <height>16</height>
     </rect>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For more info click this link to visit AirspaceConverter website.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="text">
     <string>&lt;a href=&quot;http://www.alus.it/AirspaceConverter/&quot;&gt;www.alus.it/AirspaceConverter&lt;/a&gt;</string>
@@ -156,6 +168,9 @@
      <height>16</height>
     </rect>
    </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For any comment about AirspaceConverter write to thie e-mail.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
    <property name="text">
     <string>&lt;a href=&quot;mailto:info@alus.it&quot;&gt;info@alus.it&lt;/a&gt;</string>
    </property>
@@ -177,6 +192,9 @@
      <width>64</width>
      <height>64</height>
     </rect>
+   </property>
+   <property name="whatsThis">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="text">
     <string/>

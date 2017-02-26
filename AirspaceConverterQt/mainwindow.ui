@@ -29,7 +29,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Airspace Converter</string>
+   <string>AirspaceConverter</string>
   </property>
   <property name="windowIcon">
    <iconset resource="resources.qrc">
@@ -48,6 +48,9 @@
       <height>26</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click this button to get more info about this software.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
     <property name="locale">
      <locale language="English" country="UnitedStates"/>
     </property>
@@ -63,6 +66,9 @@
       <width>231</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose one or more input airspace file(s). The input files can be in the OpenAIP, OpenAir or Google Earth KML/KMZ formats.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="locale">
      <locale language="English" country="UnitedStates"/>
@@ -83,6 +89,9 @@
       <height>31</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clears all the airspace definitions currently loaded in memory.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
     <property name="locale">
      <locale language="English" country="UnitedStates"/>
     </property>
@@ -98,6 +107,9 @@
       <width>781</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the desired output format.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="locale">
      <locale language="English" country="UnitedStates"/>
@@ -164,6 +176,9 @@
       <height>31</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose a folder with input airspace files. All the contained files, in OpenAIP, OpenAir and Google Earth KML/KMZ will be attempted to load. Beware to don't reload the just converted files.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
     <property name="locale">
      <locale language="English" country="UnitedStates"/>
     </property>
@@ -179,6 +194,9 @@
       <width>231</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load one or more waypoints files in the SeeYou (.CUP) format.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="locale">
      <locale language="English" country="UnitedStates"/>
@@ -196,6 +214,9 @@
       <height>31</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load all the waypoints files in the SeeYou (.CUP) format contained in a folder.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
     <property name="locale">
      <locale language="English" country="UnitedStates"/>
     </property>
@@ -212,6 +233,9 @@
       <height>31</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load one or multiple terrain raster maps (.DEM) files. Terrain maps are used to get the AMSL altitude of AGL altitudes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
     <property name="locale">
      <locale language="English" country="UnitedStates"/>
     </property>
@@ -227,6 +251,9 @@
       <width>231</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load all terrain raster maps (.DEM) files from a directory. Terrain maps are used to get the AMSL altitude of AGL altitudes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="locale">
      <locale language="English" country="UnitedStates"/>
@@ -295,6 +322,9 @@
       <height>31</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The number of airspace definitions currently loaded.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
     <property name="locale">
      <locale language="English" country="UnitedStates"/>
     </property>
@@ -319,6 +349,9 @@
       <width>111</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The number of terrain raster maps currently loaded.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="locale">
      <locale language="English" country="UnitedStates"/>
@@ -345,6 +378,9 @@
       <height>31</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The number of waypoints currently loaded.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
     <property name="locale">
      <locale language="English" country="UnitedStates"/>
     </property>
@@ -370,6 +406,9 @@
       <height>31</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clears all the waypoints currently loaded in memory.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
     <property name="locale">
      <locale language="English" country="UnitedStates"/>
     </property>
@@ -388,6 +427,9 @@
       <width>151</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clears all the terrain raster maps currently loaded in memory.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="locale">
      <locale language="English" country="UnitedStates"/>
@@ -456,6 +498,9 @@
       <height>31</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If desired, only before to load airspace, set here a specific QNH to be used to calculate the AMSL height of flight levels. This is used only to make Google Earth files.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
     <property name="minimum">
      <double>800.000000000000000</double>
     </property>
@@ -479,7 +524,7 @@
      <locale language="English" country="UnitedStates"/>
     </property>
     <property name="text">
-     <string>hPa   (used to calculate altitude of flight levels, only durin input)</string>
+     <string>hPa   (used to calculate altitude of flight levels, only during input)</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_8">
@@ -523,6 +568,9 @@
       <height>31</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set here the default terrain altitude in meters that will be used for the points not covered by the loaded terrain raster maps. Used only to make Google Earth files.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
     <property name="minimum">
      <number>-100</number>
     </property>
@@ -542,6 +590,9 @@
       <height>31</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clears all the text from the below message log.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
     <property name="text">
      <string>Clear log</string>
     </property>
@@ -557,6 +608,9 @@
       <width>161</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Opens the folder with the just created output file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="text">
      <string>Open output folder</string>
@@ -574,6 +628,9 @@
       <height>31</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Opens the just created output file with its predefined software.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
     <property name="text">
      <string>Open output file</string>
     </property>
@@ -586,6 +643,9 @@
       <width>161</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Terminates AirspaceConverter.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="text">
      <string>Close</string>
@@ -608,6 +668,9 @@
       <weight>75</weight>
       <bold>true</bold>
      </font>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:400;&quot;&gt;Starts the conversion process.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="text">
      <string>Convert</string>
@@ -641,6 +704,9 @@
       <height>31</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This is the path of the output file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
     <property name="inputMethodHints">
      <set>Qt::ImhNone</set>
     </property>
@@ -662,6 +728,9 @@
       <width>41</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Press this button to choose path and name of the output file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="text">
      <string>...</string>
