@@ -84,7 +84,7 @@ std::vector<RasterMap*> KML::terrainMaps;
 double KML::defaultTerrainAltitudeMt = 20.842;
 std::string KML::iconsPath = "/usr/share/airspaceconverter/icons/"; // Default installed Linux location
 
-KML::KML(std::multimap<int, Airspace>& airspacesMap, std::multimap<int, Waypoint>& waypointsMap):
+KML::KML(std::multimap<int, Airspace>& airspacesMap, std::multimap<int, Waypoint*>& waypointsMap):
 		airspaces(airspacesMap),
 		waypoints(waypointsMap),
 		allAGLaltitudesCovered(true),
@@ -199,28 +199,28 @@ void KML::OpenPlacemark(const Airspace& airspace) {
 		<< "</ExtendedData>\n";
 }
 
-void KML::OpenPlacemark(const Waypoint& waypoint) {
-	const bool isAirfield = waypoint.IsAirfield();
-	const int altMt = waypoint.GetAltitude();
+void KML::OpenPlacemark(const Waypoint* waypoint) {
+	const bool isAirfield = waypoint->IsAirfield();
+	const int altMt = waypoint->GetAltitude();
 	const int altFt = (int)round(altMt / Altitude::FEET2METER);
 	outputFile << "<Placemark>\n"
-		<< "<name>" << waypoint.GetName() << "</name>\n"
-		<< "<styleUrl>#Style" << waypoint.GetTypeName() << "</styleUrl>\n";
+		<< "<name>" << waypoint->GetName() << "</name>\n"
+		<< "<styleUrl>#Style" << waypoint->GetTypeName() << "</styleUrl>\n";
 	outputFile << "<visibility>" << (isAirfield ? 1 : 0) << "</visibility>\n"
 		<< "<ExtendedData>\n"
 		<< "<SchemaData>\n"
-		<< "<SimpleData name=\"Name\">" << waypoint.GetName() << "</SimpleData>\n"
-		<< "<SimpleData name=\"Type\">" << waypoint.GetTypeName() << "</SimpleData>\n"
-		<< "<SimpleData name=\"Code\">" << waypoint.GetCode() << "</SimpleData>\n"
-		<< "<SimpleData name=\"Country\">" << waypoint.GetCountry() << "</SimpleData>\n"
+		<< "<SimpleData name=\"Name\">" << waypoint->GetName() << "</SimpleData>\n"
+		<< "<SimpleData name=\"Type\">" << waypoint->GetTypeName() << "</SimpleData>\n"
+		<< "<SimpleData name=\"Code\">" << waypoint->GetCode() << "</SimpleData>\n"
+		<< "<SimpleData name=\"Country\">" << waypoint->GetCountry() << "</SimpleData>\n"
 		<< "<SimpleData name=\"Altitude\">" << altMt << " m - " << altFt << " ft" << "</SimpleData>\n";
 	if(isAirfield) {
-		const Airfield& airfield = (const Airfield&)waypoint;
-		outputFile << "<SimpleData name=\"Runway direction\">" << (airfield.GetRunwayDir() != -1 ? std::to_string(airfield.GetRunwayDir()) + " deg" : "UNKNOWN") << "</SimpleData>\n"
-		<< "<SimpleData name=\"Runway length\">" << (airfield.GetRunwayLength() != -1 ? std::to_string(airfield.GetRunwayLength()) + " m" : "UNKNOWN") << "</SimpleData>\n"
-		<< "<SimpleData name=\"Radio frequency\">" << (airfield.GetRadioFrequency().empty() ? "UNKNOWN" : airfield.GetRadioFrequency() + " MHz") << "</SimpleData>\n";
+		const Airfield* airfield = (const Airfield*)waypoint;
+		outputFile << "<SimpleData name=\"Runway direction\">" << (airfield->GetRunwayDir() != -1 ? std::to_string(airfield->GetRunwayDir()) + " deg" : "UNKNOWN") << "</SimpleData>\n"
+		<< "<SimpleData name=\"Runway length\">" << (airfield->GetRunwayLength() != -1 ? std::to_string(airfield->GetRunwayLength()) + " m" : "UNKNOWN") << "</SimpleData>\n"
+		<< "<SimpleData name=\"Radio frequency\">" << (airfield->GetRadioFrequency().empty() ? "UNKNOWN" : airfield->GetRadioFrequency() + " MHz") << "</SimpleData>\n";
 	}
-	outputFile << "<SimpleData name=\"Description\">" << waypoint.GetDescription() << "</SimpleData>\n"
+	outputFile << "<SimpleData name=\"Description\">" << waypoint->GetDescription() << "</SimpleData>\n"
 		<< "</SchemaData>\n"
 		<< "</ExtendedData>\n";
 }
@@ -390,7 +390,7 @@ bool KML::Write(const std::string& filename) {
 			const auto filtered = waypoints.equal_range(t);
 			for (auto it = filtered.first; it != filtered.second; ++it) {
 				//const Waypoint* w = it->second;
-				const Waypoint& w = it->second;
+				const Waypoint* w = it->second;
 
 				// Open placemark
 				OpenPlacemark(w);
@@ -404,18 +404,18 @@ bool KML::Write(const std::string& filename) {
 				if (isAirfield) {
 					
 					// Get the airfield
-					const Airfield& a = (const Airfield&)w;
+					const Airfield* a = (const Airfield*)w;
 					
 					// Get its rinway length and direction
-					const int leng = a.GetRunwayLength();
-					dir = a.GetRunwayDir();
+					const int leng = a->GetRunwayLength();
+					dir = a->GetRunwayDir();
 
 					// If they are valid...
 					if (leng > 0 && dir >= 0) {
 
 						// Calculate the runway perimeter
 						std::vector<Geometry::LatLon> airfieldPerimeter;
-						if (Geometry::CalcAirfieldPolygon(a.GetLatitude(), a.GetLongitude(), leng, dir, airfieldPerimeter)) {
+						if (Geometry::CalcAirfieldPolygon(a->GetLatitude(), a->GetLongitude(), leng, dir, airfieldPerimeter)) {
 							
 							// Open a multigeometry with a polygon clamped onto the ground
 							outputFile << "<MultiGeometry>\n"
@@ -427,10 +427,10 @@ bool KML::Write(const std::string& filename) {
 
 							// Add the four points
 							for (const Geometry::LatLon& p : airfieldPerimeter)
-								outputFile << p.Lon() << "," << p.Lat() << "," << a.GetAltitude() << "\n";
+								outputFile << p.Lon() << "," << p.Lat() << "," << a->GetAltitude() << "\n";
 							
 							// Close the perimeter re-adding the first point 
-							outputFile << airfieldPerimeter.front().Lon() << "," << airfieldPerimeter.front().Lat() << "," << a.GetAltitude() << "\n";
+							outputFile << airfieldPerimeter.front().Lon() << "," << airfieldPerimeter.front().Lat() << "," << a->GetAltitude() << "\n";
 
 							// Close the polygon
 							ClosePolygon();
@@ -445,7 +445,7 @@ bool KML::Write(const std::string& filename) {
 				outputFile << "<Point>\n"
 					<< "<extrude>0</extrude>\n"
 					<< "<altitudeMode>" << (t != Waypoint::normal ? "clampToGround" : "absolute") << "</altitudeMode>\n" // Except "normal" are all objects on the ground
-					<< "<coordinates>" << w.GetLongitude() << "," << w.GetLatitude() << "," << w.GetAltitude() << "</coordinates>\n"
+					<< "<coordinates>" << w->GetLongitude() << "," << w->GetLatitude() << "," << w->GetAltitude() << "</coordinates>\n"
 					<< "</Point>\n";
 
 				// If the perimeter was drawn the the multigeometry have to be closed

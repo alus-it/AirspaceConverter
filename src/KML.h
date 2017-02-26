@@ -25,7 +25,7 @@ class Airfield;
 
 class KML {
 public:
-	KML(std::multimap<int, Airspace>& airspacesMap, std::multimap<int, Waypoint>& waypointsMap);
+	KML(std::multimap<int, Airspace>& airspacesMap, std::multimap<int, Waypoint*>& waypointsMap);
 	bool Write(const std::string& filename);
 	static bool AddTerrainMap(const std::string& filename);
 	inline static int GetNumOfRasterMaps() { return (int)terrainMaps.size(); }
@@ -41,7 +41,7 @@ private:
 	static bool GetTerrainAltitudeMt(const double& lat, const double& lon, double&alt);
 	void WriteHeader(const bool airspacePresent, const bool waypointsPresent);
 	void OpenPlacemark(const Airspace& airspace);
-	void OpenPlacemark(const Waypoint& waypoint);
+	void OpenPlacemark(const Waypoint* waypoint);
 	void OpenPolygon(const bool extrude, const bool absolute);
 	void ClosePolygon();
 	void WriteSideWalls(const Airspace& airspace);
@@ -60,7 +60,7 @@ private:
 	static double defaultTerrainAltitudeMt;
 	static std::string iconsPath;
 	std::multimap<int, Airspace>& airspaces;
-	std::multimap<int, Waypoint>& waypoints;
+	std::multimap<int, Waypoint*>& waypoints;
 	std::ofstream outputFile;
 	bool allAGLaltitudesCovered;
 	int folderCategory;

@@ -15,6 +15,6 @@
 
 class Waypoint;
 
-namespace CUPreader {
-	bool ReadFile(const std::string& fileName, std::multimap<int,Waypoint>& output);
+namespace SeeYou {
+	bool ReadFile(const std::string& fileName, std::multimap<int,Waypoint*>& output);
 };

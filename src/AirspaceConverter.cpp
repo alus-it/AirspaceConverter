@@ -62,6 +62,7 @@ AirspaceConverter::AirspaceConverter() :
 
 AirspaceConverter::~AirspaceConverter() {
 	KML::ClearTerrainMaps();
+	UnloadWaypoints();
 }
 
 void AirspaceConverter::DefaultLogMessage(const std::string& msgText, const bool isError) {
@@ -191,7 +192,7 @@ void AirspaceConverter::UnloadRasterMaps() {
 void AirspaceConverter::LoadWaypoints() {
 	conversionDone = false;
 	for (const std::string& inputFile : waypointFiles) {
-		bool redOk = CUPreader::ReadFile(inputFile, waypoints);
+		bool redOk = SeeYou::ReadFile(inputFile, waypoints);
 		if (redOk && outputFile.empty()) outputFile = boost::filesystem::path(inputFile).replace_extension(".kmz").string(); // Default output as KMZ
 	}
 	waypointFiles.clear();
@@ -199,6 +200,7 @@ void AirspaceConverter::LoadWaypoints() {
 
 void AirspaceConverter::UnloadWaypoints() {
 	conversionDone = false;
+	for (const std::pair<const int, Waypoint*>& wpt : waypoints) delete wpt.second;
 	waypoints.clear();
 }
 

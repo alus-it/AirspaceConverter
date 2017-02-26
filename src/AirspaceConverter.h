@@ -84,7 +84,7 @@ private:
 
 	static std::string cGPSmapperCommand;
 	std::multimap<int, Airspace> airspaces;
-	std::multimap<int, Waypoint> waypoints;
+	std::multimap<int, Waypoint*> waypoints;
 	std::string outputFile;
 	std::vector<std::string> airspaceFiles, terrainRasterMapFiles, waypointFiles;
 	bool conversionDone;
