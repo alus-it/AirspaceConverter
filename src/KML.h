@@ -25,9 +25,7 @@ class Airfield;
 
 class KML {
 public:
-	inline KML(std::multimap<int, Airspace>& airspacesMap, std::multimap<int, Waypoint>& waypointsMap): airspaces(airspacesMap), waypoints(waypointsMap), allAGLaltitudesCovered(true) {}
-	inline ~KML() {}
-
+	KML(std::multimap<int, Airspace>& airspacesMap, std::multimap<int, Waypoint>& waypointsMap);
 	bool Write(const std::string& filename);
 	static bool AddTerrainMap(const std::string& filename);
 	inline static int GetNumOfRasterMaps() { return (int)terrainMaps.size(); }
@@ -36,7 +34,6 @@ public:
 	inline static double GetDefaultTerrainAltitude() { return defaultTerrainAltitudeMt; }
 	inline static void SetIconsPath(const std::string& path) { iconsPath = path; } // To set the directory containing the waypoints icons...
 	inline bool WereAllAGLaltitudesCovered() const { return allAGLaltitudesCovered; }
-
 	bool ReadKMZ(const std::string& filename);
 	bool ReadKML(const std::string& filename);
 
@@ -54,7 +51,7 @@ private:
 
 	bool ProcessFolder(const boost::property_tree::ptree& folder, const int upperCategory);
 	bool ProcessPlacemark(const boost::property_tree::ptree& placemark);
-	static bool ProcessPolygon(const boost::property_tree::ptree& polygon, Airspace& airspace);
+	static bool ProcessPolygon(const boost::property_tree::ptree& polygon, Airspace& airspace, bool& isExtruded, Altitude& avgAltitude);
 
 	static const std::string colors[][2];
 	static const std::string airfieldColors[][2];

@@ -290,16 +290,14 @@ bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop,
 					valueFound = true;
 				}
 				else return false;
-			}
-			else {
+			} else {
 				if (!typeFound) {
 					if (valueFound) {
 						if (boost::iequals(str, "AGL") || boost::iequals(str, "AGND") || boost::iequals(str, "ASFC") || boost::iequals(str, "GND") || boost::iequals(str, "SFC")) {
 							isAGL = true;
 							isAMSL = false;
 							typeFound = true;
-						}
-						else if (boost::iequals(str, "MSL") || boost::iequals(str, "AMSL") || boost::iequals(str, "ALT")) typeFound = true;
+						} else if (boost::iequals(str, "MSL") || boost::iequals(str, "AMSL") || boost::iequals(str, "ALT")) typeFound = true;
 						else if (!unitFound) {
 							if (boost::iequals(str, "FT") || boost::iequals(str, "F")) unitFound = true;
 							else if (boost::iequals(str, "M") || boost::iequals(str, "MT")) {
@@ -307,38 +305,34 @@ bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop,
 								unitFound = true;
 							}
 						}
-					}
-					else {
+					} else {
 						if (boost::iequals(str, "FL")) {
 							isFL = true;
 							isAMSL = false;
 							typeFound = true;
-						}
-						else if (boost::iequals(str, "GND") || boost::iequals(str, "SFC")) {
+						} else if (boost::iequals(str, "GND") || boost::iequals(str, "SFC")) {
 							isAGL = true;
 							isAMSL = false;
 							typeFound = true;
 							valueFound = true;
 							unitFound = true;
-						}
-						else if (boost::iequals(str, "UNLIM") || boost::iequals(str, "UNLIMITED") || boost::iequals(str, "UNL")) {
-							isAGL = false;
-							isAMSL = true;
+						} else if (boost::iequals(str, "MSL") || boost::iequals(str, "AMSL")) {
+							typeFound = true;
+							valueFound = true;
+							unitFound = true;
+						} else if (boost::iequals(str, "UNLIM") || boost::iequals(str, "UNLIMITED") || boost::iequals(str, "UNL")) {
 							typeFound = true;
 							valueFound = true;
 							unitFound = true;
 							value = 10000000;
 						}
 					}
-				}
-				else if (!unitFound && !typeFound) return false;
+				} else if (!unitFound && !typeFound) return false;
 			}
 			if (valueFound && typeFound && unitFound) break;
 			if (text.at(i) == ' ' || text.at(i) == '=') {
-				i++;
-				if (i < l) isNumber = isDigit(text.at(i));
-			}
-			else isNumber = !isNumber;
+				if (++i < l) isNumber = isDigit(text.at(i));
+			} else isNumber = !isNumber;
 			s = i;
 		}
 	}

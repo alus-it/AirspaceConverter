@@ -65,7 +65,7 @@ const bool Airspace::CATEGORY_VISIBILITY[] = {
 	true, //PROHIBITED
 	true, //RESTRICTED
 	true, //CTR
-	false, //TMA
+	true, //TMA
 	false, //TMZ
 	false, //RMZ
 	false, //FIR
@@ -122,6 +122,16 @@ Airspace::Airspace(Airspace&& orig) // Move constructor
 	orig.type = UNDEFINED;
 }
 
+Airspace& Airspace::operator=(const Airspace& other) {
+	top = other.top;
+	base = other.base;
+	geometries = other.geometries;
+	points = other.points;
+	type = other.type;
+	name = other.name;
+	return *this;
+}
+
 Airspace::~Airspace() {
 	ClearGeometries();
 }
@@ -165,6 +175,13 @@ bool Airspace::ArePointsValid() {
 	
 	// If we arrived here it is all OK
 	return true;
+}
+
+void Airspace::CopyNameAlt(const Airspace& other) {
+	top = other.top;
+	base = other.base;
+	type = other.type;
+	name = other.name;
 }
 
 void Airspace::AddGeometry(const Geometry* geometry) {

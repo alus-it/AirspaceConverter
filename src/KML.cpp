@@ -84,6 +84,13 @@ std::vector<RasterMap*> KML::terrainMaps;
 double KML::defaultTerrainAltitudeMt = 20.842;
 std::string KML::iconsPath = "/usr/share/airspaceconverter/icons/"; // Default installed Linux location
 
+KML::KML(std::multimap<int, Airspace>& airspacesMap, std::multimap<int, Waypoint>& waypointsMap):
+		airspaces(airspacesMap),
+		waypoints(waypointsMap),
+		allAGLaltitudesCovered(true),
+		folderCategory(Airspace::Type::UNDEFINED) {
+}
+
 bool KML::AddTerrainMap(const std::string& filename) {
 	RasterMap* pTerrainMap = new RasterMap();
 	if (pTerrainMap == nullptr) return false;
@@ -496,7 +503,7 @@ bool KML::Write(const std::string& filename) {
 
 				OpenPlacemark(a);
 
-				if (a.IsGNDbased()) WriteBaseOrTop(a, a.GetTopAltitude(), true); // then that's easy!
+				if (a.IsGNDbased() || a.IsMSLbased()) WriteBaseOrTop(a, a.GetTopAltitude(), true); // then that's easy!
 				else { // otherwise we have to abuse KML which is not properly done to draw middle air airspaces
 					outputFile << "<MultiGeometry>\n";
 
@@ -671,6 +678,8 @@ bool KML::ReadKMZ(const std::string& filename) {
 		return false;
 	}
 
+	AirspaceConverter::LogMessage("Opened KMZ file: " + filename, false);
+
 	std::string extractedKmlFile;
 	struct zip_stat sb;
 
@@ -822,33 +831,34 @@ bool KML::ProcessFolder(const boost::property_tree::ptree& folder, const int upp
 	return true;
 }
 
-bool KML::ProcessPolygon(const boost::property_tree::ptree& polygon, Airspace& airspace) {
+bool KML::ProcessPolygon(const boost::property_tree::ptree& polygon, Airspace& airspace, bool& isExtruded, Altitude& altitude) {
 	// Verify if extrude and altitudeMode tags are present
-	bool extruded(polygon.count("extrude") == 1);
-	bool altRelToGnd(polygon.count("altitudeMode") == 1);
+	isExtruded = (polygon.count("extrude") == 1);
+	bool isAGL = (polygon.count("altitudeMode") == 1);
 
 	try {
 		// First try to get the LinearRing
 		boost::property_tree::ptree linearRing = polygon.get_child("outerBoundaryIs").get_child("LinearRing");
 
 		// Get extrude and altitudeMode contents
-		if (extruded && polygon.get<int>("extrude") != 1) extruded = false;
-		if (altRelToGnd && polygon.get<std::string>("altitudeMode") != "relativeToGround") altRelToGnd = false;
-		//TODO: do something with those... extrude should be a GND base...
+		if (isExtruded && polygon.get<int>("extrude") != 1) isExtruded = false;
+		if (isAGL && polygon.get<std::string>("altitudeMode") != "relativeToGround") isAGL = false;
 
 		// Then get the coordinates
 		std::string str = linearRing.get<std::string>("coordinates");
 		if (str.empty()) return false;
 
-		// Before starting adding points make sure it is empty
-		assert(airspace.GetNumberOfPoints() == 0);
+		Airspace airsp;
+		assert(airsp.GetNumberOfPoints() == 0);
 
+		double avgAltitude = 0;
+		unsigned long numOfPoints = 0;
 		double lat = Geometry::LatLon::UNDEF_LAT, lon = Geometry::LatLon::UNDEF_LON;
 		double alt = -8000;
 		boost::char_separator<char> sep(", \n");
 		boost::tokenizer<boost::char_separator<char> > tokens(str, sep);
 		bool error(false);
-		bool allPointsAtSameAlt(true);
+		bool allPointsAtSameAlt = true;
 		int expected = 0; // 0: longitude, 1: latitude, 2:altitude
 		try {
 			for (const std::string& c : tokens) {
@@ -870,7 +880,9 @@ bool KML::ProcessPolygon(const boost::property_tree::ptree& polygon, Airspace& a
 								if (value != alt) allPointsAtSameAlt = false;
 							} else alt = value;
 						}
-						airspace.AddSinglePointOnly(lat, lon);
+						airsp.AddSinglePointOnly(lat, lon);
+						numOfPoints++;
+						avgAltitude += value;
 						expected = 0;
 						break;
 					default:
@@ -885,15 +897,21 @@ bool KML::ProcessPolygon(const boost::property_tree::ptree& polygon, Airspace& a
 
 		// If all OK perform additional checks
 		if (!error && expected == 0) {
+			// Calculate the average altitude found in this polygon
+			if (allPointsAtSameAlt) avgAltitude = alt;
+			else avgAltitude /= numOfPoints;
+
 			// Ensure that the polygon is closed (it should be already)...
-			airspace.ClosePoints();
+			airsp.ClosePoints();
 
-			// Verify that all points are unique
-			if (allPointsAtSameAlt || airspace.ArePointsValid()) return true;
+			// Or the points are all at the same height or verify that all points are unique
+			if (allPointsAtSameAlt || airsp.ArePointsValid()) {
+				airsp.CopyNameAlt(airspace);
+				airspace = std::move(airsp);
+				isAGL ? altitude.SetAltMtGND(avgAltitude) : altitude.SetAltMtMSL(avgAltitude);
+				return true;
+			}
 		}
-
-		// If we are here the polygon wasn't good: it is not the top or base polygon of the airspace, so clean the points
-		airspace.ClearPoints();
 	} catch(...) {}
 	return false;
 }
@@ -922,14 +940,8 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 		for (boost::property_tree::ptree::value_type const& simpleData : schemaData) {
 			if (simpleData.first != "SimpleData") continue;
 			str = simpleData.second.get_child("<xmlattr>").get<std::string>("name");
-			if (str == "Upper_Limit" || str == "Top") {
-				topPresent = AirspaceConverter::ParseAltitude(simpleData.second.data(), true, airspace);
-				if(!topPresent) AirspaceConverter::LogMessage("ERROR: Failed to parse top altitude: " + simpleData.second.data(), true);
-			}
-			else if (str == "Lower_Limit" || str == "Base") {
-				basePresent = AirspaceConverter::ParseAltitude(simpleData.second.data(), false, airspace);
-				if(!basePresent) AirspaceConverter::LogMessage("ERROR: Failed to parse base altitude: " + simpleData.second.data(), true);
-			}
+			if (str == "Upper_Limit" || str == "Top") topPresent = AirspaceConverter::ParseAltitude(simpleData.second.data(), true, airspace);
+			else if (str == "Lower_Limit" || str == "Base") basePresent = AirspaceConverter::ParseAltitude(simpleData.second.data(), false, airspace);
 			else if (str == "NAM" || str == "name") {
 				if (!simpleData.second.data().empty()) airspace.SetName(simpleData.second.data());
 			}
@@ -966,49 +978,101 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 		if (category != Airspace::Type::UNDEFINED) airspace.SetType(category);
 		else return false;
 
-		// If no altitude(s)
-		if (!basePresent || !topPresent) {
-			//TODO: Guesstimate altitudes from the points.... get altitude from polygons...
-			AirspaceConverter::LogMessage("Warning: Assuming previous altitude as GND for airspace: " + airspace.GetName(), false);
-		}
+		bool pointsFound(false);
 
-		// Check if the altitudes make sense
-		if (airspace.GetBaseAltitude().GetAltFt() >= airspace.GetTopAltitude().GetAltFt()) {
-			AirspaceConverter::LogMessage("ERROR: Base and top altitudes are inverted or equal. Skipping airspace: " + airspace.GetName(), true);
-			return false;
-		}
-
-		// If we expect a multigemetry...
+		// If we expect a multigeometry...
 		if(isMultiGeometry) {
-			bool pointsFound(false);
 
-			// Iterate trough all the polygons of multigeometry
-			for (boost::property_tree::ptree::value_type const& polygon : placemark.get_child("MultiGeometry")) {
-				if (polygon.first != "Polygon") continue;
+			// If both altitudes were already found in the "header", then it's easier
+			if(basePresent && topPresent) {
+				// Iterate trough all the polygons of multigeometry just to find the points
+				for (boost::property_tree::ptree::value_type const& polygon : placemark.get_child("MultiGeometry")) {
+					if (polygon.first != "Polygon") continue;
+					Altitude alt;
+					bool isExtruded(true);
+					pointsFound = ProcessPolygon(polygon.second, airspace, isExtruded, alt);
+					if (isExtruded) return false; // Polygon of multigeometry must not be extruded
 
-				pointsFound = ProcessPolygon(polygon.second, airspace);
-
-				// if found it, no need to continue iterating over all the other polygons...
-				if(pointsFound) break;
+					// if found it, no need to continue iterating over all the other polygons...
+					if(pointsFound) break;
+				}
 			}
 
-			if (pointsFound) {
-				airspaces.insert(std::pair<int, Airspace>(airspace.GetType(), std::move(airspace)));
-				return true;
-			} else AirspaceConverter::LogMessage("Warning: skipping MultiGeometry with invalid coordinates: " + airspace.GetName(), false);
+			// If the altitudes were not found look for them from the polygons...
+			else {
+				Altitude top(airspace.GetTopAltitude()), base(airspace.GetBaseAltitude());
+				if (!basePresent) base.SetAltMtMSL(1000000);
+				if (!topPresent) top.SetAltMtMSL(-8000);
+				bool baseFound(basePresent), topFound(topPresent);
+
+				// Iterate trough all the polygons of multigeometry
+				for (boost::property_tree::ptree::value_type const& polygon : placemark.get_child("MultiGeometry")) {
+					if (polygon.first != "Polygon") continue;
+					Altitude foundAlt;
+					bool isExtruded(true);
+
+					if(ProcessPolygon(polygon.second, airspace, isExtruded, foundAlt)) {
+						// There should be no extruded polygons in a multigeometry
+						if (isExtruded) return false;
+
+						if (!topPresent && foundAlt > top) {
+							top = foundAlt;
+							topFound = true;
+						}
+						if(!basePresent && foundAlt < base) {
+							base = foundAlt;
+							baseFound = true;
+						}
+					}
+				}
+				if(baseFound && topFound) pointsFound = true;
+
+				// If points found verify the altitudes found
+				if (pointsFound) {
+					if (!basePresent) {
+						if (baseFound) airspace.SetBaseAltitude(base);
+						else {
+							AirspaceConverter::LogMessage("Warning: skipping MultiGeometry with invalid base altitude: " + airspace.GetName(), false);
+							return false;
+						}
+					}
+					if (!topPresent) {
+						if (topFound) airspace.SetTopAltitude(top);
+						else {
+							AirspaceConverter::LogMessage("Warning: skipping MultiGeometry with invalid top altitude: " + airspace.GetName(), false);
+							return false;
+						}
+					}
+				}
+			}
 		}
 
 		// Otherwise it should be a single extruded polygon
 		else {
-			if (ProcessPolygon(placemark.get_child("Polygon"), airspace)) {
+			bool isExtruded(false);
+			Altitude foundAlt;
+			pointsFound = ProcessPolygon(placemark.get_child("Polygon"), airspace, isExtruded, foundAlt);
+			if (pointsFound) {
+				if (isExtruded) {
+					if (!basePresent) { // Extruded means GND base
+						Altitude gnd;
+						gnd.SetGND();
+						airspace.SetBaseAltitude(gnd);
+					}
+				} else return false; // The single polygon should be always extruded
+				if (!topPresent) airspace.SetTopAltitude(foundAlt);
+			}
+		}
+
+		if (pointsFound) {
+			// Check if the altitudes make sense
+			if (airspace.GetBaseAltitude() < airspace.GetTopAltitude()) {
 				airspaces.insert(std::pair<int, Airspace>(airspace.GetType(), std::move(airspace)));
 				return true;
-			} else AirspaceConverter::LogMessage("Warning: skipping Geometry with invalid coordinates: " + airspace.GetName(), false);
+			} else AirspaceConverter::LogMessage("Warning: skipping Placemark with invalid altitudes: " + airspace.GetName(), false);
 		}
-	} catch (...) {
-		//TODO: Exception handling have to be done better here!
-		//AirspaceConverter::LogMessage("ERROR: Exception while parsing Placemark tag.", true); ///////////////////////////////////
-	}
+
+	} catch (...) {}
 	return false;
 }
 

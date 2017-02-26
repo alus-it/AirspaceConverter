@@ -30,6 +30,11 @@ public:
 	inline int GetAltFt() const { return altFt; }
 	inline double GetAltMt() const { return altMt; }
 	inline bool IsGND() const { return !refIsMsl && altFt == 0; }
+	inline bool IsMSL() const { return refIsMsl && altFt == 0; }
+	inline bool operator<(const Altitude& other) const { return altMt < other.altMt; }
+	inline bool operator>=(const Altitude& other) const { return altMt >= other.altMt; }
+	inline bool operator<=(const Altitude& other) const { return altMt <= other.altMt; }
+		inline bool operator>(const Altitude& other) const { return altMt > other.altMt; }
 	const std::string ToString() const;
 	inline static void SetQNH(const double QNHmb) { QNH = QNHmb; }
 	inline static double GetQNH() { return QNH; }
@@ -78,6 +83,7 @@ public:
 	Airspace(Type category) : type(category) {}
 	Airspace(const Airspace& orig);
 	Airspace(Airspace&& orig);
+	Airspace& operator=(const Airspace& other);
 	~Airspace();
 
 	inline static const std::string& CategoryName(const Type& category) { return CATEGORY_NAMES[category]; }
@@ -95,6 +101,7 @@ public:
 	inline void ClosePoints() { if (!points.empty() && points.front() != points.back()) points.push_back(points.front()); }
 	bool ArePointsValid();
 	bool Undiscretize();
+	void CopyNameAlt(const Airspace& other);
 	inline const Type& GetType() const { return type; }
 	inline const std::string& GetCategoryName() const { return CategoryName(type); }
 	inline const Altitude& GetTopAltitude() const { return top; }
@@ -108,6 +115,7 @@ public:
 	inline unsigned int GetNumberOfPoints() const { return (unsigned int)points.size(); }
 	inline const Geometry::LatLon& GetPointAt(unsigned int pos) const { return points.at(pos); }
 	inline bool IsGNDbased() const { return base.IsGND(); }
+	inline bool IsMSLbased() const { return base.IsMSL(); }
 	inline bool IsVisibleByDefault() const { return CategoryVisibleByDefault(type); }
 
 private:

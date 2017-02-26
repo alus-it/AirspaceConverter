@@ -416,7 +416,7 @@ bool OpenAir::InsertAirspace(Airspace& airspace) {
 		validAirspace = false;
 	}
 
-	if (validAirspace && airspace.GetTopAltitude().GetAltFt() <= airspace.GetBaseAltitude().GetAltFt()) {
+	if (validAirspace && airspace.GetTopAltitude() <= airspace.GetBaseAltitude()) {
 		AirspaceConverter::LogMessage(boost::str(boost::format("ERROR at line %1d: skip airspace %2s with top and base equal or inverted.") % lastACline % airspace.GetName()), true);
 		validAirspace = false;
 	}
