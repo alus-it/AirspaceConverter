@@ -158,19 +158,22 @@ void AirspaceConverter::LoadAirspaces() {
 	conversionDone = false;
 	OpenAir openAir(airspaces);
 	KML kml(airspaces, waypoints);
-	bool redOk(false);
+	int counter = 0;
 	for (const std::string& inputFile : airspaceFiles) {
+		bool redOk(false);
 		const std::string ext(boost::filesystem::path(inputFile).extension().string());
 		if(boost::iequals(ext, ".txt")) redOk = openAir.Read(inputFile);
 		else if (boost::iequals(ext, ".aip")) redOk = OpenAIP::Read(inputFile, airspaces);
 		else if (boost::iequals(ext, ".kmz")) redOk = kml.ReadKMZ(inputFile);
 		else if (boost::iequals(ext, ".kml")) redOk = kml.ReadKML(inputFile);
+		if (redOk) counter++; // Count the files red correctly
 
 		// Guess a default output file name if still not defined by the user
 		if (redOk && outputFile.empty())
 			outputFile = boost::filesystem::path(inputFile).replace_extension(".kmz").string(); // Default output as KMZ
 	}
 	airspaceFiles.clear();
+	if (counter > 0) LogMessage(boost::str(boost::format("Red successfully %1d airspace file(s).") % counter), false);
 }
 
 void AirspaceConverter::UnloadAirspaces() {
@@ -180,8 +183,10 @@ void AirspaceConverter::UnloadAirspaces() {
 
 void AirspaceConverter::LoadTerrainRasterMaps() {
 	conversionDone = false;
-	for (const std::string& demFile : terrainRasterMapFiles) KML::AddTerrainMap(demFile);
+	int counter = 0;
+	for (const std::string& demFile : terrainRasterMapFiles) if (KML::AddTerrainMap(demFile)) counter++;
 	terrainRasterMapFiles.clear();
+	if (counter > 0) LogMessage(boost::str(boost::format("Red successfully %1d terrain raster map file(s).") % counter), false);
 }
 
 void AirspaceConverter::UnloadRasterMaps() {
@@ -191,11 +196,14 @@ void AirspaceConverter::UnloadRasterMaps() {
 
 void AirspaceConverter::LoadWaypoints() {
 	conversionDone = false;
+	int counter = 0;
 	for (const std::string& inputFile : waypointFiles) {
 		bool redOk = SeeYou::ReadFile(inputFile, waypoints);
+		if (redOk) counter++;
 		if (redOk && outputFile.empty()) outputFile = boost::filesystem::path(inputFile).replace_extension(".kmz").string(); // Default output as KMZ
 	}
 	waypointFiles.clear();
+	if (counter > 0) LogMessage(boost::str(boost::format("Red successfully %1d waypoints file(s).") % counter), false);
 }
 
 void AirspaceConverter::UnloadWaypoints() {
