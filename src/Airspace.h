@@ -17,24 +17,29 @@
 
 class Altitude {
 public:
-	Altitude(): refIsMsl(false), altMt(0), altFt(0), fl(0) {}
-	inline void SetAltFtMSL(const int ft) { refIsMsl = true; altMt = ft*FEET2METER; altFt = ft; fl = 0; }
-	inline void SetAltMtMSL(const double mt) { refIsMsl = true;  altFt = (int)(mt / FEET2METER); altMt = mt; fl = 0; }
-	inline void SetAltFtGND(const int ft) { refIsMsl = false; altMt = ft*FEET2METER; altFt = ft; fl = 0; }
-	inline void SetAltMtGND(const double mt) { refIsMsl = false; altFt = (int)(mt / FEET2METER); altMt = mt; fl = 0; }
+	Altitude() : refIsMsl(false), fl(0), altFt(0), altMt(0), isUnlimited(false) {}
+	//Altitude(const int feet, const bool isAMSL) : refIsMsl(isAMSL), fl(0), altFt(feet), altMt(feet * FEET2METER), isUnlimited(false) {}
+	//Altitude(const double meters, const bool isAMSL) : refIsMsl(isAMSL), fl(0), altFt((int)(meters / FEET2METER)), altMt(meters), isUnlimited(false) {}
+	//Altitude(const int FL);
+
+	inline void SetAltFt(const int ft, const bool isAMSL = true) { refIsMsl = isAMSL; altMt = ft*FEET2METER; altFt = ft; fl = 0; isUnlimited = false; }
+	inline void SetAltMt(const double mt, const bool isAMSL = true) { refIsMsl = isAMSL;  altFt = (int)(mt / FEET2METER); altMt = mt; fl = 0; isUnlimited = false; }
 	void SetFlightLevel(const int FL);
-	inline void SetGND() { refIsMsl = false; altMt = 0; altFt = 0; fl = 0; }
+	inline void SetGND() { refIsMsl = false; altMt = 0; altFt = 0; fl = 0; isUnlimited = false; }
+	inline void SetUnlimited() { SetFlightLevel(600); isUnlimited = true; }
 	inline bool IsAMSL() const { return refIsMsl; }
 	inline bool IsAGL() const { return !refIsMsl; }
 	inline bool IsFL() const { return fl != 0; }
+	inline bool IsUnlimited() const { return isUnlimited; }
 	inline int GetAltFt() const { return altFt; }
 	inline double GetAltMt() const { return altMt; }
 	inline bool IsGND() const { return !refIsMsl && altFt == 0; }
 	inline bool IsMSL() const { return refIsMsl && altFt == 0; }
-	inline bool operator<(const Altitude& other) const { return altMt < other.altMt; }
-	inline bool operator>=(const Altitude& other) const { return altMt >= other.altMt; }
-	inline bool operator<=(const Altitude& other) const { return altMt <= other.altMt; }
-		inline bool operator>(const Altitude& other) const { return altMt > other.altMt; }
+	bool operator<(const Altitude& other) const;
+	bool operator>(const Altitude& other) const;
+	bool operator>=(const Altitude& other) const;
+	bool operator<=(const Altitude& other) const;
+	
 	const std::string ToString() const;
 	inline static void SetQNH(const double QNHmb) { QNH = QNHmb; }
 	inline static double GetQNH() { return QNH; }
@@ -46,8 +51,10 @@ private:
 	static double QNEaltitudeToQNHaltitude(const double ps);
 
 	bool refIsMsl;
-	double altMt;
-	int altFt, fl;
+	int fl; // Flight level
+	int altFt; // Alt in feet
+	double altMt; // Alt in meters
+	bool isUnlimited;
 	static const double K1, K2, QNE;
 	static double QNH;
 };

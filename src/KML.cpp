@@ -908,7 +908,7 @@ bool KML::ProcessPolygon(const boost::property_tree::ptree& polygon, Airspace& a
 			if (allPointsAtSameAlt || airsp.ArePointsValid()) {
 				airsp.CopyNameAlt(airspace);
 				airspace = std::move(airsp);
-				isAGL ? altitude.SetAltMtGND(avgAltitude) : altitude.SetAltMtMSL(avgAltitude);
+				altitude.SetAltMt(avgAltitude, !isAGL);
 				return true;
 			}
 		}
@@ -1001,8 +1001,8 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 			// If the altitudes were not found look for them from the polygons...
 			else {
 				Altitude top(airspace.GetTopAltitude()), base(airspace.GetBaseAltitude());
-				if (!basePresent) base.SetAltMtMSL(1000000);
-				if (!topPresent) top.SetAltMtMSL(-8000);
+				if (!basePresent) base.SetAltMt(1000000);
+				if (!topPresent) top.SetAltMt(-8000);
 				bool baseFound(basePresent), topFound(topPresent);
 
 				// Iterate trough all the polygons of multigeometry

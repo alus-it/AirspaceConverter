@@ -43,7 +43,7 @@ bool ReadAltitude(const ptree& node, Altitude& altitude) {
 			case 'M': // MSL Main sea level
 				if (str.at(1) == 'S' && str.at(2) == 'L') {
 					if (!isFeet) return false;
-					altitude.SetAltFtMSL(value);
+					altitude.SetAltFt(value);
 					return true;
 				}
 				break;
@@ -57,7 +57,7 @@ bool ReadAltitude(const ptree& node, Altitude& altitude) {
 			case 'G': // GND Ground
 				if (str.at(1) == 'N' && str.at(2) == 'D') {
 					if (!isFeet) return false;
-					altitude.SetAltFtGND(value);
+					altitude.SetAltFt(value, false);
 					return true;
 				}
 				break;

@@ -267,12 +267,12 @@ bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop,
 	const unsigned int l = (unsigned int)text.length();
 	double value = 0;
 	bool isFL = false;
-	bool isAGL = false;
 	bool isAMSL = true;
 	bool valueFound = false;
 	bool typeFound = false;
-	bool isMeter = false;
+	bool isInFeet = true;
 	bool unitFound = false;
+	bool isUnlimited = false;
 	unsigned int s = 0;
 	bool isNumber = isDigit(text.at(s));
 	for (unsigned int i = 1; i < l; i++) {
@@ -296,24 +296,21 @@ bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop,
 				if (!typeFound) {
 					if (valueFound) {
 						if (boost::iequals(str, "AGL") || boost::iequals(str, "AGND") || boost::iequals(str, "ASFC") || boost::iequals(str, "GND") || boost::iequals(str, "SFC")) {
-							isAGL = true;
 							isAMSL = false;
 							typeFound = true;
 						} else if (boost::iequals(str, "MSL") || boost::iequals(str, "AMSL") || boost::iequals(str, "ALT")) typeFound = true;
 						else if (!unitFound) {
 							if (boost::iequals(str, "FT") || boost::iequals(str, "F")) unitFound = true;
 							else if (boost::iequals(str, "M") || boost::iequals(str, "MT")) {
-								isMeter = true;
+								isInFeet = false;
 								unitFound = true;
 							}
 						}
 					} else {
 						if (boost::iequals(str, "FL")) {
 							isFL = true;
-							isAMSL = false;
 							typeFound = true;
 						} else if (boost::iequals(str, "GND") || boost::iequals(str, "SFC")) {
-							isAGL = true;
 							isAMSL = false;
 							typeFound = true;
 							valueFound = true;
@@ -326,7 +323,7 @@ bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop,
 							typeFound = true;
 							valueFound = true;
 							unitFound = true;
-							value = 10000000;
+							isUnlimited = true;
 						}
 					}
 				} else if (!unitFound && !typeFound) return false;
@@ -340,9 +337,10 @@ bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop,
 	}
 	if (!valueFound) return false;
 	Altitude alt;
-	if (isFL) alt.SetFlightLevel((int)value);
-	else if (isAMSL) isMeter ? alt.SetAltMtMSL(value) : alt.SetAltFtMSL((int)value);
-	else if (isAGL) isMeter ? alt.SetAltMtGND(value) : alt.SetAltFtGND((int)value);
+	if (isUnlimited) alt.SetUnlimited();
+	else if (isFL) alt.SetFlightLevel((int)value);
+	else if (isInFeet) alt.SetAltFt((int)value, isAMSL);
+	else alt.SetAltMt(value, isAMSL);
 	isTop ? airspace.SetTopAltitude(alt) : airspace.SetBaseAltitude(alt);
 	return true;
 }

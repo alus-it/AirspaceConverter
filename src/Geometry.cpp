@@ -29,7 +29,7 @@ const double Geometry::NM2M = 1852.0;
 const double Geometry::MI2M = 1609.344;
 const double Geometry::M2RAD = NM2RAD / NM2M;
 
-const double Geometry::TOL = 1e-10;
+const double Geometry::TOL = 2e-10;
 
 double Geometry::resolution = 0.3 * NM2RAD; // 0.3 NM = 555.6 m
 

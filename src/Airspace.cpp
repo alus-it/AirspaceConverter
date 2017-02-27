@@ -20,6 +20,18 @@ const double Altitude::K2 = 8.417286e-5;
 const double Altitude::QNE = 1013.25;
 double Altitude::QNH = QNE;
 
+/*Altitude::Altitude(const int FL) :
+	refIsMsl(true),
+	fl(FL),
+	altFt(FL * 100),
+	altMt(altFt * FEET2METER),
+	isUnlimited(false) {
+	if (QNH != QNE) {
+		altMt = QNEaltitudeToQNHaltitude(altMt);
+		altFt = (int)(altMt / FEET2METER);
+	}
+}*/
+
 double Altitude::QNEaltitudeToStaticPressure(const double alt) {
 	return std::pow((std::pow(QNE, K1) - K2*alt), 1.0 / K1);
 }
@@ -44,6 +56,7 @@ void Altitude::SetFlightLevel(const int FL) {
 }
 
 const std::string Altitude::ToString() const {
+	if (isUnlimited) return "UNLIMITED";
 	if (fl > 0) return "FL " + std::to_string(fl);
 	if (refIsMsl) {
 		if(altFt!=0) return std::to_string(altFt) + " FT AMSL";
@@ -51,6 +64,30 @@ const std::string Altitude::ToString() const {
 	}
 	if (IsGND()) return "GND";
 	return std::to_string(altFt) + " FT AGL";
+}
+
+bool Altitude::operator<(const Altitude& other) const {
+	if (isUnlimited && !other.isUnlimited) return false;
+	if (!isUnlimited && other.isUnlimited) return true;
+	return altMt < other.altMt;
+}
+
+bool Altitude::operator>(const Altitude& other) const {
+	if (isUnlimited && !other.isUnlimited) return true;
+	if (!isUnlimited && other.isUnlimited) return false;
+	return altMt > other.altMt;
+}
+
+bool Altitude::operator<=(const Altitude& other) const {
+	if (isUnlimited && !other.isUnlimited) return false;
+	if (!isUnlimited && other.isUnlimited) return true;
+	return altMt <= other.altMt;
+}
+
+bool Altitude::operator>=(const Altitude& other) const {
+	if (isUnlimited && !other.isUnlimited) return true;
+	if (!isUnlimited && other.isUnlimited) return false;
+	return altMt >= other.altMt;
 }
 
 const bool Airspace::CATEGORY_VISIBILITY[] = {
