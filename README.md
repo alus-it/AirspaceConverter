@@ -16,8 +16,8 @@ And the output can be done in the following formats:
 
 This utility can convert also SeeYou .CUP waypoint files to KMZ (for Google Earth). The conversion to IMG for Garmin devices is done using cGPSmapper.  
 While converting to OpenAir this software estimates if the points entered are part of arcs or circumferences in order to make use of arc and circumference definitions of the OpeanAir format and so avoiding to output all points one by one.  
-AirspaceConverter is written in C++11 can be ran both on Linux and on Windows.
-The Windows version has MFC user interface in order to be immediately easy to use, while the Linux version works from command line to be usable also from shell scripts.  
+The ability to read KML/KMZ is based on the KMZ airspace files produced by Austrocontrol.  
+AirspaceConverter is written in C++11 can be ran both on Linux and on Windows. It has a Qt user interface and Windows MFC UI as well in order to be immediately easy to use. Under Linux can also work also from command line to be usable from shell scripts.  
 For more information's about this project: http://www.alus.it/AirspaceConverter  
 Contributors are, as usual, warmly welcome!
 
@@ -28,7 +28,7 @@ Not only, having the planned route or track of a flight (as GPX file), displayed
 This software can also be useful for maintainers of OpenAir airspace and SeeYou .CUP waypoints files, not only to visualize airspace and waypoints but also to verify the syntax of OpenAir and CUP commands entered.  
 For the "landable" waypoints in the CUP files an estimation of the runway perimeter is drawn on the earth surface, in order to do that not only the position is used but also the runway orientation and length. This is particularly useful to verify that the position of the airfield in the CUP file matches exactly the runway in Google Earth.  In software like LK8000 the airfield position is considered as the exact center of the runway, orientation and length are used to assist for landing with an HSI and glide slope indications thus the correctness of position, orientation and length becomes really important.  
 OpenAIP (http://www.openaip.net/) provides a free, worldwide and updated airspace repository but in his own format, while many devices and software support OpenAir airspace files.
-This software can convert also to OpenAir so making OpenAIP data available to many portable devices.
+This software can convert also to OpenAir so making OpenAIP data available to many portable devices. There are also cases where the "official" airspace files are available only in KML format like the Austrian airspace from Austrocontrol, also in this case is possible to convert it to OpenAir.
 
 About KML format
 ----------------
