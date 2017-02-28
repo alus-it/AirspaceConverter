@@ -140,12 +140,18 @@ const std::string Airspace::CATEGORY_NAMES[] = {
 	"UNDEFINED" //UNDEFINED
 };
 
+Airspace::Airspace(Type category)
+	: type(category)
+	, airspaceClass(category >= CLASSA && category <= CLASSG ? category : UNDEFINED) {
+}
+
 Airspace::Airspace(const Airspace& orig) // Copy constructor
 	: top(orig.top)
 	, base(orig.base)
 	, geometries(orig.geometries)
 	, points(orig.points)
 	, type(orig.type)
+	, airspaceClass(orig.airspaceClass)
 	, name(orig.name) {
 }
 
@@ -155,6 +161,7 @@ Airspace::Airspace(Airspace&& orig) // Move constructor
 	, geometries(std::move(orig.geometries))
 	, points(std::move(orig.points))
 	, type(std::move(orig.type))
+	, airspaceClass(std::move(orig.airspaceClass))
 	, name(std::move(orig.name)) {
 	orig.type = UNDEFINED;
 }
@@ -165,6 +172,7 @@ Airspace& Airspace::operator=(const Airspace& other) {
 	geometries = other.geometries;
 	points = other.points;
 	type = other.type;
+	airspaceClass = other.airspaceClass;
 	name = other.name;
 	return *this;
 }
@@ -173,8 +181,66 @@ Airspace::~Airspace() {
 	ClearGeometries();
 }
 
+void Airspace::SetType(const Type& category) {
+	type = category;
+	airspaceClass = category >= CLASSA && category <= CLASSG ? category : UNDEFINED;
+}
+
+void Airspace::SetClass(const Type& airspClass) {
+	if(airspClass > CLASSG) return;
+	airspaceClass = airspClass;
+	if (type <= CLASSG && type != airspClass) type = airspClass;
+}
+
+bool Airspace::GuessClassFromName() {
+	if (type != CTR && type != TMA && type != UNDEFINED) return false;
+	if (name.empty()) return false;
+	Type foundClass = UNDEFINED;
+	const static std::vector<std::string> keywords = {
+		"class",
+		"Class",
+		"CLASS",
+		"klasse",
+		"Klasse",
+		"KLASSE",
+		"classe",
+		"Classe",
+		"CLASSE"
+	};
+
+	for(const std::string& keyword : keywords) {
+		unsigned int pos = (unsigned int)name.find(keyword);
+		if(pos == std::string::npos) continue;
+		const unsigned int l = (unsigned int)name.length();
+		pos =+ (unsigned int)keyword.length();
+		if (l <= pos) continue;
+		char c = name.at(pos);
+		if (c == ' ' || c == ':') {
+			pos++;
+			if (l <= pos) continue;
+			c = name.at(pos);
+			if (c == ' ' || c == ':') {
+				pos++;
+				if (l <= pos) continue;
+				c = name.at(pos);
+			}
+		}
+		if (c >= 'A' && c <= 'F') {
+			foundClass = (Type)(c - 'A');
+			break;
+		}
+	}
+
+	if (foundClass == UNDEFINED) return false;
+	assert(foundClass >= CLASSA && foundClass <= CLASSG);
+	airspaceClass = foundClass;
+	if (type == UNDEFINED) type = foundClass;
+	return true;
+}
+
 void Airspace::Clear() {
 	type = UNDEFINED;
+	airspaceClass = UNDEFINED;
 	name.clear();
 	ClearPoints();
 }

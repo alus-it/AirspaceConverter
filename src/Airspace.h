@@ -86,16 +86,18 @@ public:
 		UNDEFINED // also the last one
 	} Type;
 
-	Airspace() : type(UNDEFINED) {}
-	Airspace(Type category) : type(category) {}
+	Airspace() : type(UNDEFINED) , airspaceClass(UNDEFINED) {}
+	Airspace(Type category);
 	Airspace(const Airspace& orig);
 	Airspace(Airspace&& orig);
-	Airspace& operator=(const Airspace& other);
 	~Airspace();
 
+	Airspace& operator=(const Airspace& other);
 	inline static const std::string& CategoryName(const Type& category) { return CATEGORY_NAMES[category]; }
 	static bool CategoryVisibleByDefault(const Type& category) { return CATEGORY_VISIBILITY[category]; }
-	inline void SetType(const Type& category) { type = category; }
+	void SetType(const Type& category);
+	void SetClass(const Type& airspClass);
+	bool GuessClassFromName();
 	inline void SetTopAltitude(const Altitude& alt) { top = alt; }
 	inline void SetBaseAltitude(const Altitude& alt) { base = alt; }
 	inline void SetName(const std::string& airspaceName) { name = airspaceName; }
@@ -110,6 +112,7 @@ public:
 	bool Undiscretize();
 	void CopyNameAlt(const Airspace& other);
 	inline const Type& GetType() const { return type; }
+	inline const Type& GetClass() const { return airspaceClass; }
 	inline const std::string& GetCategoryName() const { return CategoryName(type); }
 	inline const Altitude& GetTopAltitude() const { return top; }
 	inline const Altitude& GetBaseAltitude() const { return base; }
@@ -135,5 +138,6 @@ private:
 	std::vector<const Geometry*> geometries;
 	std::vector<Geometry::LatLon> points;
 	Type type;
+	Type airspaceClass; // This is to remember the class of a TMA or CTR where possible
 	std::string name;
 };

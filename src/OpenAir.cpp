@@ -508,9 +508,6 @@ bool OpenAir::WriteCategory(const Airspace& airspace) {
 		case Airspace::RESTRICTED:	openAirCategory = "R"; break;
 		case Airspace::DANGER:		openAirCategory = "Q"; break;
 		case Airspace::PROHIBITED:	openAirCategory = "P"; break;
-		case Airspace::TMA: // TMA is not an OpenAir definition but better to fall back on CTR
-			AirspaceConverter::LogMessage(boost::str(boost::format("Warning: TMA %1s written as CTR.") % airspace.GetName()), false);
-			/* no break */
 		case Airspace::CTR:			openAirCategory = "CTR"; break;
 		case Airspace::CLASSA:		openAirCategory = "A"; break;
 		case Airspace::CLASSB:		openAirCategory = "B"; break;
@@ -519,6 +516,22 @@ bool OpenAir::WriteCategory(const Airspace& airspace) {
 		case Airspace::CLASSE:		openAirCategory = "E"; break;
 		case Airspace::CLASSF:		openAirCategory = "F"; break;
 		case Airspace::CLASSG:		openAirCategory = "G"; break;
+		case Airspace::TMA: // TMA is not an OpenAir definition but better to fall back on CTR
+			switch (airspace.GetClass()) {
+				case Airspace::CLASSA:	openAirCategory = "A"; break;
+				case Airspace::CLASSB:	openAirCategory = "B"; break;
+				case Airspace::CLASSC:	openAirCategory = "C"; break;
+				case Airspace::CLASSD:	openAirCategory = "D"; break;
+				case Airspace::CLASSE:	openAirCategory = "E"; break;
+				case Airspace::CLASSF:	openAirCategory = "F"; break;
+				case Airspace::CLASSG:	openAirCategory = "G"; break;
+				case Airspace::UNKNOWN:
+					openAirCategory = "CTR";
+					AirspaceConverter::LogMessage(boost::str(boost::format("Warning: TMA %1s written as CTR.") % airspace.GetName()), false);
+					break;
+				default: assert(false);
+			}
+			break;
 		case Airspace::WAVE:		openAirCategory = "W"; break;
 		case Airspace::RMZ:			openAirCategory = "RMZ"; break;
 		case Airspace::TMZ:			openAirCategory = "TMZ"; break;

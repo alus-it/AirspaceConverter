@@ -792,8 +792,7 @@ bool KML::ProcessFolder(const boost::property_tree::ptree& folder, const int upp
 				default: break;
 				}
 			} else {
-				if (shortCategory == "CTA") thisCategory = Airspace::Type::CTR; //Control areas
-				else if (shortCategory == "TMA") thisCategory = Airspace::Type::TMA; //Terminal control areas
+				if (shortCategory == "TMA") thisCategory = Airspace::Type::TMA; //Terminal control areas
 				else if (shortCategory == "CTR") thisCategory = Airspace::Type::CTR; //Control zones
 				else if (shortCategory == "RMZ") thisCategory = Airspace::Type::RMZ; //Radio mandatory zones
 				else if (shortCategory == "TMZ") thisCategory = Airspace::Type::TMZ; //Transponder mandatory zones
@@ -803,6 +802,7 @@ bool KML::ProcessFolder(const boost::property_tree::ptree& folder, const int upp
 				else if (shortCategory == "MATZ") thisCategory = Airspace::Type::CTR; // Military aerodrome traffic zones
 				else if (shortCategory == "MTRA") thisCategory = Airspace::Type::RESTRICTED; // Military temporary reserved areas
 				else if (shortCategory == "MTA") thisCategory = Airspace::Type::DANGER;  // Military training areas
+				//else if (shortCategory == "CTA") thisCategory = Airspace::Type::UNDEFINED; //Control areas: will be converted to normal classes
 			}
 		}
 	}
@@ -967,16 +967,21 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 				else if (simpleData.second.data() == "No glider") category = Airspace::Type::NOGLIDER;
 				else if (simpleData.second.data() == "Wave window") category = Airspace::Type::WAVE;
 				else if (simpleData.second.data() == "Unknown") category = Airspace::Type::UNKNOWN;
-				else {
-					category = Airspace::Type::UNDEFINED;
-					AirspaceConverter::LogMessage("ERROR: Undefined category of airspace. Skipping airspace: " + airspace.GetName(), true);
-				}
+				else AirspaceConverter::LogMessage("ERROR: Unable to parse airspace category in the label: " + simpleData.second.data(), true);
 			}
 		}
 
-		// If valid category make sure the new airspace is of that category
-		if (category != Airspace::Type::UNDEFINED) airspace.SetType(category);
-		else return false;
+		// If found a category from the label use it
+		if (category != airspace.GetType()) airspace.SetType(category);
+
+		// Try to find the airspace class (for CTA, TMA and CTR) or the category from the name
+		airspace.GuessClassFromName();
+
+		// If still invalid category skyp it
+		if (airspace.GetType() == Airspace::Type::UNDEFINED) {
+			AirspaceConverter::LogMessage("ERROR: Undefined category of airspace. Skipping airspace: " + airspace.GetName(), true);
+			return false;
+		}
 
 		bool pointsFound(false);
 
