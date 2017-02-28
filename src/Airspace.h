@@ -110,7 +110,7 @@ public:
 	inline void ClosePoints() { if (!points.empty() && points.front() != points.back()) points.push_back(points.front()); }
 	bool ArePointsValid();
 	bool Undiscretize();
-	void CopyNameAlt(const Airspace& other);
+	inline void CutPointsFrom(Airspace& orig) { points = std::move(orig.points); }
 	inline const Type& GetType() const { return type; }
 	inline const Type& GetClass() const { return airspaceClass; }
 	inline const std::string& GetCategoryName() const { return CategoryName(type); }

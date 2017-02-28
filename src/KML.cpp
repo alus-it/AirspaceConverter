@@ -906,8 +906,7 @@ bool KML::ProcessPolygon(const boost::property_tree::ptree& polygon, Airspace& a
 
 			// Or the points are all at the same height or verify that all points are unique
 			if (allPointsAtSameAlt || airsp.ArePointsValid()) {
-				airsp.CopyNameAlt(airspace);
-				airspace = std::move(airsp);
+				airspace.CutPointsFrom(airsp);
 				altitude.SetAltMt(avgAltitude, !isAGL);
 				return true;
 			}
@@ -977,11 +976,8 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 		// Try to find the airspace class (for CTA, TMA and CTR) or the category from the name
 		airspace.GuessClassFromName();
 
-		// If still invalid category skyp it
-		if (airspace.GetType() == Airspace::Type::UNDEFINED) {
-			AirspaceConverter::LogMessage("ERROR: Undefined category of airspace. Skipping airspace: " + airspace.GetName(), true);
-			return false;
-		}
+		// If still invalid category skip it
+		if (airspace.GetType() == Airspace::Type::UNDEFINED) return false;
 
 		bool pointsFound(false);
 

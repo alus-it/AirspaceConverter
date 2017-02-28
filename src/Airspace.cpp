@@ -212,7 +212,7 @@ bool Airspace::GuessClassFromName() {
 		unsigned int pos = (unsigned int)name.find(keyword);
 		if(pos == std::string::npos) continue;
 		const unsigned int l = (unsigned int)name.length();
-		pos =+ (unsigned int)keyword.length();
+		pos += (unsigned int)keyword.length();
 		if (l <= pos) continue;
 		char c = name.at(pos);
 		if (c == ' ' || c == ':') {
@@ -278,13 +278,6 @@ bool Airspace::ArePointsValid() {
 	
 	// If we arrived here it is all OK
 	return true;
-}
-
-void Airspace::CopyNameAlt(const Airspace& other) {
-	top = other.top;
-	base = other.base;
-	type = other.type;
-	name = other.name;
 }
 
 void Airspace::AddGeometry(const Geometry* geometry) {

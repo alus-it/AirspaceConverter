@@ -525,7 +525,7 @@ bool OpenAir::WriteCategory(const Airspace& airspace) {
 				case Airspace::CLASSE:	openAirCategory = "E"; break;
 				case Airspace::CLASSF:	openAirCategory = "F"; break;
 				case Airspace::CLASSG:	openAirCategory = "G"; break;
-				case Airspace::UNKNOWN:
+				case Airspace::UNDEFINED:
 					openAirCategory = "CTR";
 					AirspaceConverter::LogMessage(boost::str(boost::format("Warning: TMA %1s written as CTR.") % airspace.GetName()), false);
 					break;
