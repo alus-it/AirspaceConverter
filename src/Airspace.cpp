@@ -197,6 +197,8 @@ bool Airspace::GuessClassFromName() {
 	if (name.empty()) return false;
 	Type foundClass = UNDEFINED;
 	const static std::vector<std::string> keywords = {
+		"Airspace class",
+		"Luftraumklasse",
 		"class",
 		"Class",
 		"CLASS",
@@ -208,33 +210,47 @@ bool Airspace::GuessClassFromName() {
 		"CLASSE"
 	};
 
+	const unsigned int nameLength = (unsigned int)name.length();
+	unsigned int start = 0, length = 0;
 	for(const std::string& keyword : keywords) {
-		unsigned int pos = (unsigned int)name.find(keyword);
-		if(pos == std::string::npos) continue;
-		const unsigned int l = (unsigned int)name.length();
-		pos += (unsigned int)keyword.length();
-		if (l <= pos) continue;
+		start = (unsigned int)name.find(keyword);
+		if(start == std::string::npos) continue;
+		unsigned int pos = start + (unsigned int)keyword.length();
+		if (nameLength <= pos) continue;
 		char c = name.at(pos);
 		if (c == ' ' || c == ':') {
 			pos++;
-			if (l <= pos) continue;
+			if (nameLength <= pos) continue;
 			c = name.at(pos);
 			if (c == ' ' || c == ':') {
 				pos++;
-				if (l <= pos) continue;
+				if (nameLength <= pos) continue;
 				c = name.at(pos);
 			}
 		}
 		if (c >= 'A' && c <= 'F') {
 			foundClass = (Type)(c - 'A');
+			length = pos - start + 1;
+			break;
+		} else if (c >= 'a' && c <= 'f') {
+			foundClass = (Type)(c - 'a');
+			length = pos - start + 1;
 			break;
 		}
 	}
 
 	if (foundClass == UNDEFINED) return false;
+
 	assert(foundClass >= CLASSA && foundClass <= CLASSG);
 	airspaceClass = foundClass;
 	if (type == UNDEFINED) type = foundClass;
+	
+	// Remove the text "Class: C" from the name
+	name.erase(start, length);
+
+	// Remove the eventual dash
+	if (name.length() >=3 && name.compare(name.length() - 3, 3, " - ") == 0) name.erase(name.length() - 3, 3);
+
 	return true;
 }
 
