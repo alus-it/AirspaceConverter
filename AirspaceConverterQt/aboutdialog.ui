@@ -169,7 +169,7 @@
     </rect>
    </property>
    <property name="toolTip">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For any comment about AirspaceConverter write to thie e-mail.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For any comment about AirspaceConverter write to this e-mail.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="text">
     <string>&lt;a href=&quot;mailto:info@alus.it&quot;&gt;info@alus.it&lt;/a&gt;</string>

@@ -19,6 +19,7 @@
 #include <QDesktopServices>
 #include <QtConcurrent/QtConcurrent>
 //#include <QtConcurrentRun> // Use this instead of the previous to compile with older Qt versions
+//#include <QUrl>
 #include <QFuture>
 #include <QFutureWatcher>
 #include <boost/filesystem/path.hpp>
