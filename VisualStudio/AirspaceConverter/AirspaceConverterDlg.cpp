@@ -19,6 +19,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
+#include <boost/locale/encoding.hpp>
 #include "AirspaceConverter.h"
 
 #ifdef _DEBUG
@@ -290,7 +291,7 @@ void CAirspaceConverterDlg::UpdateOutputFilename() {
 }
 
 void CAirspaceConverterDlg::LogMessage(const std::string& text, const bool isError /*= false*/) {
-	CString message(CA2T((AirspaceConverter::UTF8toANSI(text) + '\n').c_str()));
+	CString message(CA2T((boost::locale::conv::between(text, "ISO8859-1", "utf-8") + '\n').c_str()));
 	CHARFORMAT cf = { 0 };
 	cf.cbSize = sizeof(CHARFORMAT);
 	cf.dwMask = isError ? CFM_BOLD | CFM_COLOR : CFM_COLOR;
