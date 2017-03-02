@@ -75,7 +75,7 @@ void MainWindow::logMessage(const QString& message, const bool& isError) {
 // This is function that will be called by libAirspaceConverter from another thread to append a new message on the log
 void MainWindow::postMessage(const std::string& message, const bool isError /* = false */) {
     // Emit the signal that a new message has to be posted on the log (multiple signals will be queued)
-    emit messagePosted(QString::fromStdString(message), isError);
+    emit messagePosted(QString::fromUtf8(message.c_str()), isError);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
