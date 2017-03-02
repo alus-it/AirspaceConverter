@@ -12,14 +12,19 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+
+#if QT_VERSION >= 0x050000
+    #include <QtConcurrent/QtConcurrent>
+#else
+    #include <QtConcurrentRun> // Use this instead of the previous to compile with older Qt versions
+    #include <QUrl>
+#endif
+
 #include <QFileDialog>
 #include <QCloseEvent>
 #include <QMessageBox>
 #include <QScrollBar>
 #include <QDesktopServices>
-#include <QtConcurrent/QtConcurrent>
-//#include <QtConcurrentRun> // Use this instead of the previous to compile with older Qt versions
-//#include <QUrl>
 #include <QFuture>
 #include <QFutureWatcher>
 #include <boost/filesystem/path.hpp>

@@ -18,8 +18,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = airspaceconverter-gui
 TEMPLATE = app
 
-CONFIG += c++11
-#QMAKE_CXXFLAGS += -std=c++11 # Use this instead of the previous to compile with older Qt versions
+greaterThan(QT_MAJOR_VERSION, 4): CONFIG += c++11
+lessThan(QT_MAJOR_VERSION, 5): QMAKE_CXXFLAGS += -std=c++11
 
 RESOURCES += \
     resources.qrc
