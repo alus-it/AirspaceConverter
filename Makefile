@@ -19,7 +19,7 @@ CPPFLAGS = -std=c++0x -Wall -Werror -fmessage-length=0
 
 # Linker options
 LIB = /usr/lib/x86_64-linux-gnu
-LFLAGS = -lzip -lboost_system -lboost_filesystem
+LFLAGS = -lzip -lboost_system -lboost_filesystem -lboost_locale
 
 # Source path
 SRC = src/
@@ -65,7 +65,7 @@ all: $(BIN)airspaceconverter
 # Build the command line program
 $(BIN)airspaceconverter: $(BIN)libairspaceconverter.so $(SRC)main.cpp
 	@echo Building executable: $@
-	@$(CXX) $(CPPFLAGS) -lboost_system -lboost_filesystem -L$(BIN) -lairspaceconverter $(SRC)main.cpp -o $@
+	@$(CXX) $(CPPFLAGS) -L$(BIN) -lairspaceconverter $(SRC)main.cpp -o $@
 ifeq ($(DEBUG),0)
 	@$(STRIP) -S --strip-unneeded $@
 endif
@@ -73,7 +73,7 @@ endif
 # Build the shared library
 $(BIN)libairspaceconverter.so: $(OBJS)
 	@echo Building shared library: $@
-	@$(CXX) -L$(LIB) $(LFLAGS)  -Wl,-soname,libairspaceconverter.so -shared $(OBJS) -o $@
+	@$(CXX) -L$(LIB) $(LFLAGS) -Wl,-soname,libairspaceconverter.so -shared $(OBJS) -o $@
 ifeq ($(DEBUG),0)
 	@$(STRIP) -S --strip-unneeded $@
 endif
