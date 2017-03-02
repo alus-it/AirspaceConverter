@@ -19,10 +19,11 @@
 #include "OpenAIP.h"
 #include "Polish.h"
 #include <iostream>
+#include <codecvt>
+#include <locale>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
-
 
 std::function<void(const std::string&, const bool)> AirspaceConverter::LogMessage = DefaultLogMessage;
 std::function<bool(const std::string&, const std::string&)> AirspaceConverter::cGPSmapper = Default_cGPSmapper;
@@ -351,4 +352,19 @@ bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop,
 	else alt.SetAltMt(value, isAMSL);
 	isTop ? airspace.SetTopAltitude(alt) : airspace.SetBaseAltitude(alt);
 	return true;
+}
+
+std::string AirspaceConverter::UTF8toANSI(const std::string& utf8str) {
+	try {
+		const static std::locale loc(".1252");									  
+		static std::wstring_convert<std::codecvt_utf8<wchar_t>> wconv;
+		
+		std::wstring wstr = wconv.from_bytes(utf8str);
+		std::vector<char> buf(wstr.size());
+		std::use_facet<std::ctype<wchar_t>>(loc).narrow(wstr.data(), wstr.data() + wstr.size(), '?', buf.data());
+		return std::string(buf.data(), buf.size());
+	} catch (...) {
+		assert(false);
+		return utf8str;
+	}
 }

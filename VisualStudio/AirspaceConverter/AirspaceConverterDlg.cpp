@@ -289,8 +289,8 @@ void CAirspaceConverterDlg::UpdateOutputFilename() {
 	}
 }
 
-void CAirspaceConverterDlg::LogMessage(const std::string& text, const bool isError /*= false*/) {	
-	CString message(CA2T((text + '\n').c_str()));
+void CAirspaceConverterDlg::LogMessage(const std::string& text, const bool isError /*= false*/) {
+	CString message(CA2T((AirspaceConverter::UTF8toANSI(text) + '\n').c_str()));
 	CHARFORMAT cf = { 0 };
 	cf.cbSize = sizeof(CHARFORMAT);
 	cf.dwMask = isError ? CFM_BOLD | CFM_COLOR : CFM_COLOR;

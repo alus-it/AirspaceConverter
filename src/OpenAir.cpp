@@ -471,7 +471,7 @@ bool OpenAir::Write(const std::string& fileName) {
 		if (!WriteCategory(a)) continue;
 
 		// Write the name
-		file << "AN " << a.GetName() << "\r\n";
+		file << "AN " << AirspaceConverter::UTF8toANSI(a.GetName()) << "\r\n";
 		
 		// Write base and ceiling altitudes
 		file << "AL " << a.GetBaseAltitude().ToString() << "\r\n";
