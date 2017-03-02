@@ -10,6 +10,12 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
+#ifdef __GNUC__
+#if __GNUC__ < 5
+#define NO_CODECVT
+#endif
+#endif
+
 #include "AirspaceConverter.h"
 #include "Airspace.h"
 #include "Waypoint.h"
@@ -19,11 +25,22 @@
 #include "OpenAIP.h"
 #include "Polish.h"
 #include <iostream>
-#include <codecvt>
 #include <locale>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
+
+#ifndef NO_CODECVT
+#include <codecvt> // For this is necessary GCC 5
+#else
+#include <boost/locale/encoding_utf.hpp> // This is an alternative to codecvt
+#endif
+
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+#define ISO8859 ".1252"
+#else
+#define ISO8859 "en_US.iso88591"
+#endif
 
 std::function<void(const std::string&, const bool)> AirspaceConverter::LogMessage = DefaultLogMessage;
 std::function<bool(const std::string&, const std::string&)> AirspaceConverter::cGPSmapper = Default_cGPSmapper;
@@ -356,10 +373,17 @@ bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop,
 
 std::string AirspaceConverter::UTF8toANSI(const std::string& utf8str) {
 	try {
-		const static std::locale loc(".1252");									  
+		const static std::locale loc(ISO8859);
+
+#ifndef NO_CODECVT
+		// This is possible with #include<codecvt>
 		static std::wstring_convert<std::codecvt_utf8<wchar_t>> wconv;
-		
 		std::wstring wstr = wconv.from_bytes(utf8str);
+#else
+		// Without codecvt use boost:
+		std::wstring wstr(boost::locale::conv::utf_to_utf<wchar_t>(utf8str.c_str(), utf8str.c_str() + utf8str.size()));
+#endif
+
 		std::vector<char> buf(wstr.size());
 		std::use_facet<std::ctype<wchar_t>>(loc).narrow(wstr.data(), wstr.data() + wstr.size(), '?', buf.data());
 		return std::string(buf.data(), buf.size());
