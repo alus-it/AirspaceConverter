@@ -301,8 +301,18 @@ void MainWindow::on_unloadTerrainMapsButton_clicked() {
 }
 
 void MainWindow::on_chooseOutputFileButton_clicked() {
+    QString selectedFilter; // this string will conatin the selected type by the user in the dialog
+
+    // Set it to current selected type, so the user will have it already preselected in the file dialog
+    switch(converter->GetOutputType()) {
+        case AirspaceConverter::OutputType::KMZ_Format:     selectedFilter = tr("Google Earth(*.kmz)"); break;
+        case AirspaceConverter::OutputType::OpenAir_Format: selectedFilter = tr("OpenAir(*.txt)"); break;
+        case AirspaceConverter::OutputType::Polish_Format:  selectedFilter = tr("Polish(*.mp)"); break;
+        case AirspaceConverter::OutputType::Garmin_Format:  selectedFilter = tr("Garmin img(*.img)"); break;
+        default: assert(false);
+    }
+
     // Prepare dialog to ask for output file, will be without extension if not manually typed by the user
-    QString selectedFilter; // this will conatin the selected type by the user in the dialog
     std::string desiredOutputFile = QFileDialog::getSaveFileName(this, tr("Output file"), QString::fromStdString(converter->GetOutputFile()), tr("Google Earth(*.kmz);;OpenAir(*.txt);;Polish(*.mp);;Garmin img(*.img)"), &selectedFilter).toStdString();
 
     // If no file selected or entered: do nothing
@@ -354,10 +364,10 @@ void MainWindow::on_convertButton_clicked() {
 
     // Ask confirmation to overwrite any other file that will be created during the conversion process
     switch(converter->GetOutputType()) {
-    case AirspaceConverter::KMZ_Format:
+    case AirspaceConverter::OutputType::KMZ_Format:
         if(boost::filesystem::exists(boost::filesystem::path(path.parent_path() / boost::filesystem::path("doc.kml"))) && QMessageBox::warning(this, "Overwrite?", tr("The already existing doc.kml file will be deleted, continue?"), QMessageBox::Yes | QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) return;
         break;
-    case AirspaceConverter::Garmin_Format:
+    case AirspaceConverter::OutputType::Garmin_Format:
         if(boost::filesystem::exists(path.replace_extension(".mp")) && QMessageBox::warning(this, "Overwrite?", tr("The already existing .MP file will be deleted, continue?"), QMessageBox::Yes | QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) return;
         break;
     default:
