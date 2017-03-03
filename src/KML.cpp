@@ -931,21 +931,24 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 		// Build the new airspace
 		Airspace airspace(category);
 
-		// Get and set the name
-		std::string str = placemark.get<std::string>("name");
-		airspace.SetName(str);
+		// If present get and set the name
+		if (placemark.count("name") > 0) {
+			airspace.SetName(placemark.get<std::string>("name"));
+
+			// Try to find the airspace class (for CTA, TMA and CTR) or the category from the name
+			airspace.GuessClassFromName();
+		}
 
 		boost::property_tree::ptree schemaData = placemark.get_child("ExtendedData").get_child("SchemaData");
 
 		bool basePresent(false), topPresent(false);
+		std::string labelName;
 		for (boost::property_tree::ptree::value_type const& simpleData : schemaData) {
 			if (simpleData.first != "SimpleData") continue;
-			str = simpleData.second.get_child("<xmlattr>").get<std::string>("name");
+			std::string str(simpleData.second.get_child("<xmlattr>").get<std::string>("name"));
 			if (str == "Upper_Limit" || str == "Top") topPresent = AirspaceConverter::ParseAltitude(simpleData.second.data(), true, airspace);
 			else if (str == "Lower_Limit" || str == "Base") basePresent = AirspaceConverter::ParseAltitude(simpleData.second.data(), false, airspace);
-			else if (str == "NAM" || str == "name") {
-				if (!simpleData.second.data().empty()) airspace.SetName(simpleData.second.data());
-			}
+			else if (str == "NAM" || str == "name" || str == "Name") labelName = simpleData.second.data();
 			else if (str == "Category") {
 				if (simpleData.second.data() == "Class A") category = Airspace::Type::CLASSA;
 				else if (simpleData.second.data() == "Class B") category = Airspace::Type::CLASSB;
@@ -975,11 +978,30 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 		// If found a category from the label use it
 		if (category != airspace.GetType()) airspace.SetType(category);
 
-		// Try to find the airspace class (for CTA, TMA and CTR) or the category from the name
-		airspace.GuessClassFromName();
+		// Try to find the best name between the placemark and the label names if both present
+		if (!labelName.empty() && !airspace.GetName().empty()) {
+			// Remember the placemark name
+			const std::string placemarkName(airspace.GetName());
+
+			// Set the name from the label
+			airspace.SetName(labelName);
+			airspace.GuessClassFromName();
+
+			// Set back the placemark name if it is better
+			if (airspace.GetName().length() < labelName.length()) airspace.SetName(placemarkName);	
+		}
+
+		// If there is only the name from the label use it
+		else if (!labelName.empty() && airspace.GetName().empty()) {
+			airspace.SetName(labelName);
+			airspace.GuessClassFromName();
+		}
 
 		// If still invalid category skip it
 		if (airspace.GetType() == Airspace::Type::UNDEFINED) return false;
+
+		// The name can be empty also after doing GuessClassFromName(), so make sure there is something there
+		if (airspace.GetName().empty()) airspace.SetName(airspace.GetType() <= Airspace::CLASSG ? ("Class " + airspace.GetCategoryName()) : airspace.GetCategoryName());
 
 		bool pointsFound(false);
 
