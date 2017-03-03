@@ -9,11 +9,6 @@
 # This source file is part of AirspaceConverter project
 #============================================================================
 
-# Tools
-CXX = g++
-STRIP = strip
-RM = rm -rf
-
 # Compiler options
 CPPFLAGS = -std=c++0x -Wall -Werror -fmessage-length=0
 
@@ -65,17 +60,17 @@ all: $(BIN)airspaceconverter
 # Build the command line program
 $(BIN)airspaceconverter: $(BIN)libairspaceconverter.so $(SRC)main.cpp
 	@echo Building executable: $@
-	@$(CXX) $(CPPFLAGS) -L$(BIN) -lairspaceconverter $(SRC)main.cpp -o $@
+	@g++ $(CPPFLAGS) -L$(BIN) -lairspaceconverter $(SRC)main.cpp -o $@
 ifeq ($(DEBUG),0)
-	@$(STRIP) -S --strip-unneeded $@
+	@strip -S --strip-unneeded $@
 endif
 
 # Build the shared library
 $(BIN)libairspaceconverter.so: $(OBJS)
 	@echo Building shared library: $@
-	@$(CXX) -L$(LIB) $(LFLAGS) -Wl,-soname,libairspaceconverter.so -shared $(OBJS) -o $@
+	@g++ -L$(LIB) $(LFLAGS) -Wl,-soname,libairspaceconverter.so -shared $(OBJS) -o $@
 ifeq ($(DEBUG),0)
-	@$(STRIP) -S --strip-unneeded $@
+	@strip -S --strip-unneeded $@
 endif
 	@chmod a-x $@
 
@@ -83,7 +78,7 @@ endif
 $(BIN)%.o: $(SRC)%.cpp
 $(BIN)%.o: $(SRC)%.cpp $(DEPDIR)%.d
 	@echo 'Compiling: $<'
-	@$(CXX) $(DEPFLAGS) $(CPPFLAGS) -fPIC -c $< -o $@
+	@g++ $(DEPFLAGS) $(CPPFLAGS) -fPIC -c $< -o $@
 	@mv -f $(DEPDIR)$*.Td $(DEPDIR)$*.d
 
 # Compile dependencies
@@ -96,7 +91,7 @@ $(DEPDIR)%.d: ;
 .PHONY: clean
 clean:
 	@echo Cleaning all
-	@$(RM) $(BIN)*
+	@rm -rf $(BIN)*
 
 # Install
 .PHONY: install
