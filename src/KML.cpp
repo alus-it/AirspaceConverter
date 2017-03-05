@@ -1009,9 +1009,6 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 		// The name can be empty also after doing GuessClassFromName(), so make sure there is something there
 		if (airspace.GetName().empty()) airspace.SetName(airspace.GetType() <= Airspace::CLASSG ? ("Class " + airspace.GetCategoryName()) : airspace.GetCategoryName());
 
-
-		AirspaceConverter::LogMessage("THE FUCKING NAME IS: " + airspace.GetName(), true);
-
 		bool pointsFound(false);
 
 		// If we expect a multigeometry...

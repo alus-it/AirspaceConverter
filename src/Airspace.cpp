@@ -289,10 +289,10 @@ bool Airspace::ArePointsValid() {
 	if (points.front() != points.back()) return false;
 
 	// Except last one the points must be different from each other
-	const unsigned int l = (unsigned int)points.size() - 1;
+	const size_t l = points.size() - 1;
 
 	// Usung a set with O(N log N) is faster in the generic case, but here this way should be faster in most of cases and requiring less memeory
-	for (unsigned int i = 0; i < l; i++) for (unsigned int j = i+1; j < l; j++) {
+	for (size_t i = 0; i < l; i++) for (size_t j = i+1; j < l; j++) {
 		if (points.at(i) == points.at(j)) return false;
 	}
 	

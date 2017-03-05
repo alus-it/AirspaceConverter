@@ -279,7 +279,7 @@ bool OpenAir::ParseAN(const std::string & line, Airspace& airspace) {
 
 bool OpenAir::ParseAltitude(const std::string& line, const bool isTop, Airspace& airspace) {
 	if (airspace.GetType() == Airspace::UNDEFINED) return true;
-	const unsigned int l = (unsigned int)line.length();
+	const std::string::size_type l = line.length();
 	if (l < 4) return false;
 	return AirspaceConverter::ParseAltitude(line.substr(3,l-3), isTop, airspace);
 }

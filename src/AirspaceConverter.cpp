@@ -159,7 +159,7 @@ void AirspaceConverter::LoadAirspaces() {
 	OpenAir openAir(airspaces);
 	KML kml(airspaces, waypoints);
 	int counter = 0;
-	const int airspaceCounter = (int)airspaces.size();
+	const size_t airspaceCounter = airspaces.size();
 	for (const std::string& inputFile : airspaceFiles) {
 		bool redOk(false);
 		const std::string ext(boost::filesystem::path(inputFile).extension().string());
@@ -174,7 +174,7 @@ void AirspaceConverter::LoadAirspaces() {
 			outputFile = boost::filesystem::path(inputFile).replace_extension(".kmz").string(); // Default output as KMZ
 	}
 	airspaceFiles.clear();
-	if (counter > 0) LogMessage(boost::str(boost::format("Red successfully %1d airspace definition(s) from %2d file(s).") %((int)airspaces.size() - airspaceCounter) %counter), false);
+	if (counter > 0) LogMessage(boost::str(boost::format("Red successfully %1d airspace definition(s) from %2d file(s).") %(airspaces.size() - airspaceCounter) %counter), false);
 }
 
 void AirspaceConverter::UnloadAirspaces() {
@@ -198,14 +198,14 @@ void AirspaceConverter::UnloadRasterMaps() {
 void AirspaceConverter::LoadWaypoints() {
 	conversionDone = false;
 	int counter = 0;
-	const int wptCounter = (int)waypoints.size();
+	const size_t wptCounter = waypoints.size();
 	for (const std::string& inputFile : waypointFiles) {
 		bool redOk = SeeYou::ReadFile(inputFile, waypoints);
 		if (redOk) counter++;
 		if (redOk && outputFile.empty()) outputFile = boost::filesystem::path(inputFile).replace_extension(".kmz").string(); // Default output as KMZ
 	}
 	waypointFiles.clear();
-	if (counter > 0) LogMessage(boost::str(boost::format("Red successfully %1d waypoint(s) from %2d file(s).") % ((int)waypoints.size() - wptCounter) %counter), false);
+	if (counter > 0) LogMessage(boost::str(boost::format("Red successfully %1d waypoint(s) from %2d file(s).") % (waypoints.size() - wptCounter) %counter), false);
 }
 
 void AirspaceConverter::UnloadWaypoints() {
@@ -274,7 +274,7 @@ int AirspaceConverter::GetNumOfTerrainMaps() const {
 
 bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop, Airspace& airspace) {
 	if (text.empty()) return false;
-	const unsigned int l = (unsigned int)text.length();
+	const std::string::size_type l = text.length();
 	double value = 0;
 	bool isFL = false;
 	bool isAMSL = true;
@@ -283,9 +283,9 @@ bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop,
 	bool isInFeet = true;
 	bool unitFound = false;
 	bool isUnlimited = false;
-	unsigned int s = 0;
+	std::string::size_type s = 0;
 	bool isNumber = isDigit(text.at(s));
-	for (unsigned int i = 1; i < l; i++) {
+	for (std::string::size_type i = 1; i < l; i++) {
 		const char c = text.at(i);
 		const bool isLast = (i == l - 1);
 		const bool isSep = (c == ' ' || c == '=');
