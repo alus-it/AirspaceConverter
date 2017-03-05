@@ -253,6 +253,11 @@ bool Airspace::GuessClassFromName() {
 	return true;
 }
 
+bool Airspace::NameStartsWithIdent(const std::string& ident) {
+	if(name.length() < 4 || ident.length() < 4) return false;
+	return(ident.find(name.substr(0,4)) != std::string::npos);
+}
+
 void Airspace::Clear() {
 	type = UNDEFINED;
 	airspaceClass = UNDEFINED;

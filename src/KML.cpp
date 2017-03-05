@@ -978,23 +978,29 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 		// If found a category from the label use it
 		if (category != airspace.GetType()) airspace.SetType(category);
 
-		// Try to find the best name between the placemark and the label names if both present
-		if (!labelName.empty() && !airspace.GetName().empty()) {
-			// Remember the placemark name
-			std::string placemarkName(airspace.GetName());
+		// Remember the placemark name
+		std::string placemarkName(airspace.GetName());
 
-			// Set the name from the label
+		// Consider the name from the label
+		if (!labelName.empty()) {
 			airspace.SetName(labelName);
 			airspace.GuessClassFromName();
-
-			// Join the names if they are different
-			if (airspace.GetName() != placemarkName) airspace.SetName(placemarkName.append(" - ") + labelName);
 		}
 
-		// If there is only the name from the label use it
-		else if (!labelName.empty() && airspace.GetName().empty()) {
-			airspace.SetName(labelName);
-			airspace.GuessClassFromName();
+		// The name from the label is valid
+		if (!airspace.GetName().empty()) {
+
+			// If ident is also present in the label use them joined as name
+			if (!ident.empty() && airspace.GetName() != ident && !airspace.NameStartsWithIdent(ident)) airspace.SetName(ident.append(" ") + airspace.GetName());
+
+			// Otherwise if a name from the tag is present and different from the label join them
+			else if (!placemarkName.empty() && airspace.GetName() != placemarkName) airspace.SetName(placemarkName.append(" ") + airspace.GetName());
+		}
+
+		// No valid name from the label then use placemark name, add also ident if present
+		else {
+			airspace.SetName(placemarkName);
+			if (!ident.empty() && ident != placemarkName && !airspace.NameStartsWithIdent(ident)) airspace.SetName(ident.append(" ") + placemarkName);
 		}
 
 		// If still invalid category skip it
@@ -1002,6 +1008,9 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 
 		// The name can be empty also after doing GuessClassFromName(), so make sure there is something there
 		if (airspace.GetName().empty()) airspace.SetName(airspace.GetType() <= Airspace::CLASSG ? ("Class " + airspace.GetCategoryName()) : airspace.GetCategoryName());
+
+
+		AirspaceConverter::LogMessage("THE FUCKING NAME IS: " + airspace.GetName(), true);
 
 		bool pointsFound(false);
 

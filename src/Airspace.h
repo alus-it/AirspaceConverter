@@ -98,6 +98,7 @@ public:
 	void SetType(const Type& category);
 	void SetClass(const Type& airspClass);
 	bool GuessClassFromName();
+	bool NameStartsWithIdent(const std::string& ident);
 	inline void SetTopAltitude(const Altitude& alt) { top = alt; }
 	inline void SetBaseAltitude(const Altitude& alt) { base = alt; }
 	inline void SetName(const std::string& airspaceName) { name = airspaceName; }
