@@ -209,13 +209,12 @@ bool Airspace::GuessClassFromName() {
 		"Classe",
 		"CLASSE"
 	};
-
-	const unsigned int nameLength = (unsigned int)name.length();
-	unsigned int start = 0, length = 0;
+	std::string::size_type nameLength = name.length();
+	std::string::size_type start = 0, length = 0;
 	for(const std::string& keyword : keywords) {
-		start = (unsigned int)name.find(keyword);
+		start = name.find(keyword);
 		if(start == std::string::npos) continue;
-		unsigned int pos = start + (unsigned int)keyword.length();
+		std::string::size_type pos = start + keyword.length();
 		if (nameLength <= pos) continue;
 		char c = name.at(pos);
 		if (c == ' ' || c == ':') {

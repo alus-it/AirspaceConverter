@@ -771,15 +771,13 @@ bool KML::ReadKMZ(const std::string& filename) {
 }
 
 bool KML::ProcessFolder(const boost::property_tree::ptree& folder, const int upperCategory) {
-	
-	// Try to guess the category from the name of folder
-	const std::string categoryName = folder.get<std::string>("name");
+	const std::string categoryName = folder.get<std::string>("name"); // Try to guess the category from the name of folder
 	int thisCategory = Airspace::Type::UNDEFINED;
-	unsigned int first = (unsigned int)categoryName.find('(');
+	const std::string::size_type first = categoryName.find('(');
 	if (first != std::string::npos) {
-		unsigned int last = (unsigned int)categoryName.find(')');
+		const std::string::size_type last = categoryName.find(')');
 		if (last != std::string::npos && first < last) {
-			const std::string shortCategory = categoryName.substr(first+1, last - first - 1);
+			const std::string shortCategory = categoryName.substr(first+1, last-first-1);
 			if (shortCategory.length() == 1) {
 				switch (shortCategory.at(0)) {
 				case 'A': thisCategory = Airspace::Type::CLASSA; break;
@@ -942,13 +940,15 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 		boost::property_tree::ptree schemaData = placemark.get_child("ExtendedData").get_child("SchemaData");
 
 		bool basePresent(false), topPresent(false);
-		std::string labelName;
+		std::string labelName, ident;
 		for (boost::property_tree::ptree::value_type const& simpleData : schemaData) {
 			if (simpleData.first != "SimpleData") continue;
 			std::string str(simpleData.second.get_child("<xmlattr>").get<std::string>("name"));
+
 			if (str == "Upper_Limit" || str == "Top") topPresent = AirspaceConverter::ParseAltitude(simpleData.second.data(), true, airspace);
 			else if (str == "Lower_Limit" || str == "Base") basePresent = AirspaceConverter::ParseAltitude(simpleData.second.data(), false, airspace);
 			else if (str == "NAM" || str == "name" || str == "Name") labelName = simpleData.second.data();
+			else if (str == "IDENT") ident = simpleData.second.data();
 			else if (str == "Category") {
 				if (simpleData.second.data() == "Class A") category = Airspace::Type::CLASSA;
 				else if (simpleData.second.data() == "Class B") category = Airspace::Type::CLASSB;
@@ -981,14 +981,14 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 		// Try to find the best name between the placemark and the label names if both present
 		if (!labelName.empty() && !airspace.GetName().empty()) {
 			// Remember the placemark name
-			const std::string placemarkName(airspace.GetName());
+			std::string placemarkName(airspace.GetName());
 
 			// Set the name from the label
 			airspace.SetName(labelName);
 			airspace.GuessClassFromName();
 
-			// Set back the placemark name if it is better
-			if (airspace.GetName().length() < labelName.length()) airspace.SetName(placemarkName);	
+			// Join the names if they are different
+			if (airspace.GetName() != placemarkName) airspace.SetName(placemarkName.append(" - ") + labelName);
 		}
 
 		// If there is only the name from the label use it
