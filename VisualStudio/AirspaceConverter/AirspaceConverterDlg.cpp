@@ -188,6 +188,7 @@ BOOL CAirspaceConverterDlg::OnInitDialog() {
 	// In case of Windows XP disable button that can't be used
 	if (isWinXPorOlder) {
 		LoadAirspacesFolderBt.EnableWindow(FALSE);
+		loadWaypointsFolderBt.EnableWindow(FALSE);
 		LoadRasterMapsFolderBt.EnableWindow(FALSE);
 		OpenOutputFileBt.EnableWindow(FALSE);
 		OpenOutputFolderBt.EnableWindow(FALSE);
