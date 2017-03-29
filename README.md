@@ -69,12 +69,12 @@ Possible options:
 At least one input airspace or waypoint file must be present.  
 Warning: any already existing output file will be overwritten.
 
-Windows MFC user version
-------------------------
+Windows MFC version
+-------------------
 The native Windows MFC executable needs just a couple of small DLLs: zip.dll zlib.dll to be kept in the same folder.  
 If you get the error about VCRUNTIME140.dll missing: it can be easily and quickly fixed installing the: MS VC++ redistributable, this will allow this software to run also on older Windows versions such us WindowsXP.  
 
-The Windows version has graphical user interface, this should be the default way to use it:
+This Windows MFC version has graphical user interface, this should be the default way to use it:
 
 1. Choose the desired output format
 2. If needed, specify the QNH to be used for calculating the height of flight levels, this must be done before reading airspace files.
