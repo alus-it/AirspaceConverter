@@ -74,7 +74,7 @@ bool ParseAltitude(const std::string& text, int& alt) {
 	try {
 		double altitude = std::stod(text.substr(0,pos));
 		if(feet) altitude *= Altitude::FEET2METER;
-		alt = (int)round(altitude);
+		alt = (int)std::round(altitude);
 	} catch(...) {
 		return false;
 	}
@@ -99,7 +99,7 @@ bool ParseLength(const std::string& text, int& len) {
 		if (length < 0) return false;
 		if (nauticalMiles) length *= Geometry::NM2M;
 		else if (statuteMiles) length *= Geometry::MI2M;
-		len = (int)round(length);
+		len = (int)std::round(length);
 	} catch (...) {
 		return false;
 	}
