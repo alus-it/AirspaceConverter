@@ -35,7 +35,7 @@ double Geometry::resolution = 0.3 * NM2RAD; // 0.3 NM = 555.6 m
 
 void Geometry::LatLon::convertDec2DegMin(const double& dec, int& deg, double& min) {
 	double decimal = std::fabs(dec);
-	deg=(int)floor(decimal);
+	deg=(int)std::floor(decimal);
 	min = (decimal-deg)/SIXTYTH;
 }
 

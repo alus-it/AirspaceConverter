@@ -67,7 +67,7 @@ bool RasterMap::GetMapCenter(double *lon, double *lat) const {
 
 
 inline static int iround(double i) {
-	return (int)(floor(i + 0.5));
+	return (int)(std::floor(i + 0.5));
 }
 
 void RasterMap::SetFieldRounding(double xr, double yr) {
