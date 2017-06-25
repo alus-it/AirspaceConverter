@@ -271,7 +271,9 @@ bool OpenAir::ParseAN(const std::string & line, Airspace& airspace) {
 	if (airspace.GetType() == Airspace::UNDEFINED) return true;
 	if (line.size() < 4) return false;
 	if (airspace.GetName().empty()) {
-		airspace.SetName(line.substr(3));
+		std::string name(line.substr(3));
+		if (name == "COLORENTRY") airspace.SetType(Airspace::UNDEFINED); // Skip Strepla colortable entries
+		else airspace.SetName(name);
 		return true;
 	}
 	AirspaceConverter::LogMessage(boost::str(boost::format("ERROR: airspace %1s has already a name.") % airspace.GetName()), true);
