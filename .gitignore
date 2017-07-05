@@ -27,6 +27,10 @@
 *.out
 *.app
 
+# Installation files
+*.deb
+*.msi
+
 # Ignore bin and build folder
 /bin
 /Debug
