@@ -11,6 +11,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AirspaceConverterLib", "AirspaceConverterLib\AirspaceConverterLib.vcxproj", "{1412BB18-5649-411D-B0A2-0A32E6402939}"
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "AirspaceConverterSetup", "AirspaceConverterSetup\AirspaceConverterSetup.vdproj", "{8E0CD3A0-7EE2-478D-A21E-4C19F3E911CA}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1412BB18-5649-411D-B0A2-0A32E6402939} = {1412BB18-5649-411D-B0A2-0A32E6402939}
+		{39B99CB8-DFCA-45A2-8AB8-FAC2EA6EE35E} = {39B99CB8-DFCA-45A2-8AB8-FAC2EA6EE35E}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
