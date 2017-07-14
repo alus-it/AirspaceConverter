@@ -589,7 +589,7 @@ bool KML::Write(const std::string& filename) {
 #ifdef ZIP_FL_OVERWRITE
 	int index = (int)zip_file_add(archive, "doc.kml", source, ZIP_FL_OVERWRITE);
 #else
-	int index = (int)zip_add(archive, "doc,kml", source);
+	int index = (int)zip_add(archive, "doc.kml", source);
 #endif
 	if (index < 0) { // "failed to add file to archive. " << zip_strerror(archive)
 #ifdef ZIP_FL_OVERWRITE
