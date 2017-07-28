@@ -1,6 +1,5 @@
 AirspaceConverter
 =================
-Welcome to AirspaceConverter repository!  
 This is a free, open source and multi-platform tool to convert between different airspace formats.  
 
 Can read airspace files in the following formats:  
