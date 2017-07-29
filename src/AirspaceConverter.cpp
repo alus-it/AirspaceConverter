@@ -35,7 +35,7 @@ const std::vector<std::string> AirspaceConverter::disclaimer = {
 	"",
 	"WARNING:",
 	"AirspaceConverter is an experimental software. So, please, be aware that the output may contain errors!",
-	"The only usage of this software is to test it; so, you, as tester user, are kindly requested to report any error or discrepancy found.",
+	"The users are kindly requested to report any error or discrepancy found.",
 	"",
 	"Disclaimer:",
 	"The author of AirspaceConverter assumes no liability at all for the previous, actual or future correctness, completeness, functionality or usability",
