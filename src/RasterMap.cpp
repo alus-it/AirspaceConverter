@@ -25,9 +25,17 @@
 RasterMap::RasterMap() :
 	terrain_valid(false),
 	max_field_value(0),
+	xlleft(0),
+	xlltop(0),
 	DirectFine(false),
 	DirectAccess(true),
 	Paged(false),
+	fXrounding(0.0),
+	fYrounding(0.0),
+	fXroundingFine(0.0),
+	fYroundingFine(0.0),
+	Xrounding(0),
+	Yrounding(0),
 	TerrainMem(nullptr) {
 }
 

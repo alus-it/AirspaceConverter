@@ -578,6 +578,7 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 				else return;
 			}
 		} // Fall trough
+		/* no break */
 	case AirspaceConverter::OutputType::Polish_Format:
 		if (processor != nullptr && processor->Convert()) StartBusy();
 		else MessageBox(_T("Error while starting Polish output thread."), _T("Error"), MB_ICONERROR);

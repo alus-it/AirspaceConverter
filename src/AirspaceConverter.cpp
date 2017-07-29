@@ -93,26 +93,31 @@ std::istream& AirspaceConverter::SafeGetline(std::istream& is, std::string& line
 	std::istream::sentry se(is, true);
 	std::streambuf* sb = is.rdbuf();
 	isCRLF = false;
-	for(;;) {
+	bool proceed(true);
+	do {
 		const int c = sb->sbumpc();
 		switch (c) {
 		case '\n':
-			return is;
+			proceed = false;
+			break;
 		case '\r': // Beware that to detect the CR under Windows it is necessary to read the file in binary mode
 			if(sb->sgetc() == '\n') {
 				sb->sbumpc();
 				isCRLF = true;
 			}
-			return is;
+			proceed = false;
+			break;
 		case EOF:
 			// Also handle the case when the last line has no line ending
 			if(line.empty()) is.setstate(std::ios::eofbit);
 			isCRLF = true; // no problem in this case
-			return is;
+			proceed = false;
+			break;
 		default:
 			line += (char)c;
 		}
-	}
+	} while(proceed);
+	return is;
 }
 
 AirspaceConverter::OutputType AirspaceConverter::DetermineType(const std::string& filename) {
