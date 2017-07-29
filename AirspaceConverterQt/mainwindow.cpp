@@ -303,8 +303,8 @@ void MainWindow::on_unloadTerrainMapsButton_clicked() {
 void MainWindow::on_chooseOutputFileButton_clicked() {
     QString selectedFilter; // this string will conatin the selected type by the user in the dialog
 
-    // Set it to current selected type, so the user will have it already preselected in the file dialog
-    switch(converter->GetOutputType()) {
+    // The desired format is initially dictated by the combo box: the user will have it already preselected in the file dialog
+    switch(ui->outputFormatComboBox->currentIndex()) {
         case AirspaceConverter::OutputType::KMZ_Format:     selectedFilter = tr("Google Earth(*.kmz)"); break;
         case AirspaceConverter::OutputType::OpenAir_Format: selectedFilter = tr("OpenAir(*.txt)"); break;
         case AirspaceConverter::OutputType::Polish_Format:  selectedFilter = tr("Polish(*.mp)"); break;
