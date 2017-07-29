@@ -121,7 +121,7 @@ std::istream& AirspaceConverter::SafeGetline(std::istream& is, std::string& line
 }
 
 AirspaceConverter::OutputType AirspaceConverter::DetermineType(const std::string& filename) {
-	if (filename.empty()) return OutputType::Unknown_Format;
+	if (filename.empty()) return OutputType::KMZ_Format; // KMZ default
 	OutputType outputType = OutputType::KMZ_Format; // KMZ default
 	std::string outputExt(boost::filesystem::path(filename).extension().string());
 	if (!boost::iequals(outputExt, ".kmz")) {
