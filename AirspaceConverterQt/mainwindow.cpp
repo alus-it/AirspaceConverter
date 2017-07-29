@@ -191,7 +191,7 @@ void MainWindow::on_loadAirspaceFileButton_clicked() {
 
     // Load all the files
     for(const auto& file : filenames) converter->AddAirspaceFile(file.toStdString());
-    watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::LoadAirspaces));
+    watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::LoadAirspaces, (AirspaceConverter::OutputType)ui->outputFormatComboBox->currentIndex()));
 }
 
 void MainWindow::on_loadAirspaceFolderButton_clicked() {
@@ -212,7 +212,7 @@ void MainWindow::on_loadAirspaceFolderButton_clicked() {
         if (!boost::filesystem::is_regular_file(*it)) continue;
         converter->AddAirspaceFile(it->path().string());
     }
-    watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::LoadAirspaces));
+    watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::LoadAirspaces, (AirspaceConverter::OutputType)ui->outputFormatComboBox->currentIndex()));
 }
 
 void MainWindow::on_unloadAirspacesButton_clicked() {
