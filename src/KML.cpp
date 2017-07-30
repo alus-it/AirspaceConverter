@@ -81,7 +81,7 @@ const std::string KML::waypointIcons[] = {
 };
 
 std::vector<RasterMap*> KML::terrainMaps;
-double KML::defaultTerrainAltitudeMt = 20.842;
+double KML::defaultTerrainAltitudeMt = 20;
 std::string KML::iconsPath = "/usr/share/airspaceconverter/icons/"; // Default installed Linux location
 
 KML::KML(std::multimap<int, Airspace>& airspacesMap, std::multimap<int, Waypoint*>& waypointsMap):

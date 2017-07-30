@@ -1,0 +1,87 @@
+.TH AIRSPACECONVERTER 1
+.SH NAME
+airspaceconverter \- convert between different airspace formats
+.SH SYNOPSIS
+.B airspaceconverter
+[\fB\-q\fR \fIQNH\fR]
+[\fB\-a\fR \fIterrainAltitude\fR]
+[\fB\-i\fR \fIinputFile\fR]
+[\fB\-w\fR \fIwaypointFile\fR]
+[\fB\-m\fR \fIterrainMapFile\fR]
+[\fB\-o\fR \fIoutputFile\fR]
+.PP
+Example usage:
+.br
+airspaceconverter -q 1013 -a 35 -i inputFileOpenAir.txt -i inputFileOpenAIP.aip -w waypoints.cup -m terrainMap.dem -o outputFile.kmz
+.SH DESCRIPTION
+.B airspaceconverter
+an open source and multi-platform tool to convert between different airspace formats.
+.PP
+Can read airspace files in the following formats:
+    - OpenAir
+    - OpenAIP
+    - KML/KMZ
+.PP
+And the output can be done in the following formats:
+    - KMZ
+    - OpenAir
+    - Polish
+    - Garmin IMG
+.PP
+KMZ files are to be shown in 3D with Google Earth.
+AirspaceConverter can take as input also SeeYou .CUP waypoints files and convert them as well in KMZ for Google Earth.
+Airspace represented in 3D in Google Earth can help to visualize and better understand the airspace structure.
+Not only, having the planned route or track of a flight (as GPX file), displayed as well in Google Earth will make easy to check for airspace crossed or to be avoided.
+.PP
+The PFM "Polish" format, (file .mp), can be used with cGPSmapper. This utility uses cGPSmapper to make the .img files for Garmin devices.
+.PP
+The output in OpenAir is useful to make the data from OpenAIP suitable for many devices which support OpenAir only format; in particular this feature attempts to recalculate arcs and circles (possible definitions in OpenAir) in order to contain the size of output files.
+This software can also be useful for maintainers of OpenAir airspace and SeeYou .CUP waypoints files, not only to visualize airspace and waypoints but also to verify the syntax of OpenAir and CUP commands entered.
+.PP
+For the "landable" waypoints in the CUP files an estimation of the runway perimeter is drawn on the earth surface, in order to do that not only the position is used but also the runway orientation and length.
+This is particularly useful to verify that the position of the airfield in the CUP file matches exactly the runway in Google Earth.
+In software like LK8000 the airfield position is considered as the exact center of the runway, orientation and length are used to assist for landing with an HSI and glide slope indications; thus the correctness of: position, orientation and length becomes quite important.
+.PP
+There are also cases where the "official" airspace files are available only in KML format, also in this case is possible to convert it to OpenAir.
+.PP
+AirspaceConverter uses the same terrain raster maps (.DEM) of LK8000 to get the altitude of the terrain and so to convert altitudes from AGL to AMSL.
+In case the loaded terrain maps are overlapping, the one with the best resolution will be automatically used.
+On the LK8000 website there is a wide terrain raster map collection.
+.PP
+For more information visit: http://www.alus.it/AirspaceConverter
+.SH OPTIONS
+.TP
+.BR \-q " " \fIQNH\fR
+Specify the QNH in hPa used to calculate height of flight levels.
+Default is 1013.15 hPa.
+.TP
+.BR \-a " " \fIterrainAltitude\fR
+Specify a default terrain altitude in meters to calculate AGL heights of points not covered by loaded terrain map(s).
+Default is 20 m.
+.TP
+.BR \-i " " \fIinputFile\fR
+Mltiple, input airspace file(s) can be OpenAir (.txt), OpenAIP (.aip), Google Earth (.kmz, .kml).
+At least one input airspace or waypoint file must be present.
+Additional input airspace files must be specified repeating the option \-i in front of each of them.
+.TP
+.BR \-w " " \fIwaypointFile\fR
+Multiple, input waypoint file(s) in the SeeYou CUP format (.cup).
+At least one input airspace or waypoint file must be present.
+Additional input waypoint files must be specified repeating the option \-w in front of each of them.
+The waypoints will be used only if converting to KMZ.
+.TP
+.BR \-m " " \fIterrainMapFile\fR
+Multiple, terrain map file(s) (.dem) used to lookup terrain heights.
+Additional input terrain map files must be specified repeating the option \-m in front of each of them.
+The terrain maps will be used only if converting to KMZ.
+.TP
+.BR \-o " " \fIoutputFile\fR
+Output file, can be: .kmz (Google Earth), .txt (OpenAir), .img (Garmin) or .mp (Polish).
+If not specified will be used the name of first input file as KMZ.
+WARNING: any already existing output file will be automatically overwritten.
+.TP
+.BR \-v
+Print version number.
+.TP
+.BR \-h
+Print a short help guide.
