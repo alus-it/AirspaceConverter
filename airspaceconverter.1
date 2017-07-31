@@ -10,9 +10,7 @@ airspaceconverter \- convert between different airspace formats
 [\fB\-m\fR \fIterrainMapFile\fR]
 [\fB\-o\fR \fIoutputFile\fR]
 .PP
-Example usage:
-.br
-airspaceconverter -q 1013 -a 35 -i inputFileOpenAir.txt -i inputFileOpenAIP.aip -w waypoints.cup -m terrainMap.dem -o outputFile.kmz
+Example: airspaceconverter -q 1013 -a 35 -i fileOpenAir.txt -i fileOpenAIP.aip -w waypoints.cup -m terrainMap.dem -o outputFile.kmz
 .SH DESCRIPTION
 .B airspaceconverter
 an open source and multi-platform tool to convert between different airspace formats.
@@ -60,7 +58,7 @@ Specify a default terrain altitude in meters to calculate AGL heights of points 
 Default is 20 m.
 .TP
 .BR \-i " " \fIinputFile\fR
-Mltiple, input airspace file(s) can be OpenAir (.txt), OpenAIP (.aip), Google Earth (.kmz, .kml).
+Multiple, input airspace file(s) can be OpenAir (.txt), OpenAIP (.aip), Google Earth (.kmz, .kml).
 At least one input airspace or waypoint file must be present.
 Additional input airspace files must be specified repeating the option \-i in front of each of them.
 .TP
