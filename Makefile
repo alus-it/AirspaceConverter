@@ -101,6 +101,8 @@ install: $(BIN)airspaceconverter
 	@cp $(BIN)libairspaceconverter.so /usr/lib
 	@mkdir -p /usr/share/airspaceconverter/icons
 	@cp icons/* /usr/share/airspaceconverter/icons
+	@gzip -9 < airspaceconverter.1 > airspaceconverter.1.gz
+	@mv airspaceconverter.1.gz /usr/share/man/man1/
 	@echo Done.
 
 # Uninstall
@@ -110,4 +112,5 @@ uninstall:
 	@rm -f /usr/bin/airspaceconverter
 	@rm -f /usr/lib/libairspaceconverter.so
 	@rm -rf /usr/share/airspaceconverter
+	@rm -rf /usr/share/man/man1/airspaceconverter.1.gz
 	@echo Done.
