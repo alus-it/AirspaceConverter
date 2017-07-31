@@ -58,7 +58,7 @@ The Linux command line version works taking several arguments, for example:
 Possible options:  
   -q: optional, specify the QNH in hPa used to calculate height of flight levels  
   -a: optional, specify a default terrain altitude in meters to calculate AGL heights of points not covered by loaded terrain map(s)  
-  -i: multiple, input file(s) can be OpenAir (.txt), OpenAIP (.aip)  
+  -i: multiple, input file(s) can be OpenAir (.txt), OpenAIP (.aip), Google Earth (.kmz, .kml)  
   -w: multiple, input waypoint file(s) in the SeeYou CUP format (.cup)  
   -m: optional, multiple, terrain map file(s) (.dem) used to lookup terrain heights  
   -o: optional, output file .kmz, .mp (Polish) or .txt (OpenAir) if not specified will be used the name of first input file as KMZ  
