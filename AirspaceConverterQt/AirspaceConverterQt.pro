@@ -42,7 +42,7 @@ DEPENDPATH += $$PWD/../src/
 ## Linux libraries
 
 # libAirspaceConverter
-unix:!macx: LIBS += -lairspaceconverter
+unix:!macx: LIBS += -L$$PWD/../Release/ -lairspaceconverter
 
 # Boost libraries
 unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu/ -lboost_filesystem
