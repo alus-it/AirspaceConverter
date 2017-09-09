@@ -24,6 +24,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/tokenizer.hpp>
+#include <cmath>
 
 const std::string KML::colors[][2] = {
 	{ "509900ff", "7f9900ff" }, //CLASSA

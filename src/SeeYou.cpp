@@ -18,6 +18,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/format.hpp>
+#include <cmath>
 #include <cassert>
 #include "SeeYou.h"
 
