@@ -200,7 +200,7 @@ cd DEBIAN
 
 # Make control file
 echo 'Package: airspaceconverter-gui
-Version: '${version}'
+Version: '${version}'-1
 Section: misc
 Priority: optional
 Standards-Version: '${version}'
@@ -256,5 +256,4 @@ dpkg-deb --build airspaceconverter-gui_${version}-1_amd64
 rm -R buildQt
 sudo rm -R airspaceconverter_${version}-1_amd64
 sudo rm -R airspaceconverter-gui_${version}-1_amd64
-
 
