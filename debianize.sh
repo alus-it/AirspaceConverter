@@ -1,4 +1,14 @@
 #!/bin/bash
+#============================================================================
+# AirspaceConverter
+# Since       : 10/9/2017
+# Author      : Alberto Realis-Luc <alberto.realisluc@gmail.com>
+# Web         : http://www.alus.it/AirspaceConverter
+# Copyright   : (C) 2016-2017 Alberto Realis-Luc
+# License     : GNU GPL v3
+#
+# This script is part of AirspaceConverter project
+#============================================================================
 
 # Ask version number
 echo Version number?
@@ -177,6 +187,7 @@ cd ..
 cp ../../airspaceconverter_${version}-1_amd64/usr/share/doc/airspaceconverter/copyright ./share/doc/airspaceconverter-gui
 cp ../../airspaceconverter.xpm ./share/pixmaps
 cp ../../buildQt/airspaceconverter-gui ./bin
+strip -S --strip-unneeded ./bin/airspaceconverter-gui
 
 cd ..
 
