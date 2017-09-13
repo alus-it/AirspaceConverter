@@ -10,23 +10,157 @@
 # This script is part of AirspaceConverter project
 #============================================================================
 
-# Ask version number
-echo Version number?
-read version
+# Determine if we want to compile or just copy binaries
+printf "Compile [C] on this machine or only build the DEB packge [D] from existing binaries [C/D]? "
+read -r ACTION
 
-# Get number of processors available
-PROCESSORS="$(grep -c ^processor /proc/cpuinfo)"
+if [[ "$ACTION" == "C" || "$ACTION" == "c" || "$ACTION" == "" ]]; then
+	# Find out Debian version
+	if [ -f /etc/os-release ]; then
+		# freedesktop.org and systemd
+		. /etc/os-release
+		OS=$NAME
+		DEBIANVER=$VERSION_ID
+	elif type lsb_release >/dev/null 2>&1; then
+		# linuxbase.org
+		OS=$(lsb_release -si)
+		DEBIANVER=$(lsb_release -sr)
+	elif [ -f /etc/lsb-release ]; then
+		# For some versions of Debian/Ubuntu without lsb_release command
+		. /etc/lsb-release
+		OS=$DISTRIB_ID
+		DEBIANVER=$DISTRIB_RELEASE
+	elif [ -f /etc/debian_version ]; then
+		# Older Debian/Ubuntu/etc.
+		OS=Debian
+		DEBIANVER=$(cat /etc/debian_version)
+	#elif [ -f /etc/SuSe-release ]; then
+		# Older SuSE/etc.
+	#elif [ -f /etc/redhat-release ]; then
+		# Older Red Hat, CentOS, etc.
+	else
+	    # Fall back to uname, e.g. "Linux <version>", also works for BSD, etc.
+	    OS=$(uname -s)
+	    DEBIANVER=$(uname -r)
+	fi
 
-# Build shared library and command line version
-make -j${PROCESSORS} all
+	# Check if it is Debian distribution first
+	if [ "$OS" != "Debian GNU/Linux" ]; then
+		echo "ERROR: this not Debian!"
+		exit 1
+	fi
+
+	# Get architecture type
+	case $(uname -m) in
+		x86_64)
+			ARCH=amd64
+			;;
+		i686)
+			ARCH=i386
+			;;
+		*)
+			echo "ERROR: This script is not able to work on the achitecture, please add it!"
+			exit 1
+		esac
+
+elif [[ "$ACTION" == "D" || "$ACTION" == "d" ]]; then
+	# Tell the user to copy the binaries built on another Debian	
+	echo "So, please copy the already compiled: airspaceconverter libairspaceconverter.so and airspaceconverter-gui binaries to this folder."
+	read -p "Press ENTER when done"
+
+	# Instead of building just copy the binaries (make sure they are executable as well)
+	chmod a+x airspaceconverter
+	chmod a+x airspaceconverter-gui
+	mkdir -p Release
+	mv airspaceconverter ./Release/airspaceconverter
+	mv libairspaceconverter.so ./Release/libairspaceconverter.so
+	mkdir -p buildQt
+	mv airspaceconverter-gui ./buildQt/airspaceconverter-gui
+	
+	# Ask the user for which version of Debian we are building the packages	
+	printf "Enter target Debian release number [7-9]: "
+	read -r DEBIANVER
+	
+	# Ask the packager for which architecure are built the copied binaries
+	printf "Bits has the target architecture? [32/64]: "
+	read -r ARCH
+	if [[ "$ARCH" == "64" || "$ARCH" == "" ]]; then
+		ARCH=amd64
+	elif [ "$ARCH" == "32" ]; then
+		ARCH=i386
+	else
+		echo "ERROR: Unknown achitecture, please add it!"
+		exit 1
+	fi
+else
+	echo "ERROR: Unknown action!"
+	exit 1
+fi
+
+
+# Check what Debian release we are talking about
+case $DEBIANVER in
+	7)
+		echo "Packaging for Debian Wheezy..."
+		#TODO: Check versions on Wheezy!!!!!		
+		ZIPLIB=libzip2		
+		ZIPVER=0.11.2
+		BOOSTVER=1.55.0
+		QTVER=5.3.2
+        ;;
+
+	8)
+		echo "Packaging for Debian Jessie..."
+		ZIPLIB=libzip2		
+		ZIPVER=0.11.2
+		BOOSTVER=1.55.0
+		QTVER=5.3.2
+		;;
+
+	9)
+		echo "Packaging for Debian Stretch..."
+		ZIPLIB=libzip4		
+		ZIPVER=1.1.2
+		BOOSTVER=1.62.0
+		QTVER=5.7.1
+		;;
+	
+	*)
+	echo "ERROR: This version of Debian: ${DEBIANVER} is not known by this script, please add it!"
+	exit 1
+ 
+esac
+
+# Compile everithing
+if [[ "$ACTION" == "C" || "$ACTION" == "c" || "$ACTION" == "" ]]; then
+	# Get number of processors available
+	PROCESSORS="$(grep -c ^processor /proc/cpuinfo)"
+
+	# Build shared library and command line version
+	make -j${PROCESSORS} all
+
+	# Get version number from the compiled executable
+	VERSION="$(./Release/airspaceconverter -v | head -n 1 | sed -r 's/^[^0-9]+([0-9]+.[0-9]+.[0-9]+).*/\1/g')"
+
+	# Build Qt user interface
+	mkdir -p buildQt
+	cd buildQt
+	qmake ../AirspaceConverterQt/AirspaceConverterQt.pro -r -spec linux-g++-64
+	make -j${PROCESSORS} all
+	cd ..
+else
+	# Ask the version to the user
+	printf "New airspaceconverter version number: "
+	read -r VERSION
+fi
 
 # Man page has to be compressed at maximum
 gzip -9 < airspaceconverter.1 > airspaceconverter.1.gz
 
 # Make folder for airspaceconverter
-sudo rm -rf airspaceconverter_${version}-1_amd64
-mkdir airspaceconverter_${version}-1_amd64
-cd airspaceconverter_${version}-1_amd64
+sudo rm -rf airspaceconverter_${VERSION}-${DEBIANVER}_${ARCH}
+mkdir airspaceconverter_${VERSION}-${DEBIANVER}_${ARCH}
+cd airspaceconverter_${VERSION}-${DEBIANVER}_${ARCH}
 
 # Build directory structure
 mkdir usr
@@ -101,14 +235,14 @@ cd DEBIAN
 
 # Make control file
 echo 'Package: airspaceconverter
-Version: '${version}'-1
+Version: '${VERSION}'-'${DEBIANVER}'
 Section: misc
 Priority: optional
-Build-Depends: libc6-dev (>= 2.19), libboost-system-dev (>= 1.55.0), libboost-filesystem-dev (>= 1.55.0), libboost-locale-dev (>= 1.55.0), libzip-dev (>= 0.11.2)
-Standards-Version: '${version}'
-Architecture: amd64
-Depends: libc6 (>= 2.19), libboost-system-dev (>= 1.55.0), libboost-filesystem-dev (>= 1.55.0), libboost-locale-dev (>= 1.55.0), libzip-dev (>= 0.11.2)
-Enhances: airspaceconverter-gui (>= '${version}'), cgpsmapper (>= 0.0.9.3c)
+Build-Depends: libc6-dev (>= 2.19), libboost-system-dev (>= '${BOOSTVER}'), libboost-filesystem-dev (>= '${BOOSTVER}'), libboost-locale-dev (>= '${BOOSTVER}'), libzip-dev (>= '${ZIPVER}')
+Standards-Version: 3.9.4
+Architecture: '${ARCH}'
+Depends: libc6 (>= 2.19), libboost-system'${BOOSTVER}' (>= '${BOOSTVER}'), libboost-filesystem'${BOOSTVER}' (>= '${BOOSTVER}'), libboost-locale'${BOOSTVER}' (>= '${BOOSTVER}'), '${ZIPLIB}' (>= '${ZIPVER}')
+Enhances: airspaceconverter-gui (>= '${VERSION}'), cgpsmapper (>= 0.0.9.3c)
 Maintainer: Alberto Realis-Luc <admin@alus.it>
 Installed-size: '${SIZE}'
 Description: Airspace Converter
@@ -134,20 +268,13 @@ sudo chown -R root:root *
 cd ..
 
 #Make airspaceconverter DEB package
-rm -f airspaceconverter_${version}-1_amd64.deb
-dpkg-deb --build airspaceconverter_${version}-1_amd64
-
-# Build Qt user interface
-mkdir buildQt
-cd buildQt
-qmake ../AirspaceConverterQt/AirspaceConverterQt.pro -r -spec linux-g++-64
-make -j${PROCESSORS} all
-cd ..
+rm -f airspaceconverter_${VERSION}-${DEBIANVER}_${ARCH}.deb
+dpkg-deb --build airspaceconverter_${VERSION}-${DEBIANVER}_${ARCH}
 
 # Make folder for airspaceconverter-gui
-sudo rm -rf airspaceconverter-gui_${version}-1_amd64
-mkdir airspaceconverter-gui_${version}-1_amd64
-cd airspaceconverter-gui_${version}-1_amd64
+sudo rm -rf airspaceconverter-gui_${VERSION}-${DEBIANVER}_${ARCH}
+mkdir airspaceconverter-gui_${VERSION}-${DEBIANVER}_${ARCH}
+cd airspaceconverter-gui_${VERSION}-${DEBIANVER}_${ARCH}
 
 # Build directory structure
 mkdir usr
@@ -184,7 +311,7 @@ mkdir pixmaps
 cd ..
 
 # Copy the files
-cp ../../airspaceconverter_${version}-1_amd64/usr/share/doc/airspaceconverter/copyright ./share/doc/airspaceconverter-gui
+cp ../../airspaceconverter_${VERSION}-${DEBIANVER}_${ARCH}/usr/share/doc/airspaceconverter/copyright ./share/doc/airspaceconverter-gui
 cp ../../airspaceconverter.xpm ./share/pixmaps
 cp ../../buildQt/airspaceconverter-gui ./bin
 strip -S --strip-unneeded ./bin/airspaceconverter-gui
@@ -200,13 +327,13 @@ cd DEBIAN
 
 # Make control file
 echo 'Package: airspaceconverter-gui
-Version: '${version}'-1
+Version: '${VERSION}'-'${DEBIANVER}'
 Section: misc
 Priority: optional
-Standards-Version: '${version}'
-Architecture: amd64
-Depends: libc6 (>= 2.19), airspaceconverter (>= '${version}'), libqt5core5a (>= 5.3.2), libqt5gui5 (>= 5.3.2), libqt5widgets5 (>= 5.3.2), libgl1-mesa-glx (>= 10.3.2), libboost-system-dev (>= 1.55.0) ,libboost-filesystem-dev (>= 1.55.0)
-Suggests: airspaceconverter (>= '${version}')
+Standards-Version: 3.9.4
+Architecture: '${ARCH}'
+Depends: libc6 (>= 2.19), airspaceconverter (>= '${VERSION}'), libqt5core5a (>= '${QTVER}'), libqt5gui5 (>= '${QTVER}'), libqt5widgets5 (>= '${QTVER}'), libgl1-mesa-glx (>= 10.3.2), libboost-system'${BOOSTVER}' (>= '${BOOSTVER}') ,libboost-filesystem'${BOOSTVER}' (>= '${BOOSTVER}')
+Suggests: airspaceconverter (>= '${VERSION}')
 Enhances: cgpsmapper (>= 0.0.9.3c)
 Maintainer: Alberto Realis-Luc <admin@alus.it>
 Installed-size: '${SIZE}'
@@ -249,11 +376,15 @@ sudo chown -R root:root *
 cd ..
 
 #Make DEB package for airspaceconverter-gui
-rm -f airspaceconverter-gui_${version}-1_amd64.deb
-dpkg-deb --build airspaceconverter-gui_${version}-1_amd64
+rm -f airspaceconverter-gui_${VERSION}-${DEBIANVER}_${ARCH}.deb
+dpkg-deb --build airspaceconverter-gui_${VERSION}-${DEBIANVER}_${ARCH}
 
 # Clean
 rm -R buildQt
-sudo rm -R airspaceconverter_${version}-1_amd64
-sudo rm -R airspaceconverter-gui_${version}-1_amd64
+sudo rm -R airspaceconverter_${VERSION}-${DEBIANVER}_${ARCH}
+sudo rm -R airspaceconverter-gui_${VERSION}-${DEBIANVER}_${ARCH}
+if [[ "$ACTION" == "D" || "$ACTION" == "d" ]]; then
+	make clean
+fi
+exit 0
 
