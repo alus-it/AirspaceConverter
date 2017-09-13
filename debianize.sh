@@ -102,33 +102,37 @@ fi
 case $DEBIANVER in
 	7)
 		echo "Packaging for Debian Wheezy..."
-		#TODO: Check versions on Wheezy!!!!!		
+		LIBCVER=2.13
 		ZIPLIB=libzip2		
-		ZIPVER=0.11.2
-		BOOSTVER=1.55.0
-		QTVER=5.3.2
+		ZIPVER=0.10.1
+		BOOSTVER=1.49.0
+		QTVER=4:4.8.2
+		QTDEPS="libqtcore4 (>= ${QTVER}), libqtgui4 (>= ${QTVER})"
         ;;
 
 	8)
 		echo "Packaging for Debian Jessie..."
+		LIBCVER=2.19		
 		ZIPLIB=libzip2		
 		ZIPVER=0.11.2
 		BOOSTVER=1.55.0
 		QTVER=5.3.2
+		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER}), libgl1-mesa-glx (>= 10.3.2)"
 		;;
 
 	9)
 		echo "Packaging for Debian Stretch..."
+		LIBCVER=2.19	
 		ZIPLIB=libzip4		
 		ZIPVER=1.1.2
 		BOOSTVER=1.62.0
 		QTVER=5.7.1
+		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER}), libgl1-mesa-glx (>= 10.3.2)"
 		;;
 	
 	*)
 	echo "ERROR: This version of Debian: ${DEBIANVER} is not known by this script, please add it!"
 	exit 1
- 
 esac
 
 # Compile everithing
@@ -238,10 +242,10 @@ echo 'Package: airspaceconverter
 Version: '${VERSION}'-'${DEBIANVER}'
 Section: misc
 Priority: optional
-Build-Depends: libc6-dev (>= 2.19), libboost-system-dev (>= '${BOOSTVER}'), libboost-filesystem-dev (>= '${BOOSTVER}'), libboost-locale-dev (>= '${BOOSTVER}'), libzip-dev (>= '${ZIPVER}')
+Build-Depends: libc6-dev (>= '${LIBCVER}'), libboost-system-dev (>= '${BOOSTVER}'), libboost-filesystem-dev (>= '${BOOSTVER}'), libboost-locale-dev (>= '${BOOSTVER}'), libzip-dev (>= '${ZIPVER}')
 Standards-Version: 3.9.4
 Architecture: '${ARCH}'
-Depends: libc6 (>= 2.19), libboost-system'${BOOSTVER}' (>= '${BOOSTVER}'), libboost-filesystem'${BOOSTVER}' (>= '${BOOSTVER}'), libboost-locale'${BOOSTVER}' (>= '${BOOSTVER}'), '${ZIPLIB}' (>= '${ZIPVER}')
+Depends: libc6 (>= '${LIBCVER}'), libboost-system'${BOOSTVER}' (>= '${BOOSTVER}'), libboost-filesystem'${BOOSTVER}' (>= '${BOOSTVER}'), libboost-locale'${BOOSTVER}' (>= '${BOOSTVER}'), '${ZIPLIB}' (>= '${ZIPVER}')
 Enhances: airspaceconverter-gui (>= '${VERSION}'), cgpsmapper (>= 0.0.9.3c)
 Maintainer: Alberto Realis-Luc <admin@alus.it>
 Installed-size: '${SIZE}'
@@ -332,7 +336,7 @@ Section: misc
 Priority: optional
 Standards-Version: 3.9.4
 Architecture: '${ARCH}'
-Depends: libc6 (>= 2.19), airspaceconverter (>= '${VERSION}'), libqt5core5a (>= '${QTVER}'), libqt5gui5 (>= '${QTVER}'), libqt5widgets5 (>= '${QTVER}'), libgl1-mesa-glx (>= 10.3.2), libboost-system'${BOOSTVER}' (>= '${BOOSTVER}') ,libboost-filesystem'${BOOSTVER}' (>= '${BOOSTVER}')
+Depends: libc6 (>= '${LIBCVER}'), airspaceconverter (>= '${VERSION}'), '${QTDEPS}', libboost-system'${BOOSTVER}' (>= '${BOOSTVER}') ,libboost-filesystem'${BOOSTVER}' (>= '${BOOSTVER}')
 Suggests: airspaceconverter (>= '${VERSION}')
 Enhances: cgpsmapper (>= 0.0.9.3c)
 Maintainer: Alberto Realis-Luc <admin@alus.it>
