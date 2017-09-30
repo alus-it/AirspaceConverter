@@ -40,7 +40,7 @@ void Geometry::LatLon::convertDec2DegMin(const double& dec, int& deg, double& mi
 }
 
 double Geometry::AbsAngle(const double& angle) { //to put angle in the range between 0 and 2PI
-	assert(!isinf(angle) && !isnan(angle));
+	assert(!std::isinf(angle) && !std::isnan(angle));
 	double absangle = std::fmod(angle, TWO_PI);
 	if (absangle < 0) absangle += TWO_PI;
 	assert(absangle >= 0 && absangle <= TWO_PI);
@@ -58,7 +58,7 @@ double Geometry::DeltaAngle(const double angle, const double reference) {
 }
 
 double Geometry::AnglePi2Pi(const double& angle) { //to put angle in the range between -PI and PI
-	assert(!isinf(angle) && !isnan(angle));
+	assert(!std::isinf(angle) && !std::isnan(angle));
 	double anglePi2Pi = std::fmod(angle, TWO_PI);
 	if(anglePi2Pi > PI) anglePi2Pi -= TWO_PI;
 	else if(anglePi2Pi < -PI) anglePi2Pi += TWO_PI;
