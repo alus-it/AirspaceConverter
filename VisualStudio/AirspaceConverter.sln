@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AirspaceConverter", "AirspaceConverter\AirspaceConverter.vcxproj", "{39B99CB8-DFCA-45A2-8AB8-FAC2EA6EE35E}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -51,5 +51,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BFE826CF-3CBB-48C5-8DA9-85B4106A3134}
 	EndGlobalSection
 EndGlobal
