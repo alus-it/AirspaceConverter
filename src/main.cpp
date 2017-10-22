@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 	AirspaceConverter ac;
 
 	for(int i=1; i<argc; i++) {
-		int len=strlen(argv[i]);
+		size_t len=strlen(argv[i]);
 		if(len != 2 || argv[i][0]!='-') {
 			std::cerr << "Expected an option but found: " << argv[i] << std::endl;
 			return EXIT_FAILURE;

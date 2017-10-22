@@ -31,7 +31,7 @@
 *.deb
 *.msi
 
-# Ignore bin and build folder
+# Ignore bin and build folders
 /bin
 /Debug
 /Release
@@ -65,7 +65,9 @@
 # Visual Studio folders
 /VisualStudio/.vs
 /VisualStudio/packages
-/VisualStudio/*/x64
+/VisualStudio/ipch
+/VisualStudio/Debug
+/VisualStudio/Release
 
 # QT stuff
 *.user

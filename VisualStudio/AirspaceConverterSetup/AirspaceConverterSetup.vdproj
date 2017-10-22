@@ -21,6 +21,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_0B62E1F3E46A4B759394AB7AC051397F"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_0F8526FAD43B47EB9B6EE21A4B0A758F"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -57,13 +63,13 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_1D8DA54DA26F476DBA66020465E73EA4"
+        "MsmKey" = "8:_23C24BB7CCD543649CED51ACA0AEA3CD"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_23C24BB7CCD543649CED51ACA0AEA3CD"
+        "MsmKey" = "8:_2445D7DC091D441EB6F5B39E6B95F8A6"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -292,6 +298,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_0B62E1F3E46A4B759394AB7AC051397F"
+            {
+            "SourcePath" = "8:..\\Release\\Win32\\AirspaceConverterMFC.exe"
+            "TargetName" = "8:AirspaceConverterMFC.exe"
+            "Tag" = "8:"
+            "Folder" = "8:_DAC0292CD03D4BCEA4D5C690940A22F5"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_0F8526FAD43B47EB9B6EE21A4B0A758F"
             {
             "SourcePath" = "8:..\\..\\README.md"
@@ -412,12 +438,12 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_1D8DA54DA26F476DBA66020465E73EA4"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_23C24BB7CCD543649CED51ACA0AEA3CD"
             {
-            "SourcePath" = "8:..\\Release\\Win32\\AirspaceConverter.exe"
-            "TargetName" = "8:AirspaceConverter.exe"
+            "SourcePath" = "8:..\\..\\icons\\bridge.png"
+            "TargetName" = "8:bridge.png"
             "Tag" = "8:"
-            "Folder" = "8:_DAC0292CD03D4BCEA4D5C690940A22F5"
+            "Folder" = "8:_2DE9544612164C99A8B721861E11E781"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -432,12 +458,12 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_23C24BB7CCD543649CED51ACA0AEA3CD"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_2445D7DC091D441EB6F5B39E6B95F8A6"
             {
-            "SourcePath" = "8:..\\..\\icons\\bridge.png"
-            "TargetName" = "8:bridge.png"
+            "SourcePath" = "8:..\\Release\\Win32\\airspaceconverter.exe"
+            "TargetName" = "8:airspaceconverter.exe"
             "Tag" = "8:"
-            "Folder" = "8:_2DE9544612164C99A8B721861E11E781"
+            "Folder" = "8:_DAC0292CD03D4BCEA4D5C690940A22F5"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -1042,7 +1068,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:AirspaceConverter"
         "ProductCode" = "8:{14AB8698-ED57-486E-AEF7-A11844C6D997}"
-        "PackageCode" = "8:{6B7B0F27-36E1-4F5F-B003-100AB58FC9C0}"
+        "PackageCode" = "8:{35A5CCE7-AF0E-4BC4-9084-07ADA77DC1B0}"
         "UpgradeCode" = "8:{9209EC37-746F-4FB7-AC80-51C0D2BC9FEA}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -1059,7 +1085,7 @@
         "Keywords" = "8:Airspace Converter"
         "ARPCOMMENTS" = "8:Converter between different airspace formats"
         "ARPURLINFOABOUT" = "8:http://www.alus.it"
-        "ARPPRODUCTICON" = "8:_1D8DA54DA26F476DBA66020465E73EA4"
+        "ARPPRODUCTICON" = "8:"
         "ARPIconIndex" = "3:128"
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"
@@ -1162,20 +1188,6 @@
         }
         "Shortcut"
         {
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_281C7A2A821047C3B24045DF3AC0D026"
-            {
-            "Name" = "8:Airspace Converter"
-            "Arguments" = "8:"
-            "Description" = "8:"
-            "ShowCmd" = "3:1"
-            "IconIndex" = "3:128"
-            "Transitive" = "11:FALSE"
-            "Target" = "8:_1D8DA54DA26F476DBA66020465E73EA4"
-            "Folder" = "8:_E5AF63EAFB5D4D83AF00294337CA39A9"
-            "WorkingFolder" = "8:_DAC0292CD03D4BCEA4D5C690940A22F5"
-            "Icon" = "8:_1D8DA54DA26F476DBA66020465E73EA4"
-            "Feature" = "8:"
-            }
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_3542EF55FFFF4510963C2AC63701901B"
             {
             "Name" = "8:AirspaceConverter Source Code"
@@ -1204,18 +1216,18 @@
             "Icon" = "8:"
             "Feature" = "8:"
             }
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_5723D4F0C8CD41608667369AC3CF9635"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_42EE8AB887F74754AA0D45BDAF315EBF"
             {
-            "Name" = "8:AirspaceConverter"
+            "Name" = "8:Airspace Converter"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
             "IconIndex" = "3:128"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_1D8DA54DA26F476DBA66020465E73EA4"
-            "Folder" = "8:_1E84454B749741ED850615C73FF405B2"
+            "Target" = "8:_0B62E1F3E46A4B759394AB7AC051397F"
+            "Folder" = "8:_E5AF63EAFB5D4D83AF00294337CA39A9"
             "WorkingFolder" = "8:_DAC0292CD03D4BCEA4D5C690940A22F5"
-            "Icon" = "8:_1D8DA54DA26F476DBA66020465E73EA4"
+            "Icon" = "8:_0B62E1F3E46A4B759394AB7AC051397F"
             "Feature" = "8:"
             }
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_CD30C1B9C3A645BDB8801E58C463F5BF"
@@ -1230,6 +1242,20 @@
             "Folder" = "8:_1E84454B749741ED850615C73FF405B2"
             "WorkingFolder" = "8:_DAC0292CD03D4BCEA4D5C690940A22F5"
             "Icon" = "8:"
+            "Feature" = "8:"
+            }
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_E704E4B78428482BB2E58D948DA2AF68"
+            {
+            "Name" = "8:AirspaceConverter"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:128"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_0B62E1F3E46A4B759394AB7AC051397F"
+            "Folder" = "8:_1E84454B749741ED850615C73FF405B2"
+            "WorkingFolder" = "8:_DAC0292CD03D4BCEA4D5C690940A22F5"
+            "Icon" = "8:_0B62E1F3E46A4B759394AB7AC051397F"
             "Feature" = "8:"
             }
         }
