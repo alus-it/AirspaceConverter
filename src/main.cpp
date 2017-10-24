@@ -94,6 +94,15 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
+	// If on Windows determine the proper cGPSmapper command
+#ifdef _WIN32
+#ifdef _WIN64
+	ac.Set_cGPSmapperCommand("\"C:\\Program Files\\AirspaceConverter\\cGPSmapper\\cgpsmapper.exe\"");
+#else
+	ac.Set_cGPSmapperCommand("\"C:\\Program Files (x86)\\AirspaceConverter\\cGPSmapper\\cgpsmapper.exe\"");
+#endif
+#endif
+
 	// Start the timer
 	const auto startTime = std::chrono::high_resolution_clock::now();
 
