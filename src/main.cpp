@@ -14,6 +14,9 @@
 #include <iostream>
 #include <cstring>
 #include <chrono>
+#ifdef _WIN32
+#include <boost/filesystem/operations.hpp>
+#endif
 
 void printHelp() {
 	std::cout << "Example usage: airspaceconverter -q 1013 -a 35 -i inputFileOpenAir.txt -i inputFileOpenAIP.aip -w waypoints.cup -m terrainMap.dem -o outputFile.kmz" << std::endl << std::endl;
@@ -94,13 +97,11 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	// If on Windows determine the proper cGPSmapper command
+	// If on Windows determine the proper cGPSmapper path
 #ifdef _WIN32
-#ifdef _WIN64
-	ac.Set_cGPSmapperCommand("\"C:\\Program Files\\AirspaceConverter\\cGPSmapper\\cgpsmapper.exe\"");
-#else
-	ac.Set_cGPSmapperCommand("\"C:\\Program Files (x86)\\AirspaceConverter\\cGPSmapper\\cgpsmapper.exe\"");
-#endif
+	std::string path('"' + boost::filesystem::system_complete(boost::filesystem::path(argv[0])).parent_path().string());
+	path.append("\\cGPSmapper\\cgpsmapper.exe\"");
+	ac.Set_cGPSmapperCommand(path);
 #endif
 
 	// Start the timer
