@@ -131,9 +131,9 @@ bool OpenAir::Read(const std::string& fileName) {
 		// Verify line ending
 		if (!CRLFwarningGiven && !isCRLF) {
 			AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: not valid Windows style end of line (expected CR LF).") % linecount), true);
-			AirspaceConverter::LogMessage("This warning will be not reapeated for furter lines not termintated with CR LF of this OpenAir file.", false);
+			AirspaceConverter::LogMessage("This warning will be not repeated for further lines not terminated with CR LF of this OpenAir file.", false);
 
-			// OpenAir files may contain thousends of lines we don't want to print this warning all the time
+			// OpenAir files may contain thousands of lines we don't want to print this warning all the time
 			CRLFwarningGiven = true;
 		}
 		
