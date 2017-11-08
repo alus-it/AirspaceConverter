@@ -412,13 +412,11 @@ bool OpenAir::InsertAirspace(Airspace& airspace) {
 	//	AirspaceConverter::LogMessage(boost::str(boost::format("WARNING at line %1d: airspace without name.") % lastACline), true);
 	//}
 
-	// Let's be optimistic
-	bool validAirspace(true);
+	// Verify if is valid airspace giving a proper explanatory error message
+	bool validAirspace(airspace.GetNumberOfGeometries() > 0);
 
-	if (validAirspace && airspace.GetNumberOfGeometries() == 0) {
+	if (!validAirspace)
 		AirspaceConverter::LogMessage(boost::str(boost::format("ERROR at line %1d: skip airspace %2s with no geometries.") % lastACline % airspace.GetName()), true);
-		validAirspace = false;
-	}
 
 	if (validAirspace && airspace.GetTopAltitude() <= airspace.GetBaseAltitude()) {
 		AirspaceConverter::LogMessage(boost::str(boost::format("ERROR at line %1d: skip airspace %2s with top and base equal or inverted.") % lastACline % airspace.GetName()), true);
