@@ -405,12 +405,6 @@ bool OpenAir::InsertAirspace(Airspace& airspace) {
 		airspace.Clear();
 		return false;
 	}
-	
-	//TODO: the color table has no names so the following is disturbing...
-	// This should be just a warning
-	//if (airspace.GetName().empty()) {
-	//	AirspaceConverter::LogMessage(boost::str(boost::format("WARNING at line %1d: airspace without name.") % lastACline), true);
-	//}
 
 	// Verify if is valid airspace giving a proper explanatory error message
 	bool validAirspace(airspace.GetNumberOfGeometries() > 0);
@@ -437,8 +431,14 @@ bool OpenAir::InsertAirspace(Airspace& airspace) {
 	}
 
 	// If all OK insert the new airspace
-	if (validAirspace) airspaces.insert(std::pair<int, Airspace>(airspace.GetType(), std::move(airspace)));
+	if (validAirspace) {
+
+		// This should be just a warning
+		if (airspace.GetName().empty()) AirspaceConverter::LogMessage(boost::str(boost::format("WARNING at line %1d: airspace without name.") % lastACline), true);
 		
+		airspaces.insert(std::pair<int, Airspace>(airspace.GetType(), std::move(airspace)));
+	}
+
 	// Otherwise discard it
 	else airspace.Clear();
 
