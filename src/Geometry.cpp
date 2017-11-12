@@ -379,7 +379,6 @@ void Circle::WriteOpenAirGeometry(OpenAir& openAir) const {
 
 /* Airway not supported yet
 bool AirwayPoint::Discretize(std::vector<LatLon>& output) const {
-	// TODO...
 	return false;
 }
 */
