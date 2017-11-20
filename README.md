@@ -50,9 +50,9 @@ The common shared library
 This software is designed to keep completely separated functionalities from the user interfaces.  
 All the reading, writing and conversion features are in a common shared library: libAirspaceConverter can be compiled under different platfoms and so used from different user interfaces.
 
-Linux command line version
---------------------------
-The Linux command line version works taking several arguments, for example:  
+Command line version
+--------------------
+The command line version, compiled both for Linux and Windows, works taking several arguments, for example:  
 `AirspaceConverter -q 1013 -a 35 -i inputFileOpenAir.txt -i inputFileOpenAIP.aip -w waypoints.cup -m terrainMap.dem -o outputFile.kmz`  
 
 Possible options:  
@@ -106,7 +106,7 @@ Build dependencies
 ------------------
 In order to compile this project the following libraries are required:  
 - libzip2 (libzip-dev) and dependencies (zlib)
-- Boost libraries (libboost-filesystem-dev)
+- Boost libraries (libboost-filesystem-dev and libboost-locale-dev)
 
 Compiling AirspaceConverter on Linux
 ------------------------------------
@@ -115,7 +115,7 @@ To build in debug: `make DEBUG=1 all`
 The "AirspaceConverter" executable will be located in the "Release" or "Debug" folder
 
 Installing AirspaceConverter on Linux
-------------------------------------
+-------------------------------------
 From the root of this project: `sudo make install`  
 To uninstall: `sudo make uninstall` 
 
