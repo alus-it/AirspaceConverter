@@ -60,7 +60,7 @@ all: $(BIN)airspaceconverter
 # Build the command line program
 $(BIN)airspaceconverter: $(BIN)libairspaceconverter.so $(SRC)main.cpp
 	@echo Building executable: $@
-	@g++ $(CPPFLAGS) -L$(BIN) -lairspaceconverter $(SRC)main.cpp -o $@
+	@g++ $(CPPFLAGS) -L$(BIN) $(SRC)main.cpp -lairspaceconverter -lboost_system -lboost_filesystem -lboost_locale -lzip -o $@
 ifeq ($(DEBUG),0)
 	@strip -S --strip-unneeded $@
 endif
