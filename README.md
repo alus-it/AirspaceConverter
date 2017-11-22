@@ -110,12 +110,16 @@ In order to compile this project the following libraries are required:
 
 Compiling AirspaceConverter on Linux
 ------------------------------------
-From the root of this project: `make all`  
+First it is necessary to install the dependencies, on a Debian based distribution it would be:  
+`sudo apt-get install libzip-dev`  
+`sudo apt-get install libboost-filesystem-dev`  
+`sudo apt-get install libboost-locale-dev`  
+Then, to compile, from the root of this project: `make all`  
 To build in debug: `make DEBUG=1 all`  
 The "AirspaceConverter" executable will be located in the "Release" or "Debug" folder
 
-Installing AirspaceConverter on Linux
--------------------------------------
+Installing AirspaceConverter from sources on Linux
+--------------------------------------------------
 From the root of this project: `sudo make install`  
 To uninstall: `sudo make uninstall` 
 
