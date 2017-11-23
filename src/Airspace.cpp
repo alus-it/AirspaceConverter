@@ -382,9 +382,9 @@ bool Airspace::Undiscretize() {
 	return true;
 }
 
-bool Airspace::IsWithinLimits() const {
+bool Airspace::IsWithinLimits(const Geometry::Limits& limits) const {
 	bool pointWhithinLimitsFound(false);
-	for(const Geometry::LatLon& p : points) if (Geometry::GetLimits().AreLatLonWithinLimits(p)) {
+	for(const Geometry::LatLon& p : points) if (limits.AreLatLonWithinLimits(p)) {
 		pointWhithinLimitsFound = true;
 		break;
 	}

@@ -14,6 +14,7 @@
 #include <string>
 #include <map>
 #include <fstream>
+#include "Geometry.h"
 
 class Airspace;
 
@@ -21,7 +22,7 @@ class Polish {
 public:
 	Polish() {}
 	~Polish() {}
-	bool Write(const std::string& filename, const std::multimap<int, Airspace>& airspaces);
+	bool Write(const std::string& filename, const std::multimap<int, Airspace>& airspaces, const Geometry::Limits& limits);
 
 private:
 	void WriteHeader(const std::string& filename);

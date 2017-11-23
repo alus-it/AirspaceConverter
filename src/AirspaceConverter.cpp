@@ -57,7 +57,8 @@ const std::vector<std::string> AirspaceConverter::disclaimer = {
 };
 
 AirspaceConverter::AirspaceConverter() :
-	conversionDone(false) {
+	conversionDone(false),
+	limits() {
 }
 
 AirspaceConverter::~AirspaceConverter() {
@@ -261,7 +262,7 @@ bool AirspaceConverter::Convert() {
 	case OutputType::KMZ_Format:
 		{
 			KML writer(airspaces, waypoints);
-			if (writer.Write(outputFile)) {
+			if (writer.Write(outputFile, limits)) {
 				conversionDone = true;
 				if(KML::GetNumOfRasterMaps() == 0) LogMessage("Warning: no raster terrain map loaded, used default terrain height for all applicable AGL points.", true);
 				else if(!writer.WereAllAGLaltitudesCovered()) LogMessage("Warning: not all AGL altitudes were under coverage of the loaded terrain map(s).", true);
@@ -269,17 +270,17 @@ bool AirspaceConverter::Convert() {
 		}
 		break;
 	case OutputType::OpenAir_Format:
-		conversionDone = OpenAir(airspaces).Write(outputFile);
+		conversionDone = OpenAir(airspaces).Write(outputFile, limits);
 		break;
 	case OutputType::Polish_Format:
-		conversionDone = Polish().Write(outputFile, airspaces);
+		conversionDone = Polish().Write(outputFile, airspaces, limits);
 		break;
 	case OutputType::Garmin_Format: // For Garmin IMG will be necessary to call cGPSmapper
 		{
 			// First make the Polish file
 			const std::string polishFile(boost::filesystem::path(outputFile).replace_extension(".mp").string());
 			LogMessage("Building Polish file: " + polishFile, false);
-			if(!Polish().Write(polishFile, airspaces)) break;
+			if(!Polish().Write(polishFile, airspaces, limits)) break;
 
 			// Then call cGPSmapper
 			conversionDone = cGPSmapper(polishFile, outputFile);
