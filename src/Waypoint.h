@@ -65,7 +65,7 @@ public:
 	inline const std::string& GetTypeName() const { return TypeName(type); }
 	inline const std::string& GetDescription() const { return description; }
 	inline bool IsAirfield() const { return IsTypeAirfield(type); }
-	inline bool IsWithinLimits() const { return Geometry::GetLimits().AreLatLonWithinLimits(pos); }
+	inline bool IsWithinLimits(const Geometry::Limits& limits) const { return limits.AreLatLonWithinLimits(pos); }
 
 	inline static const std::string& TypeName(const WaypointType& type) { return TYPE_NAMES[type]; }
 

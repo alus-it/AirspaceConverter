@@ -333,7 +333,7 @@ void KML::WriteSideWalls(const Airspace& airspace, const std::vector<double>& al
 	}
 }
 
-bool KML::Write(const std::string& filename) {
+bool KML::Write(const std::string& filename, const Geometry::Limits& limits) {
 	
 	// Verify presence of waypoints and airspaces
 	const bool airspacesPresent = !airspaces.empty();
@@ -395,7 +395,7 @@ bool KML::Write(const std::string& filename) {
 				const Waypoint* w = it->second;
 
 				// Skip it if not within limits
-				if (!w->IsWithinLimits()) continue;
+				//if (!w->IsWithinLimits()) continue;
 
 				// Open placemark
 				OpenPlacemark(w);
@@ -507,7 +507,7 @@ bool KML::Write(const std::string& filename) {
 				assert(a.GetFirstPoint()==a.GetLastPoint());
 
 				// Skip it if not within limits
-				if (!a.IsWithinLimits()) continue;
+				if (!a.IsWithinLimits(limits)) continue;
 
 				OpenPlacemark(a);
 

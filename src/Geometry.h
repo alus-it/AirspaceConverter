@@ -57,13 +57,9 @@ public:
 	public:
 		Limits() : valid(false), acrossAntiGreenwich(false) {};
 		Limits(const LatLon& topLeftPoint, const LatLon& bottomRightPoint) : topLeft(topLeftPoint), bottomRight(bottomRightPoint) { Verify(); }
-		Limits(const double& topLat, const double& leftLon, const double& bottomLat, const double& rightLon) : topLeft(topLat, leftLon), bottomRight(bottomLat, rightLon) { Verify(); }
-		bool SetTopLeftLimit(const LatLon& topLeftLimit);
-		bool SetBottomRightLimit(const LatLon& bottomRightLimit);
-		bool SetTopLatitudeLimit(const double& topLat);
-		bool SetBottomLatitudeLimit(const double& bottomLat);
-		bool SetLeftLongitudeLimit(const double& leftLon);
-		bool SetRightLongitudeLimit(const double& rightLon);
+		Limits(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon) : topLeft(topLat, leftLon), bottomRight(bottomLat, rightLon) { Verify(); }
+		bool Set(const LatLon& topLeftLimit, const LatLon& bottomRightLimit);
+		bool Set(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon);
 		inline bool IsValid() const { return valid; }
 		inline LatLon GetTopLeft() const { return topLeft; }
 		inline LatLon GetBottomRight() const { return bottomRight; }
@@ -87,9 +83,6 @@ public:
 	static inline void SetResolution(const double resolutionNM) { resolution = resolutionNM * NM2RAD; }
 	static bool CalcAirfieldPolygon(const double lat, const double lon, const int length, const int dir, std::vector<LatLon>& polygon);
 	inline const LatLon& GetCenterPoint() const { return point; }
-	static inline void SetLimits(const Limits& newLimits) { limits = newLimits; }
-	static inline Limits GetLimits() { return limits; }
-	static inline void DisableLimits() { limits.Disable(); }
 
 	static const double NM2M, MI2M;
 
@@ -124,7 +117,6 @@ protected:
 private:
 	static const double PI;
 	static const double TOL;
-	static Limits limits;
 	virtual void WriteOpenAirGeometry(OpenAir& openAir) const = 0;
 };
 

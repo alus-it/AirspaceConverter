@@ -32,7 +32,6 @@ const double Geometry::M2RAD = NM2RAD / NM2M;
 const double Geometry::TOL = 2e-10;
 
 double Geometry::resolution = 0.3 * NM2RAD; // 0.3 NM = 555.6 m
-Geometry::Limits Geometry::limits;
 
 void Geometry::LatLon::convertDec2DegMin(const double& dec, int& deg, double& min) {
 	double decimal = std::fabs(dec);
@@ -40,43 +39,23 @@ void Geometry::LatLon::convertDec2DegMin(const double& dec, int& deg, double& mi
 	min = (decimal-deg)/SIXTYTH;
 }
 
-bool Geometry::Limits::SetTopLeftLimit(const LatLon& topLeftLimit) {
+bool Geometry::Limits::Set(const LatLon& topLeftLimit, const LatLon& bottomRightLimit) {
 	assert(topLeftLimit.IsValid());
-	topLeft = topLeftLimit;
-	Verify();
-	return valid;
-}
-
-bool Geometry::Limits::SetBottomRightLimit(const LatLon& bottomRightLimit) {
 	assert(bottomRightLimit.IsValid());
+	topLeft = topLeftLimit;
 	bottomRight = bottomRightLimit;
 	Verify();
 	return valid;
 }
 
-bool Geometry::Limits::SetTopLatitudeLimit(const double& topLat) {
+bool Geometry::Limits::Set(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon) {
 	assert(LatLon::IsValidLat(topLat));
-	topLeft.SetLat(topLat);
-	Verify();
-	return valid;
-}
-
-bool Geometry::Limits::SetBottomLatitudeLimit(const double& bottomLat) {
 	assert(LatLon::IsValidLat(bottomLat));
-	bottomRight.SetLat(bottomLat);
-	Verify();
-	return valid;
-}
-
-bool Geometry::Limits::SetLeftLongitudeLimit(const double& leftLon) {
 	assert(LatLon::IsValidLon(leftLon));
-	topLeft.SetLon(leftLon);
-	Verify();
-	return valid;
-}
-
-bool Geometry::Limits::SetRightLongitudeLimit(const double& rightLon) {
 	assert(LatLon::IsValidLon(rightLon));
+	topLeft.SetLat(topLat);
+	bottomRight.SetLat(bottomLat);
+	topLeft.SetLon(leftLon);
 	bottomRight.SetLon(rightLon);
 	Verify();
 	return valid;
