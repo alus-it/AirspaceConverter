@@ -47,6 +47,10 @@ unix:!macx: LIBS += -L$$PWD/../Release/ -lairspaceconverter
 # Boost libraries
 unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu/ -lboost_filesystem
 unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu/ -lboost_system
+unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu/ -lboost_locale
+
+# Zip library
+unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu/ -lzip
 
 
 ## Windows libraries on 64 bit
