@@ -41,6 +41,7 @@ public:
 		inline void GetLonDegMin(int& deg, double& min) const { return convertDec2DegMin(lon, deg, min); }
 		inline char GetNorS() const { return lat > 0 ? 'N' : 'S'; }
 		inline char GetEorW() const { return lon > 0 ? 'E' : 'W'; }
+		inline bool IsValid() const { return IsValidLat(lat) &&  IsValidLon(lon); }
 		inline static bool IsValidLat(const double& la) { return la >= -90 && la <= 90; }
 		inline static bool IsValidLon(const double& lo) { return lo >= -180 && lo <= 180; }
 
@@ -52,11 +53,43 @@ public:
 		static const double SIXTYTH;
 	};
 
+	class Limits {
+	public:
+		Limits() : valid(false), acrossAntiGreenwich(false) {};
+		Limits(const LatLon& topLeftPoint, const LatLon& bottomRightPoint) : topLeft(topLeftPoint), bottomRight(bottomRightPoint) { Verify(); }
+		Limits(const double& topLat, const double& leftLon, const double& bottomLat, const double& rightLon) : topLeft(topLat, leftLon), bottomRight(bottomLat, rightLon) { Verify(); }
+		bool SetTopLeftLimit(const LatLon& topLeftLimit);
+		bool SetBottomRightLimit(const LatLon& bottomRightLimit);
+		bool SetTopLatitudeLimit(const double& topLat);
+		bool SetBottomLatitudeLimit(const double& bottomLat);
+		bool SetLeftLongitudeLimit(const double& leftLon);
+		bool SetRightLongitudeLimit(const double& rightLon);
+		inline bool IsValid() const { return valid; }
+		inline LatLon GetTopLeft() const { return topLeft; }
+		inline LatLon GetBottomRight() const { return bottomRight; }
+		inline double GetTopLatitudeLimit() const { return topLeft.Lat(); }
+		inline double GetBottomLatitudeLimit() const { return bottomRight.Lat(); }
+		inline double GetLeftLongitudeLimit() const { return topLeft.Lon(); }
+		inline double GetRightLongitudeLimit() const { return bottomRight.Lon(); }
+		inline void Disable() { valid = false; }
+		bool AreLatLonWithinLimits(const LatLon& pos) const;
+
+	private:
+		void Verify();
+		LatLon topLeft;
+		LatLon bottomRight;
+		bool valid;
+		bool acrossAntiGreenwich;
+	};
+
 	virtual ~Geometry() {}
 	virtual bool Discretize(std::vector<LatLon>& output) const = 0;
 	static inline void SetResolution(const double resolutionNM) { resolution = resolutionNM * NM2RAD; }
 	static bool CalcAirfieldPolygon(const double lat, const double lon, const int length, const int dir, std::vector<LatLon>& polygon);
 	inline const LatLon& GetCenterPoint() const { return point; }
+	static inline void SetLimits(const Limits& newLimits) { limits = newLimits; }
+	static inline Limits GetLimits() { return limits; }
+	static inline void DisableLimits() { limits.Disable(); }
 
 	static const double NM2M, MI2M;
 
@@ -91,6 +124,7 @@ protected:
 private:
 	static const double PI;
 	static const double TOL;
+	static Limits limits;
 	virtual void WriteOpenAirGeometry(OpenAir& openAir) const = 0;
 };
 

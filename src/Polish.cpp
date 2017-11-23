@@ -117,6 +117,9 @@ bool Polish::Write(const std::string& filename, const std::multimap<int, Airspac
 		assert(a.GetNumberOfPoints() > 3);
 		assert(a.GetFirstPoint()==a.GetLastPoint());
 
+		// Skip it if not within limits
+		if (!a.IsWithinLimits()) continue;
+
 		// Determine if it's a POLYGON or a POLYLINE
 		if (a.GetType() == Airspace::PROHIBITED || a.GetType() == Airspace::CTR || a.GetType() == Airspace::DANGER) {
 			file << "[POLYGON]\n"

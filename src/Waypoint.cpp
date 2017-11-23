@@ -31,3 +31,4 @@ const std::string Waypoint::TYPE_NAMES[] = {
 	"Castle",
 	"Intersection"
 };
+
