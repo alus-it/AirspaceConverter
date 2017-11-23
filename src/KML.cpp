@@ -392,8 +392,10 @@ bool KML::Write(const std::string& filename) {
 			
 			const auto filtered = waypoints.equal_range(t);
 			for (auto it = filtered.first; it != filtered.second; ++it) {
-				//const Waypoint* w = it->second;
 				const Waypoint* w = it->second;
+
+				// Skip it if not within limits
+				if (!w->IsWithinLimits()) continue;
 
 				// Open placemark
 				OpenPlacemark(w);
@@ -503,6 +505,9 @@ bool KML::Write(const std::string& filename) {
 
 				assert(a.GetNumberOfPoints() > 3);
 				assert(a.GetFirstPoint()==a.GetLastPoint());
+
+				// Skip it if not within limits
+				if (!a.IsWithinLimits()) continue;
 
 				OpenPlacemark(a);
 

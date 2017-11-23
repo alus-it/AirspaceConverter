@@ -462,6 +462,9 @@ bool OpenAir::Write(const std::string& fileName) {
 		// Get the airspace
 		Airspace& a = pair.second;
 
+		// Skip it if not within limits
+		if (!a.IsWithinLimits()) continue;
+
 		// Just a couple if assertions
 		assert(a.GetNumberOfPoints() > 3);
 		assert(a.GetFirstPoint()==a.GetLastPoint());

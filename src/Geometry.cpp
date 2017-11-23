@@ -32,11 +32,67 @@ const double Geometry::M2RAD = NM2RAD / NM2M;
 const double Geometry::TOL = 2e-10;
 
 double Geometry::resolution = 0.3 * NM2RAD; // 0.3 NM = 555.6 m
+Geometry::Limits Geometry::limits;
 
 void Geometry::LatLon::convertDec2DegMin(const double& dec, int& deg, double& min) {
 	double decimal = std::fabs(dec);
 	deg=(int)std::floor(decimal);
 	min = (decimal-deg)/SIXTYTH;
+}
+
+bool Geometry::Limits::SetTopLeftLimit(const LatLon& topLeftLimit) {
+	assert(topLeftLimit.IsValid());
+	topLeft = topLeftLimit;
+	Verify();
+	return valid;
+}
+
+bool Geometry::Limits::SetBottomRightLimit(const LatLon& bottomRightLimit) {
+	assert(bottomRightLimit.IsValid());
+	bottomRight = bottomRightLimit;
+	Verify();
+	return valid;
+}
+
+bool Geometry::Limits::SetTopLatitudeLimit(const double& topLat) {
+	assert(LatLon::IsValidLat(topLat));
+	topLeft.SetLat(topLat);
+	Verify();
+	return valid;
+}
+
+bool Geometry::Limits::SetBottomLatitudeLimit(const double& bottomLat) {
+	assert(LatLon::IsValidLat(bottomLat));
+	bottomRight.SetLat(bottomLat);
+	Verify();
+	return valid;
+}
+
+bool Geometry::Limits::SetLeftLongitudeLimit(const double& leftLon) {
+	assert(LatLon::IsValidLon(leftLon));
+	topLeft.SetLon(leftLon);
+	Verify();
+	return valid;
+}
+
+bool Geometry::Limits::SetRightLongitudeLimit(const double& rightLon) {
+	assert(LatLon::IsValidLon(rightLon));
+	bottomRight.SetLon(rightLon);
+	Verify();
+	return valid;
+}
+
+void Geometry::Limits::Verify() {
+	valid = topLeft.IsValid() && bottomRight.IsValid() && topLeft.Lat() > bottomRight.Lat() && topLeft.Lon() == bottomRight.Lon();
+	if (valid) acrossAntiGreenwich = topLeft.Lon() < bottomRight.Lon();
+}
+
+bool Geometry::Limits::AreLatLonWithinLimits(const LatLon& pos) const {
+	if (!valid) return true; // If no limit or not valid limit accept it
+	assert(pos.IsValid());
+	if (pos.Lat() >= topLeft.Lat() || pos.Lat() <= bottomRight.Lat()) return false;
+	if (acrossAntiGreenwich) return pos.Lon() >= 0 ? pos.Lon() < topLeft.Lon() : pos.Lon() < bottomRight.Lon();
+	else return pos.Lon() > topLeft.Lon() && pos.Lon() < bottomRight.Lon();
 }
 
 double Geometry::AbsAngle(const double& angle) { //to put angle in the range between 0 and 2PI

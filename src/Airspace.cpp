@@ -381,3 +381,12 @@ bool Airspace::Undiscretize() {
 	} else for (unsigned int i = steps - 1; i < points.size() ; i++) geometries.push_back(new Point(points.at(i))); // Otherwise the remaining points
 	return true;
 }
+
+bool Airspace::IsWithinLimits() const {
+	bool pointWhithinLimitsFound(false);
+	for(const Geometry::LatLon& p : points) if (Geometry::GetLimits().AreLatLonWithinLimits(p)) {
+		pointWhithinLimitsFound = true;
+		break;
+	}
+	return pointWhithinLimitsFound;
+}

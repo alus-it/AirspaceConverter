@@ -10,7 +10,9 @@
 //============================================================================
 
 #pragma once
+#include "Geometry.h"
 #include <string>
+#include <cassert>
 
 class Waypoint {
 
@@ -41,11 +43,11 @@ public:
 		: name(longName)
 		, code(shortName)
 		, country(countryCode)
-		, latitude(lat)
-		, longitude(lon)
+		, pos(lat, lon)
 		, altitude(alt)
 		, type((WaypointType)style)
 		, description(descr) {
+		assert(pos.IsValid());
 	}
 
 	virtual ~Waypoint() {}
@@ -55,13 +57,15 @@ public:
 	inline const std::string& GetName() const { return name; }
 	inline const std::string& GetCode() const { return code; }
 	inline const std::string& GetCountry() const { return country; }
-	inline double GetLatitude() const { return latitude; }
-	inline double GetLongitude() const { return longitude; }
+	inline Geometry::LatLon GetPosition() const { return pos; }
+	inline double GetLatitude() const { return pos.Lat(); }
+	inline double GetLongitude() const { return pos.Lon(); }
 	inline int GetAltitude() const { return altitude; }
 	inline WaypointType GetType() const { return type; }
 	inline const std::string& GetTypeName() const { return TypeName(type); }
 	inline const std::string& GetDescription() const { return description; }
 	inline bool IsAirfield() const { return IsTypeAirfield(type); }
+	inline bool IsWithinLimits() const { return Geometry::GetLimits().AreLatLonWithinLimits(pos); }
 
 	inline static const std::string& TypeName(const WaypointType& type) { return TYPE_NAMES[type]; }
 
@@ -69,8 +73,7 @@ private:
 	std::string name;
 	std::string code;
 	std::string country;
-	double latitude; // [deg]
-	double longitude; // [deg]
+	Geometry::LatLon pos;
 	int altitude; // [m]
 	WaypointType type;
 	std::string description;
