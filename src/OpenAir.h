@@ -27,7 +27,7 @@ public:
 	OpenAir(std::multimap<int, Airspace>& airspacesMap): airspaces(airspacesMap), varRotationClockwise(true), lastACline(-1) {}
 	~OpenAir() {}
 	bool Read(const std::string& fileName);
-	bool Write(const std::string& fileName, const Geometry::Limits& limits);
+	bool Write(const std::string& fileName);
 
 private:
 	static std::string& RemoveComments(std::string &s);

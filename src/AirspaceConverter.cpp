@@ -57,8 +57,7 @@ const std::vector<std::string> AirspaceConverter::disclaimer = {
 };
 
 AirspaceConverter::AirspaceConverter() :
-	conversionDone(false),
-	limits() {
+	conversionDone(false) {
 }
 
 AirspaceConverter::~AirspaceConverter() {
@@ -262,7 +261,7 @@ bool AirspaceConverter::Convert() {
 	case OutputType::KMZ_Format:
 		{
 			KML writer(airspaces, waypoints);
-			if (writer.Write(outputFile, limits)) {
+			if (writer.Write(outputFile)) {
 				conversionDone = true;
 				if(KML::GetNumOfRasterMaps() == 0) LogMessage("Warning: no raster terrain map loaded, used default terrain height for all applicable AGL points.", true);
 				else if(!writer.WereAllAGLaltitudesCovered()) LogMessage("Warning: not all AGL altitudes were under coverage of the loaded terrain map(s).", true);
@@ -270,17 +269,17 @@ bool AirspaceConverter::Convert() {
 		}
 		break;
 	case OutputType::OpenAir_Format:
-		conversionDone = OpenAir(airspaces).Write(outputFile, limits);
+		conversionDone = OpenAir(airspaces).Write(outputFile);
 		break;
 	case OutputType::Polish_Format:
-		conversionDone = Polish().Write(outputFile, airspaces, limits);
+		conversionDone = Polish().Write(outputFile, airspaces);
 		break;
 	case OutputType::Garmin_Format: // For Garmin IMG will be necessary to call cGPSmapper
 		{
 			// First make the Polish file
 			const std::string polishFile(boost::filesystem::path(outputFile).replace_extension(".mp").string());
 			LogMessage("Building Polish file: " + polishFile, false);
-			if(!Polish().Write(polishFile, airspaces, limits)) break;
+			if(!Polish().Write(polishFile, airspaces)) break;
 
 			// Then call cGPSmapper
 			conversionDone = cGPSmapper(polishFile, outputFile);
@@ -378,6 +377,32 @@ bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop,
 	else if (isInFeet) alt.SetAltFt((int)value, isAMSL);
 	else alt.SetAltMt(value, isAMSL);
 	isTop ? airspace.SetTopAltitude(alt) : airspace.SetBaseAltitude(alt);
+	return true;
+}
+
+bool AirspaceConverter::FilterOnLatLonLimits(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon) {
+
+	// Prepare the limits
+	Geometry::Limits limits(topLat, bottomLat, leftLon, rightLon);
+
+	// If no valid limits nothing to filter
+	if (!limits.IsValid()) return false;
+
+	// Go trough all airspace
+	for (std::multimap<int, Airspace>::iterator it = airspaces.begin(); it != airspaces.end(); ) {
+		if (!(*it).second.IsWithinLimits(limits)) airspaces.erase(it);
+		else ++it;
+	}
+
+	// Go trough all waypoints
+	for (std::multimap<int, Waypoint*>::iterator it = waypoints.begin(); it != waypoints.end(); ) {
+		Waypoint* w = (*it).second;
+		if (!w->IsWithinLimits(limits)) {
+			waypoints.erase(it);
+			delete(w);
+		} else ++it;
+	}
+
 	return true;
 }
 

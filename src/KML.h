@@ -16,7 +16,6 @@
 #include <map>
 #include <fstream>
 #include <boost/property_tree/ptree_fwd.hpp>
-#include "Geometry.h"
 
 class Altitude;
 class Airspace;
@@ -27,7 +26,7 @@ class Airfield;
 class KML {
 public:
 	KML(std::multimap<int, Airspace>& airspacesMap, std::multimap<int, Waypoint*>& waypointsMap);
-	bool Write(const std::string& filename, const Geometry::Limits& limits);
+	bool Write(const std::string& filename);
 	static bool AddTerrainMap(const std::string& filename);
 	inline static int GetNumOfRasterMaps() { return (int)terrainMaps.size(); }
 	static void ClearTerrainMaps();

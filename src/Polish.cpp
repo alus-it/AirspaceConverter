@@ -90,7 +90,7 @@ void Polish::WriteHeader(const std::string& filename) {
 		<< "[END]\n\n";
 }
 
-bool Polish::Write(const std::string& filename, const std::multimap<int, Airspace>& airspaces, const Geometry::Limits& limits) {
+bool Polish::Write(const std::string& filename, const std::multimap<int, Airspace>& airspaces) {
 	// Check if has the right extension
 	if (!boost::iequals(boost::filesystem::path(filename).extension().string(), ".mp")) {
 		AirspaceConverter::LogMessage("ERROR: Expected MP extension but found: " + boost::filesystem::path(filename).extension().string(), true);
@@ -116,9 +116,6 @@ bool Polish::Write(const std::string& filename, const std::multimap<int, Airspac
 		// Just a couple if assertions
 		assert(a.GetNumberOfPoints() > 3);
 		assert(a.GetFirstPoint()==a.GetLastPoint());
-
-		// Skip it if not within limits
-		if (!a.IsWithinLimits(limits)) continue;
 
 		// Determine if it's a POLYGON or a POLYLINE
 		if (a.GetType() == Airspace::PROHIBITED || a.GetType() == Airspace::CTR || a.GetType() == Airspace::DANGER) {

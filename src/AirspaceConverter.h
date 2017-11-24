@@ -16,7 +16,6 @@
 #define VERSION "0.2.6"
 #endif
 
-#include "Geometry.h"
 #include <functional>
 #include <string>
 #include <vector>
@@ -76,8 +75,8 @@ public:
 	inline unsigned long GetNumOfAirspaces() const { return (unsigned long)airspaces.size(); }
 	inline unsigned long GetNumOfWaypoints() const { return (unsigned long)waypoints.size(); }
 	int GetNumOfTerrainMaps() const;
-	inline bool SetLimits(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon) { return limits.Set(topLat, bottomLat, leftLon, rightLon); }
-	inline void DisableLimits() { limits.Disable(); }
+	bool FilterOnLatLonLimits(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon);
+
 
 	static const std::vector<std::string> disclaimer;
 
@@ -91,5 +90,4 @@ private:
 	std::string outputFile;
 	std::vector<std::string> airspaceFiles, terrainRasterMapFiles, waypointFiles;
 	bool conversionDone;
-	Geometry::Limits limits;
 };
