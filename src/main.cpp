@@ -54,11 +54,19 @@ int main(int argc, char *argv[]) {
 		switch (argv[i][1]) {
 		case 'q':
 			if(!hasValueAfter) std::cerr << "ERROR: QNH value not found, using default value: " << ac.GetQNH() << " hPa."<< std::endl;
-			else ac.SetQNH(std::stod(argv[++i]));
+			else try {
+				ac.SetQNH(std::stod(argv[++i]));
+			} catch (...) {
+				std::cerr << "ERROR: QNH value not valid, using default value: " << ac.GetQNH() << " hPa." << std::endl;
+			}
 			break;
 		case 'a':
 			if(!hasValueAfter) std::cerr << "ERROR: default altitude value not found, using default value: " << ac.GetDefaultTearrainAlt() << " m."<< std::endl;
-			else ac.SetDefaultTearrainAlt(std::stod(argv[++i]));
+			else try {
+				ac.SetDefaultTearrainAlt(std::stod(argv[++i]));
+			} catch (...) {
+				std::cerr << "ERROR: default altitude value not valid, using default value: " << ac.GetDefaultTearrainAlt() << " m." << std::endl;
+			}
 			break;
 		case 'i':
 			if(!hasValueAfter) std::cerr << "ERROR: input airspace file path not found."<< std::endl;
