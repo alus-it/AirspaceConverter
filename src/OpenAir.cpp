@@ -445,7 +445,7 @@ bool OpenAir::InsertAirspace(Airspace& airspace) {
 	return validAirspace;	
 }
 
-bool OpenAir::Write(const std::string& fileName, const Geometry::Limits& limits) {
+bool OpenAir::Write(const std::string& fileName) {
 	if (file.is_open()) file.close();
 	file.open(fileName, std::ios::out | std::ios::trunc | std::ios::binary);
 	if (!file.is_open() || file.bad()) {
@@ -461,9 +461,6 @@ bool OpenAir::Write(const std::string& fileName, const Geometry::Limits& limits)
 	{
 		// Get the airspace
 		Airspace& a = pair.second;
-
-		// Skip it if not within limits
-		if (!a.IsWithinLimits(limits)) continue;
 
 		// Just a couple if assertions
 		assert(a.GetNumberOfPoints() > 3);
