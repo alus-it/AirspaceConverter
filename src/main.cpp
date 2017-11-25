@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
 			return EXIT_FAILURE;
 		}
 
-		bool hasValueAfter = i+1 < argc && strlen(argv[i+1])>0 && argv[i+1][0]!='-';
+		bool hasValueAfter = i+1 < argc && ((strlen(argv[i+1])>0 && argv[i+1][0]!='-') || (strlen(argv[i+1])>=2 && argv[i+1][0]=='-' && AirspaceConverter::isDigit(argv[i+1][1])));
 
 		switch (argv[i][1]) {
 		case 'q':
