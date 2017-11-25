@@ -384,7 +384,7 @@ bool Airspace::Undiscretize() {
 
 bool Airspace::IsWithinLimits(const Geometry::Limits& limits) const {
 	bool pointWhithinLimitsFound(false);
-	for(const Geometry::LatLon& p : points) if (limits.AreLatLonWithinLimits(p)) {
+	for(const Geometry::LatLon& pos : points) if (limits.IsPositionWithinLimits(pos)) {
 		pointWhithinLimitsFound = true;
 		break;
 	}

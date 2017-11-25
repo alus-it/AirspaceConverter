@@ -68,7 +68,8 @@ public:
 		inline double GetLeftLongitudeLimit() const { return topLeft.Lon(); }
 		inline double GetRightLongitudeLimit() const { return bottomRight.Lon(); }
 		inline void Disable() { valid = false; }
-		bool AreLatLonWithinLimits(const LatLon& pos) const;
+		bool IsPositionWithinLimits(const LatLon& pos) const;
+		bool IsPositionWithinLimits(const double& lat, const double& lon) const;
 
 	private:
 		void Verify();

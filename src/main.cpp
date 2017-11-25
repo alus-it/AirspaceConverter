@@ -100,23 +100,23 @@ int main(int argc, char *argv[]) {
 				try {
 					// Top Lat
 					boost::tokenizer<boost::char_separator<char>>::iterator token = tokens.begin();
-					if ((*token).empty()) topLat = std::stod(*token);
-					
+					if (!(*token).empty()) topLat = std::stod(*token);
+
 					// Bottom Lat
 					token++;
-					if ((*token).empty()) bottomLat = std::stod(*token);
-					
+					if (!(*token).empty()) bottomLat = std::stod(*token);
+
 					// Left Lon
 					token++;
-					if ((*token).empty()) leftLon = std::stod(*token);
+					if (!(*token).empty()) leftLon = std::stod(*token);
 
 					// Right Lon
 					token++;
-					if ((*token).empty()) rightLon = std::stod(*token);
+					if (!(*token).empty()) rightLon = std::stod(*token);
 
 					limitsAreSet = true;
 				} catch (...) {
-					std::cerr << "ERROR: limit bounds not parsable." << std::endl;
+					std::cerr << "ERROR: unable to parse limit bounds." << std::endl;
 				}
 			}
 			break;
@@ -162,8 +162,11 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Apply filter if required
-	if (limitsAreSet && !ac.FilterOnLatLonLimits(topLat, bottomLat, leftLon, rightLon)) std::cerr << "ERROR: limit bounds not valid." << std::endl;;
-	
+	if (limitsAreSet) {
+		if (ac.FilterOnLatLonLimits(topLat, bottomLat, leftLon, rightLon)) std::cout << ac.GetNumOfAirspaces() << " airspaces have been filtered." << std::endl;
+		else std::cerr << "ERROR: limit bounds not valid." << std::endl;
+	}
+
 	// Convert!
 	bool flag = ac.Convert();
 

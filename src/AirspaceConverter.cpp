@@ -390,17 +390,20 @@ bool AirspaceConverter::FilterOnLatLonLimits(const double& topLat, const double&
 
 	// Go trough all airspace
 	for (std::multimap<int, Airspace>::iterator it = airspaces.begin(); it != airspaces.end(); ) {
-		if (!(*it).second.IsWithinLimits(limits)) it = airspaces.erase(it);
-		else ++it;
+		if ((*it).second.IsWithinLimits(limits)) ++it;
+		else it = airspaces.erase(it);
 	}
 
 	// Go trough all waypoints
 	for (std::multimap<int, Waypoint*>::iterator it = waypoints.begin(); it != waypoints.end(); ) {
 		Waypoint* w = (*it).second;
-		if (!w->IsWithinLimits(limits)) {
-			waypoints.erase(it);
+
+
+		if (limits.IsPositionWithinLimits(w->GetLatitude(), w->GetLongitude())) ++it;
+		else {
+			it = waypoints.erase(it);
 			delete(w);
-		} else ++it;
+		}
 	}
 
 	return true;
