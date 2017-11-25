@@ -62,7 +62,7 @@ bool Geometry::Limits::Set(const double& topLat, const double& bottomLat, const 
 }
 
 void Geometry::Limits::Verify() {
-	valid = topLeft.IsValid() && bottomRight.IsValid() && topLeft.Lat() > bottomRight.Lat() && topLeft.Lon() == bottomRight.Lon();
+	valid = topLeft.IsValid() && bottomRight.IsValid() && topLeft.Lat() > bottomRight.Lat() && topLeft.Lat() != bottomRight.Lat() && topLeft.Lon() != bottomRight.Lon();
 	if (valid) acrossAntiGreenwich = topLeft.Lon() < bottomRight.Lon();
 }
 
