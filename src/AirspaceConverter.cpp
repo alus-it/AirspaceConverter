@@ -390,7 +390,7 @@ bool AirspaceConverter::FilterOnLatLonLimits(const double& topLat, const double&
 
 	// Go trough all airspace
 	for (std::multimap<int, Airspace>::iterator it = airspaces.begin(); it != airspaces.end(); ) {
-		if (!(*it).second.IsWithinLimits(limits)) airspaces.erase(it);
+		if (!(*it).second.IsWithinLimits(limits)) it = airspaces.erase(it);
 		else ++it;
 	}
 
