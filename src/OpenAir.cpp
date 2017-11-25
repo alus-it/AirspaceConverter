@@ -27,7 +27,7 @@ std::string& OpenAir::RemoveComments(std::string &s) {
 bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg) {
 	if(dddmmss.empty()) return false;
 
-	// Tokenize on colons
+	// Tokenize on columns
 	boost::tokenizer<boost::char_separator<char>> tokens(dddmmss, boost::char_separator<char>(":"));
 	const int fields = (int)std::distance(tokens.begin(),tokens.end());
 	if(fields < 1 || fields > 3) return false; // We expect from 1 to 3 fields
