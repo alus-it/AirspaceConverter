@@ -382,28 +382,37 @@ bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop,
 
 bool AirspaceConverter::FilterOnLatLonLimits(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon) {
 
+	// Check if it is necessary to filter
+	if (topLat == 90 && bottomLat == -90 && leftLon == -180 && rightLon == 180) return true;
+
 	// Prepare the limits
 	Geometry::Limits limits(topLat, bottomLat, leftLon, rightLon);
 
 	// If no valid limits nothing to filter
 	if (!limits.IsValid()) return false;
 
-	// Go trough all airspace
-	for (std::multimap<int, Airspace>::iterator it = airspaces.begin(); it != airspaces.end(); ) {
-		if ((*it).second.IsWithinLimits(limits)) ++it;
-		else it = airspaces.erase(it);
+	// Filter airspace
+	if (!airspaces.empty()) {
+		const unsigned long origAirspaces(GetNumOfAirspaces());
+		for (std::multimap<int, Airspace>::iterator it = airspaces.begin(); it != airspaces.end(); ) {
+			if ((*it).second.IsWithinLimits(limits)) ++it;
+			else it = airspaces.erase(it);
+		}
+		LogMessage(boost::str(boost::format("Filtering airspaces... excluded: %1d, remaining: %2d") %(origAirspaces - GetNumOfAirspaces()) %GetNumOfAirspaces()), false);
 	}
 
-	// Go trough all waypoints
-	for (std::multimap<int, Waypoint*>::iterator it = waypoints.begin(); it != waypoints.end(); ) {
-		Waypoint* w = (*it).second;
-
-
-		if (limits.IsPositionWithinLimits(w->GetLatitude(), w->GetLongitude())) ++it;
-		else {
-			it = waypoints.erase(it);
-			delete(w);
+	// Filter waypoints
+	if (!waypoints.empty()) {
+		const unsigned long origWaypoints(GetNumOfWaypoints());
+		for (std::multimap<int, Waypoint*>::iterator it = waypoints.begin(); it != waypoints.end(); ) {
+			Waypoint* w = (*it).second;
+			if (limits.IsPositionWithinLimits(w->GetLatitude(), w->GetLongitude())) ++it;
+			else {
+				it = waypoints.erase(it);
+				delete(w);
+			}
 		}
+		LogMessage(boost::str(boost::format("Filtering waypoints... excluded: %1d, remaining: %2d ") %(origWaypoints - GetNumOfWaypoints()) %GetNumOfWaypoints()), false);
 	}
 
 	return true;

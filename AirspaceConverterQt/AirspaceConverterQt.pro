@@ -26,13 +26,16 @@ RESOURCES += \
 
 SOURCES += main.cpp\
     mainwindow.cpp \
-    aboutdialog.cpp
+    aboutdialog.cpp \
+    limitsdialog.cpp
 
 HEADERS  += mainwindow.h \
-    aboutdialog.h
+    aboutdialog.h \
+    limitsdialog.h
 
 FORMS    += mainwindow.ui \
-    aboutdialog.ui
+    aboutdialog.ui \
+    limitsdialog.ui
 
 # Include headers of libAirspaceConverter
 INCLUDEPATH += $$PWD/../src/
