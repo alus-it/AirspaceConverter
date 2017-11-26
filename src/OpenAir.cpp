@@ -446,6 +446,10 @@ bool OpenAir::InsertAirspace(Airspace& airspace) {
 }
 
 bool OpenAir::Write(const std::string& fileName) {
+	if (airspaces.empty()) {
+		AirspaceConverter::LogMessage("OpenAir output: no airspace, nothing to write", false);
+		return false;
+	}
 	if (file.is_open()) file.close();
 	file.open(fileName, std::ios::out | std::ios::trunc | std::ios::binary);
 	if (!file.is_open() || file.bad()) {

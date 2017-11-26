@@ -69,17 +69,17 @@ void Geometry::Limits::Verify() {
 bool Geometry::Limits::IsPositionWithinLimits(const LatLon& pos) const {
 	if (!valid) return true; // If no limit or not valid limit accept it
 	assert(pos.IsValid());
-	if (pos.Lat() >= topLeft.Lat() || pos.Lat() <= bottomRight.Lat()) return false;
-	if (acrossAntiGreenwich) return pos.Lon() >= 0 ? pos.Lon() < topLeft.Lon() : pos.Lon() < bottomRight.Lon();
-	else return pos.Lon() > topLeft.Lon() && pos.Lon() < bottomRight.Lon();
+	if (pos.Lat() > topLeft.Lat() || pos.Lat() < bottomRight.Lat()) return false;
+	if (acrossAntiGreenwich) return pos.Lon() >= 0 ? pos.Lon() <= topLeft.Lon() : pos.Lon() <= bottomRight.Lon();
+	else return pos.Lon() >= topLeft.Lon() && pos.Lon() <= bottomRight.Lon();
 }
 
 bool Geometry::Limits::IsPositionWithinLimits(const double& lat, const double& lon) const {
 	if (!valid) return true; // If no limit or not valid limit accept it
 	assert(LatLon::IsValidLat(lat) && LatLon::IsValidLon(lon));
-	if (lat >= topLeft.Lat() || lat <= bottomRight.Lat()) return false;
-	if (acrossAntiGreenwich) return lon >= 0 ? lon < topLeft.Lon() : lon < bottomRight.Lon();
-	else return lon > topLeft.Lon() && lon < bottomRight.Lon();
+	if (lat > topLeft.Lat() || lat < bottomRight.Lat()) return false;
+	if (acrossAntiGreenwich) return lon >= 0 ? lon <= topLeft.Lon() : lon <= bottomRight.Lon();
+	else return lon >= topLeft.Lon() && lon <= bottomRight.Lon();
 }
 
 double Geometry::AbsAngle(const double& angle) { //to put angle in the range between 0 and 2PI
