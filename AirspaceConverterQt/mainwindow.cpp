@@ -54,6 +54,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     connect(this, SIGNAL(messagePosted(QString,bool)), this, SLOT(logMessage(QString,bool)));
     connect(&watcher, SIGNAL(finished()), this, SLOT(endBusy()));
+    connect(&filter, SIGNAL(validLimitsSet(double,double,double,double)), this, SLOT(applyFilter(double,double,double,double)));
 
     // Set the logging function (to write in the logging texbox)
     AirspaceConverter::SetLogMessageFunction(std::function<void(const std::string&, const bool)>(std::bind(&MainWindow::postMessage, this, std::placeholders::_1, std::placeholders::_2)));
@@ -106,6 +107,7 @@ void MainWindow::startBusy() {
     ui->loadRasterMapFileButton->setEnabled(false);
     ui->loadRasterMapFolderButton->setEnabled(false);
     ui->unloadTerrainMapsButton->setEnabled(false);
+    ui->filterButton->setEnabled(false);
     ui->defaultAltSpinBox->setEnabled(false);
     ui->QNHspinBox->setEnabled(false);
     ui->chooseOutputFileButton->setEnabled(false);
@@ -124,19 +126,18 @@ void MainWindow::endBusy() {
         const double elapsedTimeSec = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - startTime).count() / 1e6;
         logMessage(QString::fromStdString(std::string(boost::str(boost::format("Execution time: %1f sec.") %elapsedTimeSec))));
     }
-    
+
+    // Set the numer of airspaces loaded in its spinBox
+    ui->numAirspacesLoadedSpinBox->setValue(converter->GetNumOfAirspaces());
+
+    // Set the number of waypoints loaded in its spinBox
+    ui->numWaypointsLoadedSpinBox->setValue(converter->GetNumOfWaypoints());
+
     // All operartions to do after loading
     if(!converter->IsConversionDone()) {
-
-        // Set the numer of airspaces loaded in its spinBox
-        ui->numAirspacesLoadedSpinBox->setValue(converter->GetNumOfAirspaces());
-
         // Eventually update the output file
         if(ui->outputFileTextEdit->toPlainText().toStdString() != converter->GetOutputFile()) ui->outputFileTextEdit->setPlainText(QString::fromStdString(converter->GetOutputFile()));
 
-        // Set the number of waypoints loaded in its spinBox
-        ui->numWaypointsLoadedSpinBox->setValue(converter->GetNumOfWaypoints());
-    
         // Set the number of terrain raster maps loaded in its spinBox
         ui->numTerrainMapsLoadedSpinBox->setValue(converter->GetNumOfTerrainMaps());
     }
@@ -152,6 +153,7 @@ void MainWindow::endBusy() {
     ui->loadRasterMapFileButton->setEnabled(true);
     ui->loadRasterMapFolderButton->setEnabled(true);
     ui->unloadTerrainMapsButton->setEnabled(converter->GetNumOfTerrainMaps()>0);
+    ui->filterButton->setEnabled(converter->GetNumOfAirspaces()>0 || converter->GetNumOfWaypoints()>0);
     ui->defaultAltSpinBox->setEnabled(true);
     ui->QNHspinBox->setEnabled(converter->GetNumOfAirspaces()==0);
     ui->chooseOutputFileButton->setEnabled(true);
@@ -390,4 +392,16 @@ void MainWindow::on_openOutputFileButton_clicked() {
 
 void MainWindow::on_openOutputFolderButton_clicked() {
     QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(boost::filesystem::path(converter->GetOutputFile()).parent_path().string())));
+}
+
+void MainWindow::on_filterButton_clicked() {
+    filter.show();
+}
+
+void MainWindow::applyFilter(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon) {
+    // Start to work...
+    startBusy();
+
+    // Apply filter
+    watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::FilterOnLatLonLimits, topLat, bottomLat, leftLon, rightLon));
 }

@@ -151,33 +151,29 @@ int main(int argc, char *argv[]) {
 	// Start the timer
 	const auto startTime = std::chrono::high_resolution_clock::now();
 
-	// Process input files
+	// Load airspaces and waypoints
 	ac.LoadAirspaces();
 	ac.LoadWaypoints();
-	ac.LoadTerrainRasterMaps();
 
-	const bool airspacesPresent = ac.GetNumOfAirspaces() > 0;
-	const bool waypointsPresent = ac.GetNumOfWaypoints() > 0;
-	if(!airspacesPresent && !waypointsPresent) {
+	// Verify that there is at least one airspace or waypoint
+	if(ac.GetNumOfAirspaces() == 0 && ac.GetNumOfWaypoints() == 0) {
 		std::cerr << "ERROR: no usable data found in the input files specified." << std::endl;
 		return EXIT_FAILURE;
 	}
 
+	// Load raster maps
+	ac.LoadTerrainRasterMaps();
+
 	// Apply filter if required
-	if (limitsAreSet) {
-		if (ac.FilterOnLatLonLimits(topLat, bottomLat, leftLon, rightLon)) {
-			if (airspacesPresent) std::cout << ac.GetNumOfAirspaces() << " airspaces have been filtered." << std::endl;
-			if (waypointsPresent) std::cout << ac.GetNumOfWaypoints() << " waypoints have been filtered." << std::endl;
-		} else std::cerr << "ERROR: limit bounds not valid." << std::endl;
-	}
+	if (limitsAreSet && !ac.FilterOnLatLonLimits(topLat, bottomLat, leftLon, rightLon)) std::cerr << "ERROR: limit bounds not valid." << std::endl;
 
 	// Convert!
-	bool flag = ac.Convert();
+	bool result = ac.Convert();
 
 	// Stop the timer
 	const double elapsedTimeSec = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - startTime).count() / 1e6;
 	std::cout<<"Total execution time: " << elapsedTimeSec << " sec." << std::endl << std::endl;
 
-	return flag ? EXIT_SUCCESS : EXIT_FAILURE;
+	return result ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
