@@ -338,7 +338,10 @@ bool KML::Write(const std::string& filename) {
 	// Verify presence of waypoints and airspaces
 	const bool airspacesPresent = !airspaces.empty();
 	const bool waypointsPresent = !waypoints.empty();
-	if((!airspacesPresent && !waypointsPresent) || filename.empty()) return false;
+	if((!airspacesPresent && !waypointsPresent) || filename.empty()) {
+		AirspaceConverter::LogMessage("KML output: no airspace and no waypoints, nothing to write", false);
+		return false;
+	}
 	
 	// The file must be a KMZ
 	if (!boost::iequals(boost::filesystem::path(filename).extension().string(), ".kmz")) {

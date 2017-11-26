@@ -156,15 +156,19 @@ int main(int argc, char *argv[]) {
 	ac.LoadWaypoints();
 	ac.LoadTerrainRasterMaps();
 
-	if(ac.GetNumOfAirspaces() == 0 && ac.GetNumOfWaypoints() == 0) {
+	const bool airspacesPresent = ac.GetNumOfAirspaces() > 0;
+	const bool waypointsPresent = ac.GetNumOfWaypoints() > 0;
+	if(!airspacesPresent && !waypointsPresent) {
 		std::cerr << "ERROR: no usable data found in the input files specified." << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	// Apply filter if required
 	if (limitsAreSet) {
-		if (ac.FilterOnLatLonLimits(topLat, bottomLat, leftLon, rightLon)) std::cout << ac.GetNumOfAirspaces() << " airspaces have been filtered." << std::endl;
-		else std::cerr << "ERROR: limit bounds not valid." << std::endl;
+		if (ac.FilterOnLatLonLimits(topLat, bottomLat, leftLon, rightLon)) {
+			if (airspacesPresent) std::cout << ac.GetNumOfAirspaces() << " airspaces have been filtered." << std::endl;
+			if (waypointsPresent) std::cout << ac.GetNumOfWaypoints() << " waypoints have been filtered." << std::endl;
+		} else std::cerr << "ERROR: limit bounds not valid." << std::endl;
 	}
 
 	// Convert!
