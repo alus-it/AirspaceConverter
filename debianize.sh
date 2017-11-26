@@ -2,7 +2,8 @@
 #============================================================================
 # AirspaceConverter
 # Since       : 10/9/2017
-# Author      : Alberto Realis-Luc <alberto.realisluc@gmail.com>
+# Authors     : Alberto Realis-Luc <alberto.realisluc@gmail.com>
+#               Valerio Messina <efa@iol.it>
 # Web         : http://www.alus.it/AirspaceConverter
 # Copyright   : (C) 2016-2017 Alberto Realis-Luc
 # License     : GNU GPL v3
@@ -45,9 +46,9 @@ if [[ "$ACTION" == "C" || "$ACTION" == "c" || "$ACTION" == "" ]]; then
 	fi
 	###echo OS:$OS DEBIANVER:$DEBIANVER
 
-	# Check if it is Debian distribution first
+	# Check if it is Debian or Ubuntu
 	if [ "$OS" != "Debian GNU/Linux" ] && [ "$OS" != "Ubuntu" ]; then
-		echo "ERROR: this not Debian!"
+		echo "ERROR: this script can actually work only for Debian or Ubuntu. You may consider to update it!"
 		exit 1
 	fi
 
@@ -83,7 +84,7 @@ elif [[ "$ACTION" == "D" || "$ACTION" == "d" ]]; then
 	read -r DEBIANVER
 	
 	# Ask the packager for which architecure are built the copied binaries
-	printf "Bits has the target architecture? [32/64]: "
+	printf "How many bits has the target architecture? [32/64]: "
 	read -r ARCH
 	if [[ "$ARCH" == "64" || "$ARCH" == "" ]]; then
 		ARCH=amd64
@@ -99,7 +100,7 @@ else
 fi
 
 
-# Check what Debian release we are talking about
+# Check what Debian or Ubuntu release we are talking about
 case $DEBIANVER in
 	7)
 		echo "Packaging for Debian Wheezy..."
@@ -142,7 +143,7 @@ case $DEBIANVER in
 		MANT="Valerio Messina <efa@iol.it>"
 		;;
 	*)
-	echo "ERROR: This version of Debian: ${DEBIANVER} is not known by this script, please add it!"
+	echo "ERROR: This version of Debian or Ubuntu: ${DEBIANVER} is not known by this script, please add it!"
 	exit 1
 esac
 
