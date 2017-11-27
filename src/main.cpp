@@ -27,9 +27,9 @@ void printHelp() {
 	std::cout << "-i: multiple, input airspace file(s) can be OpenAir (.txt), OpenAIP (.aip), Google Earth (.kmz, .kml)" << std::endl;
 	std::cout << "-w: multiple, input waypoint file(s) in the SeeYou CUP format (.cup)" << std::endl;
 	std::cout << "-m: optional, multiple, terrain map file(s) (.dem) used to lookup terrain heights" << std::endl;
-	std::cout << "-o: optional, output file .kmz, .txt (OpenAir), .img (Garmin) or .mp (Polish). If not specified will be used the name of first input file as KMZ" << std::endl;
 	std::cout << "-l: optional, set filter limits in latitude and longitude for the output, followed by the 4 limit values: northLat,southLat,westLon,eastLon" << std::endl;
 	std::cout << "    where the limits are comma separated, expressed in degrees, without spaces, negative for west longitudes and south latitudes" << std::endl;
+	std::cout << "-o: optional, output file .kmz, .txt (OpenAir), .img (Garmin) or .mp (Polish). If not specified will be used the name of first input file as KMZ" << std::endl;
 	std::cout << "-v: print version number" << std::endl;
 	std::cout << "-h: print this guide" << std::endl << std::endl;
 	std::cout << "At least one input airspace or waypoint file must be present." << std::endl;
