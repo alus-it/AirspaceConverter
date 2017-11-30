@@ -9,7 +9,6 @@
 //
 // This source file is part of AirspaceConverter project
 //============================================================================
-
 #include "OpenAIP.h"
 #include "Airspace.h"
 #include "AirspaceConverter.h"
@@ -70,6 +69,8 @@ bool ReadAltitude(const ptree& node, Altitude& altitude) {
 	return false;
 }
 
+#include <boost/format.hpp>
+
 bool OpenAIP::Read(const std::string& fileName, std::multimap<int, Airspace>& output) {
 	std::ifstream input(fileName);
 	if (!input.is_open() || input.bad()) {
@@ -81,6 +82,7 @@ bool OpenAIP::Read(const std::string& fileName, std::multimap<int, Airspace>& ou
 	read_xml(input, tree);
 	input.close();
 	ptree root;
+	setlocale(LC_ALL, "C"); // so std::stod recognize dot as decimal sep
 	try {
 		root = tree.get_child("OPENAIP");
 		double value = root.get_child("<xmlattr>").get<double>("DATAFORMAT");

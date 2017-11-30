@@ -199,7 +199,7 @@ void AirspaceConverter::LoadAirspaces(const OutputType suggestedTypeForOutputFil
 		}
 	}
 	airspaceFiles.clear();
-	if (counter > 0) LogMessage(boost::str(boost::format("Red successfully %1d airspace definition(s) from %2d file(s).") %(airspaces.size() - airspaceCounter) %counter), false);
+	if (counter > 0) LogMessage(boost::str(boost::format("Read successfully %1d airspace definition(s) from %2d file(s).") %(airspaces.size() - airspaceCounter) %counter), false);
 }
 
 void AirspaceConverter::UnloadAirspaces() {
@@ -212,7 +212,7 @@ void AirspaceConverter::LoadTerrainRasterMaps() {
 	int counter = 0;
 	for (const std::string& demFile : terrainRasterMapFiles) if (KML::AddTerrainMap(demFile)) counter++;
 	terrainRasterMapFiles.clear();
-	if (counter > 0) LogMessage(boost::str(boost::format("Red successfully %1d terrain raster map file(s).") % counter), false);
+	if (counter > 0) LogMessage(boost::str(boost::format("Read successfully %1d terrain raster map file(s).") % counter), false);
 }
 
 void AirspaceConverter::UnloadRasterMaps() {
@@ -230,7 +230,7 @@ void AirspaceConverter::LoadWaypoints() {
 		if (redOk && outputFile.empty()) outputFile = boost::filesystem::path(inputFile).replace_extension(".kmz").string(); // Default output as KMZ
 	}
 	waypointFiles.clear();
-	if (counter > 0) LogMessage(boost::str(boost::format("Red successfully %1d waypoint(s) from %2d file(s).") % (waypoints.size() - wptCounter) %counter), false);
+	if (counter > 0) LogMessage(boost::str(boost::format("Read successfully %1d waypoint(s) from %2d file(s).") % (waypoints.size() - wptCounter) %counter), false);
 }
 
 void AirspaceConverter::UnloadWaypoints() {

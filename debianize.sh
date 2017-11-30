@@ -40,9 +40,9 @@ if [[ "$ACTION" == "C" || "$ACTION" == "c" || "$ACTION" == "" ]]; then
 	#elif [ -f /etc/redhat-release ]; then
 		# Older Red Hat, CentOS, etc.
 	else
-	    # Fall back to uname, e.g. "Linux <version>", also works for BSD, etc.
-	    OS=$(uname -s)
-	    DEBIANVER=$(uname -r)
+		# Fall back to uname, e.g. "Linux <version>", also works for BSD, etc.
+		OS=$(uname -s)
+		DEBIANVER=$(uname -r)
 	fi
 	###echo OS:$OS DEBIANVER:$DEBIANVER
 
@@ -70,15 +70,17 @@ elif [[ "$ACTION" == "D" || "$ACTION" == "d" ]]; then
 	echo "So, please copy the already compiled: airspaceconverter libairspaceconverter.so and airspaceconverter-gui binaries to this folder."
 	read -p "Press ENTER when done"
 
+	if [ "$1" != "test" ]; then
 	# Instead of building just copy the binaries (make sure they are executable as well)
-	chmod a+x airspaceconverter
-	chmod a+x airspaceconverter-gui
-	mkdir -p Release
-	mv airspaceconverter ./Release/airspaceconverter
-	mv libairspaceconverter.so ./Release/libairspaceconverter.so
-	mkdir -p buildQt
-	mv airspaceconverter-gui ./buildQt/airspaceconverter-gui
-	
+		chmod a+x airspaceconverter
+		chmod a+x airspaceconverter-gui
+		mkdir -p Release
+		mv airspaceconverter ./Release/airspaceconverter
+		mv libairspaceconverter.so ./Release/libairspaceconverter.so
+		mkdir -p buildQt
+		mv airspaceconverter-gui ./buildQt/airspaceconverter-gui
+	fi
+
 	# Ask the user for which version of Debian we are building the packages	
 	printf "Enter target Debian release number [7-9,16.04]: "
 	read -r DEBIANVER
@@ -400,11 +402,15 @@ rm -f airspaceconverter-gui_${VERSION}-${DEBIANVER}_${ARCH}.deb
 dpkg-deb --build airspaceconverter-gui_${VERSION}-${DEBIANVER}_${ARCH}
 
 # Clean
-rm -R buildQt
+if [ "$1" != "test" ]; then
+	rm -R buildQt
+fi
 sudo rm -R airspaceconverter_${VERSION}-${DEBIANVER}_${ARCH}
 sudo rm -R airspaceconverter-gui_${VERSION}-${DEBIANVER}_${ARCH}
 if [[ "$ACTION" == "D" || "$ACTION" == "d" ]]; then
-	echo cleaning
-	make clean
+	if [ "$1" != "test" ]; then
+		echo cleaning
+		make clean
+	fi
 fi
 exit 0
