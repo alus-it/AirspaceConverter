@@ -14,6 +14,7 @@
 #include <iostream>
 #include <cstring>
 #include <chrono>
+#include <boost/tokenizer.hpp>
 #ifdef _WIN32
 #include <boost/filesystem/operations.hpp>
 #endif
@@ -26,6 +27,8 @@ void printHelp() {
 	std::cout << "-i: multiple, input airspace file(s) can be OpenAir (.txt), OpenAIP (.aip), Google Earth (.kmz, .kml)" << std::endl;
 	std::cout << "-w: multiple, input waypoint file(s) in the SeeYou CUP format (.cup)" << std::endl;
 	std::cout << "-m: optional, multiple, terrain map file(s) (.dem) used to lookup terrain heights" << std::endl;
+	std::cout << "-l: optional, set filter limits in latitude and longitude for the output, followed by the 4 limit values: northLat,southLat,westLon,eastLon" << std::endl;
+	std::cout << "    where the limits are comma separated, expressed in degrees, without spaces, negative for west longitudes and south latitudes" << std::endl;
 	std::cout << "-o: optional, output file .kmz, .txt (OpenAir), .img (Garmin) or .mp (Polish). If not specified will be used the name of first input file as KMZ" << std::endl;
 	std::cout << "-v: print version number" << std::endl;
 	std::cout << "-h: print this guide" << std::endl << std::endl;
@@ -41,6 +44,8 @@ int main(int argc, char *argv[]) {
 	}
 
 	AirspaceConverter ac;
+	bool limitsAreSet(false);
+	double topLat(90), bottomLat(-90), leftLon(-180), rightLon(180);
 
 	for(int i=1; i<argc; i++) {
 		size_t len=strlen(argv[i]);
@@ -49,7 +54,7 @@ int main(int argc, char *argv[]) {
 			return EXIT_FAILURE;
 		}
 
-		bool hasValueAfter = i+1 < argc && strlen(argv[i+1])>0 && argv[i+1][0]!='-';
+		bool hasValueAfter = i+1 < argc && ((strlen(argv[i+1])>0 && argv[i+1][0]!='-') || (strlen(argv[i+1])>=2 && argv[i+1][0]=='-' && AirspaceConverter::isDigit(argv[i+1][1])));
 
 		switch (argv[i][1]) {
 		case 'q':
@@ -84,6 +89,37 @@ int main(int argc, char *argv[]) {
 			if(!hasValueAfter) std::cerr << "ERROR: output file path not found."<< std::endl;
 			else ac.SetOutputFile(argv[++i]);
 			break;
+		case 'l':
+			if (!hasValueAfter) std::cerr << "ERROR: limit bounds not found." << std::endl;
+			else {
+				boost::tokenizer<boost::char_separator<char>> tokens(std::string(argv[++i]), boost::char_separator<char>(","));
+				if (std::distance(tokens.begin(), tokens.end()) != 4) {
+					std::cerr << "ERROR: wrong number (expected 4) of limit bounds found." << std::endl;
+					break;
+				}
+				try {
+					// Top Lat
+					boost::tokenizer<boost::char_separator<char>>::iterator token = tokens.begin();
+					if (!(*token).empty()) topLat = std::stod(*token);
+
+					// Bottom Lat
+					token++;
+					if (!(*token).empty()) bottomLat = std::stod(*token);
+
+					// Left Lon
+					token++;
+					if (!(*token).empty()) leftLon = std::stod(*token);
+
+					// Right Lon
+					token++;
+					if (!(*token).empty()) rightLon = std::stod(*token);
+
+					limitsAreSet = true;
+				} catch (...) {
+					std::cerr << "ERROR: unable to parse limit bounds." << std::endl;
+				}
+			}
+			break;
 		case 'h':
 			printHelp();
 			if (argc == 2) return EXIT_SUCCESS;
@@ -115,23 +151,29 @@ int main(int argc, char *argv[]) {
 	// Start the timer
 	const auto startTime = std::chrono::high_resolution_clock::now();
 
-	// Process input files
+	// Load airspaces and waypoints
 	ac.LoadAirspaces();
 	ac.LoadWaypoints();
-	ac.LoadTerrainRasterMaps();
 
+	// Verify that there is at least one airspace or waypoint
 	if(ac.GetNumOfAirspaces() == 0 && ac.GetNumOfWaypoints() == 0) {
 		std::cerr << "ERROR: no usable data found in the input files specified." << std::endl;
 		return EXIT_FAILURE;
 	}
-	
+
+	// Load raster maps
+	ac.LoadTerrainRasterMaps();
+
+	// Apply filter if required
+	if (limitsAreSet && !ac.FilterOnLatLonLimits(topLat, bottomLat, leftLon, rightLon)) std::cerr << "ERROR: limit bounds not valid." << std::endl;
+
 	// Convert!
-	bool flag = ac.Convert();
+	bool result = ac.Convert();
 
 	// Stop the timer
 	const double elapsedTimeSec = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - startTime).count() / 1e6;
 	std::cout<<"Total execution time: " << elapsedTimeSec << " sec." << std::endl << std::endl;
 
-	return flag ? EXIT_SUCCESS : EXIT_FAILURE;
+	return result ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 

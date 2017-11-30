@@ -14,6 +14,7 @@
 #include <QMainWindow>
 #include <QFutureWatcher>
 #include "aboutdialog.h"
+#include "limitsdialog.h"
 #include <chrono>
 
 class AirspaceConverter;
@@ -38,6 +39,7 @@ private:
 
     Ui::MainWindow *ui;
     AboutDialog about;
+    LimitsDialog filter;
     AirspaceConverter* converter;
     std::chrono::high_resolution_clock::time_point startTime;
     bool busy;
@@ -57,12 +59,14 @@ private slots:
     void on_loadRasterMapFileButton_clicked();
     void on_loadRasterMapFolderButton_clicked();
     void on_unloadTerrainMapsButton_clicked();
+    void on_filterButton_clicked();
     void on_openOutputFileButton_clicked();
     void on_openOutputFolderButton_clicked();
     void on_convertButton_clicked();
     void on_chooseOutputFileButton_clicked();
     void endBusy();
     void logMessage(const QString& message, const bool& isError = false);
+    void applyFilter(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon);
 
 signals:
     void messagePosted(const QString& message, const bool& isError = false);

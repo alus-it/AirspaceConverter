@@ -2,7 +2,8 @@
 #============================================================================
 # AirspaceConverter
 # Since       : 10/9/2017
-# Author      : Alberto Realis-Luc <alberto.realisluc@gmail.com>
+# Authors     : Alberto Realis-Luc <alberto.realisluc@gmail.com>
+#               Valerio Messina <efa@iol.it>
 # Web         : http://www.alus.it/AirspaceConverter
 # Copyright   : (C) 2016-2017 Alberto Realis-Luc
 # License     : GNU GPL v3
@@ -43,10 +44,11 @@ if [[ "$ACTION" == "C" || "$ACTION" == "c" || "$ACTION" == "" ]]; then
 	    OS=$(uname -s)
 	    DEBIANVER=$(uname -r)
 	fi
+	###echo OS:$OS DEBIANVER:$DEBIANVER
 
-	# Check if it is Debian distribution first
-	if [ "$OS" != "Debian GNU/Linux" ]; then
-		echo "ERROR: this not Debian!"
+	# Check if it is Debian or Ubuntu
+	if [ "$OS" != "Debian GNU/Linux" ] && [ "$OS" != "Ubuntu" ]; then
+		echo "ERROR: this script can actually work only for Debian or Ubuntu. You may consider to update it!"
 		exit 1
 	fi
 
@@ -78,11 +80,11 @@ elif [[ "$ACTION" == "D" || "$ACTION" == "d" ]]; then
 	mv airspaceconverter-gui ./buildQt/airspaceconverter-gui
 	
 	# Ask the user for which version of Debian we are building the packages	
-	printf "Enter target Debian release number [7-9]: "
+	printf "Enter target Debian release number [7-9,16.04]: "
 	read -r DEBIANVER
 	
 	# Ask the packager for which architecure are built the copied binaries
-	printf "Bits has the target architecture? [32/64]: "
+	printf "How many bits has the target architecture? [32/64]: "
 	read -r ARCH
 	if [[ "$ARCH" == "64" || "$ARCH" == "" ]]; then
 		ARCH=amd64
@@ -98,7 +100,7 @@ else
 fi
 
 
-# Check what Debian release we are talking about
+# Check what Debian or Ubuntu release we are talking about
 case $DEBIANVER in
 	7)
 		echo "Packaging for Debian Wheezy..."
@@ -108,8 +110,8 @@ case $DEBIANVER in
 		BOOSTVER=1.49.0
 		QTVER=4:4.8.2
 		QTDEPS="libqtcore4 (>= ${QTVER}), libqtgui4 (>= ${QTVER})"
-        ;;
-
+		MANT="Alberto Realis-Luc <admin@alus.it>"
+		;;
 	8)
 		echo "Packaging for Debian Jessie..."
 		LIBCVER=2.19		
@@ -118,8 +120,8 @@ case $DEBIANVER in
 		BOOSTVER=1.55.0
 		QTVER=5.3.2
 		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER}), libgl1-mesa-glx (>= 10.3.2)"
+		MANT="Alberto Realis-Luc <admin@alus.it>"
 		;;
-
 	9)
 		echo "Packaging for Debian Stretch..."
 		LIBCVER=2.19	
@@ -128,10 +130,20 @@ case $DEBIANVER in
 		BOOSTVER=1.62.0
 		QTVER=5.7.1
 		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER}), libgl1-mesa-glx (>= 10.3.2)"
+		MANT="Alberto Realis-Luc <admin@alus.it>"
 		;;
-	
+	16.04)
+		echo "Packaging for Ubuntu Xenial..."
+		LIBCVER=2.23	
+		ZIPLIB=libzip4		
+		ZIPVER=1.0.1
+		BOOSTVER=1.58.0
+		QTVER=5.5.1
+		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER}), libgl1-mesa-glx (>= 10.3.2)"
+		MANT="Valerio Messina <efa@iol.it>"
+		;;
 	*)
-	echo "ERROR: This version of Debian: ${DEBIANVER} is not known by this script, please add it!"
+	echo "ERROR: This version of Debian or Ubuntu: ${DEBIANVER} is not known by this script, please add it!"
 	exit 1
 esac
 
@@ -144,7 +156,10 @@ if [[ "$ACTION" == "C" || "$ACTION" == "c" || "$ACTION" == "" ]]; then
 	make -j${PROCESSORS} all
 
 	# Get version number from the compiled executable
-	VERSION="$(./Release/airspaceconverter -v | head -n 1 | sed -r 's/^[^0-9]+([0-9]+.[0-9]+.[0-9]+).*/\1/g')"
+	cd Release # so find local shared object: libairspaceconverter.so
+	VERSION="$(airspaceconverter -v | head -n 1 | sed -r 's/^[^0-9]+([0-9]+.[0-9]+.[0-9]+).*/\1/g')"
+	cd ..
+	###echo VERSION:$VERSION
 
 	# Build Qt user interface
 	mkdir -p buildQt
@@ -232,6 +247,7 @@ cd ..
 
 # Estimate package size
 SIZE="$(du -s --apparent-size usr | awk '{print $1}')"
+#echo SIZE:$SIZE
 
 # Make control directory
 mkdir DEBIAN
@@ -247,7 +263,7 @@ Standards-Version: 3.9.4
 Architecture: '${ARCH}'
 Depends: libc6 (>= '${LIBCVER}'), libboost-system'${BOOSTVER}' (>= '${BOOSTVER}'), libboost-filesystem'${BOOSTVER}' (>= '${BOOSTVER}'), libboost-locale'${BOOSTVER}' (>= '${BOOSTVER}'), '${ZIPLIB}' (>= '${ZIPVER}')
 Enhances: airspaceconverter-gui (>= '${VERSION}'), cgpsmapper (>= 0.0.9.3c)
-Maintainer: Alberto Realis-Luc <admin@alus.it>
+Maintainer: '${MANT}'
 Installed-size: '${SIZE}'
 Description: Airspace Converter
  A free and open source tool to convert from OpenAir or OpenAIP airspace files
@@ -324,7 +340,7 @@ cd ..
 
 # Estimate package size
 SIZE="$(du -s --apparent-size usr | awk '{print $1}')"
-
+#echo SIZE:$SIZE
 # Make control directory
 mkdir DEBIAN
 cd DEBIAN
@@ -339,7 +355,7 @@ Architecture: '${ARCH}'
 Depends: libc6 (>= '${LIBCVER}'), airspaceconverter (>= '${VERSION}'), '${QTDEPS}', libboost-system'${BOOSTVER}' (>= '${BOOSTVER}') ,libboost-filesystem'${BOOSTVER}' (>= '${BOOSTVER}')
 Suggests: airspaceconverter (>= '${VERSION}')
 Enhances: cgpsmapper (>= 0.0.9.3c)
-Maintainer: Alberto Realis-Luc <admin@alus.it>
+Maintainer: '${MANT}'
 Installed-size: '${SIZE}'
 Description: Qt GUI for Airspace Converter
  A free and open source tool to convert from OpenAir or OpenAIP airspace files
@@ -388,7 +404,7 @@ rm -R buildQt
 sudo rm -R airspaceconverter_${VERSION}-${DEBIANVER}_${ARCH}
 sudo rm -R airspaceconverter-gui_${VERSION}-${DEBIANVER}_${ARCH}
 if [[ "$ACTION" == "D" || "$ACTION" == "d" ]]; then
+	echo cleaning
 	make clean
 fi
 exit 0
-

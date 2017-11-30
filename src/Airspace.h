@@ -111,6 +111,7 @@ public:
 	inline void ClosePoints() { if (!points.empty() && points.front() != points.back()) points.push_back(points.front()); }
 	bool ArePointsValid();
 	bool Undiscretize();
+	bool IsWithinLimits(const Geometry::Limits& limits) const;
 	inline void CutPointsFrom(Airspace& orig) { points = std::move(orig.points); }
 	inline const Type& GetType() const { return type; }
 	inline const Type& GetClass() const { return airspaceClass; }

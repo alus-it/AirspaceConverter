@@ -41,6 +41,7 @@ public:
 		inline void GetLonDegMin(int& deg, double& min) const { return convertDec2DegMin(lon, deg, min); }
 		inline char GetNorS() const { return lat > 0 ? 'N' : 'S'; }
 		inline char GetEorW() const { return lon > 0 ? 'E' : 'W'; }
+		inline bool IsValid() const { return IsValidLat(lat) &&  IsValidLon(lon); }
 		inline static bool IsValidLat(const double& la) { return la >= -90 && la <= 90; }
 		inline static bool IsValidLon(const double& lo) { return lo >= -180 && lo <= 180; }
 
@@ -50,6 +51,32 @@ public:
 		double lat, lon;
 		static void convertDec2DegMin(const double& dec, int& deg, double& min);
 		static const double SIXTYTH;
+	};
+
+	class Limits {
+	public:
+		Limits() : valid(false), acrossAntiGreenwich(false) {};
+		Limits(const LatLon& topLeftPoint, const LatLon& bottomRightPoint) : topLeft(topLeftPoint), bottomRight(bottomRightPoint) { Verify(); }
+		Limits(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon) : topLeft(topLat, leftLon), bottomRight(bottomLat, rightLon) { Verify(); }
+		bool Set(const LatLon& topLeftLimit, const LatLon& bottomRightLimit);
+		bool Set(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon);
+		inline bool IsValid() const { return valid; }
+		inline LatLon GetTopLeft() const { return topLeft; }
+		inline LatLon GetBottomRight() const { return bottomRight; }
+		inline double GetTopLatitudeLimit() const { return topLeft.Lat(); }
+		inline double GetBottomLatitudeLimit() const { return bottomRight.Lat(); }
+		inline double GetLeftLongitudeLimit() const { return topLeft.Lon(); }
+		inline double GetRightLongitudeLimit() const { return bottomRight.Lon(); }
+		inline void Disable() { valid = false; }
+		bool IsPositionWithinLimits(const LatLon& pos) const;
+		bool IsPositionWithinLimits(const double& lat, const double& lon) const;
+
+	private:
+		void Verify();
+		LatLon topLeft;
+		LatLon bottomRight;
+		bool valid;
+		bool acrossAntiGreenwich;
 	};
 
 	virtual ~Geometry() {}

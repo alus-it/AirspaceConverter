@@ -75,7 +75,9 @@ public:
 	inline unsigned long GetNumOfAirspaces() const { return (unsigned long)airspaces.size(); }
 	inline unsigned long GetNumOfWaypoints() const { return (unsigned long)waypoints.size(); }
 	int GetNumOfTerrainMaps() const;
-	
+	bool FilterOnLatLonLimits(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon);
+
+
 	static const std::vector<std::string> disclaimer;
 
 private:

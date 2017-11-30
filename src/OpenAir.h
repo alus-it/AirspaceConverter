@@ -24,7 +24,7 @@ friend class Circle;
 friend class Sector;
 
 public:
-	OpenAir(std::multimap<int, Airspace>& airspacesMap): airspaces(airspacesMap), varRotationClockwise(true) {}
+	OpenAir(std::multimap<int, Airspace>& airspacesMap): airspaces(airspacesMap), varRotationClockwise(true), lastACline(-1) {}
 	~OpenAir() {}
 	bool Read(const std::string& fileName);
 	bool Write(const std::string& fileName);

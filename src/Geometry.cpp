@@ -39,6 +39,49 @@ void Geometry::LatLon::convertDec2DegMin(const double& dec, int& deg, double& mi
 	min = (decimal-deg)/SIXTYTH;
 }
 
+bool Geometry::Limits::Set(const LatLon& topLeftLimit, const LatLon& bottomRightLimit) {
+	assert(topLeftLimit.IsValid());
+	assert(bottomRightLimit.IsValid());
+	topLeft = topLeftLimit;
+	bottomRight = bottomRightLimit;
+	Verify();
+	return valid;
+}
+
+bool Geometry::Limits::Set(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon) {
+	assert(LatLon::IsValidLat(topLat));
+	assert(LatLon::IsValidLat(bottomLat));
+	assert(LatLon::IsValidLon(leftLon));
+	assert(LatLon::IsValidLon(rightLon));
+	topLeft.SetLat(topLat);
+	bottomRight.SetLat(bottomLat);
+	topLeft.SetLon(leftLon);
+	bottomRight.SetLon(rightLon);
+	Verify();
+	return valid;
+}
+
+void Geometry::Limits::Verify() {
+	valid = topLeft.IsValid() && bottomRight.IsValid() && topLeft.Lat() > bottomRight.Lat() && topLeft.Lat() != bottomRight.Lat() && topLeft.Lon() != bottomRight.Lon();
+	if (valid) acrossAntiGreenwich = topLeft.Lon() > bottomRight.Lon();
+}
+
+bool Geometry::Limits::IsPositionWithinLimits(const LatLon& pos) const {
+	if (!valid) return true; // If no limit or not valid limit accept it
+	assert(pos.IsValid());
+	if (pos.Lat() > topLeft.Lat() || pos.Lat() < bottomRight.Lat()) return false;
+	if (acrossAntiGreenwich) return pos.Lon() >= 0 ? pos.Lon() <= topLeft.Lon() : pos.Lon() <= bottomRight.Lon();
+	else return pos.Lon() >= topLeft.Lon() && pos.Lon() <= bottomRight.Lon();
+}
+
+bool Geometry::Limits::IsPositionWithinLimits(const double& lat, const double& lon) const {
+	if (!valid) return true; // If no limit or not valid limit accept it
+	assert(LatLon::IsValidLat(lat) && LatLon::IsValidLon(lon));
+	if (lat > topLeft.Lat() || lat < bottomRight.Lat()) return false;
+	if (acrossAntiGreenwich) return lon >= 0 ? lon <= topLeft.Lon() : lon <= bottomRight.Lon();
+	else return lon >= topLeft.Lon() && lon <= bottomRight.Lon();
+}
+
 double Geometry::AbsAngle(const double& angle) { //to put angle in the range between 0 and 2PI
 	assert(!std::isinf(angle) && !std::isnan(angle));
 	double absangle = std::fmod(angle, TWO_PI);

@@ -91,6 +91,11 @@ void Polish::WriteHeader(const std::string& filename) {
 }
 
 bool Polish::Write(const std::string& filename, const std::multimap<int, Airspace>& airspaces) {
+	if (airspaces.empty()) {
+		AirspaceConverter::LogMessage("Polish output: no airspace, nothing to write", false);
+		return false;
+	}
+
 	// Check if has the right extension
 	if (!boost::iequals(boost::filesystem::path(filename).extension().string(), ".mp")) {
 		AirspaceConverter::LogMessage("ERROR: Expected MP extension but found: " + boost::filesystem::path(filename).extension().string(), true);

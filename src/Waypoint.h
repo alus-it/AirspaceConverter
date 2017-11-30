@@ -37,16 +37,7 @@ public:
 		numOfWaypointTypes
 	};
 
-	Waypoint(const std::string& longName, const std::string& shortName, const std::string& countryCode, const double lat, const double lon, const int alt, const int style, const std::string& descr)
-		: name(longName)
-		, code(shortName)
-		, country(countryCode)
-		, latitude(lat)
-		, longitude(lon)
-		, altitude(alt)
-		, type((WaypointType)style)
-		, description(descr) {
-	}
+	Waypoint(const std::string& longName, const std::string& shortName, const std::string& countryCode, const double latitude, const double lon, const int alt, const int style, const std::string& descr);
 
 	virtual ~Waypoint() {}
 
@@ -69,8 +60,8 @@ private:
 	std::string name;
 	std::string code;
 	std::string country;
-	double latitude; // [deg]
-	double longitude; // [deg]
+	double latitude;
+	double longitude;
 	int altitude; // [m]
 	WaypointType type;
 	std::string description;
