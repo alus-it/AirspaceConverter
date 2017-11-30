@@ -39,6 +39,8 @@ public:
 	bool operator>(const Altitude& other) const;
 	bool operator>=(const Altitude& other) const;
 	bool operator<=(const Altitude& other) const;
+	bool operator==(const Altitude& other) const;
+	bool operator!=(const Altitude& other) const;
 	
 	const std::string ToString() const;
 	inline static void SetQNH(const double QNHmb) { QNH = QNHmb; }
@@ -93,6 +95,7 @@ public:
 	~Airspace();
 
 	Airspace& operator=(const Airspace& other);
+	bool operator==(const Airspace& other) const;
 	inline static const std::string& CategoryName(const Type& category) { return CATEGORY_NAMES[category]; }
 	static bool CategoryVisibleByDefault(const Type& category) { return CATEGORY_VISIBILITY[category]; }
 	void SetType(const Type& category);

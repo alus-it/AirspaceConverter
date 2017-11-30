@@ -207,7 +207,7 @@ bool OpenAIP::Read(const std::string& fileName, std::multimap<int, Airspace>& ou
 					continue;
 				}
 
-				// Ensure that the polygon is closed (it should be already but can happen).....
+				// Ensure that the polygon is closed (it should be already, but can still happen).....
 				airspace.ClosePoints();
 
 				// The number of points must be at least 3+1 (plus the closing one)
@@ -217,8 +217,20 @@ bool OpenAIP::Read(const std::string& fileName, std::multimap<int, Airspace>& ou
 					continue;
 				}
 
-				// Add the new airspace
-				output.insert(std::pair<int, Airspace>(airspace.GetType(), std::move(airspace)));
+				// Verify that the current airspace it not already existing in our collection (apparently this happens in in the same OpenAIP file)
+				bool found(false);
+
+				// Filter only on airspaces of the same type
+				const auto filtered = output.equal_range(airspace.GetType());
+				for (auto it = filtered.first; it != filtered.second && !found; ++it) {
+					if (it->second == airspace) {
+						found = true;
+						AirspaceConverter::LogMessage("Warning: Skipping existing airspace: " + airspace.GetName() + " already known as: " + it->second.GetName(), false);
+					}
+				}
+
+				// If it is not already present in our collection add the new airspace
+				if (!found) output.insert(std::pair<int, Airspace>(airspace.GetType(), std::move(airspace)));
 
 			} // for each ASP
 			return true;

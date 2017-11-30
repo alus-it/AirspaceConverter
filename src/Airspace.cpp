@@ -90,6 +90,16 @@ bool Altitude::operator>=(const Altitude& other) const {
 	return altMt >= other.altMt;
 }
 
+bool Altitude::operator==(const Altitude& other) const {
+	if (isUnlimited == other.isUnlimited) return true;
+	return altMt == other.altMt;
+}
+
+bool Altitude::operator!=(const Altitude& other) const {
+	if (isUnlimited && other.isUnlimited) return false;
+	return altMt != other.altMt;
+}
+
 const bool Airspace::CATEGORY_VISIBILITY[] = {
 	false, //CLASSA
 	false, //CLASSB
@@ -175,6 +185,14 @@ Airspace& Airspace::operator=(const Airspace& other) {
 	airspaceClass = other.airspaceClass;
 	name = other.name;
 	return *this;
+}
+
+bool Airspace::operator==(const Airspace& other) const {
+	if (top != other.top) return false;
+	if (base != other.base) return false;
+	if (type != other.type) return false;
+	if (airspaceClass != other.airspaceClass) return false;
+	return points == other.points;
 }
 
 Airspace::~Airspace() {
