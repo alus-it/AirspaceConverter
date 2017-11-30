@@ -105,7 +105,7 @@ bool OpenAir::ParseCoordinates(const std::string& text, Geometry::LatLon& point)
 	if (sign == 'W' || sign == 'w') lon = -lon;
 	else if (sign != 'E' && sign != 'e') return false;
 
-	// Finally set the poit coordinates
+	// Finally set the point coordinates
 	point.SetLatLon(lat,lon);
 	return true;
 }
