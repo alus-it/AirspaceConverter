@@ -92,12 +92,12 @@ bool Altitude::operator>=(const Altitude& other) const {
 
 bool Altitude::operator==(const Altitude& other) const {
 	if (isUnlimited == other.isUnlimited) return true;
-	return altMt == other.altMt;
+	return altFt == other.altFt && refIsMsl == other.refIsMsl && fl == other.fl;
 }
 
 bool Altitude::operator!=(const Altitude& other) const {
 	if (isUnlimited && other.isUnlimited) return false;
-	return altMt != other.altMt;
+	return altFt != other.altFt || refIsMsl != other.refIsMsl || fl != other.fl;
 }
 
 const bool Airspace::CATEGORY_VISIBILITY[] = {
