@@ -49,6 +49,7 @@ private:
 	afx_msg void OnBnClickedClearInputBt();
 	afx_msg void OnBnClickedClearWaypointsBt();
 	afx_msg void OnBnClickedClearMapsBt();
+	afx_msg void OnBnClickedFilterBt();
 	afx_msg void OnBnClickedClearLogBt();
 	afx_msg void OnBnClickedConvert();
 	afx_msg void OnBnClickedOpenOutputFile();
@@ -75,6 +76,7 @@ private:
 	CButton unloadAirspacesBt;
 	CButton unloadRasterMapsBt;
 	CButton unloadWaypointsBt;
+	CButton filterBt;
 	CButton chooseOutputFileBt;
 	CButton ClearLogBt;
 	CButton CloseButton;

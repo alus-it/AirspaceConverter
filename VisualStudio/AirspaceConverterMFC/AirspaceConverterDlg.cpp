@@ -12,15 +12,17 @@
 
 #include "stdafx.h"
 #include "afxdialogex.h"
+#include "afxwin.h"
 #include "AirspaceConverterApp.h"
 #include "AirspaceConverterDlg.h"
+#include "LimitsDlg.h"
 #include "Processor.h"
+#include "AirspaceConverter.h"
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
 #include <boost/locale/encoding.hpp>
-#include "AirspaceConverter.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -53,7 +55,7 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX) {
 }
 
 BOOL CAboutDlg::OnInitDialog() {
-	CDialog::OnInitDialog();
+	if (!CDialog::OnInitDialog()) return FALSE;
 	this->GetDlgItem(IDC_VERSION)->SetWindowTextW(_T(VERSION));
 	return TRUE;
 }
@@ -116,6 +118,7 @@ void CAirspaceConverterDlg::DoDataExchange(CDataExchange* pDX) {
 	DDX_Control(pDX, IDC_CLEAR_INPUT_BT, unloadAirspacesBt);
 	DDX_Control(pDX, IDC_CLEAR_MAPS_BT, unloadRasterMapsBt);
 	DDX_Control(pDX, IDC_CLEAR_WAYPOINTS_BT, unloadWaypointsBt);
+	DDX_Control(pDX, IDC_FILTER_BT, filterBt);
 	DDX_Control(pDX, IDC_OUTPUT_FILE_BT, chooseOutputFileBt);
 	DDX_Control(pDX, IDC_EDIT_OUTPUT_FILENAME, outputFileEditBox);
 	DDX_Control(pDX, IDC_CLEAR_LOG_BT, ClearLogBt);
@@ -141,6 +144,7 @@ BEGIN_MESSAGE_MAP(CAirspaceConverterDlg, CDialog)
 	ON_BN_CLICKED(IDC_CLEAR_INPUT_BT, &CAirspaceConverterDlg::OnBnClickedClearInputBt)
 	ON_BN_CLICKED(IDC_CLEAR_WAYPOINTS_BT, &CAirspaceConverterDlg::OnBnClickedClearWaypointsBt)
 	ON_BN_CLICKED(IDC_CLEAR_MAPS_BT, &CAirspaceConverterDlg::OnBnClickedClearMapsBt)
+	ON_BN_CLICKED(IDC_FILTER_BT, &CAirspaceConverterDlg::OnBnClickedFilterBt)
 	ON_BN_CLICKED(IDC_OUTPUT_FILE_BT, &CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt)
 	ON_BN_CLICKED(IDC_CLEAR_LOG_BT, &CAirspaceConverterDlg::OnBnClickedClearLogBt)
 	ON_CBN_SELCHANGE(IDC_COMBO_OUTPUT_TYPE, &CAirspaceConverterDlg::OnBnClickedOutputTypeCombo)
@@ -265,6 +269,7 @@ void CAirspaceConverterDlg::StartBusy() {
 	unloadAirspacesBt.EnableWindow(FALSE);
 	unloadWaypointsBt.EnableWindow(FALSE);
 	unloadRasterMapsBt.EnableWindow(FALSE);
+	filterBt.EnableWindow(FALSE);
 	OutputTypeCombo.EnableWindow(FALSE);
 	editQNHtextField.EnableWindow(FALSE);
 	editDefualtAltTextField.EnableWindow(FALSE);
@@ -343,6 +348,7 @@ void CAirspaceConverterDlg::EndBusy(const bool takeTime /* = false */) {
 	unloadAirspacesBt.EnableWindow(numAirspacesLoaded > 0 ? TRUE : FALSE);
 	unloadWaypointsBt.EnableWindow(numWaypointsLoaded > 0 ? TRUE : FALSE);
 	unloadRasterMapsBt.EnableWindow(numRasterMapLoaded > 0 ? TRUE : FALSE);
+	filterBt.EnableWindow(numAirspacesLoaded > 0 ? TRUE : FALSE);
 	ConvertBt.EnableWindow((numAirspacesLoaded > 0 || (isKmzFile && numWaypointsLoaded > 0)) && !outputFile.empty() ? TRUE : FALSE);
 	OutputTypeCombo.EnableWindow(TRUE);
 	editQNHtextField.EnableWindow(isKmzFile ? numAirspacesLoaded == 0 : FALSE);
@@ -358,6 +364,9 @@ void CAirspaceConverterDlg::EndBusy(const bool takeTime /* = false */) {
 }
 
 void CAirspaceConverterDlg::OnBnClickedInputFile() {
+	assert(converter != nullptr);
+	assert(processor != nullptr);
+	if (!UpdateData(TRUE)) return; // Force the user to enter valid QNH
 	CFileDialog dlg(TRUE, NULL, NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("All airspace files|*.txt; *.aip; *.kmz; *.kml|OpenAIP|*.aip|OpenAir|*.txt|Google Earth|*.kmz; *.kml||"), (CWnd*)this, 0, TRUE);
 	if (dlg.DoModal() == IDOK) {
 		outputFile.clear();
@@ -412,6 +421,7 @@ void CAirspaceConverterDlg::OnBnClickedLoadDEM() {
 void CAirspaceConverterDlg::OnBnClickedInputFolderBt() {
 	assert(converter != nullptr);
 	assert(processor != nullptr);
+	if (!UpdateData(TRUE)) return; // Force the user to enter valid QNH
 	CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
 	if (dlgFolder.DoModal() == IDOK) {
 		outputFile.clear();
@@ -467,8 +477,7 @@ void CAirspaceConverterDlg::OnBnClickedLoadDemFolderBt() {
 void CAirspaceConverterDlg::OnBnClickedClearInputBt() {
 	assert(converter != nullptr);
 	converter->UnloadAirspaces();
-	numAirspacesLoaded = 0;
-	assert(numAirspacesLoaded == converter->GetNumOfAirspaces());
+	assert(converter->GetNumOfAirspaces() == 0);
 	if(numWaypointsLoaded == 0) outputFile.clear();
 	UpdateOutputFilename();
 	LogMessage("Unloaded input airspaces.");
@@ -478,8 +487,7 @@ void CAirspaceConverterDlg::OnBnClickedClearInputBt() {
 void CAirspaceConverterDlg::OnBnClickedClearWaypointsBt() {
 	assert(converter != nullptr);
 	converter->UnloadWaypoints();
-	numWaypointsLoaded = 0;
-	assert(numWaypointsLoaded == converter->GetNumOfWaypoints());
+	assert(converter->GetNumOfWaypoints() == 0);
 	if (numAirspacesLoaded == 0) outputFile.clear();
 	LogMessage("Unloaded input waypoints.");
 	EndBusy();
@@ -488,10 +496,20 @@ void CAirspaceConverterDlg::OnBnClickedClearWaypointsBt() {
 void CAirspaceConverterDlg::OnBnClickedClearMapsBt() {
 	assert(converter != nullptr);
 	converter->UnloadRasterMaps();
-	numRasterMapLoaded = 0;
-	assert(numRasterMapLoaded == converter->GetNumOfTerrainMaps());
+	assert(converter->GetNumOfTerrainMaps() == 0);
 	LogMessage("Unloaded terrain raster maps.");
 	EndBusy();
+}
+
+void CAirspaceConverterDlg::OnBnClickedFilterBt() {
+	assert(converter != nullptr);
+	CLimitsDlg dlgLimits;
+	dlgLimits.DoModal();
+	if (dlgLimits.HasValidLimits()) {
+		StartBusy();
+		converter->FilterOnLatLonLimits(dlgLimits.GetTopLatLimit(), dlgLimits.GetBottomLatLimit(), dlgLimits.GetLeftLonLimit(), dlgLimits.GetRightLonLimit());
+		EndBusy();
+	}
 }
 
 void CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt() {
@@ -536,6 +554,7 @@ void CAirspaceConverterDlg::OnBnClickedOutputTypeCombo() {
 }
 
 void CAirspaceConverterDlg::OnBnClickedConvert() {
+	if (!UpdateData(TRUE)) return; // Force the user to enter valid default terrain altitude
 	if (outputFile.empty()) return;
 	AirspaceConverter::OutputType type = (AirspaceConverter::OutputType)OutputTypeCombo.GetCurSel();
 	assert(type >= AirspaceConverter::OutputType::KMZ_Format && type < AirspaceConverter::OutputType::Unknown_Format);

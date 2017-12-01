@@ -26,8 +26,6 @@ LimitsDialog::~LimitsDialog() {
     delete ui;
 }
 
-
-
 void LimitsDialog::on_buttonBox_accepted() {
     if (Geometry::Limits(ui->topLatSpinBox->value(), ui->bottomLatSpinBox->value(), ui->leftLonSpinBox->value(), ui->rightLonSpinBox->value()).IsValid())
         emit validLimitsSet(ui->topLatSpinBox->value(), ui->bottomLatSpinBox->value(), ui->leftLonSpinBox->value(), ui->rightLonSpinBox->value());

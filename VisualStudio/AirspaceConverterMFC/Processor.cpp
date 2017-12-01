@@ -96,8 +96,7 @@ bool Processor::Convert() {
 	return true;
 }
 
-void Processor::ConvertThread()
-{
+void Processor::ConvertThread() {
 	converter->Convert();
 	PostMessage(window, WM_GENERAL_WORK_DONE, 0, 0);
 }
