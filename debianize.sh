@@ -21,20 +21,20 @@ if [[ "$ACTION" == "C" || "$ACTION" == "c" || "$ACTION" == "" ]]; then
 		# freedesktop.org and systemd
 		. /etc/os-release
 		OS=$NAME
-		DEBIANVER=$VERSION_ID
+		OSVER=$VERSION_ID
 	elif type lsb_release >/dev/null 2>&1; then
 		# linuxbase.org
 		OS=$(lsb_release -si)
-		DEBIANVER=$(lsb_release -sr)
+		OSVER=$(lsb_release -sr)
 	elif [ -f /etc/lsb-release ]; then
 		# For some versions of Debian/Ubuntu without lsb_release command
 		. /etc/lsb-release
 		OS=$DISTRIB_ID
-		DEBIANVER=$DISTRIB_RELEASE
+		OSVER=$DISTRIB_RELEASE
 	elif [ -f /etc/debian_version ]; then
 		# Older Debian/Ubuntu/etc.
 		OS=Debian
-		DEBIANVER=$(cat /etc/debian_version)
+		OSVER=$(cat /etc/debian_version)
 	#elif [ -f /etc/SuSe-release ]; then
 		# Older SuSE/etc.
 	#elif [ -f /etc/redhat-release ]; then
@@ -42,9 +42,8 @@ if [[ "$ACTION" == "C" || "$ACTION" == "c" || "$ACTION" == "" ]]; then
 	else
 		# Fall back to uname, e.g. "Linux <version>", also works for BSD, etc.
 		OS=$(uname -s)
-		DEBIANVER=$(uname -r)
+		OSVER=$(uname -r)
 	fi
-	###echo OS:$OS DEBIANVER:$DEBIANVER
 
 	# Check if it is Debian or Ubuntu
 	if [ "$OS" != "Debian GNU/Linux" ] && [ "$OS" != "Ubuntu" ]; then
@@ -82,8 +81,8 @@ elif [[ "$ACTION" == "D" || "$ACTION" == "d" ]]; then
 	fi
 
 	# Ask the user for which version of Debian we are building the packages	
-	printf "Enter target Debian release number [7-9,16.04]: "
-	read -r DEBIANVER
+	printf "Enter target Debian (7, 8 or 9) or Ubuntu (16.04) release number [7,8,9,16.04]: "
+	read -r OSVER
 	
 	# Ask the packager for which architecure are built the copied binaries
 	printf "How many bits has the target architecture? [32/64]: "
@@ -103,9 +102,10 @@ fi
 
 
 # Check what Debian or Ubuntu release we are talking about
-case $DEBIANVER in
+case $OSVER in
 	7)
 		echo "Packaging for Debian Wheezy..."
+		DISTR=deb		
 		LIBCVER=2.13
 		ZIPLIB=libzip2		
 		ZIPVER=0.10.1
@@ -116,6 +116,7 @@ case $DEBIANVER in
 		;;
 	8)
 		echo "Packaging for Debian Jessie..."
+		DISTR=deb
 		LIBCVER=2.19		
 		ZIPLIB=libzip2		
 		ZIPVER=0.11.2
@@ -126,6 +127,7 @@ case $DEBIANVER in
 		;;
 	9)
 		echo "Packaging for Debian Stretch..."
+		DISTR=deb
 		LIBCVER=2.19	
 		ZIPLIB=libzip4		
 		ZIPVER=1.1.2
@@ -136,6 +138,7 @@ case $DEBIANVER in
 		;;
 	16.04)
 		echo "Packaging for Ubuntu Xenial..."
+		DISTR=ubn
 		LIBCVER=2.23	
 		ZIPLIB=libzip4		
 		ZIPVER=1.0.1
@@ -145,7 +148,7 @@ case $DEBIANVER in
 		MANT="Valerio Messina <efa@iol.it>"
 		;;
 	*)
-	echo "ERROR: This version of Debian or Ubuntu: ${DEBIANVER} is not known by this script, please add it!"
+	echo "ERROR: This version of Debian or Ubuntu: ${OSVER} is not known by this script, please add it!"
 	exit 1
 esac
 
@@ -157,21 +160,27 @@ if [[ "$ACTION" == "C" || "$ACTION" == "c" || "$ACTION" == "" ]]; then
 	# Build shared library and command line version
 	make -j${PROCESSORS} all
 
-	# Get version number from the compiled executable
-	cd Release # so find local shared object: libairspaceconverter.so
-	VERSION="$(airspaceconverter -v | head -n 1 | sed -r 's/^[^0-9]+([0-9]+.[0-9]+.[0-9]+).*/\1/g')"
-	cd ..
-	###echo VERSION:$VERSION
-
 	# Build Qt user interface
 	mkdir -p buildQt
 	cd buildQt
 	qmake ../AirspaceConverterQt/AirspaceConverterQt.pro -r -spec linux-g++-64
 	make -j${PROCESSORS} all
 	cd ..
+fi
+
+# Get version number, try from the sources (sources should be present)
+VERSION="$(grep -s "define VERSION" src/AirspaceConverter.h | awk -F\" '{print $2}')"
+
+# Other possibility: get version number from compiled executable (not needed it should ve the same as from the sources)
+#cd Release # so find local shared object: libairspaceconverter.so #WARNING: not always true, can be also the installed lib!!
+#VERSION="$(./airspaceconverter -v | head -n 1 | sed -r 's/^[^0-9]+([0-9]+.[0-9]+.[0-9]+).*/\1/g')"
+#cd ..
+
+# If no valid version number, then ask the user
+if [[ "$VERSION" =~ [0-9].[0-9].[0-9] ]]; then
+	echo New airspaceconverter version: $VERSION
 else
-	# Ask the version to the user
-	printf "New airspaceconverter version number: "
+	printf "Enter new airspaceconverter version: "
 	read -r VERSION
 fi
 
@@ -179,9 +188,9 @@ fi
 gzip -9 < airspaceconverter.1 > airspaceconverter.1.gz
 
 # Make folder for airspaceconverter
-sudo rm -rf airspaceconverter_${VERSION}-${DEBIANVER}_${ARCH}
-mkdir airspaceconverter_${VERSION}-${DEBIANVER}_${ARCH}
-cd airspaceconverter_${VERSION}-${DEBIANVER}_${ARCH}
+sudo rm -rf airspaceconverter_${VERSION}-${DISTR}${OSVER}_${ARCH}
+mkdir airspaceconverter_${VERSION}-${DISTR}${OSVER}_${ARCH}
+cd airspaceconverter_${VERSION}-${DISTR}${OSVER}_${ARCH}
 
 # Build directory structure
 mkdir usr
@@ -257,7 +266,7 @@ cd DEBIAN
 
 # Make control file
 echo 'Package: airspaceconverter
-Version: '${VERSION}'-'${DEBIANVER}'
+Version: '${VERSION}'-'${DISTR}${OSVER}'
 Section: misc
 Priority: optional
 Build-Depends: libc6-dev (>= '${LIBCVER}'), libboost-system-dev (>= '${BOOSTVER}'), libboost-filesystem-dev (>= '${BOOSTVER}'), libboost-locale-dev (>= '${BOOSTVER}'), libzip-dev (>= '${ZIPVER}')
@@ -290,13 +299,13 @@ sudo chown -R root:root *
 cd ..
 
 #Make airspaceconverter DEB package
-rm -f airspaceconverter_${VERSION}-${DEBIANVER}_${ARCH}.deb
-dpkg-deb --build airspaceconverter_${VERSION}-${DEBIANVER}_${ARCH}
+rm -f airspaceconverter_${VERSION}-${DISTR}${OSVER}_${ARCH}.deb
+dpkg-deb --build airspaceconverter_${VERSION}-${DISTR}${OSVER}_${ARCH}
 
 # Make folder for airspaceconverter-gui
-sudo rm -rf airspaceconverter-gui_${VERSION}-${DEBIANVER}_${ARCH}
-mkdir airspaceconverter-gui_${VERSION}-${DEBIANVER}_${ARCH}
-cd airspaceconverter-gui_${VERSION}-${DEBIANVER}_${ARCH}
+sudo rm -rf airspaceconverter-gui_${VERSION}-${DISTR}${OSVER}_${ARCH}
+mkdir airspaceconverter-gui_${VERSION}-${DISTR}${OSVER}_${ARCH}
+cd airspaceconverter-gui_${VERSION}-${DISTR}${OSVER}_${ARCH}
 
 # Build directory structure
 mkdir usr
@@ -333,7 +342,7 @@ mkdir pixmaps
 cd ..
 
 # Copy the files
-cp ../../airspaceconverter_${VERSION}-${DEBIANVER}_${ARCH}/usr/share/doc/airspaceconverter/copyright ./share/doc/airspaceconverter-gui
+cp ../../airspaceconverter_${VERSION}-${DISTR}${OSVER}_${ARCH}/usr/share/doc/airspaceconverter/copyright ./share/doc/airspaceconverter-gui
 cp ../../airspaceconverter.xpm ./share/pixmaps
 cp ../../buildQt/airspaceconverter-gui ./bin
 strip -S --strip-unneeded ./bin/airspaceconverter-gui
@@ -349,7 +358,7 @@ cd DEBIAN
 
 # Make control file
 echo 'Package: airspaceconverter-gui
-Version: '${VERSION}'-'${DEBIANVER}'
+Version: '${VERSION}'-'${DISTR}${OSVER}'
 Section: misc
 Priority: optional
 Standards-Version: 3.9.4
@@ -398,15 +407,15 @@ sudo chown -R root:root *
 cd ..
 
 #Make DEB package for airspaceconverter-gui
-rm -f airspaceconverter-gui_${VERSION}-${DEBIANVER}_${ARCH}.deb
-dpkg-deb --build airspaceconverter-gui_${VERSION}-${DEBIANVER}_${ARCH}
+rm -f airspaceconverter-gui_${VERSION}-${DISTR}${OSVER}_${ARCH}.deb
+dpkg-deb --build airspaceconverter-gui_${VERSION}-${DISTR}${OSVER}_${ARCH}
 
 # Clean
 if [ "$1" != "test" ]; then
 	rm -R buildQt
 fi
-sudo rm -R airspaceconverter_${VERSION}-${DEBIANVER}_${ARCH}
-sudo rm -R airspaceconverter-gui_${VERSION}-${DEBIANVER}_${ARCH}
+sudo rm -R airspaceconverter_${VERSION}-${DISTR}${OSVER}_${ARCH}
+sudo rm -R airspaceconverter-gui_${VERSION}-${DISTR}${OSVER}_${ARCH}
 if [[ "$ACTION" == "D" || "$ACTION" == "d" ]]; then
 	if [ "$1" != "test" ]; then
 		echo cleaning
