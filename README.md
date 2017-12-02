@@ -108,28 +108,24 @@ In order to compile this project the following libraries are required:
 - libzip2 (libzip-dev) and dependencies (zlib)
 - Boost libraries (libboost-filesystem-dev and libboost-locale-dev)
 
-Compiling AirspaceConverter on Linux
-------------------------------------
+Compiling and installing AirspaceConverter from sources on Linux
+----------------------------------------------------------------
 First it is necessary to install the dependencies, on a Debian based distribution it would be:  
-`sudo apt-get install libzip-dev`  
-`sudo apt-get install libboost-filesystem-dev`  
-`sudo apt-get install libboost-locale-dev`  
+`sudo apt-get install libzip-dev libboost-filesystem-dev libboost-locale-dev`  
 Then, to compile, from the root of this project: `make all`  
-To build in debug: `make DEBUG=1 all`  
-The "AirspaceConverter" executable will be located in the "Release" or "Debug" folder
+To install: `sudo make install`  
+This will install the shared library and the AirspaceConverter command line executable.  
+After it will be possible to run AirspaceConverter from anywhere simply calling: `airspaceconverter`  
+To uninstall (from the root of the project): `sudo make uninstall` 
 
-Installing AirspaceConverter from sources on Linux
---------------------------------------------------
-From the root of this project: `sudo make install`  
-To uninstall: `sudo make uninstall` 
+Compiling the Qt GUI executable
+-------------------------------
+In the "AirspaceConverterQt" folder there is the Qt project, it needs the shared library libAirspaceConverter already compiled and installed for the same platform, as described in the previous step.
 
 Compiling AirspaceConverter with MFC interface on Windows
 ---------------------------------------------------------
-In the "VisualStudio" folder there is the VisualStudio solution and project files.
-
-Compiling the Qt executable
----------------------------
-In the "AirspaceConverterQt" folder there is the Qt project, it needs the shared library libAirspaceConverter already compiled and installed for the same platform.
+In the "VisualStudio" folder there is the VisualStudio solution and project files.  
+It requires to have the boost libraries installed, with their location configured in the VS project, while libzip can be obtained via nuget.
 
 Placemarks icons credits
 ------------------------
