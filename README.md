@@ -120,7 +120,13 @@ To uninstall (from the root of the project): `sudo make uninstall`
 
 Compiling the Qt GUI executable
 -------------------------------
-In the "AirspaceConverterQt" folder there is the Qt project, it needs the shared library libAirspaceConverter already compiled and installed for the same platform, as described in the previous step.
+In the "AirspaceConverterQt" folder there is the Qt project, it needs the shared library libAirspaceConverter already compiled and installed for the same platform, as described in the previous step.  
+It is also possible to build from command line, first make sure to have the Qt development environment installed: `sudo apt-get install libqt4-dev`  
+Then to compile in the Qt user interface in the "buildQt" folder:
+`mkdir buildQt`  
+`cd buildQt`  
+`qmake ../AirspaceConverterQt/AirspaceConverterQt.pro -r -spec linux-g++-64`  
+`make all`
 
 Compiling AirspaceConverter with MFC interface on Windows
 ---------------------------------------------------------
