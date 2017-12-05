@@ -19,6 +19,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
     ui(new Ui::AboutDialog) {
     ui->setupUi(this);
     ui->versionLabel->setText(VERSION);
+    ui->compileDateLabel->setText(QString("Compiled on %1 at %2").arg(__DATE__).arg(__TIME__));
 }
 
 AboutDialog::~AboutDialog() {
