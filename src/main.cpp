@@ -126,6 +126,7 @@ int main(int argc, char *argv[]) {
 			break;
 		case 'v':
 			std::cout << "AirspaceConverter version: " << VERSION << std::endl;
+			std::cout << "Compiled on: " << __DATE__ << " " << __TIME__ << std::endl;
 			std::cout << "Copyright(C) 2016-2017 Alberto Realis-Luc" << std::endl;
 			std::cout << "http://www.alus.it/AirspaceConverter" << std::endl << std::endl;
 			if (argc == 2) return EXIT_SUCCESS;
