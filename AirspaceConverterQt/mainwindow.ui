@@ -761,6 +761,33 @@
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>aboutButton</tabstop>
+  <tabstop>outputFormatComboBox</tabstop>
+  <tabstop>loadAirspaceFileButton</tabstop>
+  <tabstop>loadAirspaceFolderButton</tabstop>
+  <tabstop>numAirspacesLoadedSpinBox</tabstop>
+  <tabstop>unloadAirspacesButton</tabstop>
+  <tabstop>loadWaypointFileButton</tabstop>
+  <tabstop>loadWaypointsFolderButton</tabstop>
+  <tabstop>numWaypointsLoadedSpinBox</tabstop>
+  <tabstop>unloadWaypointsButton</tabstop>
+  <tabstop>loadRasterMapFileButton</tabstop>
+  <tabstop>loadRasterMapFolderButton</tabstop>
+  <tabstop>numTerrainMapsLoadedSpinBox</tabstop>
+  <tabstop>unloadTerrainMapsButton</tabstop>
+  <tabstop>QNHspinBox</tabstop>
+  <tabstop>defaultAltSpinBox</tabstop>
+  <tabstop>filterButton</tabstop>
+  <tabstop>outputFileTextEdit</tabstop>
+  <tabstop>chooseOutputFileButton</tabstop>
+  <tabstop>convertButton</tabstop>
+  <tabstop>openOutputFileButton</tabstop>
+  <tabstop>openOutputFolderButton</tabstop>
+  <tabstop>clearLogButton</tabstop>
+  <tabstop>closeButton</tabstop>
+  <tabstop>loggingTextBox</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>

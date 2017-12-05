@@ -59,7 +59,7 @@
     <rect>
      <x>110</x>
      <y>10</y>
-     <width>161</width>
+     <width>251</width>
      <height>16</height>
     </rect>
    </property>
@@ -70,7 +70,7 @@
     </font>
    </property>
    <property name="text">
-    <string>AirspaceConverter</string>
+    <string>AirspaceConverterQt</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_2">

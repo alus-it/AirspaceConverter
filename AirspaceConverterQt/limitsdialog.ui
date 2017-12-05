@@ -233,10 +233,16 @@
     </rect>
    </property>
    <property name="text">
-    <string>Negative latitudes are to south, negative longitudes are to west.</string>
+    <string>Negative latitudes are to South, negative longitudes are to West.</string>
    </property>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>topLatSpinBox</tabstop>
+  <tabstop>bottomLatSpinBox</tabstop>
+  <tabstop>leftLonSpinBox</tabstop>
+  <tabstop>rightLonSpinBox</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
