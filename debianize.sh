@@ -191,8 +191,8 @@ else
 	read -r VERSION
 fi
 
-# Man page has to be compressed at maximum
-gzip -9 < airspaceconverter.1 > airspaceconverter.1.gz
+# Man page has to be compressed at maximum and without timestamp
+gzip -9 -n < airspaceconverter.1 > airspaceconverter.1.gz
 
 # Make folder for airspaceconverter
 sudo rm -rf airspaceconverter_${VERSION}-${DISTR}${OSVER}_${ARCH}
