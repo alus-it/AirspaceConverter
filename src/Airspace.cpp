@@ -342,7 +342,7 @@ bool Airspace::Undiscretize() {
 	if (!geometries.empty()) return true;
 	if (points.empty()) return false;
 	assert(points.size() >= 4);
-	unsigned int steps = (unsigned int)points.size() - 3;
+	const unsigned int steps = (unsigned int)points.size() - 2;
 	std::vector<Geometry::LatLon*> arcPoints;
 	std::vector<std::pair<const double, const double>> centerPoints;
 	bool alreadyOnArc = false;
@@ -396,7 +396,10 @@ bool Airspace::Undiscretize() {
 		assert(prevRadius > 0);
 		if (alwaysOnSameArc) EvaluateAndAddCircle(arcPoints, centerPoints);	// If we were always on arc then here we have a circle
 		else EvaluateAndAddArc(arcPoints, centerPoints, isClockwise);
-	} else for (unsigned int i = steps - 1; i < points.size() ; i++) geometries.push_back(new Point(points.at(i))); // Otherwise the remaining points
+	} else { // Otherwise add the remaining 2 points
+		geometries.push_back(new Point(points.at(steps)));
+		geometries.push_back(new Point(points.at(steps+1)));
+	}
 	return true;
 }
 
