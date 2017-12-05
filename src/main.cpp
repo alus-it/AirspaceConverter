@@ -121,6 +121,9 @@ int main(int argc, char *argv[]) {
 				}
 			}
 			break;
+		case 's':
+			ac.SetWriteCoordinatesAsDDMMSS();
+			break;
 		case 'h':
 			printHelp();
 			if (argc == 2) return EXIT_SUCCESS;

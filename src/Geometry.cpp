@@ -34,9 +34,17 @@ const double Geometry::TOL = 2e-10;
 double Geometry::resolution = 0.3 * NM2RAD; // 0.3 NM = 555.6 m
 
 void Geometry::LatLon::convertDec2DegMin(const double& dec, int& deg, double& min) {
-	double decimal = std::fabs(dec);
-	deg=(int)std::floor(decimal);
+	const double decimal = std::fabs(dec);
+	deg = (int)std::floor(decimal);
 	min = (decimal-deg)/SIXTYTH;
+}
+
+void Geometry::LatLon::convertDec2DegMinSec(const double& dec, int& deg, int& min, int& sec) {
+	double decimal = std::fabs(dec);
+	deg = (int)std::floor(decimal);
+	decimal = (decimal-deg)/SIXTYTH;
+	min = (int)std::floor(decimal);
+	sec = (int)std::round((decimal-min)/SIXTYTH);
 }
 
 bool Geometry::Limits::Set(const LatLon& topLeftLimit, const LatLon& bottomRightLimit) {

@@ -39,6 +39,8 @@ public:
 		inline bool operator!=(const LatLon& other) const { return other.lat != lat || other.lon != lon; }
 		inline void GetLatDegMin(int& deg, double& min) const { return convertDec2DegMin(lat, deg, min); }
 		inline void GetLonDegMin(int& deg, double& min) const { return convertDec2DegMin(lon, deg, min); }
+		inline void GetLatDegMinSec(int& deg, int& min, int& sec) const { return convertDec2DegMinSec(lat, deg, min, sec); }
+		inline void GetLonDegMinSec(int& deg, int& min, int& sec) const { return convertDec2DegMinSec(lon, deg, min, sec); }
 		inline char GetNorS() const { return lat > 0 ? 'N' : 'S'; }
 		inline char GetEorW() const { return lon > 0 ? 'E' : 'W'; }
 		inline bool IsValid() const { return IsValidLat(lat) &&  IsValidLon(lon); }
@@ -50,6 +52,7 @@ public:
 	private:
 		double lat, lon;
 		static void convertDec2DegMin(const double& dec, int& deg, double& min);
+		static void convertDec2DegMinSec(const double& dec, int& deg, int& min, int& sec);
 		static const double SIXTYTH;
 	};
 

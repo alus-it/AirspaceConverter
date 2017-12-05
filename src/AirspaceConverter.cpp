@@ -57,7 +57,8 @@ const std::vector<std::string> AirspaceConverter::disclaimer = {
 };
 
 AirspaceConverter::AirspaceConverter() :
-	conversionDone(false) {
+	conversionDone(false),
+	writeCoordinatesAsDDMMSS(false) {
 }
 
 AirspaceConverter::~AirspaceConverter() {
@@ -269,7 +270,7 @@ bool AirspaceConverter::Convert() {
 		}
 		break;
 	case OutputType::OpenAir_Format:
-		conversionDone = OpenAir(airspaces).Write(outputFile);
+		conversionDone = OpenAir(airspaces, writeCoordinatesAsDDMMSS).Write(outputFile);
 		break;
 	case OutputType::Polish_Format:
 		conversionDone = Polish().Write(outputFile, airspaces);

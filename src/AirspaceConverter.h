@@ -76,6 +76,7 @@ public:
 	inline unsigned long GetNumOfWaypoints() const { return (unsigned long)waypoints.size(); }
 	int GetNumOfTerrainMaps() const;
 	bool FilterOnLatLonLimits(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon);
+	inline void SetWriteCoordinatesAsDDMMSS(const bool DDMMSS = true) { writeCoordinatesAsDDMMSS = DDMMSS; }
 
 
 	static const std::vector<std::string> disclaimer;
@@ -90,4 +91,5 @@ private:
 	std::string outputFile;
 	std::vector<std::string> airspaceFiles, terrainRasterMapFiles, waypointFiles;
 	bool conversionDone;
+	bool writeCoordinatesAsDDMMSS;
 };

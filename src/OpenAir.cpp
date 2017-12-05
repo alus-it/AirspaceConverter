@@ -19,6 +19,13 @@
 #include <boost/format.hpp>
 #include <boost/locale/encoding.hpp>
 
+OpenAir::OpenAir(std::multimap<int, Airspace>& airspacesMap, const bool writeCoordinatesAsDDMMSS /*= false*/):
+	airspaces(airspacesMap),
+	varRotationClockwise(true),
+	lastACline(-1),
+	writeDecimalMinutes(!writeCoordinatesAsDDMMSS) {
+}
+
 std::string& OpenAir::RemoveComments(std::string &s) {
 	s.erase(find_if(s.begin(), s.end(), [](const char c) { return c == '*'; }), s.end());
 	return s;
@@ -553,11 +560,20 @@ bool OpenAir::WriteCategory(const Airspace& airspace) {
 
 void OpenAir::WriteLatLon(const Geometry::LatLon& point) {
 	int deg;
-	double min;
-	point.GetLatDegMin(deg, min);
-	file << deg << ":" << min << " " << point.GetNorS() << " ";
-	point.GetLonDegMin(deg, min);
-	file << deg << ":" << min << " " << point.GetEorW();
+	if (writeDecimalMinutes) {
+		double min;
+		point.GetLatDegMin(deg, min);
+		file << deg << ":" << min << " " << point.GetNorS() << " ";
+		point.GetLonDegMin(deg, min);
+		file << deg << ":" << min << " " << point.GetEorW();
+	} else {
+		int min;
+		int sec;
+		point.GetLatDegMinSec(deg, min, sec);
+		file << deg << ":" << min << ":" << sec << " " << point.GetNorS() << " ";
+		point.GetLonDegMinSec(deg, min, sec);
+		file << deg << ":" << min << ":" << sec <<" " << point.GetEorW();
+	}
 }
 
 void OpenAir::WritePoint(const Point& point) {
