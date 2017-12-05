@@ -92,7 +92,8 @@ int main(int argc, char *argv[]) {
 		case 'l':
 			if (!hasValueAfter) std::cerr << "ERROR: limit bounds not found." << std::endl;
 			else {
-				boost::tokenizer<boost::char_separator<char>> tokens(std::string(argv[++i]), boost::char_separator<char>(","));
+				const std::string limits(argv[++i]);
+				boost::tokenizer<boost::char_separator<char>> tokens(limits, boost::char_separator<char>(","));
 				if (std::distance(tokens.begin(), tokens.end()) != 4) {
 					std::cerr << "ERROR: wrong number (expected 4) of limit bounds found." << std::endl;
 					break;
@@ -166,7 +167,7 @@ int main(int argc, char *argv[]) {
 	ac.LoadTerrainRasterMaps();
 
 	// Apply filter if required
-	if (limitsAreSet && !ac.FilterOnLatLonLimits(topLat, bottomLat, leftLon, rightLon)) std::cerr << "ERROR: limit bounds not valid." << std::endl;
+	if (limitsAreSet && !ac.FilterOnLatLonLimits(topLat, bottomLat, leftLon, rightLon)) std::cerr << "ERROR: filter limit bounds are not valid." << std::endl;
 
 	// Convert!
 	bool result = ac.Convert();
