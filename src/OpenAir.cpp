@@ -13,6 +13,7 @@
 #include "OpenAir.h"
 #include "AirspaceConverter.h"
 #include "Airspace.h"
+#include <iomanip>
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -567,12 +568,11 @@ void OpenAir::WriteLatLon(const Geometry::LatLon& point) {
 		point.GetLonDegMin(deg, min);
 		file << deg << ":" << min << " " << point.GetEorW();
 	} else {
-		int min;
-		int sec;
+		int min, sec;
 		point.GetLatDegMinSec(deg, min, sec);
-		file << deg << ":" << min << ":" << sec << " " << point.GetNorS() << " ";
+		file << std::setw(2) << std::setfill('0') << deg << ":" << std::setw(2) << std::setfill('0') << min << ":" << std::setw(2) << std::setfill('0') << sec << " " << point.GetNorS() << " ";
 		point.GetLonDegMinSec(deg, min, sec);
-		file << deg << ":" << min << ":" << sec <<" " << point.GetEorW();
+		file << std::setw(3) << std::setfill('0') << deg << ":" << std::setw(2) << std::setfill('0') << min << ":" << std::setw(2) << std::setfill('0') << sec <<" " << point.GetEorW();
 	}
 }
 
