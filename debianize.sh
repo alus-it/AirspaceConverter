@@ -201,18 +201,24 @@ cd airspaceconverter_${VERSION}-${DISTR}${OSVER}_${ARCH}
 
 # Build directory structure
 mkdir usr
+chmod 0755 usr
 cd usr
 mkdir bin
 mkdir lib
 mkdir share
+chmod 0755 bin lib share
 cd share
 mkdir airspaceconverter
+chmod 0755 airspaceconverter
 cd airspaceconverter
 mkdir icons
+chmod 0755 icons
 cd ..
 mkdir doc
+chmod 0755 doc
 cd doc
 mkdir airspaceconverter
+chmod 0755 airspaceconverter
 cd airspaceconverter
 
 # Make copyright file
@@ -246,20 +252,27 @@ License: GPL-3+
  On Debian systems, the full text of the GNU General Public
  License version 3 can be found in the file
  `/usr/share/common-licenses/GPL-3''.' > copyright
+chmod 0644 copyright
 
 cd ..
 cd ..
 mkdir man
+chmod 0755 man
 cd man
 mkdir man1
+chmod 0755 man1
 cd ..
 cd ..
 
 # Copy the files
 cp ../../Release/airspaceconverter ./bin
+chmod 0755 ./bin/airspaceconverter
 cp ../../Release/libairspaceconverter.so ./lib
+chmod 0644 ./lib/libairspaceconverter.so
 cp ../../icons/* ./share/airspaceconverter/icons
+chmod 0644 ./share/airspaceconverter/icons/*.png
 mv ../../airspaceconverter.1.gz ./share/man/man1
+chmod 0644 ./share/man/man1/airspaceconverter.1.gz
 
 cd ..
 
@@ -316,11 +329,14 @@ cd airspaceconverter-gui_${VERSION}-${DISTR}${OSVER}_${ARCH}
 
 # Build directory structure
 mkdir usr
+chmod 0755 usr
 cd usr
 mkdir bin
 mkdir share
+chmod 0755 bin share
 cd share
 mkdir applications
+chmod 0755 applications
 cd applications
 echo '[Desktop Entry]
 Version=1.0
@@ -332,26 +348,34 @@ Terminal=false
 StartupNotify=no
 Icon=airspaceconverter.xpm
 Categories=Education;Science;Geoscience' > airspaceconverter-gui.desktop
+chmod 0644 airspaceconverter-gui.desktop
 cd ..
 mkdir doc
+chmod 0755 doc
 cd doc
 mkdir airspaceconverter-gui
+chmod 0755 airspaceconverter-gui
 cd ..
 mkdir menu
+chmod 0755 menu
 cd menu
 echo '?package(airspaceconverter-gui): needs="X11"\
    section="Applications/Science/Geoscience"\
    title="Airspace Converter"\
    icon="/usr/share/pixmaps/airspaceconverter.xpm"\
    command="/usr/bin/airspaceconverter-gui"' > airspaceconverter-gui
+chmod 0644 airspaceconverter-gui
 cd ..
 mkdir pixmaps
+chmod 0755 pixmaps
 cd ..
 
 # Copy the files
 cp ../../airspaceconverter_${VERSION}-${DISTR}${OSVER}_${ARCH}/usr/share/doc/airspaceconverter/copyright ./share/doc/airspaceconverter-gui
 cp ../../airspaceconverter.xpm ./share/pixmaps
+chmod 0644 ./share/pixmaps/airspaceconverter.xpm
 cp ../../buildQt/airspaceconverter-gui ./bin
+chmod 0755 ./bin/airspaceconverter-gui
 strip -S --strip-unneeded ./bin/airspaceconverter-gui
 
 cd ..
@@ -390,6 +414,7 @@ Description: Qt GUI for Airspace Converter
  portable "core", it works from "command line" on Linux.
 Homepage: http://www.alus.it/AirspaceConverter/
 ' > control
+#chmod 0755 control
 
 # Make post inst script
 echo '#!/bin/sh
@@ -398,14 +423,14 @@ if [ "$1" = "configure" ] && [ -x "`which update-menus 2>/dev/null`" ]; then
 	update-menus
 fi
 ' > postinst
-chmod a+x postinst
+chmod 0755 postinst
 
 # Make post removal script
 echo '#!/bin/sh
 set -e
 if [ -x "`which update-menus 2>/dev/null`" ]; then update-menus ; fi
 ' > postrm
-chmod a+x postrm
+chmod 0755 postrm
 
 cd ..
 
@@ -421,8 +446,8 @@ dpkg-deb --build airspaceconverter-gui_${VERSION}-${DISTR}${OSVER}_${ARCH}
 if [ "$1" != "test" ]; then
 	rm -R buildQt
 fi
-sudo rm -R airspaceconverter_${VERSION}-${DISTR}${OSVER}_${ARCH}
-sudo rm -R airspaceconverter-gui_${VERSION}-${DISTR}${OSVER}_${ARCH}
+#sudo rm -R airspaceconverter_${VERSION}-${DISTR}${OSVER}_${ARCH}
+#sudo rm -R airspaceconverter-gui_${VERSION}-${DISTR}${OSVER}_${ARCH}
 if [[ "$ACTION" == "D" || "$ACTION" == "d" ]]; then
 	if [ "$1" != "test" ]; then
 		echo cleaning
