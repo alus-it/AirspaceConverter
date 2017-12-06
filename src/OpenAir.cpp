@@ -20,10 +20,11 @@
 #include <boost/format.hpp>
 #include <boost/locale/encoding.hpp>
 
-OpenAir::OpenAir(std::multimap<int, Airspace>& airspacesMap, const bool writeCoordinatesAsDDMMSS /*= false*/):
+OpenAir::OpenAir(std::multimap<int, Airspace>& airspacesMap, const bool doNotCalcArcs /*= false*/, const bool writeCoordinatesAsDDMMSS /*= false*/):
 	airspaces(airspacesMap),
 	varRotationClockwise(true),
 	lastACline(-1),
+	calculateArcs(!doNotCalcArcs),
 	writeDecimalMinutes(!writeCoordinatesAsDDMMSS) {
 }
 
@@ -491,18 +492,25 @@ bool OpenAir::Write(const std::string& fileName) {
 		file << "AL " << a.GetBaseAltitude().ToString() << "\r\n";
 		file << "AH " << a.GetTopAltitude().ToString() << "\r\n";
 
-		// Get number of geometries
-		unsigned int numOfGeometries = a.GetNumberOfGeometries();
+		// Write the geometries
+		if (calculateArcs) {
 
-		// If no geometries are defined we have to calculate them
-		if (numOfGeometries == 0) {
-			a.Undiscretize();
-			numOfGeometries = a.GetNumberOfGeometries();
+			// Get number of geometries
+			unsigned int numOfGeometries = a.GetNumberOfGeometries();
+
+			// If no geometries are defined we have to calculate them
+			if (numOfGeometries == 0) {
+				a.Undiscretize();
+				numOfGeometries = a.GetNumberOfGeometries();
+			}
+			assert(numOfGeometries > 0);
+
+			// Write each geometry
+			for (unsigned int i = 0; i < numOfGeometries; i++) a.GetGeometryAt(i)->WriteOpenAirGeometry(*this);
 		}
-		assert(numOfGeometries > 0);
-
-		// Write each geometry
-		for (unsigned int i = 0; i < numOfGeometries; i++) a.GetGeometryAt(i)->WriteOpenAirGeometry(*this);
+		
+		// Otherwise write every single point
+		else for (const Geometry::LatLon& p : a.GetPoints()) WritePoint(p);
 
 		// Add an empty line at the end of the airspace
 		file << "\r\n";
@@ -576,10 +584,14 @@ void OpenAir::WriteLatLon(const Geometry::LatLon& point) {
 	}
 }
 
-void OpenAir::WritePoint(const Point& point) {
+void OpenAir::WritePoint(const Geometry::LatLon& point) {
 	file << "DP ";
-	WriteLatLon(point.GetCenterPoint());
+	WriteLatLon(point);
 	file << "\r\n";
+}
+
+void OpenAir::WritePoint(const Point& point) {
+	WritePoint(point.GetCenterPoint());
 }
 
 void OpenAir::WriteCircle(const Circle& circle) {

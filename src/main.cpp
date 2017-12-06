@@ -121,8 +121,11 @@ int main(int argc, char *argv[]) {
 				}
 			}
 			break;
+		case 'p':
+			ac.DoNotCalculateArcsAndCirconferences();
+			break;
 		case 's':
-			ac.SetWriteCoordinatesAsDDMMSS();
+			ac.WriteCoordinatesAsDDMMSS();
 			break;
 		case 'h':
 			printHelp();
