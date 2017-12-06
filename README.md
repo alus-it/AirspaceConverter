@@ -64,6 +64,8 @@ Possible options:
   -m: optional, multiple, terrain map file(s) (.dem) used to lookup terrain heights  
   -l: optional, set filter limits in latitude and longitude for the output, followed by the 4 limit values: northLat,southLat,westLon,eastLon where the limits are comma separated, expressed in degrees, without spaces, negative for west longitudes and south latitudes  
   -o: optional, output file .kmz, .mp (Polish) or .txt (OpenAir) if not specified will be used the name of first input file as KMZ  
+  -p: optional, when writing in OpenAir avoid to use arcs and circles but only points (DP)  
+  -s: optional, when writing in OpenAir use coordinates with minutes and seconds (DD:MM:SS) instead of decimal minutes (DD:MM.MMM)
   -v: print version number  
   -h: print this guide  
 

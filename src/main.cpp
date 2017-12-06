@@ -30,6 +30,8 @@ void printHelp() {
 	std::cout << "-l: optional, set filter limits in latitude and longitude for the output, followed by the 4 limit values: northLat,southLat,westLon,eastLon" << std::endl;
 	std::cout << "    where the limits are comma separated, expressed in degrees, without spaces, negative for west longitudes and south latitudes" << std::endl;
 	std::cout << "-o: optional, output file .kmz, .txt (OpenAir), .img (Garmin) or .mp (Polish). If not specified will be used the name of first input file as KMZ" << std::endl;
+	std::cout << "-p: optional, when writing in OpenAir avoid to use arcs and circles but only points (DP)" << std::endl;
+	std::cout << "-s: optional, when writing in OpenAir use coordinates with seconds (DD:MM:SS) instead of decimal minutes (DD:MM.MMM)" << std::endl;
 	std::cout << "-v: print version number" << std::endl;
 	std::cout << "-h: print this guide" << std::endl << std::endl;
 	std::cout << "At least one input airspace or waypoint file must be present." << std::endl;
@@ -37,8 +39,7 @@ void printHelp() {
 }
 
 int main(int argc, char *argv[]) {
-	if (argc <= 1)
-	{
+	if (argc <= 1) {
 		printHelp();
 		return EXIT_FAILURE;
 	}
@@ -133,7 +134,7 @@ int main(int argc, char *argv[]) {
 			break;
 		case 'v':
 			std::cout << "AirspaceConverter version: " << VERSION << std::endl;
-			std::cout << "Compiled on: " << __DATE__ << " " << __TIME__ << std::endl;
+			std::cout << "Compiled on " << __DATE__ << " at " << __TIME__ << std::endl;
 			std::cout << "Copyright(C) 2016-2017 Alberto Realis-Luc" << std::endl;
 			std::cout << "http://www.alus.it/AirspaceConverter" << std::endl << std::endl;
 			if (argc == 2) return EXIT_SUCCESS;

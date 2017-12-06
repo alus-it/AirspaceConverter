@@ -41,6 +41,8 @@ For the "landable" waypoints in the CUP files an estimation of the runway perime
 This is particularly useful to verify that the position of the airfield in the CUP file matches exactly the runway in Google Earth.
 In software like LK8000 the airfield position is considered as the exact center of the runway, orientation and length are used to assist for landing with an HSI and glide slope indications; thus the correctness of: position, orientation and length becomes quite important.
 .PP
+AirspaceConverter can be used also to merge together several airspace files (OpenAIP repeated airspaces will be automatically removed) and filter the result on a specific range of latitudes and longitudes.
+.PP
 There are also cases where the "official" airspace files are available only in KML format, also in this case is possible to convert it to OpenAir.
 .PP
 AirspaceConverter uses the same terrain raster maps (.DEM) of LK8000 to get the altitude of the terrain and so to convert altitudes from AGL to AMSL.
@@ -83,6 +85,15 @@ Negative values represent south latitudes or west longitudes.
 Output file, can be: .kmz (Google Earth), .txt (OpenAir), .img (Garmin) or .mp (Polish).
 If not specified will be used the name of first input file as KMZ.
 WARNING: any already existing output file will be automatically overwritten.
+.TP
+.BR \-p
+If writing to OpenAir with this option arcs (DA) and circles (DC) definitions are avoided.
+So the perimeter of each airspace will be defined using only points (DP).
+By default, without this option, arcs and circles are used even attepmting to recalculate them from points.
+.TP
+.BR \-s
+When writing to OpenAir this option will make coordinates expressed in degrees minutes and seconds (DD:MM:SS).
+By default, without this option, the coordinates are expressed in degrees and decimal minutes (DD:MM.MMM).
 .TP
 .BR \-v
 Print version number.
