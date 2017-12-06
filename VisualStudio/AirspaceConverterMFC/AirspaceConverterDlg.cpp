@@ -57,6 +57,11 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX) {
 BOOL CAboutDlg::OnInitDialog() {
 	if (!CDialog::OnInitDialog()) return FALSE;
 	this->GetDlgItem(IDC_VERSION)->SetWindowTextW(_T(VERSION));
+	std::string compileTime("Compiled on ");
+	compileTime.append(__DATE__);
+	compileTime.append(" at ");
+	compileTime.append(__TIME__);
+	this->GetDlgItem(IDC_COMPILE_TIME)->SetWindowTextW(CString(compileTime.c_str()));
 	return TRUE;
 }
 
