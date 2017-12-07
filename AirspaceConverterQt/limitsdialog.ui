@@ -22,6 +22,9 @@
      <height>51</height>
     </rect>
    </property>
+   <property name="toolTip">
+    <string>Confirm and apply filter selection with &quot;OK&quot; or abort with &quot;Cancel&quot;.</string>
+   </property>
    <property name="orientation">
     <enum>Qt::Vertical</enum>
    </property>
@@ -68,7 +71,7 @@
     </rect>
    </property>
    <property name="toolTip">
-    <string>Enter here the northen latitude of your selection</string>
+    <string>Enter here the northern latitude of your selection</string>
    </property>
    <property name="decimals">
     <number>3</number>

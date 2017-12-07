@@ -1,7 +1,8 @@
 //============================================================================
 // AirspaceConverter
 // Since       : 14/6/2016
-// Author      : Alberto Realis-Luc <alberto.realisluc@gmail.com>
+// Authors     : Alberto Realis-Luc <alberto.realisluc@gmail.com>
+//               Valerio Messina <efa@iol.it>
 // Web         : http://www.alus.it/AirspaceConverter
 // Copyright   : (C) 2016-2017 Alberto Realis-Luc
 // License     : GNU GPL v3
