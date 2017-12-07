@@ -44,7 +44,19 @@ void Geometry::LatLon::convertDec2DegMinSec(const double& dec, int& deg, int& mi
 	deg = (int)std::floor(decimal);
 	decimal = (decimal-deg)/SIXTYTH;
 	min = (int)std::floor(decimal);
+	if (min == 60) {
+		deg++;
+		min = 0;
+	}
 	sec = (int)std::round((decimal-min)/SIXTYTH);
+	if (sec == 60) {
+		min++;
+		sec = 0;
+	}
+	if (min == 60) {
+		deg++;
+		min = 0;
+	}
 }
 
 bool Geometry::Limits::Set(const LatLon& topLeftLimit, const LatLon& bottomRightLimit) {
