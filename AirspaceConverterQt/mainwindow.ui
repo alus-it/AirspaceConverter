@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>946</width>
-    <height>737</height>
+    <height>680</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>946</width>
-    <height>737</height>
+    <height>680</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>946</width>
-    <height>737</height>
+    <height>680</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -463,7 +463,7 @@
       <x>20</x>
       <y>480</y>
       <width>901</width>
-      <height>231</height>
+      <height>181</height>
      </rect>
     </property>
     <property name="horizontalScrollBarPolicy">
@@ -499,7 +499,7 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If desired, only before to load airspace, set here a specific QNH to be used to calculate the AMSL height of flight levels. This is used only to make Google Earth files.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If desired, only before to load airspace, set here a specific QNH to be used to calculate the AMSL height of flight levels. This is used only to make Google Earth files and applied only when reading input files.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="minimum">
      <double>800.000000000000000</double>
@@ -548,7 +548,7 @@
      <rect>
       <x>320</x>
       <y>250</y>
-      <width>591</width>
+      <width>251</width>
       <height>20</height>
      </rect>
     </property>
@@ -556,7 +556,7 @@
      <locale language="English" country="UnitedStates"/>
     </property>
     <property name="text">
-     <string>m      (used to calculate AGL altitudes when not covered by raster maps)</string>
+     <string>m      (if not covered by terrain maps)</string>
     </property>
    </widget>
    <widget class="QSpinBox" name="defaultAltSpinBox">
@@ -756,6 +756,44 @@
     </property>
     <property name="text">
      <string>Filter on area</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="onlyPointsCheckBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>250</y>
+      <width>131</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Only when writing to OpenAir this option forces the converter to don't use OpenAir arc (DA) and circle (DC) definititions but only points (DP). This option can be useful when comparing to other OpenAir files made with only points, otherwise it is better to keep it disabled and take advantage of the use of arcs and circles, resulting in smaller OpenAir files.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>Use only points</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="secondsCheckBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>720</x>
+      <y>250</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Only when writing to OpenAir this option forces the converter to express the coordinates using degrees minutes and seconds (DD:MM:SS). This option can be useful when comparing to other OpenAir files with coordinates expressed in the traditional way. Otherwise the coordinates are expressed in degrees and decimal minutes (DD:MM.MMM) which is more precise.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>Use DD:MM:SS coordinates</string>
     </property>
    </widget>
   </widget>

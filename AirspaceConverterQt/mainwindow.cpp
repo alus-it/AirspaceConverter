@@ -110,6 +110,8 @@ void MainWindow::startBusy() {
     ui->filterButton->setEnabled(false);
     ui->defaultAltSpinBox->setEnabled(false);
     ui->QNHspinBox->setEnabled(false);
+    ui->onlyPointsCheckBox->setEnabled(false);
+    ui->secondsCheckBox->setEnabled(false);
     ui->chooseOutputFileButton->setEnabled(false);
     ui->convertButton->setEnabled(false);
     ui->openOutputFileButton->setEnabled(false);
@@ -156,6 +158,8 @@ void MainWindow::endBusy() {
     ui->filterButton->setEnabled(converter->GetNumOfAirspaces()>0 || converter->GetNumOfWaypoints()>0);
     ui->defaultAltSpinBox->setEnabled(true);
     ui->QNHspinBox->setEnabled(converter->GetNumOfAirspaces()==0);
+    ui->onlyPointsCheckBox->setEnabled(ui->outputFormatComboBox->currentIndex() == AirspaceConverter::OpenAir_Format);
+    ui->secondsCheckBox->setEnabled(ui->outputFormatComboBox->currentIndex() == AirspaceConverter::OpenAir_Format);
     ui->chooseOutputFileButton->setEnabled(true);
     ui->convertButton->setEnabled(!converter->GetOutputFile().empty() && (converter->GetNumOfAirspaces()>0 || (ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ_Format && converter->GetNumOfWaypoints()>0)));
     ui->openOutputFileButton->setEnabled(converter->IsConversionDone());
@@ -175,6 +179,8 @@ void MainWindow::on_aboutButton_clicked() {
 
 void MainWindow::on_outputFormatComboBox_currentIndexChanged(int index) {
     if (!converter->SetOutputType((AirspaceConverter::OutputType)index)) return;
+    ui->onlyPointsCheckBox->setEnabled(ui->outputFormatComboBox->currentIndex() == AirspaceConverter::OpenAir_Format);
+    ui->secondsCheckBox->setEnabled(ui->outputFormatComboBox->currentIndex() == AirspaceConverter::OpenAir_Format);
     ui->outputFileTextEdit->setPlainText(QString::fromStdString(converter->GetOutputFile()));
 }
 
@@ -381,6 +387,10 @@ void MainWindow::on_convertButton_clicked() {
 
     // Set default terrain altitude
     converter->SetDefaultTearrainAlt(ui->defaultAltSpinBox->value());
+
+    // Set OpenAir settings
+    converter->DoNotCalculateArcsAndCirconferences(ui->onlyPointsCheckBox->isChecked());
+    converter->WriteCoordinatesAsDDMMSS(ui->secondsCheckBox->isChecked());
 
     // Let the libAirspaceConverter to do the work in a separate thread...
     watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::Convert));
