@@ -69,21 +69,19 @@ elif [[ "$ACTION" == "D" || "$ACTION" == "d" ]]; then
 	echo "So, please copy the already compiled: airspaceconverter libairspaceconverter.so and airspaceconverter-gui binaries to this folder."
 	read -p "Press ENTER when done"
 
-	if [ "$1" != "test" ]; then
 	# Instead of building just copy the binaries (make sure they are executable as well)
-		chmod a+x airspaceconverter
-		chmod a+x airspaceconverter-gui
-		mkdir -p Release
-		mv airspaceconverter ./Release/airspaceconverter
-		mv libairspaceconverter.so ./Release/libairspaceconverter.so
-		mkdir -p buildQt
-		mv airspaceconverter-gui ./buildQt/airspaceconverter-gui
-	fi
+	chmod a+x airspaceconverter
+	chmod a+x airspaceconverter-gui
+	mkdir -p Release
+	mv airspaceconverter ./Release/airspaceconverter
+	mv libairspaceconverter.so ./Release/libairspaceconverter.so
+	mkdir -p buildQt
+	mv airspaceconverter-gui ./buildQt/airspaceconverter-gui
 
 	# Ask the user for which version of Debian we are building the packages	
 	printf "Enter target Debian (7, 8 or 9) or Ubuntu (16.04) release number [7,8,9,16.04]: "
 	read -r OSVER
-	
+
 	# Ask the packager for which architecure are built the copied binaries
 	printf "How many bits has the target architecture? [32/64]: "
 	read -r ARCH
@@ -151,28 +149,15 @@ case $OSVER in
 	exit 1
 esac
 
-# Compile everithing
 if [[ "$ACTION" == "C" || "$ACTION" == "c" || "$ACTION" == "" ]]; then
-	# Get number of processors available
-	PROCESSORS="$(grep -c ^processor /proc/cpuinfo)"
+	
+	# Compile everithing
+	./build.sh
 
-	# Build shared library and command line version
-	make -j${PROCESSORS} all
+	# Abort if compile failed	
 	if [ "$?" -ne 0 ]; then
-		echo "ERROR: Failed to compile shared library and CLI executable."
 		exit 1
 	fi
-
-	# Build Qt user interface
-	mkdir -p buildQt
-	cd buildQt
-	qmake ../AirspaceConverterQt/AirspaceConverterQt.pro -r -spec linux-g++-64
-	make -j${PROCESSORS} all
-	if [ "$?" -ne 0 ]; then
-		echo "ERROR: Failed to compile Qt user interface."
-		exit 1
-	fi
-	cd ..
 fi
 
 # Get version number, try from the sources (sources should be present)
@@ -376,7 +361,6 @@ cp ../../airspaceconverter.xpm ./share/pixmaps
 chmod 0644 ./share/pixmaps/airspaceconverter.xpm
 cp ../../buildQt/airspaceconverter-gui ./bin
 chmod 0755 ./bin/airspaceconverter-gui
-strip -S --strip-unneeded ./bin/airspaceconverter-gui
 
 cd ..
 
@@ -443,15 +427,12 @@ rm -f airspaceconverter-gui_${VERSION}-${DISTR}${OSVER}_${ARCH}.deb
 dpkg-deb --build airspaceconverter-gui_${VERSION}-${DISTR}${OSVER}_${ARCH}
 
 # Clean
-if [ "$1" != "test" ]; then
-	rm -R buildQt
-fi
+echo Cleaning...
+rm -R buildQt
 sudo rm -R airspaceconverter_${VERSION}-${DISTR}${OSVER}_${ARCH}
 sudo rm -R airspaceconverter-gui_${VERSION}-${DISTR}${OSVER}_${ARCH}
 if [[ "$ACTION" == "D" || "$ACTION" == "d" ]]; then
-	if [ "$1" != "test" ]; then
-		echo cleaning
-		make clean
-	fi
+	make clean
 fi
+
 exit 0
