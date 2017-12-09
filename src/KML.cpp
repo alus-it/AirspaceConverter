@@ -263,23 +263,11 @@ void KML::WriteBaseOrTop(const Airspace& airspace, const std::vector<double>& al
 
 void KML::WriteSideWalls(const Airspace& airspace) {
 	assert(airspace.GetTopAltitude().IsAMSL() == airspace.GetBaseAltitude().IsAMSL());
+	const double top = airspace.GetTopAltitude().GetAltMt();
+	const double base = airspace.GetBaseAltitude().GetAltMt();
+	double lon1, lat1, lon2, lat2;
 
-	// Build closing wall between last and first point
-	OpenPolygon(false, airspace.GetBaseAltitude().IsAMSL());
-	double top = airspace.GetTopAltitude().GetAltMt();
-	double base = airspace.GetBaseAltitude().GetAltMt();
-	double lon1 = airspace.GetLastPoint().Lon();
-	double lat1 = airspace.GetLastPoint().Lat();
-	double lon2 = airspace.GetFirstPoint().Lon();
-	double lat2 = airspace.GetFirstPoint().Lat();
-	outputFile << lon1 << "," << lat1 << "," << top << "\n"
-		<< lon2 << "," << lat2 << "," << top << "\n"
-		<< lon2 << "," << lat2 << "," << base << "\n"
-		<< lon1 << "," << lat1 << "," << base << "\n"
-		<< lon1 << "," << lat1 << "," << top << "\n";
-	ClosePolygon();
-
-	// Build all other walls from first, point to point, until the last one
+	// Build walls from first, point to point, until the last one
 	for (unsigned int i = 0; i < airspace.GetNumberOfPoints() - 1; i++) {
 		OpenPolygon(false, airspace.GetBaseAltitude().IsAMSL());
 		airspace.GetPointAt(i).GetLatLon(lat1, lon1);
@@ -295,27 +283,11 @@ void KML::WriteSideWalls(const Airspace& airspace) {
 
 void KML::WriteSideWalls(const Airspace& airspace, const std::vector<double>& altitudesAmsl) {
 	assert(airspace.GetTopAltitude().IsAMSL() != airspace.GetBaseAltitude().IsAMSL());
-	OpenPolygon(false, true);
 	assert(airspace.GetNumberOfPoints() == altitudesAmsl.size());
-
-	// Build closing wall between last and first point
 	const bool isBase = airspace.GetBaseAltitude().IsAGL();
-	double top1 = isBase ? airspace.GetTopAltitude().GetAltMt() : altitudesAmsl.back();
-	double base1 = isBase ? altitudesAmsl.back() : airspace.GetBaseAltitude().GetAltMt();
-	double top2 = isBase ? airspace.GetTopAltitude().GetAltMt() : altitudesAmsl.front();
-	double base2 = isBase ? altitudesAmsl.front() : airspace.GetBaseAltitude().GetAltMt();
-	double lon1 = airspace.GetLastPoint().Lon();
-	double lat1 = airspace.GetLastPoint().Lat();
-	double lon2 = airspace.GetFirstPoint().Lon();
-	double lat2 = airspace.GetFirstPoint().Lat();
-	outputFile << lon1 << "," << lat1 << "," << top1 << "\n"
-		<< lon2 << "," << lat2 << "," << top2 << "\n"
-		<< lon2 << "," << lat2 << "," << base2 << "\n"
-		<< lon1 << "," << lat1 << "," << base1 << "\n"
-		<< lon1 << "," << lat1 << "," << top1 << "\n";
-	ClosePolygon();
+	double top1, base1, top2, base2, lon1, lat1, lon2, lat2;
 
-	// Build all other walls from first, point to point, until the last one
+	// Build walls from first, point to point, until the last one
 	for (unsigned int i = 0; i < airspace.GetNumberOfPoints() - 1; i++) {
 		OpenPolygon(false, true);
 		top1 = isBase ? airspace.GetTopAltitude().GetAltMt() : altitudesAmsl.at(i);
