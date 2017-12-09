@@ -16,9 +16,9 @@ And the output can be done in the following formats:
 This utility can convert also SeeYou .CUP waypoint files to KMZ (for Google Earth). The conversion to IMG for Garmin devices is done using cGPSmapper.  
 While converting to OpenAir this software estimates if the points entered are part of arcs or circumferences in order to make use of arc and circumference definitions of the OpeanAir format and so avoiding to output all points one by one.  
 The ability to read KML/KMZ is based on the KMZ airspace files produced by Austrocontrol.  
-AirspaceConverter is written in C++11 can be ran both on Linux and on Windows. It has a Qt user interface and Windows MFC UI as well in order to be immediately easy to use. Under Linux can also work also from command line to be usable from shell scripts.  
+AirspaceConverter is written in C++11 can be ran both on Linux and on Windows. It has a Qt user interface and Windows MFC UI as well in order to be immediately easy to use. But it can also work also from command line to be usable from shell scripts on Linux or batch files on Windows.  
 For more information's about this project: http://www.alus.it/AirspaceConverter  
-Contributors are, as usual, warmly welcome!
+Contributors are, always, warmly welcome!
 
 Why this software?
 ------------------
@@ -65,7 +65,7 @@ Possible options:
   -l: optional, set filter limits in latitude and longitude for the output, followed by the 4 limit values: northLat,southLat,westLon,eastLon where the limits are comma separated, expressed in degrees, without spaces, negative for west longitudes and south latitudes  
   -o: optional, output file .kmz, .mp (Polish) or .txt (OpenAir) if not specified will be used the name of first input file as KMZ  
   -p: optional, when writing in OpenAir avoid to use arcs and circles but only points (DP)  
-  -s: optional, when writing in OpenAir use coordinates with minutes and seconds (DD:MM:SS) instead of decimal minutes (DD:MM.MMM)
+  -s: optional, when writing in OpenAir use coordinates with minutes and seconds (DD:MM:SS) instead of decimal minutes (DD:MM.MMM)  
   -v: print version number  
   -h: print this guide  
 
