@@ -129,6 +129,8 @@ void CAirspaceConverterDlg::DoDataExchange(CDataExchange* pDX) {
 	DDX_Control(pDX, IDC_CLEAR_LOG_BT, ClearLogBt);
 	DDX_Control(pDX, IDC_LOG, LoggingBox);
 	DDX_Control(pDX, IDC_COMBO_OUTPUT_TYPE, OutputTypeCombo);
+	DDX_Control(pDX, IDC_CHECK_POINTS, pointsCheckBox);
+	DDX_Control(pDX, IDC_CHECK_SECONDS, secondsCheckBox);
 }
 
 BEGIN_MESSAGE_MAP(CAirspaceConverterDlg, CDialog)
@@ -278,6 +280,8 @@ void CAirspaceConverterDlg::StartBusy() {
 	OutputTypeCombo.EnableWindow(FALSE);
 	editQNHtextField.EnableWindow(FALSE);
 	editDefualtAltTextField.EnableWindow(FALSE);
+	pointsCheckBox.EnableWindow(FALSE);
+	secondsCheckBox.EnableWindow(FALSE);
 	chooseOutputFileBt.EnableWindow(FALSE);
 	ClearLogBt.EnableWindow(FALSE);
 	CloseButton.EnableWindow(FALSE);
@@ -335,7 +339,8 @@ void CAirspaceConverterDlg::EndBusy(const bool takeTime /* = false */) {
 		numAirspacesLoaded = 0;
 		numRasterMapLoaded = 0;
 	}
-	BOOL isKmzFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::KMZ_Format);
+	const BOOL isKmzFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::KMZ_Format);
+	const BOOL isOpenAirFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::OpenAir_Format);
 	loadInputFileBt.EnableWindow(TRUE);
 	loadWaypointsBt.EnableWindow(isKmzFile);
 	loadDEMfileBt.EnableWindow(isKmzFile);
@@ -358,6 +363,8 @@ void CAirspaceConverterDlg::EndBusy(const bool takeTime /* = false */) {
 	OutputTypeCombo.EnableWindow(TRUE);
 	editQNHtextField.EnableWindow(isKmzFile ? numAirspacesLoaded == 0 : FALSE);
 	editDefualtAltTextField.EnableWindow(isKmzFile);
+	pointsCheckBox.EnableWindow(isOpenAirFile);
+	secondsCheckBox.EnableWindow(isOpenAirFile);
 	chooseOutputFileBt.EnableWindow(numAirspacesLoaded > 0 || (isKmzFile && numWaypointsLoaded > 0) ? TRUE : TRUE);
 	ClearLogBt.EnableWindow(TRUE);
 	CloseButton.EnableWindow(TRUE);
@@ -541,7 +548,8 @@ void CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt() {
 
 void CAirspaceConverterDlg::OnBnClickedOutputTypeCombo() {
 	UpdateOutputFilename();
-	BOOL isKmzFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::KMZ_Format);
+	const BOOL isKmzFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::KMZ_Format);
+	const BOOL isOpenAirFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::OpenAir_Format);
 	loadWaypointsBt.EnableWindow(isKmzFile);
 	loadDEMfileBt.EnableWindow(isKmzFile);
 #ifndef _WIN64
@@ -554,6 +562,8 @@ void CAirspaceConverterDlg::OnBnClickedOutputTypeCombo() {
 #endif
 	editQNHtextField.EnableWindow(isKmzFile ? numAirspacesLoaded == 0 : FALSE);
 	editDefualtAltTextField.EnableWindow(isKmzFile);
+	pointsCheckBox.EnableWindow(isOpenAirFile);
+	secondsCheckBox.EnableWindow(isOpenAirFile);
 	ConvertBt.EnableWindow((numAirspacesLoaded > 0 || (isKmzFile && numWaypointsLoaded > 0)) && !outputFile.empty() ? TRUE : FALSE);
 	UpdateData(FALSE);
 }
@@ -587,6 +597,8 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 		else MessageBox(_T("Error while starting KML output thread."), _T("Error"), MB_ICONERROR);
 		break;
 	case AirspaceConverter::OpenAir_Format:
+		converter->DoNotCalculateArcsAndCirconferences(pointsCheckBox.GetCheck() == BST_CHECKED);
+		converter->WriteCoordinatesAsDDMMSS(secondsCheckBox.GetCheck() == BST_CHECKED);
 		converter->SetOutputFile(outputFile);
 		if (processor != nullptr && processor->Convert()) StartBusy();
 		else MessageBox(_T("Error while starting Polish output thread."), _T("Error"), MB_ICONERROR);

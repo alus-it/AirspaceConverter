@@ -82,6 +82,8 @@ private:
 	CButton CloseButton;
 	CEdit editQNHtextField;
 	CEdit editDefualtAltTextField;
+	CButton pointsCheckBox;
+	CButton secondsCheckBox;
 	CEdit outputFileEditBox;
 	CRichEditCtrl LoggingBox;
 	CProgressCtrl progressBar;
