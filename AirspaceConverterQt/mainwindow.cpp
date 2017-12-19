@@ -28,6 +28,7 @@
 #include <QFuture>
 #include <QFutureWatcher>
 #include <boost/filesystem/path.hpp>
+#include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
@@ -312,7 +313,9 @@ void MainWindow::on_convertButton_clicked() {
     }
 
     // Prepare dialog to ask for output file, will be without extension if not manually typed by the user
-    std::string desiredOutputFile = QFileDialog::getSaveFileName(this, tr("Output file"), QString::fromStdString(converter->GetOutputFile()), tr("Google Earth(*.kmz);;OpenAir(*.txt);;Polish(*.mp);;Garmin img(*.img)"), &selectedFilter).toStdString();
+    std::string desiredOutputFile = QFileDialog::getSaveFileName(this, tr("Convert to..."),
+                                                                 QString::fromStdString(boost::filesystem::change_extension(converter->GetOutputFile(), "").string()),
+                                                                 tr("Google Earth(*.kmz);;OpenAir(*.txt);;Polish(*.mp);;Garmin img(*.img)"), &selectedFilter).toStdString();
 
     // If no file selected or entered: do nothing
     if(desiredOutputFile.empty()) return;
@@ -340,20 +343,16 @@ void MainWindow::on_convertButton_clicked() {
     converter->SetOutputFile(desiredOutputFile);
     assert(converter->GetOutputType() == desiredFormat);
 
-    // Reselect the desired format also in the combo box, will trigger a signat that will update also the text box
+    // Reselect the desired format also in the combo box
     ui->outputFormatComboBox->setCurrentIndex((int)desiredFormat);
 
     // Remember that the file was inserted via save as dialog in order to don't ask twice to overwrite it
     outputFileInsertedViaDialog = true;
 
-
-
-
     // Proceed with conversion
     assert(!converter->GetOutputFile().empty());
     assert(converter->GetNumOfAirspaces()>0 || (ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ_Format && converter->GetNumOfWaypoints()>0));
     if(converter->GetOutputFile().empty() || (converter->GetNumOfAirspaces()==0 && (ui->outputFormatComboBox->currentIndex() != AirspaceConverter::KMZ_Format || converter->GetNumOfWaypoints()==0))) return;
-
 
     // Ask confirmation to overwrite the output file
     boost::filesystem::path path(converter->GetOutputFile());
