@@ -124,8 +124,6 @@ void CAirspaceConverterDlg::DoDataExchange(CDataExchange* pDX) {
 	DDX_Control(pDX, IDC_CLEAR_MAPS_BT, unloadRasterMapsBt);
 	DDX_Control(pDX, IDC_CLEAR_WAYPOINTS_BT, unloadWaypointsBt);
 	DDX_Control(pDX, IDC_FILTER_BT, filterBt);
-	DDX_Control(pDX, IDC_OUTPUT_FILE_BT, chooseOutputFileBt);
-	DDX_Control(pDX, IDC_EDIT_OUTPUT_FILENAME, outputFileEditBox);
 	DDX_Control(pDX, IDC_CLEAR_LOG_BT, ClearLogBt);
 	DDX_Control(pDX, IDC_LOG, LoggingBox);
 	DDX_Control(pDX, IDC_COMBO_OUTPUT_TYPE, OutputTypeCombo);
@@ -152,7 +150,6 @@ BEGIN_MESSAGE_MAP(CAirspaceConverterDlg, CDialog)
 	ON_BN_CLICKED(IDC_CLEAR_WAYPOINTS_BT, &CAirspaceConverterDlg::OnBnClickedClearWaypointsBt)
 	ON_BN_CLICKED(IDC_CLEAR_MAPS_BT, &CAirspaceConverterDlg::OnBnClickedClearMapsBt)
 	ON_BN_CLICKED(IDC_FILTER_BT, &CAirspaceConverterDlg::OnBnClickedFilterBt)
-	ON_BN_CLICKED(IDC_OUTPUT_FILE_BT, &CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt)
 	ON_BN_CLICKED(IDC_CLEAR_LOG_BT, &CAirspaceConverterDlg::OnBnClickedClearLogBt)
 	ON_CBN_SELCHANGE(IDC_COMBO_OUTPUT_TYPE, &CAirspaceConverterDlg::OnBnClickedOutputTypeCombo)
 END_MESSAGE_MAP()
@@ -282,7 +279,6 @@ void CAirspaceConverterDlg::StartBusy() {
 	editDefualtAltTextField.EnableWindow(FALSE);
 	pointsCheckBox.EnableWindow(FALSE);
 	secondsCheckBox.EnableWindow(FALSE);
-	chooseOutputFileBt.EnableWindow(FALSE);
 	ClearLogBt.EnableWindow(FALSE);
 	CloseButton.EnableWindow(FALSE);
 
@@ -298,11 +294,7 @@ LRESULT CAirspaceConverterDlg::OnEndJob(WPARAM, LPARAM) {
 
 void CAirspaceConverterDlg::UpdateOutputFilename() {
 	conversionDone = false;
-	if (AirspaceConverter::PutTypeExtension((AirspaceConverter::OutputType)OutputTypeCombo.GetCurSel(), outputFile)) outputFileEditBox.SetWindowTextW(CString(outputFile.c_str()));
-	else {
-		outputFile.clear();
-		outputFileEditBox.SetWindowTextW(_T(""));
-	}
+	if (!AirspaceConverter::PutTypeExtension((AirspaceConverter::OutputType)OutputTypeCombo.GetCurSel(), outputFile)) outputFile.clear();
 }
 
 void CAirspaceConverterDlg::LogMessage(const std::string& text, const bool isError /*= false*/) {
@@ -359,13 +351,12 @@ void CAirspaceConverterDlg::EndBusy(const bool takeTime /* = false */) {
 	unloadWaypointsBt.EnableWindow(numWaypointsLoaded > 0 ? TRUE : FALSE);
 	unloadRasterMapsBt.EnableWindow(numRasterMapLoaded > 0 ? TRUE : FALSE);
 	filterBt.EnableWindow(numAirspacesLoaded > 0 ? TRUE : FALSE);
-	ConvertBt.EnableWindow((numAirspacesLoaded > 0 || (isKmzFile && numWaypointsLoaded > 0)) && !outputFile.empty() ? TRUE : FALSE);
+	ConvertBt.EnableWindow((numAirspacesLoaded > 0 || (isKmzFile && numWaypointsLoaded > 0)) ? TRUE : FALSE);
 	OutputTypeCombo.EnableWindow(TRUE);
 	editQNHtextField.EnableWindow(isKmzFile ? numAirspacesLoaded == 0 : FALSE);
 	editDefualtAltTextField.EnableWindow(isKmzFile);
 	pointsCheckBox.EnableWindow(isOpenAirFile);
 	secondsCheckBox.EnableWindow(isOpenAirFile);
-	chooseOutputFileBt.EnableWindow(numAirspacesLoaded > 0 || (isKmzFile && numWaypointsLoaded > 0) ? TRUE : TRUE);
 	ClearLogBt.EnableWindow(TRUE);
 	CloseButton.EnableWindow(TRUE);
 	progressBar.SetMarquee(FALSE, 1);
@@ -524,28 +515,6 @@ void CAirspaceConverterDlg::OnBnClickedFilterBt() {
 	}
 }
 
-void CAirspaceConverterDlg::OnBnClickedChooseOutputFileBt() {
-	assert(!outputFile.empty());
-	boost::filesystem::path outputPath(outputFile);
-	std::string ext(outputPath.extension().string()); // This should be the same as type from the dialog combo box, preselect this type in the open file dlg
-	assert(ext.length() > 1);
-	assert(ext.at(0) == '.');
-	CFileDialog dlg(FALSE, NULL, CString(std::string("*" + ext).c_str()), OFN_HIDEREADONLY, _T("KMZ|*.kmz|OpenAir|*.txt|Polish|*.mp|Garmin|*.img||"), (CWnd*)this, 0, TRUE);
-	if (dlg.DoModal() == IDOK) {
-		outputFile = CT2CA(dlg.GetPathName());
-		outputPath = outputFile;
-		AirspaceConverter::OutputType type = AirspaceConverter::DetermineType(outputFile); // Extension really typed in by the user
-		if(type != AirspaceConverter::OutputType::Unknown_Format) OutputTypeCombo.SetCurSel(type);
-		else { // otherwise force it to the selected extension from the open file dialog
-			assert(dlg.GetOFN().nFilterIndex > AirspaceConverter::OutputType::KMZ_Format && dlg.GetOFN().nFilterIndex <= AirspaceConverter::OutputType::Unknown_Format);
-			type = (AirspaceConverter::OutputType)(dlg.GetOFN().nFilterIndex - 1);
-			AirspaceConverter::PutTypeExtension(type, outputFile);
-			OutputTypeCombo.SetCurSel(type);
-		}
-		OnBnClickedOutputTypeCombo();
-	}
-}
-
 void CAirspaceConverterDlg::OnBnClickedOutputTypeCombo() {
 	UpdateOutputFilename();
 	const BOOL isKmzFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::KMZ_Format);
@@ -570,10 +539,32 @@ void CAirspaceConverterDlg::OnBnClickedOutputTypeCombo() {
 
 void CAirspaceConverterDlg::OnBnClickedConvert() {
 	if (!UpdateData(TRUE)) return; // Force the user to enter valid default terrain altitude
+	assert(!outputFile.empty());
+	
+	// Prepare and show the open file dialog asking where the user wants to save the converted file
+	boost::filesystem::path outputPath(outputFile);
+	CFileDialog dlg(FALSE, NULL, CString(outputPath.stem().c_str()) , OFN_HIDEREADONLY, _T("KMZ|*.kmz|OpenAir|*.txt|Polish|*.mp|Garmin|*.img||"), (CWnd*)this, 0, TRUE);
+	dlg.GetOFN().lpstrTitle = L"Convert to ...";
+	dlg.GetOFN().lpstrInitialDir = CString(outputPath.parent_path().c_str());
+	dlg.GetOFN().nFilterIndex = OutputTypeCombo.GetCurSel() + 1; // Preselect the same type selected in the combo box
+	if (dlg.DoModal() == IDOK) {
+		outputFile = CT2CA(dlg.GetPathName());
+		outputPath = outputFile;
+		AirspaceConverter::OutputType type = AirspaceConverter::DetermineType(outputFile); // Extension really typed in by the user
+		if (type != AirspaceConverter::OutputType::Unknown_Format) OutputTypeCombo.SetCurSel(type);
+		else { // otherwise force it to the selected extension from the open file dialog
+			assert(dlg.GetOFN().nFilterIndex > AirspaceConverter::OutputType::KMZ_Format && dlg.GetOFN().nFilterIndex <= AirspaceConverter::OutputType::Unknown_Format);
+			type = (AirspaceConverter::OutputType)(dlg.GetOFN().nFilterIndex - 1);
+			AirspaceConverter::PutTypeExtension(type, outputFile);
+			OutputTypeCombo.SetCurSel(type);
+		}
+		OnBnClickedOutputTypeCombo();
+	} else return;
+
+	// Continue with the conversion
 	if (outputFile.empty()) return;
 	AirspaceConverter::OutputType type = (AirspaceConverter::OutputType)OutputTypeCombo.GetCurSel();
 	assert(type >= AirspaceConverter::OutputType::KMZ_Format && type < AirspaceConverter::OutputType::Unknown_Format);
-	boost::filesystem::path outputPath(outputFile);
 	if (boost::filesystem::exists(outputPath)) { // check if file already exists
 		CString msg(outputFile.c_str());
 		msg += "\nalready exists, overwrite?";

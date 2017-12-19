@@ -54,7 +54,6 @@ private:
 	afx_msg void OnBnClickedConvert();
 	afx_msg void OnBnClickedOpenOutputFile();
 	afx_msg void OnBnClickedOpenOutputFolder();
-	afx_msg void OnBnClickedChooseOutputFileBt();
 	afx_msg void OnBnClickedOutputTypeCombo();
 	LRESULT OnEndJob(WPARAM, LPARAM);
 
@@ -77,14 +76,12 @@ private:
 	CButton unloadRasterMapsBt;
 	CButton unloadWaypointsBt;
 	CButton filterBt;
-	CButton chooseOutputFileBt;
 	CButton ClearLogBt;
 	CButton CloseButton;
 	CEdit editQNHtextField;
 	CEdit editDefualtAltTextField;
 	CButton pointsCheckBox;
 	CButton secondsCheckBox;
-	CEdit outputFileEditBox;
 	CRichEditCtrl LoggingBox;
 	CProgressCtrl progressBar;
 
