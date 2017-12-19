@@ -112,7 +112,6 @@ void MainWindow::startBusy() {
     ui->QNHspinBox->setEnabled(false);
     ui->onlyPointsCheckBox->setEnabled(false);
     ui->secondsCheckBox->setEnabled(false);
-    ui->chooseOutputFileButton->setEnabled(false);
     ui->convertButton->setEnabled(false);
     ui->openOutputFileButton->setEnabled(false);
     ui->openOutputFolderButton->setEnabled(false);
@@ -135,14 +134,8 @@ void MainWindow::endBusy() {
     // Set the number of waypoints loaded in its spinBox
     ui->numWaypointsLoadedSpinBox->setValue(converter->GetNumOfWaypoints());
 
-    // All operartions to do after loading
-    if(!converter->IsConversionDone()) {
-        // Eventually update the output file
-        if(ui->outputFileTextEdit->toPlainText().toStdString() != converter->GetOutputFile()) ui->outputFileTextEdit->setPlainText(QString::fromStdString(converter->GetOutputFile()));
-
-        // Set the number of terrain raster maps loaded in its spinBox
-        ui->numTerrainMapsLoadedSpinBox->setValue(converter->GetNumOfTerrainMaps());
-    }
+    // After loading set the number of terrain raster maps loaded in its spinBox
+    if(!converter->IsConversionDone()) ui->numTerrainMapsLoadedSpinBox->setValue(converter->GetNumOfTerrainMaps());
 
     // Re-enable all specifically
     ui->outputFormatComboBox->setEnabled(true);
@@ -160,7 +153,6 @@ void MainWindow::endBusy() {
     ui->QNHspinBox->setEnabled(converter->GetNumOfAirspaces()==0);
     ui->onlyPointsCheckBox->setEnabled(ui->outputFormatComboBox->currentIndex() == AirspaceConverter::OpenAir_Format);
     ui->secondsCheckBox->setEnabled(ui->outputFormatComboBox->currentIndex() == AirspaceConverter::OpenAir_Format);
-    ui->chooseOutputFileButton->setEnabled(true);
     ui->convertButton->setEnabled(!converter->GetOutputFile().empty() && (converter->GetNumOfAirspaces()>0 || (ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ_Format && converter->GetNumOfWaypoints()>0)));
     ui->openOutputFileButton->setEnabled(converter->IsConversionDone());
     ui->openOutputFolderButton->setEnabled(converter->IsConversionDone());
@@ -181,7 +173,6 @@ void MainWindow::on_outputFormatComboBox_currentIndexChanged(int index) {
     if (!converter->SetOutputType((AirspaceConverter::OutputType)index)) return;
     ui->onlyPointsCheckBox->setEnabled(ui->outputFormatComboBox->currentIndex() == AirspaceConverter::OpenAir_Format);
     ui->secondsCheckBox->setEnabled(ui->outputFormatComboBox->currentIndex() == AirspaceConverter::OpenAir_Format);
-    ui->outputFileTextEdit->setPlainText(QString::fromStdString(converter->GetOutputFile()));
 }
 
 void MainWindow::on_loadAirspaceFileButton_clicked() {
@@ -308,7 +299,7 @@ void MainWindow::on_unloadTerrainMapsButton_clicked() {
     logMessage("Unloaded input terrain raster maps.");
 }
 
-void MainWindow::on_chooseOutputFileButton_clicked() {
+void MainWindow::on_convertButton_clicked() {
     QString selectedFilter; // this string will conatin the selected type by the user in the dialog
 
     // The desired format is initially dictated by the combo box: the user will have it already preselected in the file dialog
@@ -352,14 +343,13 @@ void MainWindow::on_chooseOutputFileButton_clicked() {
     // Reselect the desired format also in the combo box, will trigger a signat that will update also the text box
     ui->outputFormatComboBox->setCurrentIndex((int)desiredFormat);
 
-    // Set properly the output file name in the texbox
-    ui->outputFileTextEdit->setPlainText(QString::fromStdString(converter->GetOutputFile()));
-
     // Remember that the file was inserted via save as dialog in order to don't ask twice to overwrite it
     outputFileInsertedViaDialog = true;
-}
 
-void MainWindow::on_convertButton_clicked() {
+
+
+
+    // Proceed with conversion
     assert(!converter->GetOutputFile().empty());
     assert(converter->GetNumOfAirspaces()>0 || (ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ_Format && converter->GetNumOfWaypoints()>0));
     if(converter->GetOutputFile().empty() || (converter->GetNumOfAirspaces()==0 && (ui->outputFormatComboBox->currentIndex() != AirspaceConverter::KMZ_Format || converter->GetNumOfWaypoints()==0))) return;

@@ -63,7 +63,6 @@ private slots:
     void on_openOutputFileButton_clicked();
     void on_openOutputFolderButton_clicked();
     void on_convertButton_clicked();
-    void on_chooseOutputFileButton_clicked();
     void endBusy();
     void logMessage(const QString& message, const bool& isError = false);
     void applyFilter(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon);

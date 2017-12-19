@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>946</width>
-    <height>680</height>
+    <width>941</width>
+    <height>631</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,14 +18,14 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>946</width>
-    <height>680</height>
+    <width>941</width>
+    <height>631</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>946</width>
-    <height>680</height>
+    <width>941</width>
+    <height>631</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -442,7 +442,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>390</y>
+      <y>340</y>
       <width>901</width>
       <height>31</height>
      </rect>
@@ -461,7 +461,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>480</y>
+      <y>430</y>
       <width>901</width>
       <height>181</height>
      </rect>
@@ -585,7 +585,7 @@
     <property name="geometry">
      <rect>
       <x>590</x>
-      <y>430</y>
+      <y>380</y>
       <width>161</width>
       <height>31</height>
      </rect>
@@ -604,7 +604,7 @@
     <property name="geometry">
      <rect>
       <x>190</x>
-      <y>430</y>
+      <y>380</y>
       <width>161</width>
       <height>31</height>
      </rect>
@@ -623,7 +623,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>430</y>
+      <y>380</y>
       <width>161</width>
       <height>31</height>
      </rect>
@@ -639,7 +639,7 @@
     <property name="geometry">
      <rect>
       <x>760</x>
-      <y>430</y>
+      <y>380</y>
       <width>161</width>
       <height>31</height>
      </rect>
@@ -658,7 +658,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>330</y>
+      <y>280</y>
       <width>901</width>
       <height>41</height>
      </rect>
@@ -674,66 +674,6 @@
     </property>
     <property name="text">
      <string>Convert</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_10">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>290</y>
-      <width>141</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="locale">
-     <locale language="English" country="UnitedStates"/>
-    </property>
-    <property name="text">
-     <string>Output file:</string>
-    </property>
-   </widget>
-   <widget class="QPlainTextEdit" name="outputFileTextEdit">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>180</x>
-      <y>280</y>
-      <width>681</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This is the path of the output file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-    </property>
-    <property name="inputMethodHints">
-     <set>Qt::ImhNone</set>
-    </property>
-    <property name="verticalScrollBarPolicy">
-     <enum>Qt::ScrollBarAlwaysOff</enum>
-    </property>
-    <property name="horizontalScrollBarPolicy">
-     <enum>Qt::ScrollBarAlwaysOff</enum>
-    </property>
-    <property name="readOnly">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="chooseOutputFileButton">
-    <property name="geometry">
-     <rect>
-      <x>874</x>
-      <y>280</y>
-      <width>41</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Press this button to choose path and name of the output file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-    </property>
-    <property name="text">
-     <string>...</string>
     </property>
    </widget>
    <widget class="QPushButton" name="filterButton">
@@ -817,8 +757,6 @@
   <tabstop>QNHspinBox</tabstop>
   <tabstop>defaultAltSpinBox</tabstop>
   <tabstop>filterButton</tabstop>
-  <tabstop>outputFileTextEdit</tabstop>
-  <tabstop>chooseOutputFileButton</tabstop>
   <tabstop>convertButton</tabstop>
   <tabstop>openOutputFileButton</tabstop>
   <tabstop>openOutputFolderButton</tabstop>
