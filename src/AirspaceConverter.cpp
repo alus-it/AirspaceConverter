@@ -4,7 +4,7 @@
 // Author      : Alberto Realis-Luc <alberto.realisluc@gmail.com>
 // Web         : http://www.alus.it/AirspaceConverter
 // Repository  : https://github.com/alus-it/AirspaceConverter.git
-// Copyright   : (C) 2016-2017 Alberto Realis-Luc
+// Copyright   : (C) 2016-2018 Alberto Realis-Luc
 // License     : GNU GPL v3
 //
 // This source file is part of AirspaceConverter project
@@ -31,7 +31,7 @@ std::string AirspaceConverter::cGPSmapperCommand = "cgpsmapper";
 const std::vector<std::string> AirspaceConverter::disclaimer = {
 	"This file has been produced with: \"AirspaceConverter\" Version: " VERSION,
 	"For info visit: http://www.alus.it/AirspaceConverter",
-	"Copyrights(C) 2016-2017 Alberto Realis-Luc, Valerio Messina",
+	"Copyrights(C) 2016-2018 Alberto Realis-Luc, Valerio Messina",
 	"",
 	"WARNING:",
 	"AirspaceConverter is an experimental software. So, please, be aware that the output may contain errors!",

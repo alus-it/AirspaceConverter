@@ -4,7 +4,7 @@
 # Author      : Alberto Realis-Luc <alberto.realisluc@gmail.com>
 # Web         : http://www.alus.it/AirspaceConverter
 # Repository  : https://github.com/alus-it/AirspaceConverter.git
-# Copyright   : (C) 2016-2017 Alberto Realis-Luc
+# Copyright   : (C) 2016-2018 Alberto Realis-Luc
 # License     : GNU GPL v3
 #
 # This Qt project was created on: 2017-01-29T12:24:53
