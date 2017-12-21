@@ -165,34 +165,29 @@ void AirspaceConverter::LoadAirspaces(const OutputType suggestedTypeForOutputFil
 	conversionDone = false;
 	OpenAir openAir(airspaces);
 	KML kml(airspaces, waypoints);
-	int counter = 0;
-	const size_t airspaceCounter = airspaces.size();
+	const size_t initialAirspacesNumber = airspaces.size(); // Airspaces originally already loaded
 	for (const std::string& inputFile : airspaceFiles) {
-		bool redOk(false);
 		const std::string ext(boost::filesystem::path(inputFile).extension().string());
-		if(boost::iequals(ext, ".txt")) redOk = openAir.Read(inputFile);
-		else if (boost::iequals(ext, ".aip")) redOk = OpenAIP::Read(inputFile, airspaces);
-		else if (boost::iequals(ext, ".kmz")) redOk = kml.ReadKMZ(inputFile);
-		else if (boost::iequals(ext, ".kml")) redOk = kml.ReadKML(inputFile);
-		if (redOk) counter++; // Count the files red correctly
+		if(boost::iequals(ext, ".txt")) openAir.Read(inputFile);
+		else if (boost::iequals(ext, ".aip")) OpenAIP::Read(inputFile, airspaces);
+		else if (boost::iequals(ext, ".kmz")) kml.ReadKMZ(inputFile);
+		else if (boost::iequals(ext, ".kml")) kml.ReadKML(inputFile);
 
 		// Set (suggest) the output file name if still not defined by the user
-		if (redOk && outputFile.empty()) {
-			std::string extension;
+		if (airspaces.size() > initialAirspacesNumber && outputFile.empty()) {
+			std::string extension(".kmz"); // KMZ default extension
 			switch (suggestedTypeForOutputFilename) {
 				case OutputType::KMZ_Format:
-					extension = ".kmz"; // Default output as KMZ
+					//extension = ".kmz";
 					break;
 				case OutputType::OpenAir_Format:
 					extension = ".txt";
 					break;
 				case OutputType::Polish_Format:
 					extension = ".mp";
-					outputFile = boost::filesystem::path(inputFile).replace_extension(extension).string();
 					break;
 				case OutputType::Garmin_Format:
 					extension = ".img";
-					outputFile = boost::filesystem::path(inputFile).replace_extension(extension).string();
 					break;
 				default:
 					assert(false);
@@ -200,13 +195,14 @@ void AirspaceConverter::LoadAirspaces(const OutputType suggestedTypeForOutputFil
 			outputFile = boost::filesystem::path(inputFile).replace_extension(extension).string();
 		}
 	}
+	LogMessage(boost::str(boost::format("Read %1d airspace definition(s) from %2d file(s).") %(airspaces.size() - initialAirspacesNumber) %airspaceFiles.size()), false);
 	airspaceFiles.clear();
-	if (counter > 0) LogMessage(boost::str(boost::format("Read successfully %1d airspace definition(s) from %2d file(s).") %(airspaces.size() - airspaceCounter) %counter), false);
 }
 
 void AirspaceConverter::UnloadAirspaces() {
 	conversionDone = false;
 	airspaces.clear();
+	outputFile.clear();
 }
 
 void AirspaceConverter::LoadTerrainRasterMaps() {
@@ -227,9 +223,9 @@ void AirspaceConverter::LoadWaypoints() {
 	int counter = 0;
 	const size_t wptCounter = waypoints.size();
 	for (const std::string& inputFile : waypointFiles) {
-		bool redOk = SeeYou::ReadFile(inputFile, waypoints);
-		if (redOk) counter++;
-		if (redOk && outputFile.empty()) outputFile = boost::filesystem::path(inputFile).replace_extension(".kmz").string(); // Default output as KMZ
+		const bool readOk = SeeYou::ReadFile(inputFile, waypoints);
+		if (readOk) counter++;
+		if (readOk && outputFile.empty()) outputFile = boost::filesystem::path(inputFile).replace_extension(".kmz").string(); // Default output as KMZ
 	}
 	waypointFiles.clear();
 	if (counter > 0) LogMessage(boost::str(boost::format("Read successfully %1d waypoint(s) from %2d file(s).") % (waypoints.size() - wptCounter) %counter), false);
@@ -239,6 +235,7 @@ void AirspaceConverter::UnloadWaypoints() {
 	conversionDone = false;
 	for (const std::pair<const int, Waypoint*>& wpt : waypoints) delete wpt.second;
 	waypoints.clear();
+	if (airspaces.empty()) outputFile.clear();
 }
 
 void AirspaceConverter::SetQNH(const double newQNHhPa) {
@@ -258,6 +255,7 @@ double AirspaceConverter::GetDefaultTearrainAlt() const {
 }
 
 bool AirspaceConverter::Convert() {
+	assert(!outputFile.empty());
 	conversionDone = false;
 	switch (GetOutputType()) {
 	case OutputType::KMZ_Format:

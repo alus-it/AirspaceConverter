@@ -135,8 +135,8 @@ void MainWindow::endBusy() {
     // Set the number of waypoints loaded in its spinBox
     ui->numWaypointsLoadedSpinBox->setValue(converter->GetNumOfWaypoints());
 
-    // After loading set the number of terrain raster maps loaded in its spinBox
-    if(!converter->IsConversionDone()) ui->numTerrainMapsLoadedSpinBox->setValue(converter->GetNumOfTerrainMaps());
+    // Set the number of terrain raster maps loaded in its spinBox
+    ui->numTerrainMapsLoadedSpinBox->setValue(converter->GetNumOfTerrainMaps());
 
     // Re-enable all specifically
     ui->outputFormatComboBox->setEnabled(true);
@@ -174,6 +174,7 @@ void MainWindow::on_outputFormatComboBox_currentIndexChanged(int index) {
     if (!converter->SetOutputType((AirspaceConverter::OutputType)index)) return;
     ui->onlyPointsCheckBox->setEnabled(ui->outputFormatComboBox->currentIndex() == AirspaceConverter::OpenAir_Format);
     ui->secondsCheckBox->setEnabled(ui->outputFormatComboBox->currentIndex() == AirspaceConverter::OpenAir_Format);
+    ui->convertButton->setEnabled(!converter->GetOutputFile().empty() && (converter->GetNumOfAirspaces()>0 || (ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ_Format && converter->GetNumOfWaypoints()>0)));
 }
 
 void MainWindow::on_loadAirspaceFileButton_clicked() {
@@ -217,7 +218,6 @@ void MainWindow::on_loadAirspaceFolderButton_clicked() {
 
 void MainWindow::on_unloadAirspacesButton_clicked() {
     converter->UnloadAirspaces();
-    ui->numAirspacesLoadedSpinBox->setValue(0);
     logMessage("Unloaded input airspaces.");
     endBusy();
 }
@@ -257,8 +257,8 @@ void MainWindow::on_loadWaypointsFolderButton_clicked() {
 
 void MainWindow::on_unloadWaypointsButton_clicked() {
     converter->UnloadWaypoints();
-    ui->numWaypointsLoadedSpinBox->setValue(0);
     logMessage("Unloaded input waypoints.");
+    endBusy();
 }
 
 void MainWindow::on_loadRasterMapFileButton_clicked() {
@@ -296,8 +296,8 @@ void MainWindow::on_loadRasterMapFolderButton_clicked() {
 
 void MainWindow::on_unloadTerrainMapsButton_clicked() {
     converter->UnloadRasterMaps();
-    ui->numTerrainMapsLoadedSpinBox->setValue(0);
     logMessage("Unloaded input terrain raster maps.");
+    endBusy();
 }
 
 void MainWindow::on_convertButton_clicked() {
