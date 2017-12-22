@@ -174,25 +174,21 @@ void AirspaceConverter::LoadAirspaces(const OutputType suggestedTypeForOutputFil
 		else if (boost::iequals(ext, ".kml")) kml.ReadKML(inputFile);
 
 		// Set (suggest) the output file name if still not defined by the user
-		if (airspaces.size() > initialAirspacesNumber && outputFile.empty()) {
-			std::string extension(".kmz"); // KMZ default extension
-			switch (suggestedTypeForOutputFilename) {
-				case OutputType::KMZ_Format:
-					//extension = ".kmz";
-					break;
-				case OutputType::OpenAir_Format:
-					extension = ".txt";
-					break;
-				case OutputType::Polish_Format:
-					extension = ".mp";
-					break;
-				case OutputType::Garmin_Format:
-					extension = ".img";
-					break;
-				default:
-					assert(false);
-			}
-			outputFile = boost::filesystem::path(inputFile).replace_extension(extension).string();
+		if (airspaces.size() > initialAirspacesNumber && outputFile.empty()) switch (suggestedTypeForOutputFilename) {
+			default:
+				assert(false);
+				/* no break */
+			case OutputType::KMZ_Format: // KMZ default extension
+				outputFile = boost::filesystem::path(inputFile).replace_extension(".kmz").string();
+				break;
+			case OutputType::OpenAir_Format:
+				outputFile = boost::filesystem::path(inputFile).replace_extension(".txt").string();
+				break;
+			case OutputType::Polish_Format:
+				outputFile = boost::filesystem::path(inputFile).replace_extension(".mp").string();
+				break;
+			case OutputType::Garmin_Format:
+				outputFile = boost::filesystem::path(inputFile).replace_extension(".img").string();
 		}
 	}
 	LogMessage(boost::str(boost::format("Read %1d airspace definition(s) from %2d file(s).") %(airspaces.size() - initialAirspacesNumber) %airspaceFiles.size()), false);

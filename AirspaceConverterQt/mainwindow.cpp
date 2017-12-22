@@ -59,7 +59,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Set the logging function (to write in the logging texbox)
     AirspaceConverter::SetLogMessageFunction(std::function<void(const std::string&, const bool)>(std::bind(&MainWindow::postMessage, this, std::placeholders::_1, std::placeholders::_2)));
-
 }
 
 MainWindow::~MainWindow() {
