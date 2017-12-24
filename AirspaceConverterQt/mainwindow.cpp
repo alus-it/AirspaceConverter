@@ -53,9 +53,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Set up UI and signals
     ui->setupUi(this);
-    connect(this, SIGNAL(messagePosted(QString,bool)), this, SLOT(logMessage(QString,bool)));
+    connect(this, SIGNAL(messagePosted(QString,bool)), this, SLOT(logMessage(QString, bool)));
     connect(&watcher, SIGNAL(finished()), this, SLOT(endBusy()));
-    connect(&filter, SIGNAL(validLimitsSet(double,double,double,double)), this, SLOT(applyFilter(double,double,double,double)));
+    connect(&filter, SIGNAL(validLimitsSet(double, double, double, double)), this, SLOT(applyFilter(double, double, double, double)));
 
     // Set the logging function (to write in the logging texbox)
     AirspaceConverter::SetLogMessageFunction(std::function<void(const std::string&, const bool)>(std::bind(&MainWindow::postMessage, this, std::placeholders::_1, std::placeholders::_2)));

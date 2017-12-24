@@ -72,23 +72,25 @@ Possible options:
 At least one input airspace or waypoint file must be present.  
 Warning: any already existing output file will be overwritten.
 
-Windows MFC version
--------------------
-The native Windows MFC executable needs just a couple of small DLLs: zip.dll zlib.dll to be kept in the same folder.  
-If you get the error about VCRUNTIME140.dll missing: it can be easily and quickly fixed installing the: MS VC++ redistributable, this will allow this software to run also on older Windows versions such us WindowsXP.  
-
-This Windows MFC version has graphical user interface, this should be the default way to use it:
+Graphical user interface
+------------------------
+This is the default way to use the graphical user interface:  
 
 1. Choose the desired output format
 2. If needed, specify the QNH to be used for calculating the height of flight levels, this must be done before reading airspace files.
 3. Specify a default terrain altitude to be used for the points not under terrain raster map coverage.
-4. Select as input multiple OpenAir (.txt) and/or OpenAIP (.aip) files or the folder containing them.
+4. Select as input multiple OpenAIP (.aip) OpenAir (.txt) and/or OpenAIP (.aip) files or the folder containing them.
 5. And/or select one or multiple waypoints files (.cup) or the folder containing them.
 6. Optionally it is possible to load multiple raster map files (.dem) with the terrain altitude.
 7. Optionally configure the latitude and longitude ranges for filtering the output.
-8. Eventually choose a different name for the output file.
-9. Press the button convert to start the conversion process.
+8. Press the "Convert" button.
+9. Choose the output file and then the conversion process will start.
 10. Verify if the output is correct and report any problem found.
+
+Windows MFC user interface
+--------------------------
+The UI comes as native Windows MFC application which needs just a couple of small DLLs: zip.dll zlib.dll to be kept in the same folder.  
+If you get the error about VCRUNTIME140.dll missing: it can be easily and quickly fixed installing the: MS VC++ redistributable, this will allow this software to run also on older Windows versions such us WindowsXP.
 
 Qt user interface
 -----------------

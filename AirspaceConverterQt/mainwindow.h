@@ -69,5 +69,4 @@ private slots:
 
 signals:
     void messagePosted(const QString& message, const bool& isError = false);
-
 };
