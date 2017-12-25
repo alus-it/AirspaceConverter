@@ -61,6 +61,7 @@ private:
 	void UpdateOutputFilename();
 	void EndBusy(const bool takeTime = false);
 	void StartBusy();
+	bool BrowseForFolderDialog(std::string& path) const;
 	
 	CComboBox OutputTypeCombo;
 	CButton loadInputFileBt;

@@ -195,9 +195,6 @@ BOOL CAirspaceConverterDlg::OnInitDialog() {
 	
 	// In case of Windows XP disable button that can't be used
 	if (isWinXPorOlder) {
-		LoadAirspacesFolderBt.EnableWindow(FALSE);
-		loadWaypointsFolderBt.EnableWindow(FALSE);
-		LoadRasterMapsFolderBt.EnableWindow(FALSE);
 		OpenOutputFileBt.EnableWindow(FALSE);
 		OpenOutputFolderBt.EnableWindow(FALSE);
 	}
@@ -252,6 +249,39 @@ HCURSOR CAirspaceConverterDlg::OnQueryDragIcon() {
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+int CALLBACK BrowseForFolder(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM lpData) {
+	if (uMsg == BFFM_INITIALIZED) SendMessage(hWnd, BFFM_SETSELECTION, TRUE, lpData);
+	else if (lParam == 0) {}
+	return 0;
+}
+
+bool CAirspaceConverterDlg::BrowseForFolderDialog(std::string& path) const {
+	bool result(false);
+	LPMALLOC pMalloc(nullptr);
+	if (SHGetMalloc(&pMalloc) == NOERROR) {
+		BROWSEINFO bi;
+		ZeroMemory(&bi, sizeof(bi));
+		CString sPath("C:\\");
+		LPWSTR psFolder = sPath.GetBuffer(MAX_PATH);
+		bi.hwndOwner = GetSafeHwnd();
+		bi.pszDisplayName = psFolder;
+		bi.lpszTitle = L"Please select desired input folder";
+		bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI | BIF_NONEWFOLDERBUTTON;
+		bi.lpfn = BrowseForFolder;
+		bi.lParam = (LPARAM)psFolder;
+		bi.iImage = 0;
+		LPITEMIDLIST pidl = ::SHBrowseForFolder(&bi);
+		if (pidl != nullptr) {
+			result = SHGetPathFromIDList(pidl, psFolder);
+			pMalloc->Free(pidl);
+		}
+		sPath.ReleaseBuffer();
+		path = CT2CA(sPath);
+		pMalloc->Release();
+	}
+	return result;
+}
+
 void CAirspaceConverterDlg::StartBusy() {
 	busy = true;
 	progressBar.ModifyStyle(0, PBS_MARQUEE);
@@ -259,12 +289,12 @@ void CAirspaceConverterDlg::StartBusy() {
 	loadInputFileBt.EnableWindow(FALSE);
 	loadWaypointsBt.EnableWindow(FALSE);
 	loadDEMfileBt.EnableWindow(FALSE);
+	LoadAirspacesFolderBt.EnableWindow(FALSE);
+	loadWaypointsFolderBt.EnableWindow(FALSE);
+	LoadRasterMapsFolderBt.EnableWindow(FALSE);
 #ifndef _WIN64
 	if (!isWinXPorOlder) {
 #endif
-		LoadAirspacesFolderBt.EnableWindow(FALSE);
-		loadWaypointsFolderBt.EnableWindow(FALSE);
-		LoadRasterMapsFolderBt.EnableWindow(FALSE);
 		OpenOutputFileBt.EnableWindow(FALSE);
 		OpenOutputFolderBt.EnableWindow(FALSE);
 #ifndef _WIN64
@@ -336,12 +366,12 @@ void CAirspaceConverterDlg::EndBusy(const bool takeTime /* = false */) {
 	loadInputFileBt.EnableWindow(TRUE);
 	loadWaypointsBt.EnableWindow(isKmzFile);
 	loadDEMfileBt.EnableWindow(isKmzFile);
+	LoadAirspacesFolderBt.EnableWindow(TRUE);
+	loadWaypointsFolderBt.EnableWindow(isKmzFile);
+	LoadRasterMapsFolderBt.EnableWindow(isKmzFile);
 #ifndef _WIN64
 	if (!isWinXPorOlder) {
 #endif
-		LoadAirspacesFolderBt.EnableWindow(TRUE);
-		loadWaypointsFolderBt.EnableWindow(isKmzFile);
-		LoadRasterMapsFolderBt.EnableWindow(isKmzFile);
 		OpenOutputFileBt.EnableWindow(conversionDone);
 		OpenOutputFolderBt.EnableWindow(conversionDone);
 #ifndef _WIN64
@@ -425,56 +455,91 @@ void CAirspaceConverterDlg::OnBnClickedInputFolderBt() {
 	assert(converter != nullptr);
 	assert(processor != nullptr);
 	if (!UpdateData(TRUE)) return; // Force the user to enter valid QNH
-	CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
-	if (dlgFolder.DoModal() == IDOK) {
-		outputFile.clear();
-		conversionDone = false;
-		boost::filesystem::path root(dlgFolder.GetFolderPath());
-		if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
-		for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
-			if (!boost::filesystem::is_regular_file(*it)) continue;
-			converter->AddAirspaceFile(it->path().string());
-			if (outputFile.empty()) outputFile = it->path().string();
-		}
-		UpdateOutputFilename();
-		if (processor != nullptr && processor->LoadAirspacesFiles(QNH)) StartBusy();	
-		else MessageBox(_T("Error while starting input thread."), _T("Error"), MB_ICONERROR);
+
+	// Ask for the airspaces input folder
+	std::string inputPath;
+#ifndef _WIN64
+	if (!isWinXPorOlder) {
+#endif
+		CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
+		if (dlgFolder.DoModal() == IDOK) inputPath = CT2CA(dlgFolder.GetFolderPath());
+		else return;
+#ifndef _WIN64
+	} else if (!BrowseForFolderDialog(inputPath)) return;
+#endif
+	assert(!inputPath.empty());
+
+	outputFile.clear();
+	conversionDone = false;
+	boost::filesystem::path root(inputPath);
+	if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
+	for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
+		if (!boost::filesystem::is_regular_file(*it)) continue;
+		converter->AddAirspaceFile(it->path().string());
+		if (outputFile.empty()) outputFile = it->path().string();
 	}
+	UpdateOutputFilename();
+	if (processor != nullptr && processor->LoadAirspacesFiles(QNH)) StartBusy();	
+	else MessageBox(_T("Error while starting input thread."), _T("Error"), MB_ICONERROR);
 }
 
 void CAirspaceConverterDlg::OnBnClickedInputWaypointsFolderBt() {
 	assert(converter != nullptr);
 	assert(processor != nullptr);
-	CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
-	if (dlgFolder.DoModal() == IDOK) {
-		boost::filesystem::path root(dlgFolder.GetFolderPath());
-		if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
-		for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
-			if (boost::filesystem::is_regular_file(*it) && boost::iequals(it->path().extension().string(), ".cup")) {
-				converter->AddWaypointFile(it->path().string());
-				if (outputFile.empty()) outputFile = it->path().string();
-			}
-		}
-		UpdateOutputFilename();
-		if (processor != nullptr && processor->LoadWaypointsFiles()) StartBusy();
-		else MessageBox(_T("Error while starting read waypoints files thread."), _T("Error"), MB_ICONERROR);
+
+	// Ask for the waypoints input folder
+	std::string inputPath;
+#ifndef _WIN64
+	if (!isWinXPorOlder) {
+#endif
+		CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
+		if (dlgFolder.DoModal() == IDOK) inputPath = CT2CA(dlgFolder.GetFolderPath());
+		else return;
+#ifndef _WIN64
 	}
+	else if (!BrowseForFolderDialog(inputPath)) return;
+#endif
+	assert(!inputPath.empty());
+
+	boost::filesystem::path root(inputPath);
+	if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
+	for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
+		if (boost::filesystem::is_regular_file(*it) && boost::iequals(it->path().extension().string(), ".cup")) {
+			converter->AddWaypointFile(it->path().string());
+			if (outputFile.empty()) outputFile = it->path().string();
+		}
+	}
+	UpdateOutputFilename();
+	if (processor != nullptr && processor->LoadWaypointsFiles()) StartBusy();
+	else MessageBox(_T("Error while starting read waypoints files thread."), _T("Error"), MB_ICONERROR);
 }
 
 void CAirspaceConverterDlg::OnBnClickedLoadDemFolderBt() {
 	assert(converter != nullptr);
 	assert(processor != nullptr);
-	CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
-	if (dlgFolder.DoModal() == IDOK) {
-		boost::filesystem::path root(dlgFolder.GetFolderPath());
-		if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
-		for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
-			if (boost::filesystem::is_regular_file(*it) && boost::iequals(it->path().extension().string(), ".dem"))
-				converter->AddTerrainRasterMapFile(it->path().string());
-		}
-		if (processor != nullptr && processor->LoadDEMfiles()) StartBusy();
-		else MessageBox(_T("Error while starting read raster maps thread."), _T("Error"), MB_ICONERROR);
+
+	// Ask for the raster maps input folder
+	std::string inputPath;
+#ifndef _WIN64
+	if (!isWinXPorOlder) {
+#endif
+		CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
+		if (dlgFolder.DoModal() == IDOK) inputPath = CT2CA(dlgFolder.GetFolderPath());
+		else return;
+#ifndef _WIN64
 	}
+	else if (!BrowseForFolderDialog(inputPath)) return;
+#endif
+	assert(!inputPath.empty());
+
+	boost::filesystem::path root(inputPath);
+	if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
+	for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
+		if (boost::filesystem::is_regular_file(*it) && boost::iequals(it->path().extension().string(), ".dem"))
+			converter->AddTerrainRasterMapFile(it->path().string());
+	}
+	if (processor != nullptr && processor->LoadDEMfiles()) StartBusy();
+	else MessageBox(_T("Error while starting read raster maps thread."), _T("Error"), MB_ICONERROR);
 }
 
 void CAirspaceConverterDlg::OnBnClickedClearInputBt() {
@@ -521,14 +586,8 @@ void CAirspaceConverterDlg::OnBnClickedOutputTypeCombo() {
 	const BOOL isOpenAirFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::OpenAir_Format);
 	loadWaypointsBt.EnableWindow(isKmzFile);
 	loadDEMfileBt.EnableWindow(isKmzFile);
-#ifndef _WIN64
-	if (!isWinXPorOlder) {
-#endif
-		loadWaypointsFolderBt.EnableWindow(isKmzFile);
-		LoadRasterMapsFolderBt.EnableWindow(isKmzFile);
-#ifndef _WIN64
-	}
-#endif
+	loadWaypointsFolderBt.EnableWindow(isKmzFile);
+	LoadRasterMapsFolderBt.EnableWindow(isKmzFile);
 	editQNHtextField.EnableWindow(isKmzFile ? numAirspacesLoaded == 0 : FALSE);
 	editDefualtAltTextField.EnableWindow(isKmzFile);
 	pointsCheckBox.EnableWindow(isOpenAirFile);
