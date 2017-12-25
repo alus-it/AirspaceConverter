@@ -210,10 +210,28 @@ BOOL CAirspaceConverterDlg::OnInitDialog() {
 
 	// Buld the "converter"
 	converter = new AirspaceConverter();
+	if (converter == nullptr) {
+		MessageBox(_T("Fatal error while initilizing the converter utility."), _T("Error"), MB_ICONERROR);
+		return TRUE;
+	}
+
+	// Find the path where the current executable is running
+	TCHAR szPath[_MAX_PATH];
+	VERIFY(::GetModuleFileName(AfxGetApp()->m_hInstance, szPath, _MAX_PATH));
+	CString csPath(szPath);
+	const int nIndex(csPath.ReverseFind(_T('\\')));
+	if (nIndex > 0) csPath = csPath.Left(nIndex);
+	else csPath.Empty();
+	const std::string basePath = CT2CA(csPath);
+	
+	// Configure the paths to icons and to cGPSmapper
+	assert(!basePath.empty());
+	converter->SetIconsPath(std::string(basePath + "\\icons\\"));
+	converter->Set_cGPSmapperCommand('"' + basePath + "\\cGPSmapper\\cgpsmapper.exe\"");
 
 	// Buld the "processor"
 	processor = new Processor(this->GetSafeHwnd(), converter);	
-	if (converter == nullptr || processor == nullptr) MessageBox(_T("Fatal error while initilizing the application."), _T("Error"), MB_ICONERROR);
+	if (processor == nullptr) MessageBox(_T("Fatal error while initilizing the application processing thread."), _T("Error"), MB_ICONERROR);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }

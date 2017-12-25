@@ -40,7 +40,7 @@ bool Processor::cGPSmapper(const std::string& polishFile, const std::string& out
 	lpShellExecInfo.fMask = SEE_MASK_DOENVSUBST | SEE_MASK_NOCLOSEPROCESS;
 	lpShellExecInfo.hwnd = NULL;
 	lpShellExecInfo.lpVerb = NULL;
-	lpShellExecInfo.lpFile = _T(".\\cGPSmapper\\cgpsmapper.exe");
+	lpShellExecInfo.lpFile = _com_util::ConvertStringToBSTR(converter->Get_cGPSmapperCommand().c_str()); // _T(".\\cGPSmapper\\cgpsmapper.exe");
 	lpShellExecInfo.lpParameters = _com_util::ConvertStringToBSTR(args.c_str());
 	lpShellExecInfo.lpDirectory = NULL;
 	lpShellExecInfo.nShow = SW_SHOW;

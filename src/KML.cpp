@@ -598,7 +598,7 @@ bool KML::Write(const std::string& filename) {
 			}
 
 			// Create source buffer from KML file
-			source = zip_source_file(archive, (iconPath).c_str(), 0, 0);
+			source = zip_source_file(archive, iconPath.c_str(), 0, 0);
 			if (source == nullptr) { // "failed to create source buffer. " << zip_strerror(archive)
 #ifdef ZIP_FL_OVERWRITE
 				zip_discard(archive);

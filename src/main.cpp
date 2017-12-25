@@ -150,11 +150,11 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	// If on Windows determine the proper cGPSmapper path
+	// If on Windows determine the proper paths
 #ifdef _WIN32
-	std::string path('"' + boost::filesystem::system_complete(boost::filesystem::path(argv[0])).parent_path().string());
-	path.append("\\cGPSmapper\\cgpsmapper.exe\"");
-	ac.Set_cGPSmapperCommand(path);
+	const std::string basePath(boost::filesystem::system_complete(boost::filesystem::path(argv[0])).parent_path().string());
+	ac.SetIconsPath(basePath + "\\icons\\");
+	ac.Set_cGPSmapperCommand('"' + basePath + "\\cGPSmapper\\cgpsmapper.exe\"");
 #endif
 
 	// Start the timer
