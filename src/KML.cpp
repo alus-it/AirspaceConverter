@@ -926,7 +926,7 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 	bool isPolygon (!isMultiGeometry && placemark.count("Polygon") == 1);
 
 	// If not check if we want to treat LineStrings as Airspaces and if is a LineString otherwise return
-	if (!processLineString || isMultiGeometry || isPolygon || !placemark.count("LineString") == 1) return false;
+	if (!processLineString || isMultiGeometry || isPolygon || placemark.count("LineString") != 1) return false;
 
 	try {
 		// Initialize airspace category from the folder
