@@ -59,7 +59,8 @@ const std::vector<std::string> AirspaceConverter::disclaimer = {
 AirspaceConverter::AirspaceConverter() :
 	conversionDone(false),
 	doNotCalculateArcs(false),
-	writeCoordinatesAsDDMMSS(false) {
+	writeCoordinatesAsDDMMSS(false),
+	processLineStrings(false) {
 }
 
 AirspaceConverter::~AirspaceConverter() {
@@ -165,6 +166,7 @@ void AirspaceConverter::LoadAirspaces(const OutputType suggestedTypeForOutputFil
 	conversionDone = false;
 	OpenAir openAir(airspaces);
 	KML kml(airspaces, waypoints);
+	kml.ProcessLineStrings(processLineStrings);
 	const size_t initialAirspacesNumber = airspaces.size(); // Airspaces originally already loaded
 	for (const std::string& inputFile : airspaceFiles) {
 		const std::string ext(boost::filesystem::path(inputFile).extension().string());

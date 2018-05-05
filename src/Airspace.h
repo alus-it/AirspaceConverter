@@ -131,6 +131,8 @@ public:
 	inline const Geometry::LatLon& GetPointAt(unsigned int pos) const { return points.at(pos); }
 	inline bool IsGNDbased() const { return base.IsGND(); }
 	inline bool IsMSLbased() const { return base.IsMSL(); }
+	inline bool IsAGLtopped() const { return top.IsAGL(); }
+	inline bool IsAMSLtopped() const { return top.IsAMSL(); }
 	inline bool IsVisibleByDefault() const { return CategoryVisibleByDefault(type); }
 
 private:

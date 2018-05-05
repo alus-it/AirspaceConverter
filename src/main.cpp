@@ -32,6 +32,7 @@ void printHelp() {
 	std::cout << "-o: optional, output file .kmz, .txt (OpenAir), .img (Garmin) or .mp (Polish). If not specified will be used the name of first input file as KMZ" << std::endl;
 	std::cout << "-p: optional, when writing in OpenAir avoid to use arcs and circles but only points (DP)" << std::endl;
 	std::cout << "-s: optional, when writing in OpenAir use coordinates with seconds (DD:MM:SS) instead of decimal minutes (DD:MM.MMM)" << std::endl;
+	std::cout << "-t: optional, when reading KML/KMZ files treat also tracks as airspaces" << std::endl;
 	std::cout << "-v: print version number" << std::endl;
 	std::cout << "-h: print this guide" << std::endl << std::endl;
 	std::cout << "At least one input airspace or waypoint file must be present." << std::endl;
@@ -131,6 +132,9 @@ int main(int argc, char *argv[]) {
 		case 'h':
 			printHelp();
 			if (argc == 2) return EXIT_SUCCESS;
+			break;
+		case 't':
+			ac.ProcessTracksAsAirspaces();
 			break;
 		case 'v':
 			std::cout << "AirspaceConverter version: " << VERSION << std::endl;

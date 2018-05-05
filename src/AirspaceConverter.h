@@ -79,6 +79,7 @@ public:
 	bool FilterOnLatLonLimits(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon);
 	inline void DoNotCalculateArcsAndCirconferences(const bool doNotCalcArcs = true) { doNotCalculateArcs = doNotCalcArcs; }
 	inline void WriteCoordinatesAsDDMMSS(const bool DDMMSS = true) { writeCoordinatesAsDDMMSS = DDMMSS; }
+	inline void ProcessTracksAsAirspaces(const bool treatTracksAsAirspaces = true) { processLineStrings = treatTracksAsAirspaces; }
 
 	static const std::vector<std::string> disclaimer;
 
@@ -94,4 +95,5 @@ private:
 	bool conversionDone;
 	bool doNotCalculateArcs;
 	bool writeCoordinatesAsDDMMSS;
+	bool processLineStrings;
 };

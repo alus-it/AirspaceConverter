@@ -34,6 +34,7 @@ public:
 	inline static double GetDefaultTerrainAltitude() { return defaultTerrainAltitudeMt; }
 	inline static void SetIconsPath(const std::string& path) { iconsPath = path; } // To set the directory containing the waypoints icons...
 	inline bool WereAllAGLaltitudesCovered() const { return allAGLaltitudesCovered; }
+	inline void ProcessLineStrings(bool LineStringAsAirspaces = true) { processLineString = LineStringAsAirspaces; }
 	bool ReadKMZ(const std::string& filename);
 	bool ReadKML(const std::string& filename);
 
@@ -47,11 +48,12 @@ private:
 	void WriteSideWalls(const Airspace& airspace);
 	void WriteSideWalls(const Airspace& airspace, const std::vector<double>& altitudesAmsl);
 	void WriteBaseOrTop(const Airspace& airspace, const Altitude& alt, const bool extrudeToGround = false);
-	void WriteBaseOrTop(const Airspace& airspace, const std::vector<double>& altitudesAmsl);
+	void WriteBaseOrTop(const Airspace& airspace, const std::vector<double>& altitudesAmsl, const bool extrudeToGround = false);
 
 	bool ProcessFolder(const boost::property_tree::ptree& folder, const int upperCategory);
 	bool ProcessPlacemark(const boost::property_tree::ptree& placemark);
 	static bool ProcessPolygon(const boost::property_tree::ptree& polygon, Airspace& airspace, bool& isExtruded, Altitude& avgAltitude);
+	static bool ProcessCoordinates(const boost::property_tree::ptree& coordinates, Airspace& airspace, double& avgAltitude);
 
 	static const std::string colors[][2];
 	static const std::string airfieldColors[][2];
@@ -63,5 +65,6 @@ private:
 	std::multimap<int, Waypoint*>& waypoints;
 	std::ofstream outputFile;
 	bool allAGLaltitudesCovered;
+	bool processLineString;
 	int folderCategory;
 };
