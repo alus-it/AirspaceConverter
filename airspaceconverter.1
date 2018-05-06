@@ -95,6 +95,11 @@ By default, without this option, arcs and circles are used even attepmting to re
 When writing to OpenAir this option will make coordinates expressed in degrees minutes and seconds (DD:MM:SS).
 By default, without this option, the coordinates are expressed in degrees and decimal minutes (DD:MM.MMM).
 .TP
+.BR \-t
+When reading from KML/KMZ this option will make also the "LineString" tracks to be imported as airspaces.
+In this case the tracks found will be closed and treated as unknown GND based airspace with ceiling at 1000 mt AGL.
+Without this option, KML "LineString" tracks are ingnored by default.
+.TP
 .BR \-v
 Print version number.
 .TP
