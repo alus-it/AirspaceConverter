@@ -38,6 +38,7 @@ void Geometry::LatLon::convertDec2DegMin(const double& dec, int& deg, double& mi
 	const double decimal = std::fabs(dec);
 	deg = (int)std::floor(decimal);
 	min = (decimal-deg)/SIXTYTH;
+	if (std::fabs(min) <= TOL) min = 0;
 }
 
 void Geometry::LatLon::convertDec2DegMinSec(const double& dec, int& deg, int& min, int& sec) {
