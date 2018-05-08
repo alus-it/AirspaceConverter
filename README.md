@@ -28,7 +28,8 @@ This software can also be useful for maintainers of OpenAir airspace and SeeYou 
 For the "landable" waypoints in the CUP files an estimation of the runway perimeter is drawn on the earth surface, in order to do that not only the position is used but also the runway orientation and length. This is particularly useful to verify that the position of the airfield in the CUP file matches exactly the runway in Google Earth.  In software like LK8000 the airfield position is considered as the exact center of the runway, orientation and length are used to assist for landing with an HSI and glide slope indications thus the correctness of position, orientation and length becomes really important.  
 OpenAIP (http://www.openaip.net/) provides a free, worldwide and updated airspace repository but in his own format, while many devices and software support OpenAir airspace files. This software can convert also to OpenAir so making OpenAIP data available to many portable devices.  
 AirspaceConverter can be used also to merge together several airspace files (OpenAIP repeated airspaces will be automatically removed) and filter the result on a specific range of latitudes and longitudes.  
-There are also cases where the "official" airspace files are available only in KML format like the Austrian airspace from Austrocontrol, also in this case is possible to convert it to OpenAir.
+There are also cases where the "official" airspace files are available only in KML format like the Austrian airspace from Austrocontrol, also in this case is possible to convert it to OpenAir.  
+In case is required to import long lists of points (like state borders) from KML LineString tracks: just use the option -t and the tracks found will be closed and treated as unknown airspace. Then it will be possible to adapt the airspace definitions manually in the so converted OpenAir file.
 
 About KML format
 ----------------
@@ -66,6 +67,7 @@ Possible options:
   -o: optional, output file .kmz, .mp (Polish) or .txt (OpenAir) if not specified will be used the name of first input file as KMZ  
   -p: optional, when writing in OpenAir avoid to use arcs and circles but only points (DP)  
   -s: optional, when writing in OpenAir use coordinates with minutes and seconds (DD:MM:SS) instead of decimal minutes (DD:MM.MMM)  
+  -t: optional, when reading KML/KMZ files treat also "LineString" tracks as airspaces  
   -v: print version number  
   -h: print this guide  
 
