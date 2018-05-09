@@ -333,21 +333,18 @@ void Airspace::EvaluateAndAddArc(std::vector<Geometry::LatLon*>& arcPoints, std:
 
 void Airspace::EvaluateAndAddCircle(const std::vector<Geometry::LatLon*>& arcPoints, const std::vector<std::pair<const double, const double>>& centerPoints) {
 	if (arcPoints.size() > 10) {
+		
+		// Find center point
 		const Geometry::LatLon center(Geometry::AveragePoints(centerPoints));
 
-		// Calculate radius in NM
-		double radius(Geometry::AverageRadius(center, arcPoints) * Geometry::RAD2NM);
+		// Calculate radius rounded in NM
+		const double radius(Geometry::RoundDistanceInNM(Geometry::AverageRadius(center, arcPoints)));
 
-		// Check if it not a too small radius
+		//TODO: Eventually check if it not a too small radius
 		//if (radius > 0.003) { // 0.003 NM = 5.556 m
 
-		// Round better the radius in NM: if it is 4.99663 NM make it 5 NM
-		const int nearestInt = (int)std::round(radius);
-		if (nearestInt != 0 && std::fabs(radius - nearestInt) < 0.005) radius = nearestInt; // 0.005 NM = 9.26 m
-
+		// Finally add the so resulting circle
 		geometries.push_back(new Circle(center, radius));
-		//return;
-		//}
 	} else for (const Geometry::LatLon* p : arcPoints) geometries.push_back(new Point(*p));
 }
 

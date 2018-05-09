@@ -329,6 +329,18 @@ double Geometry::AverageRadius(const Geometry::LatLon& center, const std::vector
 	return radius / circlePoints.size();
 }
 
+// Convert a distance from rad to NM rounding it: if it is 4.99663 NM make it 5 NM
+double Geometry::RoundDistanceInNM(const double radiusRad) {
+	assert(!isnan(radiusRad));
+	assert(radiusRad > 0);
+	double radius(radiusRad * RAD2NM); // [NM]
+	const double radius10(radius * 10); // [NM * 10]
+	const double nearestInt(std::round(radius10)); // [NM * 10]
+	const double diff(nearestInt - radius10); // [NM * 10] Radius expected smaller than nearet integer, so positive diff
+	if (nearestInt != 0 && diff > 0 && diff < 0.05) radius = nearestInt / 10; //0.005 NM = 9.26 m
+	return radius;
+}
+
 bool Geometry::CalcAirfieldPolygon(const double lat, const double lon, const int length, const int dir, std::vector<LatLon>& polygon) {
 	static const double thrtyMeters = 30.0 * M2RAD;
 	assert(polygon.empty());

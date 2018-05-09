@@ -117,6 +117,8 @@ protected:
 	static bool ArePointsOnArc(const LatLon& A, const LatLon& B, const LatLon& C, double& latc, double& lonc, double& radius, bool& clockwise);
 	static LatLon AveragePoints(const std::vector<std::pair<const double, const double>>& centerPoints);
 	static double AverageRadius(const Geometry::LatLon& center, const std::vector<LatLon*>& circlePoints);
+	static double RoundDistanceInNM(const double radiusRad);
+
 
 private:
 	static const double PI;
