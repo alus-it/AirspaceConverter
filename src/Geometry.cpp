@@ -331,7 +331,7 @@ double Geometry::AverageRadius(const Geometry::LatLon& center, const std::vector
 
 // Convert a distance from rad to NM rounding it: if it is 4.99663 NM make it 5 NM
 double Geometry::RoundDistanceInNM(const double radiusRad) {
-	assert(!isnan(radiusRad));
+	assert(!std::isnan(radiusRad));
 	assert(radiusRad > 0);
 	double radius(radiusRad * RAD2NM); // [NM]
 	const double radius10(radius * 10); // [NM * 10]
