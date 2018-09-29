@@ -162,12 +162,22 @@ bool OpenAIP::Read(const std::string& fileName, std::multimap<int, Airspace>& ou
 				ptree node = asp.second.get_child("ALTLIMIT_TOP");
 				Altitude alt;
 				if (ReadAltitude(node, alt)) airspace.SetTopAltitude(alt);
-				else return false;
+				else {
+					AirspaceConverter::LogMessage("Warning: skipping airspace with invalid or missing ALTLIMIT_TOP attribute: " + airspace.GetName(), false);
+					continue;
+				}
 
 				// Airspace bottom altitude
 				node = asp.second.get_child("ALTLIMIT_BOTTOM");
 				if (ReadAltitude(node, alt)) airspace.SetBaseAltitude(alt);
-				else return false;
+				else {
+					AirspaceConverter::LogMessage("Warning: skipping airspace with invalid or missing ALTLIMIT_BOTTOM attribute: " + airspace.GetName(), false);
+					continue;
+				}
+
+				// Extra check on consistency of altitude levels
+				if (airspace.GetTopAltitude() <= airspace.GetBaseAltitude())
+					AirspaceConverter::LogMessage("Warning: detected airspace with top and base equal or inverted: " + airspace.GetName(), false);
 
 				//Geometry
 				node = asp.second.get_child("GEOMETRY");
@@ -201,7 +211,7 @@ bool OpenAIP::Read(const std::string& fileName, std::multimap<int, Airspace>& ou
 					error = true;
 				}
 				if (error || !expectedLon) {
-					AirspaceConverter::LogMessage("Warning: skipping invalid coordinates.", false);
+					AirspaceConverter::LogMessage("Warning: skipping airspace with invalid coordinates: " + airspace.GetName(), false);
 					continue;
 				}
 
@@ -211,7 +221,7 @@ bool OpenAIP::Read(const std::string& fileName, std::multimap<int, Airspace>& ou
 				// The number of points must be at least 3+1 (plus the closing one)
 				assert(airspace.GetNumberOfPoints() > 3);
 				if (airspace.GetNumberOfPoints() <= 3) {
-					AirspaceConverter::LogMessage("Warning: skipping airspace with less than 3 points.", false);
+					AirspaceConverter::LogMessage("Warning: skipping airspace with less than 3 points: : " + airspace.GetName(), false);
 					continue;
 				}
 
