@@ -137,10 +137,12 @@ Then to compile in the Qt user interface in the "buildQt" folder:
 `qmake ../AirspaceConverterQt/AirspaceConverterQt.pro -r -spec linux-g++-64`  
 `make all`
 
-Compiling AirspaceConverter with MFC interface on Windows
----------------------------------------------------------
+Compiling AirspaceConverter under Windows
+-----------------------------------------
 In the "VisualStudio" folder there is the VisualStudio solution and project files.  
-It requires to have the boost libraries installed, with their location configured in the VS project, while libzip can be obtained via nuget.
+It requires to have the proper boost libraries installed, with their location configured in the VS project, while libzip (also not included in this repository) can be obtained via nuget.  
+When compiling with VisualStudio 2017 (vs141) in order to link with libzip it is necessary to modify `libzip.targets` located in `VisualStudio\packages\libzip.1.1.2.7\build\native` replacing all occurrencies of `PlatformToolset.ToLower().IndexOf('v140')` with `PlatformToolset.ToLower().IndexOf('v14')`  
+If required cGPSmapper and zlib.dll can be found in the portable distribution archive of this project.
 
 Placemarks icons credits
 ------------------------
