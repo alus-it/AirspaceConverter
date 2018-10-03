@@ -195,9 +195,9 @@ double Geometry::FindStep(const double& radius, const double& angle) {
 	assert(radius >= 0 && radius <= PI_2);
 	static const double smallRadius = 3 * NM2RAD; // 3 NM, radius under it the number of points will be decreased
 	static const double m = 300 / smallRadius; // coeffcient to decrease points for small circles, 300 is default number of points for circles bigger than 3 NM
-	int steps;
-	if (radius < smallRadius) steps = (int)((angle * (m * radius + 8)) / TWO_PI); // 8 is the minimum number of points for circles with radius -> 0
-	else steps = (int)((angle * radius) / resolution);
+	const int steps((int)(radius < smallRadius ?
+			(angle * (m * radius + 8)) / TWO_PI: // 8 is the minimum number of points for circles with radius -> 0
+			(angle * radius) / resolution));
 	return angle / steps;
 }
 
