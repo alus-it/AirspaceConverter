@@ -68,7 +68,7 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose one or more input airspace file(s). The input files can be in the OpenAIP, OpenAir or Google Earth KML/KMZ formats.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose one or more input airspace file(s). The input files can be in the openAIP, OpenAir or Google Earth KML/KMZ formats.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="locale">
      <locale language="English" country="UnitedStates"/>
@@ -177,7 +177,7 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose a folder with input airspace files. All the contained files, in OpenAIP, OpenAir and Google Earth KML/KMZ will be attempted to load. Beware to don't reload the just converted files.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose a folder with input airspace files. All the contained files, in openAIP, OpenAir and Google Earth KML/KMZ will be attempted to load. Beware to don't reload the just converted files.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="locale">
      <locale language="English" country="UnitedStates"/>

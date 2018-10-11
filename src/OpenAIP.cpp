@@ -73,10 +73,10 @@ bool ReadAltitude(const ptree& node, Altitude& altitude) {
 bool OpenAIP::Read(const std::string& fileName, std::multimap<int, Airspace>& output) {
 	std::ifstream input(fileName);
 	if (!input.is_open() || input.bad()) {
-		AirspaceConverter::LogMessage("ERROR: Unable to open OpenAIP input file: " + fileName, true);
+		AirspaceConverter::LogMessage("ERROR: Unable to open openAIP input file: " + fileName, true);
 		return false;
 	}
-	AirspaceConverter::LogMessage("Reading OpenAIP file: " + fileName, false);
+	AirspaceConverter::LogMessage("Reading openAIP file: " + fileName, false);
 	ptree tree;
 	read_xml(input, tree);
 	input.close();
@@ -225,7 +225,7 @@ bool OpenAIP::Read(const std::string& fileName, std::multimap<int, Airspace>& ou
 					continue;
 				}
 
-				// Verify that the current airspace it not already existing in our collection (apparently this happens in in the same OpenAIP file)
+				// Verify that the current airspace it not already existing in our collection (apparently this happens in in the same openAIP file)
 				bool found(false);
 
 				// Filter only on airspaces of the same type
@@ -243,7 +243,7 @@ bool OpenAIP::Read(const std::string& fileName, std::multimap<int, Airspace>& ou
 			} // for each ASP
 			return true;
 	} catch (...) {
-		AirspaceConverter::LogMessage("ERROR: Exception while parsing OpenAIP file.", true);
+		AirspaceConverter::LogMessage("ERROR: Exception while parsing openAIP file.", true);
 		assert(false);
 	}
 	return false;
