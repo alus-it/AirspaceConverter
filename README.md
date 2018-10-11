@@ -4,7 +4,7 @@ This is a free, open source and multi-platform tool to convert between different
 
 Can read airspace files in the following formats:  
   - OpenAir  
-  - OpenAIP  
+  - openAIP  
   - KML/KMZ  
 
 And the output can be done in the following formats:  
@@ -26,9 +26,9 @@ Airspace represented in 3D in Google Earth can help to visualize and better unde
 Not only, having the planned route or track of a flight (as GPX file), displayed as well in Google Earth will make easy to check for airspace crossed or to be avoided.  
 This software can also be useful for maintainers of OpenAir airspace and SeeYou .CUP waypoints files, not only to visualize airspace and waypoints but also to verify the syntax of OpenAir and CUP commands entered.  
 For the "landable" waypoints in the CUP files an estimation of the runway perimeter is drawn on the earth surface, in order to do that not only the position is used but also the runway orientation and length. This is particularly useful to verify that the position of the airfield in the CUP file matches exactly the runway in Google Earth.  In software like LK8000 the airfield position is considered as the exact center of the runway, orientation and length are used to assist for landing with an HSI and glide slope indications thus the correctness of position, orientation and length becomes really important.  
-OpenAIP (http://www.openaip.net/) provides a free, worldwide and updated airspace repository but in his own format, while many devices and software support OpenAir airspace files. This software can convert also to OpenAir so making OpenAIP data available to many portable devices.  
-AirspaceConverter can be used also to merge together several airspace files (OpenAIP repeated airspaces will be automatically removed) and filter the result on a specific range of latitudes and longitudes.  
-Converting OpenAIP files to OpenAir has also the advantage to reduce significantly the size of the total airspace database used on a portable device. For example LK8000 recently supports also the OpenAIP format (feature that I implemented) but it is not always possible to load bigger OpenAIP files on older PNA devices, while the same files converted in OpenAir yes.  
+openAIP (http://www.openaip.net/) provides a free, worldwide and updated airspace repository but in his own format, while many devices and software support OpenAir airspace files. This software can convert also to OpenAir so making openAIP data available to many portable devices.  
+AirspaceConverter can be used also to merge together several airspace files (openAIP repeated airspaces will be automatically removed) and filter the result on a specific range of latitudes and longitudes.  
+Converting openAIP files to OpenAir has also the advantage to reduce significantly the size of the total airspace database used on a portable device. For example LK8000 recently supports also the openAIP format (feature that I implemented) but it is not always possible to load bigger openAIP files on older PNA devices, while the same files converted in OpenAir yes.  
 There are also cases where the "official" airspace files are available only in KML format like the Austrian airspace from Austrocontrol, also in this case is possible to convert it to OpenAir.  
 In case is required to import long lists of points (like state borders) from KML LineString tracks: just use the option -t and the tracks found will be closed and treated as unknown airspace. Then it will be possible to adapt the airspace definitions manually in the so converted OpenAir file.
 
@@ -61,7 +61,7 @@ The command line version, compiled both for Linux and Windows, works taking seve
 Possible options:  
   -q: optional, specify the QNH in hPa used to calculate height of flight levels  
   -a: optional, specify a default terrain altitude in meters to calculate AGL heights of points not covered by loaded terrain map(s)  
-  -i: multiple, input file(s) can be OpenAir (.txt), OpenAIP (.aip), Google Earth (.kmz, .kml)  
+  -i: multiple, input file(s) can be OpenAir (.txt), openAIP (.aip), Google Earth (.kmz, .kml)  
   -w: multiple, input waypoint file(s) in the SeeYou CUP format (.cup)  
   -m: optional, multiple, terrain map file(s) (.dem) used to lookup terrain heights  
   -l: optional, set filter limits in latitude and longitude for the output, followed by the 4 limit values: northLat,southLat,westLon,eastLon where the limits are comma separated, expressed in degrees, without spaces, negative for west longitudes and south latitudes  
@@ -82,7 +82,7 @@ This is the default way to use the graphical user interface:
 1. Choose the desired output format
 2. If needed, specify the QNH to be used for calculating the height of flight levels, this must be done before reading airspace files.
 3. Specify a default terrain altitude to be used for the points not under terrain raster map coverage.
-4. Select as input multiple OpenAIP (.aip) OpenAir (.txt) and/or OpenAIP (.aip) files or the folder containing them.
+4. Select as input multiple openAIP (.aip) OpenAir (.txt) and/or openAIP (.aip) files or the folder containing them.
 5. And/or select one or multiple waypoints files (.cup) or the folder containing them.
 6. Optionally it is possible to load multiple raster map files (.dem) with the terrain altitude.
 7. Optionally configure the latitude and longitude ranges for filtering the output.

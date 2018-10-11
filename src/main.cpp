@@ -24,7 +24,7 @@ void printHelp() {
 	std::cout << "Possible options:" << std::endl;
 	std::cout << "-q: optional, specify the QNH in hPa used to calculate height of flight levels" << std::endl;
 	std::cout << "-a: optional, specify a default terrain altitude in meters to calculate AGL heights of points not covered by loaded terrain map(s)" << std::endl;
-	std::cout << "-i: multiple, input airspace file(s) can be OpenAir (.txt), OpenAIP (.aip), Google Earth (.kmz, .kml)" << std::endl;
+	std::cout << "-i: multiple, input airspace file(s) can be OpenAir (.txt), openAIP (.aip), Google Earth (.kmz, .kml)" << std::endl;
 	std::cout << "-w: multiple, input waypoint file(s) in the SeeYou CUP format (.cup)" << std::endl;
 	std::cout << "-m: optional, multiple, terrain map file(s) (.dem) used to lookup terrain heights" << std::endl;
 	std::cout << "-l: optional, set filter limits in latitude and longitude for the output, followed by the 4 limit values: northLat,southLat,westLon,eastLon" << std::endl;
