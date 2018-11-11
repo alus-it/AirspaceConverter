@@ -189,6 +189,8 @@ void KML::WriteHeader(const bool airspacePresent, const bool waypointsPresent) {
 void KML::OpenPlacemark(const Airspace& airspace) {
 	std::string name(airspace.GetName());
 	if (airspace.GetClass() != Airspace::UNDEFINED && (airspace.GetType() == Airspace::CTR || airspace.GetType() == Airspace::TMA)) name.append(" - Class " + Airspace::CategoryName(airspace.GetClass()));
+	double area(0), perimeter(0);
+	airspace.CalculateSurface(area, perimeter);
 	outputFile << "<Placemark>\n"
 		<< "<name>" << airspace.GetName() << "</name>\n"
 		<< "<styleUrl>#Style" << airspace.GetCategoryName() << "</styleUrl>\n"
@@ -199,6 +201,8 @@ void KML::OpenPlacemark(const Airspace& airspace) {
 		<< "<SimpleData name=\"Category\">" << (airspace.GetType() <= Airspace::CLASSG ? ("Class " + airspace.GetCategoryName()) : airspace.GetCategoryName() ) << "</SimpleData>\n"
 		<< "<SimpleData name=\"Top\">" << airspace.GetTopAltitude().ToString() << "</SimpleData>\n"
 		<< "<SimpleData name=\"Base\">" << airspace.GetBaseAltitude().ToString() << "</SimpleData>\n"
+		<< "<SimpleData name=\"Perimeter\">" << perimeter << "</SimpleData>\n"
+		<< "<SimpleData name=\"Area\">" << area << "</SimpleData>\n"
 		<< "</SchemaData>\n"
 		<< "</ExtendedData>\n";
 }

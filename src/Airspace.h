@@ -134,6 +134,7 @@ public:
 	inline bool IsAGLtopped() const { return top.IsAGL(); }
 	inline bool IsAMSLtopped() const { return top.IsAMSL(); }
 	inline bool IsVisibleByDefault() const { return CategoryVisibleByDefault(type); }
+	void CalculateSurface(double& area, double& perimeter) const;
 
 private:
 	void EvaluateAndAddArc(std::vector<Geometry::LatLon*>& arcPoints, std::vector<std::pair<const double, const double>>& centerPoints, const bool& clockwise);

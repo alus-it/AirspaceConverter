@@ -13,6 +13,12 @@
 #include <cmath>
 #include <algorithm>
 #include <cassert>
+#include <boost/version.hpp>
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/adapted/boost_tuple.hpp>
+//#include <boost/geometry/algorithms/area.hpp>
+//#include <boost/geometry/geometries/point_xy.hpp>
+//#include <boost/geometry/geometries/polygon.hpp>
 
 const double Altitude::FEET2METER = 0.3048; // 1 Ft = 0.3048 m
 const double Altitude::K1 = 0.190263;
@@ -421,3 +427,23 @@ bool Airspace::IsWithinLimits(const Geometry::Limits& limits) const {
 	}
 	return pointWhithinLimitsFound;
 }
+
+void Airspace::CalculateSurface(double& area, double& perimeter) const {
+#if BOOST_VERSION >= 106700
+	// Create geographic polygon
+	boost::geometry::model::polygon<boost::geometry::model::point<double, 2, boost::geometry::cs::geographic<boost::geometry::degree> > > polygon;
+	for (const Geometry::LatLon& point : points) boost::geometry::append(polygon, boost::make_tuple(point.Lon(), point.Lat()));
+
+	// Create geographic strategy with WGS84 spheroid
+	static const boost::geometry::strategy::area::geographic<> strategy(boost::geometry::srs::spheroid<double>(6378137.0, 6356752.3142451793));
+
+	area = boost::geometry::area(polygon, strategy);
+	perimeter = boost::geometry::perimeter(polygon, strategy);
+#else
+	boost::geometry::model::polygon<boost::geometry::model::point<float, 2, boost::geometry::cs::spherical_equatorial<boost::geometry::degree> > > polygon;
+	for (const Geometry::LatLon& point : points) boost::geometry::append(polygon, boost::make_tuple(point.Lon(), point.Lat()));
+	area = boost::geometry::area(polygon);
+	perimeter = boost::geometry::perimeter(polygon);
+#endif
+}
+
