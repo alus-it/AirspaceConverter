@@ -112,7 +112,7 @@ public:
 	void AddPoint(const Geometry::LatLon& point);
 	void AddGeometry(const Geometry* geometry);
 	inline void ClosePoints() { if (!points.empty() && points.front() != points.back()) points.push_back(points.front()); }
-	bool ArePointsValid();
+	bool ArePointsValid() const;
 	bool Undiscretize();
 	bool IsWithinLimits(const Geometry::Limits& limits) const;
 	inline void CutPointsFrom(Airspace& orig) { points = std::move(orig.points); }
@@ -134,7 +134,7 @@ public:
 	inline bool IsAGLtopped() const { return top.IsAGL(); }
 	inline bool IsAMSLtopped() const { return top.IsAMSL(); }
 	inline bool IsVisibleByDefault() const { return CategoryVisibleByDefault(type); }
-	void CalculateSurface(double& area, double& perimeter) const;
+	void CalculateSurface(double& areaKm2, double& perimeterKm) const;
 
 private:
 	void EvaluateAndAddArc(std::vector<Geometry::LatLon*>& arcPoints, std::vector<std::pair<const double, const double>>& centerPoints, const bool& clockwise);

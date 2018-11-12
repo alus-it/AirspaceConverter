@@ -14,9 +14,15 @@
 #include <algorithm>
 #include <cassert>
 #include <boost/version.hpp>
+#ifdef _WIN32
+#pragma warning( push )
+#pragma warning( disable : 4127)
+#include <boost/geometry/formulas/differential_quantities.hpp>
+#include <boost/geometry/formulas/meridian_inverse.hpp>
+#pragma warning( pop )
+#endif
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/adapted/boost_tuple.hpp>
-//#include <boost/geometry/algorithms/area.hpp>
 //#include <boost/geometry/geometries/point_xy.hpp>
 //#include <boost/geometry/geometries/polygon.hpp>
 
@@ -305,7 +311,7 @@ void Airspace::AddPoint(const Geometry::LatLon& point) {
 	points.push_back(point);
 }
 
-bool Airspace::ArePointsValid() {
+bool Airspace::ArePointsValid() const {
 	// Check if the number of points must be at least 3+1 (plus the closing one)
 	if (points.size() <= 3) return false;
 	
@@ -429,21 +435,33 @@ bool Airspace::IsWithinLimits(const Geometry::Limits& limits) const {
 }
 
 void Airspace::CalculateSurface(double& area, double& perimeter) const {
-#if BOOST_VERSION >= 106700
+#if BOOST_VERSION >= 106700 // Spheroidal
 	// Create geographic polygon
 	boost::geometry::model::polygon<boost::geometry::model::point<double, 2, boost::geometry::cs::geographic<boost::geometry::degree> > > polygon;
 	for (const Geometry::LatLon& point : points) boost::geometry::append(polygon, boost::make_tuple(point.Lon(), point.Lat()));
 
-	// Create geographic strategy with WGS84 spheroid
-	static const boost::geometry::strategy::area::geographic<> strategy(boost::geometry::srs::spheroid<double>(6378137.0, 6356752.3142451793));
+	// Geographic strategy with WGS84 spheroid (spheroid sizes in Km)
+	static const boost::geometry::strategy::area::geographic<> wgs84(boost::geometry::srs::spheroid<double>(6378.137, 6356.7523142451793));
 
-	area = boost::geometry::area(polygon, strategy);
-	perimeter = boost::geometry::perimeter(polygon, strategy);
-#else
+	// Geographic strategy with Vincenty algorithm
+	//static const boost::geometry::strategy::area::geographic<boost::geometry::model::point<double, 2, boost::geometry::cs::geographic<boost::geometry::degree >>, boost::geometry::formula::vincenty_inverse> vincenty;
+
+	area = boost::geometry::area(polygon, wgs84); // [Km2]
+	perimeter = boost::geometry::perimeter(polygon) / 1000; // [Km]
+
+#else // Spherical
 	boost::geometry::model::polygon<boost::geometry::model::point<float, 2, boost::geometry::cs::spherical_equatorial<boost::geometry::degree> > > polygon;
 	for (const Geometry::LatLon& point : points) boost::geometry::append(polygon, boost::make_tuple(point.Lon(), point.Lat()));
-	area = boost::geometry::area(polygon);
-	perimeter = boost::geometry::perimeter(polygon);
+	
+	static const double earthRadiusKm = 6371.0088;
+	static const double squareEarthRadiusKm = pow(earthRadiusKm,2);
+
+	// Spherical strategy with mean Earth radius in Km
+	//static const boost::geometry::strategy::area::spherical<> sphericalStrategy(earthRadiusKm);
+
+	//area = boost::geometry::area(polygon, sphericalStrategy);
+	area = boost::geometry::area(polygon) * squareEarthRadiusKm; // [Km2]
+	perimeter = (double)boost::geometry::perimeter(polygon) * earthRadiusKm; // [Km]
 #endif
 }
 
