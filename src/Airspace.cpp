@@ -16,15 +16,13 @@
 #include <boost/version.hpp>
 #ifdef _WIN32
 #pragma warning( push )
-#pragma warning( disable : 4127)
+#pragma warning( disable : 4127 )
 #include <boost/geometry/formulas/differential_quantities.hpp>
 #include <boost/geometry/formulas/meridian_inverse.hpp>
 #pragma warning( pop )
 #endif
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/adapted/boost_tuple.hpp>
-//#include <boost/geometry/geometries/point_xy.hpp>
-//#include <boost/geometry/geometries/polygon.hpp>
 
 const double Altitude::FEET2METER = 0.3048; // 1 Ft = 0.3048 m
 const double Altitude::K1 = 0.190263;
@@ -450,6 +448,7 @@ void Airspace::CalculateSurface(double& area, double& perimeter) const {
 	perimeter = boost::geometry::perimeter(polygon) / 1000; // [Km]
 
 #else // Spherical
+	// Create spherical polygon
 	boost::geometry::model::polygon<boost::geometry::model::point<float, 2, boost::geometry::cs::spherical_equatorial<boost::geometry::degree> > > polygon;
 	for (const Geometry::LatLon& point : points) boost::geometry::append(polygon, boost::make_tuple(point.Lon(), point.Lat()));
 	
