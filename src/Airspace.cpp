@@ -444,7 +444,7 @@ void Airspace::CalculateSurface(double& area, double& perimeter) const {
 	// Geographic strategy with Vincenty algorithm
 	//static const boost::geometry::strategy::area::geographic<boost::geometry::model::point<double, 2, boost::geometry::cs::geographic<boost::geometry::degree >>, boost::geometry::formula::vincenty_inverse> vincenty;
 
-	area = boost::geometry::area(polygon, wgs84); // [Km2]
+	area = std::fabs(boost::geometry::area(polygon, wgs84)); // [Km2]
 	perimeter = boost::geometry::perimeter(polygon) / 1000; // [Km]
 
 #else // Spherical
@@ -458,8 +458,8 @@ void Airspace::CalculateSurface(double& area, double& perimeter) const {
 	// Spherical strategy with mean Earth radius in Km
 	//static const boost::geometry::strategy::area::spherical<> sphericalStrategy(earthRadiusKm);
 
-	//area = boost::geometry::area(polygon, sphericalStrategy);
-	area = boost::geometry::area(polygon) * squareEarthRadiusKm; // [Km2]
+	//area = std::fabs(boost::geometry::area(polygon, sphericalStrategy));
+	area = std::fabs(boost::geometry::area(polygon)) * squareEarthRadiusKm; // [Km2]
 	perimeter = (double)boost::geometry::perimeter(polygon) * earthRadiusKm; // [Km]
 #endif
 }
