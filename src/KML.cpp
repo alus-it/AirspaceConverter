@@ -1112,9 +1112,8 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 						airspace.SetBaseAltitude(gnd);
 					}
 				} else return false; // The single polygon should be always extruded
-				
 				if (!topPresent) airspace.SetTopAltitude(foundAlt);
-			}			
+			}
 		}
 
 		// Otherwise we process it as LineString
