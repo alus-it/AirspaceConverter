@@ -4,7 +4,7 @@
 // Authors     : Alberto Realis-Luc <alberto.realisluc@gmail.com>
 //               Valerio Messina <efa@iol.it>
 // Web         : http://www.alus.it/AirspaceConverter
-// Copyright   : (C) 2016-2018 Alberto Realis-Luc
+// Copyright   : (C) 2016-2019 Alberto Realis-Luc
 // License     : GNU GPL v3
 //
 // This source file is part of AirspaceConverter project

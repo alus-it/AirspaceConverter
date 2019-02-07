@@ -153,7 +153,7 @@ On Windows, the folder `icons` with the placemarks PNG icons must be kept in the
 
 Contributors
 ------------
-- Valerio Messina, efa@iol.it: packaging for Ubuntu 16.04, various issues fixed and testing
+- Valerio Messina, efa@iol.it: packaging for Ubuntu, various issues fixed and testing
 
 Contacts
 --------
