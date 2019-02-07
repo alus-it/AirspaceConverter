@@ -4,7 +4,7 @@
 # Since       : 8/12/2017
 # Author      : Valerio Messina <efa@iol.it>
 # Web         : http://www.alus.it/AirspaceConverter
-# Copyright   : (C) 2016-2017 Valerio Messina
+# Copyright   : (C) 2016-2019 Valerio Messina
 # License     : GNU GPL v3
 #
 # This script is part of AirspaceConverter project
