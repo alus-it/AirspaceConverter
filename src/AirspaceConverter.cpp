@@ -31,7 +31,7 @@ std::string AirspaceConverter::cGPSmapperCommand = "cgpsmapper";
 const std::vector<std::string> AirspaceConverter::disclaimer = {
 	"This file has been produced with: \"AirspaceConverter\" Version: " VERSION,
 	"For info visit: http://www.alus.it/AirspaceConverter",
-	"Copyrights(C) 2016-2018 Alberto Realis-Luc, Valerio Messina",
+	"Copyrights(C) 2016-2019 Alberto Realis-Luc, Valerio Messina",
 	"",
 	"WARNING:",
 	"AirspaceConverter is an experimental software. So, please, be aware that the output may contain errors!",
