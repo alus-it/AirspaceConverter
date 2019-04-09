@@ -431,10 +431,8 @@ bool OpenAir::InsertAirspace(Airspace& airspace) {
 		validAirspace = false;
 	}
 
-	// Ensure points are closed
-	airspace.ClosePoints();
-
-	if (validAirspace && airspace.GetNumberOfPoints() <= 3) {
+	// Ensure that the points are closed
+	if (validAirspace && !airspace.ClosePoints()) {
 		AirspaceConverter::LogMessage(boost::str(boost::format("ERROR at line %1d: skip airspace %2s with less than 3 points.") % lastACline % airspace.GetName()), true);
 		validAirspace = false;
 	}

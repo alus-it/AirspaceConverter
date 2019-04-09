@@ -216,14 +216,13 @@ bool OpenAIP::Read(const std::string& fileName, std::multimap<int, Airspace>& ou
 				}
 
 				// Ensure that the polygon is closed (it should be already, but can still happen).....
-				airspace.ClosePoints();
-
-				// The number of points must be at least 3+1 (plus the closing one)
-				assert(airspace.GetNumberOfPoints() > 3);
-				if (airspace.GetNumberOfPoints() <= 3) {
+				if (!airspace.ClosePoints()) {
 					AirspaceConverter::LogMessage("Warning: skipping airspace with less than 3 points: : " + airspace.GetName(), false);
 					continue;
 				}
+
+				// The number of points must be at least 3+1 (plus the closing one)
+				assert(airspace.GetNumberOfPoints() > 3);
 
 				// Verify that the current airspace it not already existing in our collection (apparently this happens in in the same openAIP file)
 				bool found(false);

@@ -310,8 +310,8 @@ void Airspace::AddPoint(const Geometry::LatLon& point) {
 }
 
 bool Airspace::ArePointsValid() const {
-	// Check if the number of points must be at least 3+1 (plus the closing one)
-	if (points.size() <= 3) return false;
+	// The number of points must be at least 3+1 (plus the closing one)
+	assert(points.size() > 3);
 	
 	// Check if it is closed
 	if (points.front() != points.back()) return false;
@@ -319,13 +319,32 @@ bool Airspace::ArePointsValid() const {
 	// Except last one the points must be different from each other
 	const size_t l = points.size() - 1;
 
-	// Usung a set with O(N log N) is faster in the generic case, but here this way should be faster in most of cases and requiring less memeory
+	// Using a set with O(N log N) is faster in the generic case, but here this way should be faster in most of cases and requiring less memory
 	for (size_t i = 0; i < l; i++) for (size_t j = i+1; j < l; j++) {
 		if (points.at(i) == points.at(j)) return false;
 	}
 	
 	// If we arrived here it is all OK
 	return true;
+}
+
+bool Airspace::ClosePoints() {
+	// Here we expect at least 3 points
+	if(points.size() < 3) return false;
+
+	// Make sure that the last point in the vector is equal to the first so "closing" the polygon
+	const Geometry::LatLon& first = points.front();
+	if (first != points.back()) points.push_back(first);
+
+	// Check for repeated points or equal to first
+	std::vector<Geometry::LatLon>::iterator it = std::next(points.begin()); // Start from second point
+	while(it != std::prev(points.end())) { // until the point before last one
+		if (first == (*it) || (*std::prev(it)) == (*it)) it = points.erase(it);
+		else it++;
+	}
+
+	// For a valid closed polygon we need at least 3 points plus closing point
+	return points.size() > 3;
 }
 
 void Airspace::AddGeometry(const Geometry* geometry) {
