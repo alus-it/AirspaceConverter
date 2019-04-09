@@ -910,10 +910,8 @@ bool KML::ProcessCoordinates(const boost::property_tree::ptree& parent, Airspace
 			else avgAltitude /= numOfPoints;
 
 			// Ensure that the polygon is closed (it should be already, not for LineString)...
-			airsp.ClosePoints();
-
-			// Or the points are all at the same height or verify that all points are unique
-			if (allPointsAtSameAlt || airsp.ArePointsValid()) {
+			// ... and the points are all at the same height or verify that all points are unique
+			if (airsp.ClosePoints() && (allPointsAtSameAlt || airsp.ArePointsValid())) {
 				airspace.CutPointsFrom(airsp);
 				return true;
 			}

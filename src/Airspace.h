@@ -111,7 +111,7 @@ public:
 	void ClearGeometries(); // Clear geometries only
 	void AddPoint(const Geometry::LatLon& point);
 	void AddGeometry(const Geometry* geometry);
-	inline void ClosePoints() { if (!points.empty() && points.front() != points.back()) points.push_back(points.front()); }
+	bool ClosePoints();
 	bool ArePointsValid() const;
 	bool Undiscretize();
 	bool IsWithinLimits(const Geometry::Limits& limits) const;
