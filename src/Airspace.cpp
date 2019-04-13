@@ -174,6 +174,7 @@ Airspace::Airspace(const Airspace& orig) // Copy constructor
 	, type(orig.type)
 	, airspaceClass(orig.airspaceClass)
 	, name(orig.name)
+	, radioFrequencies(orig.radioFrequencies)
 	, transponderCode(orig.transponderCode) {
 }
 
@@ -185,6 +186,7 @@ Airspace::Airspace(Airspace&& orig) // Move constructor
 	, type(std::move(orig.type))
 	, airspaceClass(std::move(orig.airspaceClass))
 	, name(std::move(orig.name))
+	, radioFrequencies(std::move(orig.radioFrequencies))
 	, transponderCode(std::move(orig.transponderCode)) {
 	orig.type = UNDEFINED;
 }
@@ -197,6 +199,7 @@ Airspace& Airspace::operator=(const Airspace& other) {
 	type = other.type;
 	airspaceClass = other.airspaceClass;
 	name = other.name;
+	radioFrequencies = other.radioFrequencies;
 	transponderCode = other.transponderCode;
 	return *this;
 }
@@ -222,6 +225,18 @@ void Airspace::SetClass(const Type& airspClass) {
 	if(airspClass > CLASSG) return;
 	airspaceClass = airspClass;
 	if (type <= CLASSG && type != airspClass) type = airspClass;
+}
+
+bool Airspace::AddRadioFrequency(const float frequency, const std::string& description) {
+	// Check if the frequency is within the airband
+	if (frequency < 118 || frequency > 137) return false;
+
+	// Check if the frequency has not more than 3 decimals
+	if (frequency != std::trunc(frequency * 1000) / 1000) return false;
+
+	// ... then we can use it
+	radioFrequencies.push_back(std::make_pair(frequency,description));
+	return true;
 }
 
 bool Airspace::SetTransponderCode(const std::string& code) {
@@ -317,6 +332,8 @@ void Airspace::Clear() {
 	airspaceClass = UNDEFINED;
 	name.clear();
 	ClearPoints();
+	radioFrequencies.clear();
+	transponderCode = -1;
 }
 
 void Airspace::ClearPoints() {
