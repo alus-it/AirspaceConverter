@@ -184,11 +184,15 @@ bool OpenAir::Read(const std::string& fileName) {
 			case 'H': //AH
 				lineParsedOK = ParseAltitude(sLine, true, airspace);
 				break;
-			case 'F': //TODO: AF radio frequency
+			case 'F': //AF radio frequency
+				lineParsedOK = ParseAF(sLine, airspace);
+				break;
+			case 'X': //AX: transponder code
+				lineParsedOK = airspace.SetTransponderCode(sLine.substr(3));
+				break;
 			case 'P': //AP: (De)activation time
 			case 'W': //AW: Weekly activation Time
 			case 'T': //AT
-			case 'X': //AX: Transponder code
 			case 'G': //AG
 			case 'Y': //AY // ignore all those for now...
 				break;
@@ -283,13 +287,18 @@ bool OpenAir::ParseAN(const std::string & line, Airspace& airspace) {
 	if (airspace.GetType() == Airspace::UNDEFINED) return true;
 	if (line.size() < 4) return false;
 	if (airspace.GetName().empty()) {
-		std::string name(line.substr(3));
+		const std::string name(line.substr(3));
 		if (name == "COLORENTRY") airspace.SetType(Airspace::UNDEFINED); // Skip Strepla colortable entries
 		else airspace.SetName(name);
 		return true;
 	}
 	AirspaceConverter::LogMessage(boost::str(boost::format("ERROR: airspace %1s has already a name.") % airspace.GetName()), true);
 	return false;	
+}
+
+bool OpenAir::ParseAF(const std::string& line, Airspace& airspace) {
+	//TODO: to be implemented.....
+	return true;
 }
 
 bool OpenAir::ParseAltitude(const std::string& line, const bool isTop, Airspace& airspace) {

@@ -162,7 +162,8 @@ const std::string Airspace::CATEGORY_NAMES[] = {
 
 Airspace::Airspace(Type category)
 	: type(category)
-	, airspaceClass(category >= CLASSA && category <= CLASSG ? category : UNDEFINED) {
+	, airspaceClass(category >= CLASSA && category <= CLASSG ? category : UNDEFINED)
+	, transponderCode(-1) {
 }
 
 Airspace::Airspace(const Airspace& orig) // Copy constructor
@@ -172,7 +173,8 @@ Airspace::Airspace(const Airspace& orig) // Copy constructor
 	, points(orig.points)
 	, type(orig.type)
 	, airspaceClass(orig.airspaceClass)
-	, name(orig.name) {
+	, name(orig.name)
+	, transponderCode(orig.transponderCode) {
 }
 
 Airspace::Airspace(Airspace&& orig) // Move constructor
@@ -182,7 +184,8 @@ Airspace::Airspace(Airspace&& orig) // Move constructor
 	, points(std::move(orig.points))
 	, type(std::move(orig.type))
 	, airspaceClass(std::move(orig.airspaceClass))
-	, name(std::move(orig.name)) {
+	, name(std::move(orig.name))
+	, transponderCode(std::move(orig.transponderCode)) {
 	orig.type = UNDEFINED;
 }
 
@@ -194,6 +197,7 @@ Airspace& Airspace::operator=(const Airspace& other) {
 	type = other.type;
 	airspaceClass = other.airspaceClass;
 	name = other.name;
+	transponderCode = other.transponderCode;
 	return *this;
 }
 
@@ -218,6 +222,28 @@ void Airspace::SetClass(const Type& airspClass) {
 	if(airspClass > CLASSG) return;
 	airspaceClass = airspClass;
 	if (type <= CLASSG && type != airspClass) type = airspClass;
+}
+
+bool Airspace::SetTransponderCode(const std::string& code) {
+	if (code.empty() || code.length() > 4) return false;
+	for (char c : code) {
+		if (c < '0' || c > '7') return false;
+	}
+	try
+	{
+		transponderCode = std::stoi(code, 0, 8);
+	}
+	catch ( ... )
+	{
+		return false;
+	}
+	return true;
+}
+
+std::string Airspace::GetTransponderCode() const {
+	std::ostringstream ss;
+	ss << std::setw(4) << std::setfill('0') << std::oct << transponderCode;
+	return ss.str();
 }
 
 bool Airspace::GuessClassFromName() {
