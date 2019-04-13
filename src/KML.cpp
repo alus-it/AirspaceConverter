@@ -200,8 +200,10 @@ void KML::OpenPlacemark(const Airspace& airspace) {
 		<< "<SimpleData name=\"Name\">" << name << "</SimpleData>\n"
 		<< "<SimpleData name=\"Category\">" << (airspace.GetType() <= Airspace::CLASSG ? ("Class " + airspace.GetCategoryName()) : airspace.GetCategoryName() ) << "</SimpleData>\n"
 		<< "<SimpleData name=\"Top\">" << airspace.GetTopAltitude().ToString() << "</SimpleData>\n"
-		<< "<SimpleData name=\"Base\">" << airspace.GetBaseAltitude().ToString() << "</SimpleData>\n"
-		<< "<SimpleData name=\"Area\">" << area << " Km2</SimpleData>\n" // <sup>2</sup> doesn't work...
+		<< "<SimpleData name=\"Base\">" << airspace.GetBaseAltitude().ToString() << "</SimpleData>\n";
+	if (airspace.HasTransponderCode())
+		outputFile << "<SimpleData name=\"Transponder code\">" << airspace.GetTransponderCode() << "</SimpleData>\n";
+	outputFile << "<SimpleData name=\"Area\">" << area << " Km2</SimpleData>\n" // <sup>2</sup> doesn't work...
 		<< "<SimpleData name=\"Perimeter\">" << perimeter << " Km</SimpleData>\n"
 		<< "</SchemaData>\n"
 		<< "</ExtendedData>\n";

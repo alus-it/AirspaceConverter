@@ -88,7 +88,7 @@ public:
 		UNDEFINED // also the last one
 	} Type;
 
-	Airspace() : type(UNDEFINED) , airspaceClass(UNDEFINED) {}
+	Airspace() : type(UNDEFINED), airspaceClass(UNDEFINED), transponderCode(-1) {}
 	Airspace(Type category);
 	Airspace(const Airspace& orig);
 	Airspace(Airspace&& orig);
@@ -105,6 +105,7 @@ public:
 	inline void SetTopAltitude(const Altitude& alt) { top = alt; }
 	inline void SetBaseAltitude(const Altitude& alt) { base = alt; }
 	inline void SetName(const std::string& airspaceName) { name = airspaceName; }
+	bool SetTransponderCode(const std::string& code);
 	inline void AddSinglePointOnly(const double& lat, const double& lon) { points.push_back(Geometry::LatLon(lat, lon)); }
 	void Clear(); // Clear name, type, points and geometries
 	void ClearPoints(); // Clear points and geometries
@@ -134,6 +135,8 @@ public:
 	inline bool IsAGLtopped() const { return top.IsAGL(); }
 	inline bool IsAMSLtopped() const { return top.IsAMSL(); }
 	inline bool IsVisibleByDefault() const { return CategoryVisibleByDefault(type); }
+	std::string GetTransponderCode() const;
+	inline bool HasTransponderCode() const { return transponderCode >= 0; }
 	void CalculateSurface(double& areaKm2, double& perimeterKm) const;
 
 private:
@@ -148,4 +151,6 @@ private:
 	Type type;
 	Type airspaceClass; // This is to remember the class of a TMA or CTR where possible
 	std::string name;
+	//float radioFrequency;
+	short transponderCode; // Transponder code mandated for this airspace 12 bits used (OCT:7777 = DEC:4095 = BIN:1111111111)
 };
