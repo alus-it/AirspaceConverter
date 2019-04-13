@@ -184,10 +184,13 @@ bool OpenAir::Read(const std::string& fileName) {
 			case 'H': //AH
 				lineParsedOK = ParseAltitude(sLine, true, airspace);
 				break;
+			case 'F': //TODO: AF radio frequency
+			case 'P': //AP: (De)activation time
+			case 'W': //AW: Weekly activation Time
 			case 'T': //AT
-			case 'F': //AF
+			case 'X': //AX: Transponder code
 			case 'G': //AG
-			case 'Y': //AY // ignore all those
+			case 'Y': //AY // ignore all those for now...
 				break;
 			default:
 				lineParsedOK = false;
