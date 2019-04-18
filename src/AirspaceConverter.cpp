@@ -20,7 +20,7 @@
 #include "Polish.h"
 #include <iostream>
 #include <locale>
-#include <boost/filesystem/path.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
 
@@ -289,6 +289,30 @@ bool AirspaceConverter::Convert() {
 		break;
 	}
 	return conversionDone;
+}
+
+bool AirspaceConverter::ConvertOpenAIPdir(const std::string openAIPdir) {
+	if (openAIPdir.empty()) return false;
+	boost::filesystem::path openAIPpath(openAIPdir);
+	if(boost::filesystem::is_directory(openAIPpath)) {
+		UnloadAirspaces(); // make sure there is no airspace before to start
+		int counter(0);
+		for (boost::filesystem::directory_iterator itr(openAIPpath); itr!=boost::filesystem::directory_iterator(); ++itr) {
+			if (boost::filesystem::is_regular_file(itr->status()) && boost::filesystem::file_size(itr->path()) && boost::iequals(itr->path().extension().string(), ".aip")) {
+				AddAirspaceFile(itr->path().relative_path().string());
+				LoadAirspaces();
+				Convert();
+				boost::filesystem::path currentFilePath(itr->path());
+				outputFile = currentFilePath.replace_extension(".txt").string();
+				Convert();
+				counter++;
+				UnloadAirspaces(); //of course always unload airspace before to load the next file
+			}
+		}
+		if (counter == 0) LogMessage("ERROR: no valid .aip files found in that directory.", true);
+		else return true;
+	} else LogMessage("ERROR: input openAIP airspace directory is not a valid directory.", true);
+	return false;
 }
 
 int AirspaceConverter::GetNumOfTerrainMaps() const {
