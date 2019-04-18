@@ -68,6 +68,7 @@ public:
 	void SetDefaultTearrainAlt(const double altMt);
 	double GetDefaultTearrainAlt() const;
 	bool Convert();
+	bool ConvertOpenAIPdir(const std::string openAIPdir);
 	inline bool IsConversionDone() const { return conversionDone; }
 	inline OutputType GetOutputType() const { return DetermineType(outputFile); }
 	inline bool SetOutputType(const OutputType type) { return PutTypeExtension(type, outputFile); }
