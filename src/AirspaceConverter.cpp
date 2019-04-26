@@ -20,6 +20,9 @@
 #include "Polish.h"
 #include <iostream>
 #include <locale>
+#include <sstream>
+#include <chrono>
+#include <iomanip>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
@@ -400,6 +403,13 @@ bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop,
 	else alt.SetAltMt(value, isAMSL);
 	isTop ? airspace.SetTopAltitude(alt) : airspace.SetBaseAltitude(alt);
 	return true;
+}
+
+std::string AirspaceConverter::GetCreationDateString() {
+	const time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+	std::stringstream ss;
+	ss << "This file was created on: " << std::put_time(gmtime(&now), "%a %d %B %Y at %T UTC");
+	return ss.str();
 }
 
 bool AirspaceConverter::FilterOnLatLonLimits(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon) {
