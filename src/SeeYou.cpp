@@ -9,6 +9,7 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
+#include "SeeYou.h"
 #include "AirspaceConverter.h"
 #include "Waypoint.h"
 #include "Airfield.h"
@@ -20,9 +21,13 @@
 #include <boost/format.hpp>
 #include <cmath>
 #include <cassert>
-#include "SeeYou.h"
 
-bool ParseLatitude(const std::string& text, double& lat) {
+
+SeeYou::SeeYou(std::multimap<int,Waypoint*>& waypointsMap):
+	waypoints(waypointsMap) {
+}
+
+bool SeeYou::ParseLatitude(const std::string& text, double& lat) {
 	const int len = (int)text.length();
 	if(len < 5) return false;
 	try {
@@ -37,7 +42,7 @@ bool ParseLatitude(const std::string& text, double& lat) {
 	return true;
 }
 
-bool ParseLongitude(const std::string& text, double& lon) {
+bool SeeYou::ParseLongitude(const std::string& text, double& lon) {
 	const int len = (int)text.length();
 	if(len < 6) return false;
 	try {
@@ -52,7 +57,7 @@ bool ParseLongitude(const std::string& text, double& lon) {
 	return true;
 }
 
-bool ParseAltitude(const std::string& text, int& alt) {
+bool SeeYou::ParseAltitude(const std::string& text, int& alt) {
 	int pos = (int)text.length() - 1;
 	if(pos == 0 && text.front()=='0') {
 		alt = 0;
@@ -82,7 +87,7 @@ bool ParseAltitude(const std::string& text, int& alt) {
 	return true;
 }
 
-bool ParseLength(const std::string& text, int& len) {
+bool SeeYou::ParseLength(const std::string& text, int& len) {
 	int pos = (int)text.length() - 1;
 	if(pos<2) return false;
 	bool nauticalMiles = false, statuteMiles = false;
@@ -107,7 +112,7 @@ bool ParseLength(const std::string& text, int& len) {
 	return true;
 }
 
-bool SeeYou::ReadFile(const std::string& fileName, std::multimap<int,Waypoint*>& output) {
+bool SeeYou::Read(const std::string& fileName) {
 	std::ifstream input(fileName, std::ios::binary);
 	if (!input.is_open() || input.bad()) {
 		AirspaceConverter::LogMessage("ERROR: Unable to open CUP input file: " + fileName, true);
@@ -245,7 +250,7 @@ bool SeeYou::ReadFile(const std::string& fileName, std::multimap<int,Waypoint*>&
 			Airfield* airfield = new Airfield(name, code, country, latitude, longitude, altitude, type, runwayDir, runwayLength, radioFreq, description);
 
 			// Add it to the multimap
-			output.insert(std::pair<int, Waypoint*>(type, (Waypoint*)airfield));
+			waypoints.insert(std::pair<int, Waypoint*>(type, (Waypoint*)airfield));
 		} else {
 			// Skip the airfield's fields
 			token++;
@@ -261,11 +266,17 @@ bool SeeYou::ReadFile(const std::string& fileName, std::multimap<int,Waypoint*>&
 			Waypoint* waypoint = new Waypoint(name, code, country, latitude, longitude, altitude, type, description);
 
 			// Add it to the multimap
-			output.insert(std::pair<int, Waypoint*>(type, waypoint));
+			waypoints.insert(std::pair<int, Waypoint*>(type, waypoint));
 		}
 
 		// Make sure that at this point we already found a valid waypoint so the header is not anymore expected
 		if (!firstWaypointFound) firstWaypointFound = true;
 	}
 	return true;
+}
+
+
+bool SeeYou::Write(const std::string& fileName) {
+	//TODO: ....
+	return false;
 }

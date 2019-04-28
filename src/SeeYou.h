@@ -15,6 +15,19 @@
 
 class Waypoint;
 
-namespace SeeYou {
-	bool ReadFile(const std::string& fileName, std::multimap<int,Waypoint*>& output);
+class SeeYou {
+
+public:
+	SeeYou(std::multimap<int,Waypoint*>& waypointsMap);
+	~SeeYou() {}
+	bool Read(const std::string& fileName);
+	bool Write(const std::string& fileName);
+
+private:
+	static bool ParseLatitude(const std::string& text, double& lat);
+	static bool ParseLongitude(const std::string& text, double& lon);
+	static bool ParseAltitude(const std::string& text, int& alt);
+	static bool ParseLength(const std::string& text, int& len);
+
+	std::multimap<int,Waypoint*>& waypoints;
 };
