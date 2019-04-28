@@ -13,9 +13,23 @@
 #pragma once
 #include <string>
 #include <map>
+#include <boost/property_tree/ptree_fwd.hpp>
 
 class Airspace;
+class Waypoint;
+class Altitude;
 
-namespace OpenAIP {
-	bool Read(const std::string& fileName, std::multimap<int,Airspace>& output);
+class OpenAIP {
+
+public:
+	OpenAIP(std::multimap<int, Airspace>& airspacesMap, std::multimap<int,Waypoint*>& waypointsMap);
+	~OpenAIP() {}
+	bool ReadAirspaces(const std::string& fileName);
+	bool ReadWaypoints(const std::string& fileName);
+
+private:
+	static bool ParseAltitude(const boost::property_tree::ptree& node, Altitude& altitude);
+
+	std::multimap<int,Airspace>& airspaces;
+	std::multimap<int,Waypoint*>& waypoints;
 };
