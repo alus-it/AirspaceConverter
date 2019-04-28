@@ -168,13 +168,14 @@ bool AirspaceConverter::PutTypeExtension(const OutputType type, std::string& fil
 void AirspaceConverter::LoadAirspaces(const OutputType suggestedTypeForOutputFilename /* = OutputType::KMZ_Format */) {
 	conversionDone = false;
 	OpenAir openAir(airspaces);
+	OpenAIP openAIP(airspaces, waypoints);
 	KML kml(airspaces, waypoints);
 	kml.ProcessLineStrings(processLineStrings);
 	const size_t initialAirspacesNumber = airspaces.size(); // Airspaces originally already loaded
 	for (const std::string& inputFile : airspaceFiles) {
 		const std::string ext(boost::filesystem::path(inputFile).extension().string());
 		if(boost::iequals(ext, ".txt")) openAir.Read(inputFile);
-		else if (boost::iequals(ext, ".aip")) OpenAIP::Read(inputFile, airspaces);
+		else if (boost::iequals(ext, ".aip")) openAIP.ReadAirspaces(inputFile);
 		else if (boost::iequals(ext, ".kmz")) kml.ReadKMZ(inputFile);
 		else if (boost::iequals(ext, ".kml")) kml.ReadKML(inputFile);
 

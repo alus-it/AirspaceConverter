@@ -20,7 +20,12 @@
 
 using boost::property_tree::ptree;
 
-bool ReadAltitude(const ptree& node, Altitude& altitude) {
+OpenAIP::OpenAIP(std::multimap<int, Airspace>& airspacesMap, std::multimap<int,Waypoint*>& waypointsMap):
+	airspaces(airspacesMap),
+	waypoints(waypointsMap) {
+}
+
+bool OpenAIP::ParseAltitude(const ptree& node, Altitude& altitude) {
 	try {
 		ptree alt = node.get_child("ALT");
 		std::string str = alt.get_child("<xmlattr>").get<std::string>("UNIT");
@@ -70,7 +75,7 @@ bool ReadAltitude(const ptree& node, Altitude& altitude) {
 	return false;
 }
 
-bool OpenAIP::Read(const std::string& fileName, std::multimap<int, Airspace>& output) {
+bool OpenAIP::ReadAirspaces(const std::string& fileName) {
 	std::ifstream input(fileName);
 	if (!input.is_open() || input.bad()) {
 		AirspaceConverter::LogMessage("ERROR: Unable to open openAIP input file: " + fileName, true);
@@ -161,7 +166,7 @@ bool OpenAIP::Read(const std::string& fileName, std::multimap<int, Airspace>& ou
 				// Airspace top altitude
 				ptree node = asp.second.get_child("ALTLIMIT_TOP");
 				Altitude alt;
-				if (ReadAltitude(node, alt)) airspace.SetTopAltitude(alt);
+				if (ParseAltitude(node, alt)) airspace.SetTopAltitude(alt);
 				else {
 					AirspaceConverter::LogMessage("Warning: skipping airspace with invalid or missing ALTLIMIT_TOP attribute: " + airspace.GetName(), false);
 					continue;
@@ -169,7 +174,7 @@ bool OpenAIP::Read(const std::string& fileName, std::multimap<int, Airspace>& ou
 
 				// Airspace bottom altitude
 				node = asp.second.get_child("ALTLIMIT_BOTTOM");
-				if (ReadAltitude(node, alt)) airspace.SetBaseAltitude(alt);
+				if (ParseAltitude(node, alt)) airspace.SetBaseAltitude(alt);
 				else {
 					AirspaceConverter::LogMessage("Warning: skipping airspace with invalid or missing ALTLIMIT_BOTTOM attribute: " + airspace.GetName(), false);
 					continue;
@@ -228,7 +233,7 @@ bool OpenAIP::Read(const std::string& fileName, std::multimap<int, Airspace>& ou
 				bool found(false);
 
 				// Filter only on airspaces of the same type
-				const auto filtered = output.equal_range(airspace.GetType());
+				const auto filtered = airspaces.equal_range(airspace.GetType());
 				for (auto it = filtered.first; it != filtered.second && !found; ++it) {
 					if (it->second == airspace) {
 						found = true;
@@ -237,7 +242,7 @@ bool OpenAIP::Read(const std::string& fileName, std::multimap<int, Airspace>& ou
 				}
 
 				// If it is not already present in our collection add the new airspace
-				if (!found) output.insert(std::pair<int, Airspace>(airspace.GetType(), std::move(airspace)));
+				if (!found) airspaces.insert(std::pair<int, Airspace>(airspace.GetType(), std::move(airspace)));
 
 			} // for each ASP
 			return true;
