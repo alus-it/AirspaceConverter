@@ -223,8 +223,9 @@ void AirspaceConverter::LoadWaypoints() {
 	conversionDone = false;
 	int counter = 0;
 	const size_t wptCounter = waypoints.size();
+	SeeYou cu(waypoints);
 	for (const std::string& inputFile : waypointFiles) {
-		const bool readOk = SeeYou::ReadFile(inputFile, waypoints);
+		const bool readOk = cu.Read(inputFile);
 		if (readOk) counter++;
 		if (readOk && outputFile.empty()) outputFile = boost::filesystem::path(inputFile).replace_extension(".kmz").string(); // Default output as KMZ
 	}
