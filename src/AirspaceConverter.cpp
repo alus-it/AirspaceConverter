@@ -23,6 +23,7 @@
 #include <sstream>
 #include <chrono>
 #include <iomanip>
+#include <cmath>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
@@ -419,6 +420,15 @@ std::string AirspaceConverter::GetCreationDateString() {
 	std::stringstream ss;
 	ss << "This file was created on: " << std::put_time(gmtime(&now), "%a %d %B %Y at %T UTC");
 	return ss.str();
+}
+
+bool AirspaceConverter::IsValidAirbandFrequency(const float& frequency) {
+	// Check if the frequency is within the airband
+	if (frequency < 118 || frequency > 137) return false;
+
+	// Check if the frequency has not more than 3 decimals
+	if (frequency != std::trunc(frequency * 1000) / 1000) return false;
+	return true;
 }
 
 bool AirspaceConverter::FilterOnLatLonLimits(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon) {

@@ -112,6 +112,13 @@ bool SeeYou::ParseLength(const std::string& text, int& len) {
 	return true;
 }
 
+bool SeeYou::ParseFrequency(const std::string& text, float& freq) {
+
+	freq = std::stof(text);
+	if (text.length() != 7) AirspaceConverter::LogMessage("Frequency not according to SeeYou format: " + text, false);
+	return false;
+}
+
 bool SeeYou::Read(const std::string& fileName) {
 	std::ifstream input(fileName, std::ios::binary);
 	if (!input.is_open() || input.bad()) {
