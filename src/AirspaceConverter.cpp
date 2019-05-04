@@ -132,6 +132,7 @@ AirspaceConverter::OutputType AirspaceConverter::DetermineType(const std::string
 	std::string outputExt(boost::filesystem::path(filename).extension().string());
 	if (!boost::iequals(outputExt, ".kmz")) {
 		if (boost::iequals(outputExt, ".txt")) outputType = OutputType::OpenAir_Format;
+		else if (boost::iequals(outputExt, ".cup")) outputType = OutputType::SeeYou_Format;
 		else if (boost::iequals(outputExt, ".mp")) outputType = OutputType::Polish_Format;
 		else if (boost::iequals(outputExt, ".img")) outputType = OutputType::Garmin_Format;
 		else outputType = OutputType::Unknown_Format;
@@ -148,6 +149,9 @@ bool AirspaceConverter::PutTypeExtension(const OutputType type, std::string& fil
 		break;
 	case OutputType::OpenAir_Format:
 		outputPath.replace_extension(".txt");
+		break;
+	case OutputType::SeeYou_Format:
+		outputPath.replace_extension(".cup");
 		break;
 	case OutputType::Polish_Format:
 		outputPath.replace_extension(".mp");
@@ -273,6 +277,9 @@ bool AirspaceConverter::Convert() {
 		break;
 	case OutputType::OpenAir_Format:
 		conversionDone = OpenAir(airspaces, doNotCalculateArcs, writeCoordinatesAsDDMMSS).Write(outputFile);
+		break;
+	case OutputType::SeeYou_Format:
+		conversionDone = SeeYou(waypoints).Write(outputFile);
 		break;
 	case OutputType::Polish_Format:
 		conversionDone = Polish().Write(outputFile, airspaces);
@@ -440,7 +447,7 @@ bool AirspaceConverter::FilterOnLatLonLimits(const double& topLat, const double&
 		const unsigned long origWaypoints(GetNumOfWaypoints());
 		for (std::multimap<int, Waypoint*>::iterator it = waypoints.begin(); it != waypoints.end(); ) {
 			Waypoint* w = (*it).second;
-			if (limits.IsPositionWithinLimits(w->GetLatitude(), w->GetLongitude())) ++it;
+			if (limits.IsPositionWithinLimits(w->GetPosition())) ++it;
 			else {
 				it = waypoints.erase(it);
 				delete(w);

@@ -24,7 +24,7 @@ public:
 private:
 	int runwayDir;    // [deg]
 	int runwayLength; // [m]
-	std::string radioFreq;
+	std::string radioFreq; //TODO: this should be just a float
 
 };
 

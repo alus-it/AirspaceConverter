@@ -26,7 +26,7 @@ public:
 private:
 	static bool ParseLatitude(const std::string& text, double& lat);
 	static bool ParseLongitude(const std::string& text, double& lon);
-	static bool ParseAltitude(const std::string& text, int& alt);
+	static bool ParseAltitude(const std::string& text, float& alt);
 	static bool ParseLength(const std::string& text, int& len);
 
 	std::multimap<int,Waypoint*>& waypoints;

@@ -10,7 +10,6 @@
 //============================================================================
 
 #include "Waypoint.h"
-#include "Geometry.h"
 #include <cassert>
 
 const std::string Waypoint::TYPE_NAMES[] = {
@@ -34,15 +33,13 @@ const std::string Waypoint::TYPE_NAMES[] = {
 	"Intersection"
 };
 
-Waypoint::Waypoint(const std::string& longName, const std::string& shortName, const std::string& countryCode, const double lat, const double lon, const int alt, const int style, const std::string& descr)
-		: name(longName)
-		, code(shortName)
-		, country(countryCode)
-		, latitude(lat)
-		, longitude(lon)
-		, altitude(alt)
-		, type((WaypointType)style)
-		, description(descr) {
-		assert(Geometry::LatLon::IsValidLat(latitude) && Geometry::LatLon::IsValidLat(longitude));
-	}
-
+Waypoint::Waypoint(const std::string& longName, const std::string& shortName, const std::string& countryCode, const double lat, const double lon, const float alt, const int style, const std::string& descr)
+	: pos(lat,lon)
+	, name(longName)
+	, code(shortName)
+	, country(countryCode)
+	, altitude(alt)
+	, type((WaypointType)style)
+	, description(descr) {
+	assert(pos.IsValid());
+}

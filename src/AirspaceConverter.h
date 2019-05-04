@@ -30,6 +30,7 @@ public:
 	enum OutputType {
 		KMZ_Format = 0,
 		OpenAir_Format,
+		SeeYou_Format,
 		Polish_Format,
 		Garmin_Format,
 		Unknown_Format

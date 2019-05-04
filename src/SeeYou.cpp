@@ -16,6 +16,7 @@
 #include "Airspace.h"
 #include "Geometry.h"
 #include <fstream>
+#include <iomanip>
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/format.hpp>
@@ -57,7 +58,7 @@ bool SeeYou::ParseLongitude(const std::string& text, double& lon) {
 	return true;
 }
 
-bool SeeYou::ParseAltitude(const std::string& text, int& alt) {
+bool SeeYou::ParseAltitude(const std::string& text, float& alt) {
 	int pos = (int)text.length() - 1;
 	if(pos == 0 && text.front()=='0') {
 		alt = 0;
@@ -78,9 +79,8 @@ bool SeeYou::ParseAltitude(const std::string& text, int& alt) {
 			return false;
 	}
 	try {
-		double altitude = std::stod(text.substr(0,pos));
-		if(feet) altitude *= Altitude::FEET2METER;
-		alt = (int)std::round(altitude);
+		alt = std::stof(text.substr(0,pos));
+		if(feet) alt *= Altitude::FEET2METER;
 	} catch(...) {
 		return false;
 	}
@@ -203,7 +203,7 @@ bool SeeYou::Read(const std::string& fileName) {
 
 		// Elevation
 		token++;
-		int altitude = 0;
+		float altitude = 0;
 		if(!ParseAltitude(*token,altitude))
 			if (firstWaypointFound) AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %(*token)), true);
 
@@ -239,6 +239,7 @@ bool SeeYou::Read(const std::string& fileName) {
 
 			// Radio frequency
 			token++;
+			//TODO: verify according to CUP specs and parse the frequency as float
 			std::string radioFreq = *token;
 
 			// Description
@@ -277,6 +278,84 @@ bool SeeYou::Read(const std::string& fileName) {
 
 
 bool SeeYou::Write(const std::string& fileName) {
-	//TODO: ....
+	if (waypoints.empty()) {
+		AirspaceConverter::LogMessage("SeeYou output: no waypoints, nothing to write", false);
+		return false;
+	}
+	std::ofstream file;
+	//if (file.is_open()) file.close();
+	file.open(fileName, std::ios::out | std::ios::trunc | std::ios::binary);
+	if (!file.is_open() || file.bad()) {
+		AirspaceConverter::LogMessage("ERROR: Unable to open output file: " + fileName, true);
+		return false;
+	}
+	AirspaceConverter::LogMessage("Writing output file: " + fileName, false);
+
+	// Write default CUP header on first line
+	file << "name, code, country, lat, lon, elev, style, rwydir, rwylen, freq, desc\r\n\r\n";
+
+	// Write our disclaimer
+	for(const std::string& line: AirspaceConverter::disclaimer) file << "* " << line << "\r\n";
+
+	// Write creation date
+	file << "\r\n* " << AirspaceConverter::GetCreationDateString() << "\r\n\r\n";
+
+	// Go trough all waypoints
+	for (const std::pair<int,Waypoint*>& pair : waypoints) {
+		assert(pair.second != nullptr);
+		const Waypoint& w(*pair.second);
+
+		// Name is mandatory according to SeeYou specs
+		if (w.GetName().empty()) {
+			AirspaceConverter::LogMessage("Warning: skipping waypoint with long name empty: " + w.GetCode(), true);
+			continue;
+		}
+
+		// Long name
+		file << '"' << w.GetName() << "\",";
+
+		// Code "short name"
+		if (!w.GetCode().empty()) file << '"' << w.GetCode() << '"';
+
+		// Country code
+		file << ',' << w.GetCountry() << ',';
+
+		// Latitude
+		int deg;
+		double min; // the minutes must be expressed with 3 decimals so they have to be rounded on three decimals
+		const Geometry::LatLon& pos(w.GetPosition());
+		pos.GetLatDegMin(deg,min);
+		file << std::setw(2) << std::setfill('0') << deg << std::setw(6) << std::setfill('0') << std::fixed << std::setprecision(3) << std::round(min*1000)/1000 << pos.GetNorS() << ',';
+
+		// Longitude
+		pos.GetLonDegMin(deg,min);
+		file << std::setw(3) << std::setfill('0') << deg << std::setw(6) << std::setfill('0') << std::fixed << std::setprecision(3) << std::round(min*1000)/1000 << pos.GetEorW() << ',';
+
+		// Altitude
+		file << std::fixed << std::setprecision(1) << std::round(w.GetAltitude()*10)/10 << "m,"; // round altitude in meters on one decimal
+
+		// Waypoint style
+		file << (int)w.GetType() << ',';
+
+		if (w.IsAirfield()) {
+			const Airfield& a((const Airfield&)w);
+
+			// Runway direction
+			file << std::setw(3) << std::setfill('0') << a.GetRunwayDir() << ',';
+
+			// Runway length
+			file << a.GetRunwayLength() << "m,";
+
+			// Radio frequency
+			file << a.GetRadioFrequency() << ',';
+		} else file << ",,,";
+
+		// Description
+		if (!w.GetDescription().empty()) file << '"' << w.GetDescription() << '"';
+
+		file << "\r\n";
+	}
+
+	file.close();
 	return false;
 }
