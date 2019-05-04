@@ -298,12 +298,20 @@ bool OpenAir::ParseAN(const std::string & line, Airspace& airspace) {
 
 bool OpenAir::ParseAF(const std::string& line, Airspace& airspace) {
 	if (line.size() < 4) return false;
-
-	//TODO: to be implemented.....
-	const float freq = 130.000;
-	const std::string descr(line.substr(3)); //TODO: parse freq<space>description...
-
-	return airspace.AddRadioFrequency(freq,descr);
+	std::string descr(line.substr(3));
+	try {
+		size_t pos(0);
+		const float freq = std::stof(descr,&pos);
+		if (!AirspaceConverter::IsValidAirbandFrequency(freq)) return false;
+		if (pos<descr.length()) {
+			descr.erase(0,pos);
+			if (descr.at(0) == ' ') descr.erase(0,1); // remove the separating space
+		} else descr.erase();
+		airspace.AddRadioFrequency(freq,descr);
+		return true;
+	} catch(...) {
+		return false;
+	}
 }
 
 bool OpenAir::ParseAltitude(const std::string& line, const bool isTop, Airspace& airspace) {

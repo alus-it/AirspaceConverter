@@ -10,7 +10,6 @@
 //============================================================================
 
 #include "Airspace.h"
-#include <cmath>
 #include <algorithm>
 #include <cassert>
 #include <boost/version.hpp>
@@ -227,16 +226,8 @@ void Airspace::SetClass(const Type& airspClass) {
 	if (type <= CLASSG && type != airspClass) type = airspClass;
 }
 
-bool Airspace::AddRadioFrequency(const float frequency, const std::string& description) {
-	// Check if the frequency is within the airband
-	if (frequency < 118 || frequency > 137) return false;
-
-	// Check if the frequency has not more than 3 decimals
-	if (frequency != std::trunc(frequency * 1000) / 1000) return false;
-
-	// ... then we can use it
-	radioFrequencies.push_back(std::make_pair(frequency,description));
-	return true;
+void Airspace::AddRadioFrequency(const float frequency, const std::string& description) {
+	radioFrequencies.push_back(std::make_pair(frequency,description)); // here we expect alredy validated airband radio frequencies
 }
 
 bool Airspace::SetTransponderCode(const std::string& code) {
