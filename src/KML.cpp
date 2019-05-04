@@ -430,7 +430,7 @@ bool KML::Write(const std::string& filename) {
 				outputFile << "<Point>\n"
 					<< "<extrude>0</extrude>\n"
 					<< "<altitudeMode>" << (t != Waypoint::normal ? "clampToGround" : "absolute") << "</altitudeMode>\n" // Except "normal" are all objects on the ground
-					<< "<coordinates>" << w->GetLongitude() << "," << w->GetLatitude() << "," << w->GetAltitude() << "</coordinates>\n"
+					<< "<coordinates>" << w->GetLongitude() << "," << w->GetLatitude() << "," << (int)std::round(w->GetAltitude()) << "</coordinates>\n"
 					<< "</Point>\n";
 
 				// If the perimeter was drawn the the multigeometry have to be closed
