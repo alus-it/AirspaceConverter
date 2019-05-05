@@ -55,6 +55,9 @@ public:
 	inline const std::string& GetTypeName() const { return TypeName(type); }
 	inline const std::string& GetDescription() const { return description; }
 	inline bool IsAirfield() const { return IsTypeAirfield(type); }
+	inline void SetOtherFrequency(float freq) { otherFreq = freq; }
+	inline bool HasOtherFrequency() const { return otherFreq > 0; }
+	inline float GetOtherFrequency() const { return otherFreq; }
 
 	inline static const std::string& TypeName(const WaypointType& type) { return TYPE_NAMES[type]; }
 
@@ -65,6 +68,7 @@ private:
 	std::string country;
 	float altitude; // [m]
 	WaypointType type;
+	float otherFreq; // frequency for VOR NDB or secondary radio frequency for airports
 	std::string description;
 	static const std::string TYPE_NAMES[];
 };

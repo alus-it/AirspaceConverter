@@ -54,7 +54,8 @@ public:
 	inline static bool isDigit(const char c) { return (c >= '0' && c <= '9'); }
 	static std::string GetCreationDateString();
 	static bool IsValidAirbandFrequency(const float& frequency);
-
+	static bool IsValidVORfrequency(const float& frequency);
+	static bool IsValidNDBfrequency(const float& frequency);
 	inline void AddAirspaceFile(const std::string& inputFile) { airspaceFiles.push_back(inputFile); }
 	inline void AddWaypointFile(const std::string& waypointsFile) { waypointFiles.push_back(waypointsFile); }
 	inline void AddTerrainRasterMapFile(const std::string& rasterMapFile) { terrainRasterMapFiles.push_back(rasterMapFile); }

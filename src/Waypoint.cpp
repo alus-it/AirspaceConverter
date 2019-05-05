@@ -40,6 +40,7 @@ Waypoint::Waypoint(const std::string& longName, const std::string& shortName, co
 	, country(countryCode)
 	, altitude(alt)
 	, type((WaypointType)style)
+	, otherFreq(0)
 	, description(descr) {
 	assert(pos.IsValid());
 }

@@ -232,9 +232,20 @@ void KML::OpenPlacemark(const Waypoint* waypoint) {
 		<< "<SimpleData name=\"Altitude\">" << altMt << " m - " << altFt << " ft" << "</SimpleData>\n";
 	if(isAirfield) {
 		const Airfield* airfield = (const Airfield*)waypoint;
-		outputFile << "<SimpleData name=\"Runway direction\">" << (airfield->GetRunwayDir() != -1 ? std::to_string(airfield->GetRunwayDir()) + " deg" : "UNKNOWN") << "</SimpleData>\n"
-		<< "<SimpleData name=\"Runway length\">" << (airfield->GetRunwayLength() != -1 ? std::to_string(airfield->GetRunwayLength()) + " m" : "UNKNOWN") << "</SimpleData>\n"
-		<< "<SimpleData name=\"Radio frequency\">" << (airfield->GetRadioFrequency().empty() ? "UNKNOWN" : airfield->GetRadioFrequency() + " MHz") << "</SimpleData>\n";
+		outputFile << "<SimpleData name=\"Runway direction\">" << (airfield->HasRunwayDir() ? std::to_string(airfield->GetRunwayDir()) + " deg" : "UNKNOWN") << "</SimpleData>\n"
+		<< "<SimpleData name=\"Runway length\">" << (airfield->HasRunwayLength() ? std::to_string(airfield->GetRunwayLength()) + " m" : "UNKNOWN") << "</SimpleData>\n"
+		<< "<SimpleData name=\"Radio frequency\">";
+		if (airfield->HasRadioFrequency()) outputFile << std::fixed << std::setprecision(3) << airfield->GetRadioFrequency() << " MHz";
+		else outputFile << "UNKNOWN";
+		outputFile << "</SimpleData>\n";
+		if (airfield->HasOtherFrequency())
+			outputFile << "<SimpleData name=\"Radio frequency\">" << airfield->GetOtherFrequency() << " MHz</SimpleData>\n";
+	}
+	if (waypoint->HasOtherFrequency()) {
+		if (waypoint->GetType() == Waypoint::WaypointType::VOR)
+			outputFile << "<SimpleData name=\"VOR frequency\">" << std::fixed << std::setprecision(3) << waypoint->GetOtherFrequency() << " MHz</SimpleData>\n";
+		else if (waypoint->GetType() == Waypoint::WaypointType::NDB)
+			outputFile << "<SimpleData name=\"NDB frequency\">" << std::fixed << std::setprecision(1) << waypoint->GetOtherFrequency() << " kHz</SimpleData>\n";
 	}
 	outputFile << "<SimpleData name=\"Description\">" << waypoint->GetDescription() << "</SimpleData>\n"
 		<< "</SchemaData>\n"
@@ -401,7 +412,7 @@ bool KML::Write(const std::string& filename) {
 					dir = a->GetRunwayDir();
 
 					// If they are valid...
-					if (leng > 0 && dir >= 0) {
+					if (leng > 0 && dir > 0) {
 
 						// Calculate the runway perimeter
 						std::vector<Geometry::LatLon> airfieldPerimeter;
