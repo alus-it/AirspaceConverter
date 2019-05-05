@@ -23,7 +23,6 @@
 #include <cmath>
 #include <cassert>
 
-
 SeeYou::SeeYou(std::multimap<int,Waypoint*>& waypointsMap):
 	waypoints(waypointsMap) {
 }
@@ -191,9 +190,8 @@ bool SeeYou::Read(const std::string& fileName) {
 		// Verify line ending
 		if (!CRLFwarningGiven && !isCRLF) {
 			AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: not valid Windows style end of line (expected CR LF).") % linecount), true);
-			AirspaceConverter::LogMessage("This warning will be not repeated for further lines not terminated with CR LF of this CUP file.", false);
 
-			// CUP files may contain thousends of WPs we don't want to print this warning all the time
+			// CUP files may contain thousands of WPs we don't want to print this warning all the time
 			CRLFwarningGiven = true;
 		}
 
@@ -324,7 +322,6 @@ bool SeeYou::Write(const std::string& fileName) {
 		return false;
 	}
 	std::ofstream file;
-	//if (file.is_open()) file.close();
 	file.open(fileName, std::ios::out | std::ios::trunc | std::ios::binary);
 	if (!file.is_open() || file.bad()) {
 		AirspaceConverter::LogMessage("ERROR: Unable to open output file: " + fileName, true);
@@ -395,10 +392,8 @@ bool SeeYou::Write(const std::string& fileName) {
 				file << std::fixed << std::setprecision(3) << a.GetRadioFrequency();
 				if (a.HasOtherFrequency()) file << '-' << std::fixed << std::setprecision(3) << a.GetOtherFrequency();
 			}
-			file << ',';
 		} else {
-			// Skip runway length and direction
-			file << ",,";
+			file << ",,"; // Skip runway length and direction
 
 			// Other frequency
 			if (w.HasOtherFrequency()) {
@@ -406,8 +401,8 @@ bool SeeYou::Write(const std::string& fileName) {
 				else if (w.GetType() == Waypoint::WaypointType::VOR) file << std::fixed << std::setprecision(2) << w.GetOtherFrequency(); // 2 decimals for VOR freq [MHz]
 				else file << std::fixed << std::setprecision(3) << w.GetOtherFrequency(); // assuming all other VHF freq [MHz]
 			}
-			file << ',';
 		}
+		file << ',';
 
 		// Description
 		if (!w.GetDescription().empty()) file << '"' << w.GetDescription() << '"';
