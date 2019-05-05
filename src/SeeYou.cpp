@@ -87,6 +87,16 @@ bool SeeYou::ParseAltitude(const std::string& text, float& alt) {
 	return true;
 }
 
+int SeeYou::ParseStyle(const std::string& text) {
+	try {
+		const int type = std::stoi(text);
+		if (type > Waypoint::undefined && type < Waypoint::numOfWaypointTypes) return type;
+	} catch(...) {
+		AirspaceConverter::LogMessage("ERROR: unable to parse waypoint style: " + text, true);
+	}
+	return Waypoint::undefined;
+}
+
 int SeeYou::ParseRunwayDir(const std::string& text) {
 	try {
 		const int runwayDir = std::stoi(text);
@@ -135,7 +145,7 @@ float SeeYou::ParseAirfieldFrequencies(const std::string& text, float& secondary
 		const float freq = std::stof(text,&pos);
 		if (!AirspaceConverter::IsValidAirbandFrequency(freq)) return 0;
 		if (pos < text.length()) {
-			secondaryFreq = std::stof(text.substr(pos));
+			secondaryFreq = std::fabs(std::stof(text.substr(pos)));
 			if (!AirspaceConverter::IsValidAirbandFrequency(secondaryFreq)) secondaryFreq = 0;
 		}
 		return freq;
@@ -220,48 +230,39 @@ bool SeeYou::Read(const std::string& fileName) {
 
 		// Long name
 		boost::tokenizer<boost::escaped_list_separator<char> >::iterator token=tokens.begin();
-		std::string name = *token;
+		const std::string name = *token;
 		if (name.empty()) {
 			if (firstWaypointFound) AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: a name must be present: %2s") %linecount %sLine), true);
 			continue;
 		}
 
-		// Code
-		token++;
-		std::string code = *token;
+		// Code (short name)
+		const std::string code = *(++token);
 
 		// Country code
-		token++;
-		std::string country = *token;
+		const std::string country = *(++token);
 
 		// Latitude
-		token++;
 		double latitude;
-		if(!ParseLatitude(*token,latitude)) {
+		if(!ParseLatitude(*(++token),latitude)) {
 			if (firstWaypointFound) AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: invalid latitude: %2s") %linecount %(*token)), true);
 			continue;
 		}
 
 		// Longitude
-		token++;
 		double longitude;
-		if(!ParseLongitude(*token,longitude)) {
+		if(!ParseLongitude(*(++token),longitude)) {
 			if (firstWaypointFound) AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: invalid longitude: %2s") %linecount %(*token)), true);
 			continue;
 		}
 
 		// Elevation
-		token++;
 		float altitude = 0;
-		if(!ParseAltitude(*token,altitude) && firstWaypointFound) AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %(*token)), true);
+		if(!ParseAltitude(*(++token),altitude) && firstWaypointFound) AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %(*token)), true);
 
 		// Waypoint style
-		token++;
-		int type = Waypoint::undefined;
-		try {
-			type = std::stoi(*token);
-		} catch(...) {}
-		if(type <= Waypoint::undefined || type >= Waypoint::numOfWaypointTypes) {
+		int type = ParseStyle(*(++token));
+		if(type <= Waypoint::undefined) {
 			if (firstWaypointFound) AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid waypoint style: %2s, assuming normal") %linecount %(*token)), true);
 			type = Waypoint::normal;
 		}
@@ -269,25 +270,20 @@ bool SeeYou::Read(const std::string& fileName) {
 		// If it's an airfield...
 		if(Waypoint::IsTypeAirfield((Waypoint::WaypointType)type)) {
 			// Runway direction
-			token++;
-			const int runwayDir = ParseRunwayDir(*token);
+			const int runwayDir = ParseRunwayDir(*(++token));
 			if (firstWaypointFound && runwayDir <= 0) AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid runway direction: %2s") % linecount % (*token)), true);
 
-
 			// Runway length
-			token++;
-			const int runwayLength = ParseRunwayLength(*token);
+			const int runwayLength = ParseRunwayLength(*(++token));
 			if(firstWaypointFound && runwayLength <= 0) AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid runway length: %2s") %linecount %(*token)), true);
 
 			// Radio frequency
-			token++;
 			float altRadioFreq(0);
-			const float radioFreq = ParseAirfieldFrequencies(*token, altRadioFreq);
+			const float radioFreq = ParseAirfieldFrequencies(*(++token), altRadioFreq);
 
 			// Description
-			token++;
+			std::string description = *(++token);
 			assert(token != tokens.end());
-			std::string description = *token;
 
 			// Build the airfield
 			Airfield* airfield = new Airfield(name, code, country, latitude, longitude, altitude, type, runwayDir, runwayLength, radioFreq, description);
@@ -296,18 +292,16 @@ bool SeeYou::Read(const std::string& fileName) {
 			// Add it to the multimap
 			waypoints.insert(std::pair<int, Waypoint*>(type, (Waypoint*)airfield));
 		} else {
-			// Skip the airfield's fields
+			// Skip runway length and direction
 			token++;
 			token++;
 
 			// Frequency may be used for VOR and NDB
-			token++;
-			const float radioFreq = ParseOtherFrequency(*token, type);
+			const float radioFreq = ParseOtherFrequency(*(++token), type);
 
 			// Description
-			token++;
+			std::string description = *(++token);
 			assert(token != tokens.end());
-			std::string description = *token;
 
 			// Build the waypoint
 			Waypoint* waypoint = new Waypoint(name, code, country, latitude, longitude, altitude, type, description);
@@ -379,7 +373,8 @@ bool SeeYou::Write(const std::string& fileName) {
 		file << std::setw(3) << std::setfill('0') << deg << std::setw(6) << std::setfill('0') << std::fixed << std::setprecision(3) << std::round(min*1000)/1000 << pos.GetEorW() << ',';
 
 		// Altitude
-		file << std::fixed << std::setprecision(1) << std::round(w.GetAltitude()*10)/10 << "m,"; // round altitude in meters on one decimal
+		if (w.GetAltitude() != 0) file << std::fixed << std::setprecision(1) << std::round(w.GetAltitude()*10)/10 << "m,"; // round altitude in meters on one decimal
+		else file << "0,";
 
 		// Waypoint style
 		file << (int)w.GetType() << ',';
@@ -396,18 +391,22 @@ bool SeeYou::Write(const std::string& fileName) {
 			file << ',';
 
 			// Radio frequency
-			if (a.HasRadioFrequency()) file << std::fixed << std::setprecision(3) << a.GetRadioFrequency();
+			if (a.HasRadioFrequency()) {
+				file << std::fixed << std::setprecision(3) << a.GetRadioFrequency();
+				if (a.HasOtherFrequency()) file << '-' << std::fixed << std::setprecision(3) << a.GetOtherFrequency();
+			}
 			file << ',';
 		} else {
+			// Skip runway length and direction
 			file << ",,";
 
 			// Other frequency
 			if (w.HasOtherFrequency()) {
 				if (w.GetType() == Waypoint::WaypointType::NDB) file << std::fixed << std::setprecision(1) << w.GetOtherFrequency(); // 1 decimal for NDB freq [kHz]
+				else if (w.GetType() == Waypoint::WaypointType::VOR) file << std::fixed << std::setprecision(2) << w.GetOtherFrequency(); // 2 decimals for VOR freq [MHz]
 				else file << std::fixed << std::setprecision(3) << w.GetOtherFrequency(); // assuming all other VHF freq [MHz]
 			}
 			file << ',';
-
 		}
 
 		// Description

@@ -27,6 +27,7 @@ private:
 	static bool ParseLatitude(const std::string& text, double& lat);
 	static bool ParseLongitude(const std::string& text, double& lon);
 	static bool ParseAltitude(const std::string& text, float& alt);
+	static int ParseStyle(const std::string& text);
 	static int ParseRunwayDir(const std::string& text);
 	static int ParseRunwayLength(const std::string& text);
 	static float ParseAirfieldFrequencies(const std::string& text, float& secondaryFreq);
