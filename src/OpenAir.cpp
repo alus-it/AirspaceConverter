@@ -515,6 +515,17 @@ bool OpenAir::Write(const std::string& fileName) {
 		file << "AL " << a.GetBaseAltitude().ToString() << "\r\n";
 		file << "AH " << a.GetTopAltitude().ToString() << "\r\n";
 
+		// Write frequencies
+		for (unsigned int i=0; i<a.GetNumberOfRadioFrequencies(); i++) {
+			const std::pair<float, std::string>& f = a.GetRadioFrequencyAt(i);
+			file << "AF " << std::fixed << std::setprecision(3) << f.first;
+			if (!f.second.empty()) file << ' ' << f.second;
+			file << "\r\n";
+		}
+
+		// Write transponder code
+		if (a.HasTransponderCode()) file << "AX " << a.GetTransponderCode() << "\r\n";
+
 		// Write the geometries
 		if (calculateArcs) {
 
