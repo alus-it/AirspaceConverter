@@ -116,12 +116,17 @@
     </property>
     <item>
      <property name="text">
-      <string>KMZ for Google Earth</string>
+      <string>KMZ Google Earth</string>
      </property>
     </item>
     <item>
      <property name="text">
-      <string>OpenAir</string>
+      <string>OpenAir (only airspace)</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>CUP SeeYou (only waypoints)</string>
      </property>
     </item>
     <item>
