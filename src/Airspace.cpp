@@ -237,7 +237,7 @@ bool Airspace::SetTransponderCode(const std::string& code) {
 	}
 	try
 	{
-		transponderCode = std::stoi(code, 0, 8);
+		transponderCode = (short)std::stoi(code, 0, 8);
 	}
 	catch ( ... )
 	{
