@@ -122,6 +122,36 @@ void MainWindow::startBusy() {
     startTime = std::chrono::high_resolution_clock::now();
 }
 
+void MainWindow::refreshUI() {
+    // Find out pre-conditions
+    const bool airspaceOutput(ui->outputFormatComboBox->currentIndex() != AirspaceConverter::SeeYou_Format);
+    const bool waypointsOutput(ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ_Format || ui->outputFormatComboBox->currentIndex() == AirspaceConverter::SeeYou_Format);
+    const bool isKMZ(ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ_Format);
+    const bool isOpenAir(ui->outputFormatComboBox->currentIndex() == AirspaceConverter::OpenAir_Format);
+
+    // Re-enable all specifically
+    ui->outputFormatComboBox->setEnabled(true);
+    ui->loadAirspaceFileButton->setEnabled(airspaceOutput);
+    ui->loadAirspaceFolderButton->setEnabled(airspaceOutput);
+    ui->unloadAirspacesButton->setEnabled(converter->GetNumOfAirspaces()>0);
+    ui->loadWaypointFileButton->setEnabled(waypointsOutput);
+    ui->loadWaypointsFolderButton->setEnabled(waypointsOutput);
+    ui->unloadWaypointsButton->setEnabled(converter->GetNumOfWaypoints()>0);
+    ui->loadRasterMapFileButton->setEnabled(isKMZ);
+    ui->loadRasterMapFolderButton->setEnabled(isKMZ);
+    ui->unloadTerrainMapsButton->setEnabled(converter->GetNumOfTerrainMaps()>0);
+    ui->filterButton->setEnabled(converter->GetNumOfAirspaces()>0 || converter->GetNumOfWaypoints()>0);
+    ui->defaultAltSpinBox->setEnabled(isKMZ);
+    ui->QNHspinBox->setEnabled(converter->GetNumOfAirspaces()==0);
+    ui->onlyPointsCheckBox->setEnabled(isOpenAir);
+    ui->secondsCheckBox->setEnabled(isOpenAir);
+    ui->convertButton->setEnabled(!converter->GetOutputFile().empty() && ((airspaceOutput && converter->GetNumOfAirspaces()>0) || (waypointsOutput && converter->GetNumOfWaypoints()>0)));
+    ui->openOutputFileButton->setEnabled(converter->IsConversionDone());
+    ui->openOutputFolderButton->setEnabled(converter->IsConversionDone());
+    ui->clearLogButton->setEnabled(true);
+    ui->closeButton->setEnabled(true);
+}
+
 void MainWindow::endBusy() {
     if (busy) { // Stop the timer
         const double elapsedTimeSec = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - startTime).count() / 1e6;
@@ -137,27 +167,8 @@ void MainWindow::endBusy() {
     // Set the number of terrain raster maps loaded in its spinBox
     ui->numTerrainMapsLoadedSpinBox->setValue(converter->GetNumOfTerrainMaps());
 
-    // Re-enable all specifically
-    ui->outputFormatComboBox->setEnabled(true);
-    ui->loadAirspaceFileButton->setEnabled(true);
-    ui->loadAirspaceFolderButton->setEnabled(true);
-    ui->unloadAirspacesButton->setEnabled(converter->GetNumOfAirspaces()>0);
-    ui->loadWaypointFileButton->setEnabled(true);
-    ui->loadWaypointsFolderButton->setEnabled(true);
-    ui->unloadWaypointsButton->setEnabled(converter->GetNumOfWaypoints()>0);
-    ui->loadRasterMapFileButton->setEnabled(true);
-    ui->loadRasterMapFolderButton->setEnabled(true);
-    ui->unloadTerrainMapsButton->setEnabled(converter->GetNumOfTerrainMaps()>0);
-    ui->filterButton->setEnabled(converter->GetNumOfAirspaces()>0 || converter->GetNumOfWaypoints()>0);
-    ui->defaultAltSpinBox->setEnabled(true);
-    ui->QNHspinBox->setEnabled(converter->GetNumOfAirspaces()==0);
-    ui->onlyPointsCheckBox->setEnabled(ui->outputFormatComboBox->currentIndex() == AirspaceConverter::OpenAir_Format);
-    ui->secondsCheckBox->setEnabled(ui->outputFormatComboBox->currentIndex() == AirspaceConverter::OpenAir_Format);
-    ui->convertButton->setEnabled(!converter->GetOutputFile().empty() && (converter->GetNumOfAirspaces()>0 || (ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ_Format && converter->GetNumOfWaypoints()>0)));
-    ui->openOutputFileButton->setEnabled(converter->IsConversionDone());
-    ui->openOutputFolderButton->setEnabled(converter->IsConversionDone());
-    ui->clearLogButton->setEnabled(true);
-    ui->closeButton->setEnabled(true);
+    // Re-enable buttons and UI
+    refreshUI();
 
     if (busy) {
         ui->progressBar->setMaximum(100); // This will disable marquee progrees bar
@@ -170,10 +181,8 @@ void MainWindow::on_aboutButton_clicked() {
 }
 
 void MainWindow::on_outputFormatComboBox_currentIndexChanged(int index) {
-    if (!converter->SetOutputType((AirspaceConverter::OutputType)index)) return;
-    ui->onlyPointsCheckBox->setEnabled(ui->outputFormatComboBox->currentIndex() == AirspaceConverter::OpenAir_Format);
-    ui->secondsCheckBox->setEnabled(ui->outputFormatComboBox->currentIndex() == AirspaceConverter::OpenAir_Format);
-    ui->convertButton->setEnabled(!converter->GetOutputFile().empty() && (converter->GetNumOfAirspaces()>0 || (ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ_Format && converter->GetNumOfWaypoints()>0)));
+    converter->SetOutputType((AirspaceConverter::OutputType)index);
+    refreshUI();
 }
 
 void MainWindow::on_loadAirspaceFileButton_clicked() {
@@ -306,6 +315,7 @@ void MainWindow::on_convertButton_clicked() {
     switch(ui->outputFormatComboBox->currentIndex()) {
         case AirspaceConverter::OutputType::KMZ_Format:     selectedFilter = tr("Google Earth(*.kmz)"); break;
         case AirspaceConverter::OutputType::OpenAir_Format: selectedFilter = tr("OpenAir(*.txt)"); break;
+        case AirspaceConverter::OutputType::SeeYou_Format:  selectedFilter = tr("SeeYou(*.cup)"); break;
         case AirspaceConverter::OutputType::Polish_Format:  selectedFilter = tr("Polish(*.mp)"); break;
         case AirspaceConverter::OutputType::Garmin_Format:  selectedFilter = tr("Garmin img(*.img)"); break;
         default: assert(false);
@@ -314,7 +324,7 @@ void MainWindow::on_convertButton_clicked() {
     // Prepare dialog to ask for output file, will be without extension if not manually typed by the user
     std::string desiredOutputFile = QFileDialog::getSaveFileName(this, tr("Convert to..."),
                                                                  QString::fromStdString(boost::filesystem::change_extension(converter->GetOutputFile(), "").string()),
-                                                                 tr("Google Earth(*.kmz);;OpenAir(*.txt);;Polish(*.mp);;Garmin img(*.img)"), &selectedFilter).toStdString();
+                                                                 tr("Google Earth(*.kmz);;OpenAir(*.txt);;SeeYou(*.cup);;Polish(*.mp);;Garmin img(*.img)"), &selectedFilter).toStdString();
 
     // If no file selected or entered: do nothing
     if(desiredOutputFile.empty()) return;
@@ -329,6 +339,7 @@ void MainWindow::on_convertButton_clicked() {
         desiredFormat = AirspaceConverter::KMZ_Format; // KMZ default
         if (selectedFilter != "Google Earth(*.kmz)") {
             if (selectedFilter == "OpenAir(*.txt)") desiredFormat = AirspaceConverter::OpenAir_Format;
+            else if (selectedFilter == "SeeYou(*.cup)") desiredFormat = AirspaceConverter::SeeYou_Format;
             else if (selectedFilter == "Polish(*.mp)") desiredFormat = AirspaceConverter::Polish_Format;
             else if (selectedFilter == "Garmin img(*.img)") desiredFormat = AirspaceConverter::Garmin_Format;
             else assert(false);
@@ -349,9 +360,11 @@ void MainWindow::on_convertButton_clicked() {
     outputFileInsertedViaDialog = true;
 
     // Proceed with conversion
-    assert(!converter->GetOutputFile().empty());
-    assert(converter->GetNumOfAirspaces()>0 || (ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ_Format && converter->GetNumOfWaypoints()>0));
-    if(converter->GetOutputFile().empty() || (converter->GetNumOfAirspaces()==0 && (ui->outputFormatComboBox->currentIndex() != AirspaceConverter::KMZ_Format || converter->GetNumOfWaypoints()==0))) return;
+    const bool conversionPossible (!converter->GetOutputFile().empty() &&
+        ((ui->outputFormatComboBox->currentIndex() != AirspaceConverter::SeeYou_Format && converter->GetNumOfAirspaces()>0) ||
+        ((ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ_Format || ui->outputFormatComboBox->currentIndex() == AirspaceConverter::SeeYou_Format) && converter->GetNumOfWaypoints()>0)));
+    assert(conversionPossible);
+    if(!conversionPossible) return;
 
     // Ask confirmation to overwrite the output file
     boost::filesystem::path path(converter->GetOutputFile());

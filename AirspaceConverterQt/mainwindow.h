@@ -36,6 +36,7 @@ private:
     void postMessage(const std::string& message, const bool isError = false);
     void startBusy();
     void laodAirspacesThread();
+    void refreshUI();
 
     Ui::MainWindow *ui;
     AboutDialog about;
