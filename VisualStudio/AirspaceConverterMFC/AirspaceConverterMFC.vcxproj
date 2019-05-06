@@ -77,7 +77,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>C:\local\boost_1_68_0;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\local\boost_1_68_0\lib32-msvc-14.0;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\local\boost_1_68_0\lib32-msvc-14.1;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(Configuration)\$(Platform)\</IntDir>
     <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>

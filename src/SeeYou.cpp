@@ -79,7 +79,7 @@ bool SeeYou::ParseAltitude(const std::string& text, float& alt) {
 	}
 	try {
 		alt = std::stof(text.substr(0,pos));
-		if(feet) alt *= Altitude::FEET2METER;
+		if(feet) alt *= (float)Altitude::FEET2METER;
 	} catch(...) {
 		return false;
 	}
@@ -411,5 +411,5 @@ bool SeeYou::Write(const std::string& fileName) {
 	}
 
 	file.close();
-	return false;
+	return true;
 }

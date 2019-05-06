@@ -84,7 +84,7 @@
     <LinkIncremental>true</LinkIncremental>
     <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
     <IncludePath>C:\local\boost_1_68_0;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include;$(VC_IncludePath);$(WindowsSdk_71A_IncludePath);</IncludePath>
-    <LibraryPath>C:\local\boost_1_68_0\lib32-msvc-14.0;$(VC_LibraryPath_x86);$(WindowsSdk_71A_LibraryPath_x86);</LibraryPath>
+    <LibraryPath>C:\local\boost_1_68_0\lib32-msvc-14.1;$(VC_LibraryPath_x86);$(WindowsSdk_71A_LibraryPath_x86);</LibraryPath>
     <TargetName>airspaceconverter</TargetName>
     <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(Configuration)\$(Platform)\</IntDir>

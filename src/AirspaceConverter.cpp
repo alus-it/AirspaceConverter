@@ -418,7 +418,13 @@ bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop,
 std::string AirspaceConverter::GetCreationDateString() {
 	const time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 	std::stringstream ss;
+#ifdef _WIN32
+	struct tm utc;
+	gmtime_s(&utc, &now);
+	ss << "This file was created on: " << std::put_time(&utc, "%a %d %B %Y at %T UTC");
+#else
 	ss << "This file was created on: " << std::put_time(gmtime(&now), "%a %d %B %Y at %T UTC");
+#endif
 	return ss.str();
 }
 
@@ -436,7 +442,7 @@ bool AirspaceConverter::IsValidVORfrequency(const float& frequency) {
 	if (frequency < 108 || frequency > 117.95) return false;
 
 	// Check if the frequency is a multiple of 50 kHz
-	const float chan = frequency / 0.05;
+	const float chan = frequency / 0.05f;
 	if (std::trunc(chan) != chan) return false;
 
 	return true;

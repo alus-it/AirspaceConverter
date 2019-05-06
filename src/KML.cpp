@@ -217,7 +217,7 @@ void KML::OpenPlacemark(const Airspace& airspace) {
 
 void KML::OpenPlacemark(const Waypoint* waypoint) {
 	const bool isAirfield = waypoint->IsAirfield();
-	const int altMt = waypoint->GetAltitude();
+	const int altMt = (int)std::round(waypoint->GetAltitude());
 	const int altFt = (int)std::round(altMt / Altitude::FEET2METER);
 	outputFile << "<Placemark>\n"
 		<< "<name>" << waypoint->GetName() << "</name>\n"

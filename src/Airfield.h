@@ -14,7 +14,7 @@
 
 class Airfield: public Waypoint {
 public:
-	Airfield(const std::string& longName, const std::string& shortName, const std::string& countryCode, const double lat, const double lon, const int alt, const int style, const int rwyDir, const int rwyLen, const float freq, const std::string& descr);
+	Airfield(const std::string& longName, const std::string& shortName, const std::string& countryCode, const double lat, const double lon, const float alt, const int style, const int rwyDir, const int rwyLen, const float freq, const std::string& descr);
 	~Airfield() {}
 
 	inline int GetRunwayDir() const { return runwayDir; }
