@@ -376,7 +376,7 @@ bool KML::Write(const std::string& filename) {
 				"<open>true</open>\n";
 
 		// For each waypoint type
-		for (int t = Waypoint::normal; t < Waypoint::numOfWaypointTypes; t++) {
+		for (int t = Waypoint::unknown; t < Waypoint::numOfWaypointTypes; t++) {
 
 			// First verify if there are waypoints of that kind
 			if (waypoints.count(t) == 0) continue;
@@ -626,7 +626,7 @@ bool KML::Write(const std::string& filename) {
 			path = std::string("./icons/");
 			if (!boost::filesystem::exists(path)) path = std::string("./");
 		}
-		for (int i = Waypoint::undefined; i < Waypoint::numOfWaypointTypes; i++) {
+		for (int i = Waypoint::unknown; i < Waypoint::numOfWaypointTypes; i++) {
 			// Get the icon PNG filename and prepare the path in the ZIP and the path from current dir
 			const std::string iconPath = path + waypointIcons[i];
 

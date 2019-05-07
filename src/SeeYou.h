@@ -27,11 +27,11 @@ private:
 	static bool ParseLatitude(const std::string& text, double& lat);
 	static bool ParseLongitude(const std::string& text, double& lon);
 	static bool ParseAltitude(const std::string& text, float& alt);
-	static int ParseStyle(const std::string& text);
-	static int ParseRunwayDir(const std::string& text);
-	static int ParseRunwayLength(const std::string& text);
-	static float ParseAirfieldFrequencies(const std::string& text, float& secondaryFreq);
-	static float ParseOtherFrequency(const std::string& text, const int type);
+	static bool ParseStyle(const std::string& text, int& type);
+	static bool ParseRunwayDir(const std::string& text, int& dir);
+	static bool ParseRunwayLength(const std::string& text, int& length);
+	static bool ParseAirfieldFrequencies(const std::string& text, float& mainFreq, float& secondaryFreq);
+	static bool ParseOtherFrequency(const std::string& text, const int type, float& freq);
 
 	std::multimap<int,Waypoint*>& waypoints;
 };

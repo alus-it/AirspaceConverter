@@ -35,14 +35,14 @@ std::string AirspaceConverter::cGPSmapperCommand = "cgpsmapper";
 const std::vector<std::string> AirspaceConverter::disclaimer = {
 	"This file has been produced with: \"AirspaceConverter\" Version: " VERSION,
 	"For info visit: http://www.alus.it/AirspaceConverter",
-	"Copyrights(C) 2016-2019 Alberto Realis-Luc, Valerio Messina",
+	"Copyrights(C) 2016-2019 Alberto Realis-Luc",
 	"",
 	"WARNING:",
 	"AirspaceConverter is an experimental software. So, please, be aware that the output may contain errors!",
 	"The users are kindly requested to report any error or discrepancy found.",
 	"",
 	"Disclaimer:",
-	"The authors of AirspaceConverter assumes no liability at all for the previous, actual or future correctness, completeness, functionality or usability",
+	"The authors of AirspaceConverter assume no liability at all for the previous, actual or future correctness, completeness, functionality or usability",
 	"of the data provided in this file and the usage of AirspaceConverter. There exists no obligation at all for the authors to continuously update",
 	"or maintain the data provided. The airspace structure in this file and the data contained therein are only intended to serve as a means to facilitate",
 	"familiarization with and to illustrate air space structure. This airspace structure file does not replace the pilot's obligation for preflight",
@@ -52,10 +52,6 @@ const std::vector<std::string> AirspaceConverter::disclaimer = {
 	"Commercial use of the data provided via this airspace structure and/or waypoints file is strictly prohibited.",
 	"The use of AirspaceConverter is only at complete user's own risk.",
 	"Any commercial usage of AirspaceConverter is also strictly prohibited if not authorized by its owner.",
-	"",
-	"Placemarks icons credits:",
-	"Some of the placemark icons used for displaying the waypoints in Google Earth included in the produced KMZ file (and so used by this project) are",
-	"coming from: \"Maps Icons Collection\" - https://mapicons.mapsmarker.com",
 	"",
 	"Error reports, complaints and suggestions please email to: info@alus.it",
 };
@@ -429,7 +425,7 @@ std::string AirspaceConverter::GetCreationDateString() {
 }
 
 bool AirspaceConverter::IsValidAirbandFrequency(const float& frequency) {
-	// Check if the frequency is within the airband [MHz]
+	// Check if the frequency is within the airband for communication [MHz]
 	if (frequency < 118 || frequency > 137) return false;
 
 	// Check if the frequency has not more than 3 decimals
