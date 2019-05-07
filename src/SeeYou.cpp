@@ -58,11 +58,9 @@ bool SeeYou::ParseLongitude(const std::string& text, double& lon) {
 }
 
 bool SeeYou::ParseAltitude(const std::string& text, float& alt) {
+	alt = 0;
 	int pos = (int)text.length() - 1;
-	if(pos == 0 && text.front()=='0') {
-		alt = 0;
-		return true;
-	}
+	if(pos == 0 && text.front()=='0') return true;
 	if(pos<1) return false;
 	bool feet = false;
 	if(text.back() == 't' || text.back() == 'T') pos--;
@@ -80,36 +78,42 @@ bool SeeYou::ParseAltitude(const std::string& text, float& alt) {
 	try {
 		alt = std::stof(text.substr(0,pos));
 		if(feet) alt *= (float)Altitude::FEET2METER;
-	} catch(...) {
-		return false;
-	}
-	return true;
+		return true;
+	} catch(...) {}
+	return false;
 }
 
-int SeeYou::ParseStyle(const std::string& text) {
+bool SeeYou::ParseStyle(const std::string& text, int& type) {
+	if (!text.empty()) try {
+		type = std::stoi(text);
+		if (type >= Waypoint::unknown && type < Waypoint::numOfWaypointTypes) return true;
+	} catch(...) {}
+	type = Waypoint::unknown;
+	return false;
+}
+
+bool SeeYou::ParseRunwayDir(const std::string& text, int& dir) {
+	if (text.empty()) {
+		dir = 0; // zero means runway direction unknown
+		return true;
+	}
 	try {
-		const int type = std::stoi(text);
-		if (type > Waypoint::undefined && type < Waypoint::numOfWaypointTypes) return type;
-	} catch(...) {
-		AirspaceConverter::LogMessage("ERROR: unable to parse waypoint style: " + text, true);
-	}
-	return Waypoint::undefined;
+		dir = std::stoi(text);
+		if (dir > 0 && dir <= 360) return true;
+		if (dir == 0) {
+			dir = 360;
+			return true;
+		}
+	} catch(...) {}
+	dir = 0;
+	return false;
 }
 
-int SeeYou::ParseRunwayDir(const std::string& text) {
-	try {
-		const int runwayDir = std::stoi(text);
-		if (runwayDir > 0 && runwayDir <= 360) return runwayDir;
-		if (runwayDir == 0) return 360;
-	} catch(...) {
-		AirspaceConverter::LogMessage("Warning: unable to parse airfield runway direction: " + text, true);
-	}
-	return 0;
-}
-
-int SeeYou::ParseRunwayLength(const std::string& text) {
+bool SeeYou::ParseRunwayLength(const std::string& text, int& length) {
+	length = 0; // zero means invalid/unknown length
+	if (text.empty()) return true; // empty field: declared as unknown
 	int pos = (int)text.length() - 1;
-	if(pos<2) return 0; // zero means invalid length
+	if(pos<2) return false; // at least 3 chars: 2 digit and a letter for the unit: a runway of "9m" (2 char) would be not possible...
 	bool nauticalMiles = false, statuteMiles = false;
 	if(text.back() == 'm' || text.back() == 'M') {
 		if(text.at(pos) == 'n' || text.at(pos) == 'N') {
@@ -119,55 +123,54 @@ int SeeYou::ParseRunwayLength(const std::string& text) {
 	} else if((text.at(pos-1) == 'm' || text.at(pos-1) == 'M') && (text.back() == 'l' || text.back() == 'L' || text.back() == 'i' || text.back() == 'I')) {
 		pos--;
 		statuteMiles = true;
-	} else {
-		AirspaceConverter::LogMessage("Warning: unable to parse airfield runway length unit: " + text, true);
-		return 0;
-	}
+	} else return false; // Unable to parse unit
 	try {
-		double length = std::stod(text.substr(0,pos));
-		if (length < 0) return false;
-		if (nauticalMiles) length *= Geometry::NM2M;
-		else if (statuteMiles) length *= Geometry::MI2M;
-		return (int)std::round(length);
-	} catch (...) {
-		AirspaceConverter::LogMessage("Warning: unable to parse airfield runway length: " + text, true);
-	}
-	return 0;
+		double len = std::stod(text.substr(0,pos));
+		if (len < 0) return false;
+		if (nauticalMiles) len *= Geometry::NM2M;
+		else if (statuteMiles) len *= Geometry::MI2M;
+		length = (int)std::round(len);
+		return true;
+	} catch (...) {}
+	return false;
 }
 
-float SeeYou::ParseAirfieldFrequencies(const std::string& text, float& secondaryFreq) {
+bool SeeYou::ParseAirfieldFrequencies(const std::string& text, float& freq, float& secondaryFreq) {
+	freq = 0;
 	secondaryFreq = 0;
-	if (text.empty()) return 0;
-	//if (text.length() != 7) AirspaceConverter::LogMessage("Frequency not according to SeeYou format: " + text, false);
+	if (text.empty()) return true;
 	try {
 		size_t pos;
-		const float freq = std::stof(text,&pos);
-		if (!AirspaceConverter::IsValidAirbandFrequency(freq)) return 0;
+		freq = std::stof(text,&pos);
+		if (!AirspaceConverter::IsValidAirbandFrequency(freq)) { // Invalid main frequency for radio communication
+			freq = 0;
+			return false;
+		}
 		if (pos < text.length()) {
 			secondaryFreq = std::fabs(std::stof(text.substr(pos)));
-			if (!AirspaceConverter::IsValidAirbandFrequency(secondaryFreq)) secondaryFreq = 0;
+			if (!AirspaceConverter::IsValidAirbandFrequency(secondaryFreq)) { // Invalid secondary frequency for radio communication
+				secondaryFreq = 0;
+				return false;
+			}
 		}
-		return freq;
-	} catch(...) {
-		AirspaceConverter::LogMessage("Warning: unable to parse airfield radio frequency: " + text, true);
-	}
-	return 0;
+		return true;
+	} catch(...) {}
+	return false;
 }
 
-float SeeYou::ParseOtherFrequency(const std::string& text, const int type) {
-	if (text.empty()) return 0;
-	if (type != Waypoint::WaypointType::VOR && type != Waypoint::WaypointType::NDB) {
-		AirspaceConverter::LogMessage("Warning: this waypoint type is not supposed to have a frequency associated but found: " + text, false);
-		return 0;
-	}
+bool SeeYou::ParseOtherFrequency(const std::string& text, const int type, float& freq) {
+	freq = 0;
+	if (text.empty()) return true;
+	if (type != Waypoint::WaypointType::VOR && type != Waypoint::WaypointType::NDB) return false; // This waypoint type is not supposed to have a frequency associated
 	try {
-		const float freq = std::stof(text);
-		if (type == Waypoint::WaypointType::VOR ? AirspaceConverter::IsValidVORfrequency(freq) : AirspaceConverter::IsValidNDBfrequency(freq)) return freq;
-		else AirspaceConverter::LogMessage("Warning: invalid frequency for VOR or DME: " + text, true);
-	} catch(...) {
-		AirspaceConverter::LogMessage("Warning: unable to parse VOR or DME frequency: " + text, true);
-	}
-	return 0;
+		freq = std::stof(text);
+		if (type == Waypoint::WaypointType::VOR ? AirspaceConverter::IsValidVORfrequency(freq) : AirspaceConverter::IsValidNDBfrequency(freq)) return true;
+		else { // Invalid frequency for VOR or DME
+			freq = 0;
+			return false;
+		}
+	} catch(...) {}
+	return false;
 }
 
 bool SeeYou::Read(const std::string& fileName) {
@@ -180,6 +183,11 @@ bool SeeYou::Read(const std::string& fileName) {
 	int linecount = 0;
 	std::string sLine;
 	bool isCRLF = false, CRLFwarningGiven = false, firstWaypointFound = false;
+
+	double latitude, longitude;
+	int type, runwayDir, runwayLength;
+	float altitude, radioFreq, altRadioFreq;
+
 
 	while (!input.eof() && input.good()) {
 
@@ -195,11 +203,13 @@ bool SeeYou::Read(const std::string& fileName) {
 			CRLFwarningGiven = true;
 		}
 
-		// Skip eventual header
-		if (!firstWaypointFound && sLine.find("name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc") == 0) continue;
-
 		// Directly skip empty lines
 		if (sLine.empty()) continue;
+
+		// Skip eventual header
+		if (!firstWaypointFound && (
+				sLine.find("name, code, country, lat, lon, elev, style, rwydir, rwylen, freq, desc") != std::string::npos ||
+				sLine.find("name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc") != std::string::npos)) continue;
 
 		// Remove front spaces
 		boost::algorithm::trim_left(sLine);
@@ -214,15 +224,18 @@ bool SeeYou::Read(const std::string& fileName) {
 		boost::algorithm::trim_right(sLine);
 
 		// Skip too short lines
-		if (sLine.size() <= 10) continue; // At least ten commas should be there
+		if (sLine.size() <= 10) { // At least ten commas should be there
+			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR: line %1d is too short to contain anything useful: %2s") %linecount %sLine), true);
+			continue;
+		}
 
 		// Check if we arrived to the task section, if yes we're done
 		if (sLine == "-----Related Tasks-----") break;
 
 		// Tokenize with quotes
 		boost::tokenizer<boost::escaped_list_separator<char> > tokens(sLine); // default separator:',', default quote:'"', default escape char:'\'
-		if(std::distance(tokens.begin(),tokens.end()) != 11) { // We expect only 11 fields
-			if (firstWaypointFound) AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: expected 11 fields: %2s") %linecount %sLine), true);
+		if (std::distance(tokens.begin(),tokens.end()) != 11) { // We expect only 11 fields
+			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: expected 11 fields: %2s") %linecount %sLine), true);
 			continue;
 		}
 
@@ -230,7 +243,7 @@ bool SeeYou::Read(const std::string& fileName) {
 		boost::tokenizer<boost::escaped_list_separator<char> >::iterator token=tokens.begin();
 		const std::string name = *token;
 		if (name.empty()) {
-			if (firstWaypointFound) AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: a name must be present: %2s") %linecount %sLine), true);
+			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: a name must be present: %2s") %linecount %sLine), true);
 			continue;
 		}
 
@@ -241,43 +254,37 @@ bool SeeYou::Read(const std::string& fileName) {
 		const std::string country = *(++token);
 
 		// Latitude
-		double latitude;
-		if(!ParseLatitude(*(++token),latitude)) {
-			if (firstWaypointFound) AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: invalid latitude: %2s") %linecount %(*token)), true);
+		if (!ParseLatitude(*(++token), latitude)) {
+			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: invalid latitude: %2s") %linecount %(*token)), true);
 			continue;
 		}
 
 		// Longitude
-		double longitude;
-		if(!ParseLongitude(*(++token),longitude)) {
-			if (firstWaypointFound) AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: invalid longitude: %2s") %linecount %(*token)), true);
+		if (!ParseLongitude(*(++token), longitude)) {
+			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: invalid longitude: %2s") %linecount %(*token)), true);
 			continue;
 		}
 
 		// Elevation
-		float altitude = 0;
-		if(!ParseAltitude(*(++token),altitude) && firstWaypointFound) AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %(*token)), true);
+		if (!ParseAltitude(*(++token), altitude))
+			AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %(*token)), true);
 
 		// Waypoint style
-		int type = ParseStyle(*(++token));
-		if(type <= Waypoint::undefined) {
-			if (firstWaypointFound) AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid waypoint style: %2s, assuming normal") %linecount %(*token)), true);
-			type = Waypoint::normal;
-		}
+		if (!ParseStyle(*(++token),type))
+			AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid waypoint style: %2s, assuming unknown") %linecount %(*token)), true);
 
 		// If it's an airfield...
 		if(Waypoint::IsTypeAirfield((Waypoint::WaypointType)type)) {
 			// Runway direction
-			const int runwayDir = ParseRunwayDir(*(++token));
-			if (firstWaypointFound && runwayDir <= 0) AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid runway direction: %2s") % linecount % (*token)), true);
+			if (!ParseRunwayDir(*(++token),runwayDir))
+				AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid runway direction: %2s") % linecount % (*token)), true);
 
 			// Runway length
-			const int runwayLength = ParseRunwayLength(*(++token));
-			if(firstWaypointFound && runwayLength <= 0) AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid runway length: %2s") %linecount %(*token)), true);
+			if (!ParseRunwayLength(*(++token),runwayLength))
+				AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid runway length: %2s") %linecount %(*token)), true);
 
 			// Radio frequency
-			float altRadioFreq(0);
-			const float radioFreq = ParseAirfieldFrequencies(*(++token), altRadioFreq);
+			if (!ParseAirfieldFrequencies(*(++token),radioFreq,altRadioFreq)) AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid radio frequency for airfield: %2s") %linecount %(*token)), true);
 
 			// Description
 			std::string description = *(++token);
@@ -295,7 +302,8 @@ bool SeeYou::Read(const std::string& fileName) {
 			token++;
 
 			// Frequency may be used for VOR and NDB
-			const float radioFreq = ParseOtherFrequency(*(++token), type);
+			if (!ParseOtherFrequency(*(++token), type, radioFreq))
+				AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid frequency for non airfield waypoint: %2s") %linecount %(*token)), true);
 
 			// Description
 			std::string description = *(++token);

@@ -17,7 +17,7 @@ class Waypoint {
 
 public:
 	enum WaypointType {
-		undefined = 0,
+		unknown = 0,
 		normal = 1,
 		airfieldGrass,
 		outlanding,
