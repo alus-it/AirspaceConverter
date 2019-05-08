@@ -90,6 +90,8 @@ public:
 
 private:
 	static void DefaultLogMessage(const std::string&, const bool isError = false);
+	//static void DefaultLogMessage(const std::string& text);
+	static void DefaultLogError(const std::string& text);
 	static bool Default_cGPSmapper(const std::string& polishFile, const std::string& outputFile);
 
 	static std::string cGPSmapperCommand;

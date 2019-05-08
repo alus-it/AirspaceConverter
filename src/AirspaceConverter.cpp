@@ -72,6 +72,14 @@ void AirspaceConverter::DefaultLogMessage(const std::string& msgText, const bool
 	(isError ? std::cerr : std::cout) << msgText << std::endl;
 }
 
+/*void AirspaceConverter::DefaultLogMessage(const std::string& text) {
+	std::cout << text << std::endl;
+}*/
+
+void AirspaceConverter::DefaultLogError(const std::string& text) {
+	std::cerr << text << std::endl;
+}
+
 bool AirspaceConverter::Default_cGPSmapper(const std::string& polishFile, const std::string& outputFile) {
 	LogMessage("Invoking cGPSmapper to make: " + outputFile, false);
 
