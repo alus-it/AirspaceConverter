@@ -33,7 +33,9 @@ public:
 
 private:
     virtual void closeEvent(QCloseEvent *event);
-    void postMessage(const std::string& message, const bool isError = false);
+    void postMessage(const std::string& text);
+    void postWarning(const std::string& text);
+    void postError(const std::string& text);
     void startBusy();
     void laodAirspacesThread();
     void refreshUI();
@@ -65,9 +67,14 @@ private slots:
     void on_openOutputFolderButton_clicked();
     void on_convertButton_clicked();
     void endBusy();
-    void logMessage(const QString& message, const bool& isError = false);
+    void logMessage(const QString& text);
+    void logWarning(const QString& text);
+    void logError(const QString& text);
     void applyFilter(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon);
 
 signals:
-    void messagePosted(const QString& message, const bool& isError = false);
+    void messagePosted(const QString& text);
+    void warningPosted(const QString& text);
+    void errorPosted(const QString& text);
+
 };

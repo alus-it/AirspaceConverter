@@ -53,12 +53,16 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Set up UI and signals
     ui->setupUi(this);
-    connect(this, SIGNAL(messagePosted(QString,bool)), this, SLOT(logMessage(QString, bool)));
+    connect(this, SIGNAL(messagePosted(QString)), this, SLOT(logMessage(QString)));
+    connect(this, SIGNAL(warningPosted(QString)), this, SLOT(logWarning(QString)));
+    connect(this, SIGNAL(errorPosted(QString)), this, SLOT(logError(QString)));
     connect(&watcher, SIGNAL(finished()), this, SLOT(endBusy()));
     connect(&filter, SIGNAL(validLimitsSet(double, double, double, double)), this, SLOT(applyFilter(double, double, double, double)));
 
-    // Set the logging function (to write in the logging texbox)
-    AirspaceConverter::SetLogMessageFunction(std::function<void(const std::string&, const bool)>(std::bind(&MainWindow::postMessage, this, std::placeholders::_1, std::placeholders::_2)));
+    // Set the logging functions (to write in the logging texbox)
+    AirspaceConverter::SetLogMessageFunction(std::function<void(const std::string&)>(std::bind(&MainWindow::postMessage, this, std::placeholders::_1)));
+    AirspaceConverter::SetLogWarningFunction(std::function<void(const std::string&)>(std::bind(&MainWindow::postWarning, this, std::placeholders::_1)));
+    AirspaceConverter::SetLogErrorFunction(std::function<void(const std::string&)>(std::bind(&MainWindow::postError, this, std::placeholders::_1)));
 }
 
 MainWindow::~MainWindow() {
@@ -66,17 +70,36 @@ MainWindow::~MainWindow() {
     if (converter != nullptr) delete converter;
 }
 
-// This is the "local" MainWindow member functon to append a new message on the log
-void MainWindow::logMessage(const QString& message, const bool& isError) {
-    ui->loggingTextBox->setTextColor(isError ? "red" : "black");
+// These are the "local" MainWindow members functons to append a new message on the log
+void MainWindow::logMessage(const QString& message) {
+    ui->loggingTextBox->setTextColor(Qt::black);
     ui->loggingTextBox->append(message);
     ui->loggingTextBox->verticalScrollBar()->setValue(ui->loggingTextBox->verticalScrollBar()->maximum());
 }
 
-// This is function that will be called by libAirspaceConverter from another thread to append a new message on the log
-void MainWindow::postMessage(const std::string& message, const bool isError /* = false */) {
-    // Emit the signal that a new message has to be posted on the log (multiple signals will be queued)
-    emit messagePosted(QString::fromUtf8(message.c_str()), isError);
+void MainWindow::logWarning(const QString& message) {
+    ui->loggingTextBox->setTextColor(Qt::darkYellow);
+    ui->loggingTextBox->append("Warning: " + message);
+    ui->loggingTextBox->verticalScrollBar()->setValue(ui->loggingTextBox->verticalScrollBar()->maximum());
+}
+
+void MainWindow::logError(const QString& message) {
+    ui->loggingTextBox->setTextColor(Qt::red);
+    ui->loggingTextBox->append("ERROR: " + message);
+    ui->loggingTextBox->verticalScrollBar()->setValue(ui->loggingTextBox->verticalScrollBar()->maximum());
+}
+
+// These are the functions that will be called by libAirspaceConverter from another thread to append a new message on the log
+void MainWindow::postMessage(const std::string& message) {
+    emit messagePosted(QString::fromUtf8(message.c_str()));  // Emit the signal that a new message has to be posted on the log (multiple signals will be queued)
+}
+
+void MainWindow::postWarning(const std::string& message) {
+    emit warningPosted(QString::fromUtf8(message.c_str()));
+}
+
+void MainWindow::postError(const std::string& message) {
+    emit errorPosted(QString::fromUtf8(message.c_str()));
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
