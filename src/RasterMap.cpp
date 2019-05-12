@@ -138,15 +138,15 @@ bool RasterMap::Open(const std::string& filename) {
 	Close();
 	std::ifstream input(filename, std::ios::in | std::ios::binary);
 	if (!input.is_open() || !input.good()) {
-		AirspaceConverter::LogMessage("ERROR: Falied to open raster map file: " + filename, true);
+		AirspaceConverter::LogError("Falied to open raster map file: " + filename);
 		return false;
 	}
-	AirspaceConverter::LogMessage("Reading raster map: " + filename, false);
+	AirspaceConverter::LogMessage("Reading raster map: " + filename);
 
 	input.read((char*)&TerrainInfo, sizeof(TERRAIN_INFO));
 	if (!input || input.gcount() != sizeof(TERRAIN_INFO) || TerrainInfo.StepSize == 0) {
 		input.close();
-		AirspaceConverter::LogMessage("ERROR: Loading raster map failed: invalid header.", true);
+		AirspaceConverter::LogError("Loading raster map failed: invalid header.");
 		return false;
 	}
 
@@ -157,14 +157,14 @@ bool RasterMap::Open(const std::string& filename) {
 	TerrainMem = (short*)std::malloc(size);
 	if (TerrainMem == nullptr) {
 		input.close();
-		AirspaceConverter::LogMessage("ERROR: Loading raster map failed: memory allocation failure.", true);
+		AirspaceConverter::LogError("Loading raster map failed: memory allocation failure.");
 		assert(false);
 		return false;
 	}
 
 	input.read((char*)TerrainMem, size);
 	if (!input || input.gcount() != (long int)size) {
-		AirspaceConverter::LogMessage("ERROR: Loading raster map failed: size doesn't match size declared in the header.", true);
+		AirspaceConverter::LogError("Loading raster map failed: size doesn't match size declared in the header.");
 		input.close();
 		Close();
 		return false;

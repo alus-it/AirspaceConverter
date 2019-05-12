@@ -39,10 +39,14 @@ public:
 	AirspaceConverter();
 	~AirspaceConverter();
 
-	static std::function<void(const std::string&, const bool)> LogMessage;
+	static std::function<void(const std::string&)> LogMessage;
+	static std::function<void(const std::string&)> LogWarning;
+	static std::function<void(const std::string&)> LogError;
 	static std::function<bool(const std::string&, const std::string&)> cGPSmapper;
 
-	inline static void SetLogMessageFunction(std::function<void(const std::string&, const bool)> func) { LogMessage = func; }
+	inline static void SetLogMessageFunction(std::function<void(const std::string&)> func) { LogMessage = func; }
+	inline static void SetLogWarningFunction(std::function<void(const std::string&)> func) { LogWarning = func; }
+	inline static void SetLogErrorFunction(std::function<void(const std::string&)> func) { LogError = func; }
 	inline static void Set_cGPSmapperFunction(std::function<bool(const std::string&, const std::string&)> func) { cGPSmapper = func; }
 	inline static void Set_cGPSmapperCommand(const std::string& cGPSmapperCmd) { cGPSmapperCommand = cGPSmapperCmd; }
 	inline static std::string& Get_cGPSmapperCommand() { return cGPSmapperCommand; }
@@ -89,8 +93,8 @@ public:
 	static const std::vector<std::string> disclaimer;
 
 private:
-	static void DefaultLogMessage(const std::string&, const bool isError = false);
-	//static void DefaultLogMessage(const std::string& text);
+	static void DefaultLogMessage(const std::string& text);
+	static void DefaultLogWarning(const std::string& text);
 	static void DefaultLogError(const std::string& text);
 	static bool Default_cGPSmapper(const std::string& polishFile, const std::string& outputFile);
 

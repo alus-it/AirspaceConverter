@@ -176,10 +176,10 @@ bool SeeYou::ParseOtherFrequency(const std::string& text, const int type, float&
 bool SeeYou::Read(const std::string& fileName) {
 	std::ifstream input(fileName, std::ios::binary);
 	if (!input.is_open() || input.bad()) {
-		AirspaceConverter::LogMessage("ERROR: Unable to open CUP input file: " + fileName, true);
+		AirspaceConverter::LogError("Unable to open CUP input file: " + fileName);
 		return false;
 	}
-	AirspaceConverter::LogMessage("Reading CUP file: " + fileName, false);
+	AirspaceConverter::LogMessage("Reading CUP file: " + fileName);
 	int linecount = 0;
 	std::string sLine;
 	bool isCRLF = false, CRLFwarningGiven = false, firstWaypointFound = false;
@@ -197,7 +197,7 @@ bool SeeYou::Read(const std::string& fileName) {
 
 		// Verify line ending
 		if (!CRLFwarningGiven && !isCRLF) {
-			AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: not valid Windows style end of line (expected CR LF).") % linecount), true);
+			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: not valid Windows style end of line (expected CR LF).") % linecount));
 
 			// CUP files may contain thousands of WPs we don't want to print this warning all the time
 			CRLFwarningGiven = true;
@@ -225,7 +225,7 @@ bool SeeYou::Read(const std::string& fileName) {
 
 		// Skip too short lines
 		if (sLine.size() <= 10) { // At least ten commas should be there
-			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR: line %1d is too short to contain anything useful: %2s") %linecount %sLine), true);
+			AirspaceConverter::LogError(boost::str(boost::format("line %1d is too short to contain anything useful: %2s") %linecount %sLine));
 			continue;
 		}
 
@@ -235,7 +235,7 @@ bool SeeYou::Read(const std::string& fileName) {
 		// Tokenize with quotes
 		boost::tokenizer<boost::escaped_list_separator<char> > tokens(sLine); // default separator:',', default quote:'"', default escape char:'\'
 		if (std::distance(tokens.begin(),tokens.end()) != 11) { // We expect only 11 fields
-			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: expected 11 fields: %2s") %linecount %sLine), true);
+			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: expected 11 fields: %2s") %linecount %sLine));
 			continue;
 		}
 
@@ -243,7 +243,7 @@ bool SeeYou::Read(const std::string& fileName) {
 		boost::tokenizer<boost::escaped_list_separator<char> >::iterator token=tokens.begin();
 		const std::string name = *token;
 		if (name.empty()) {
-			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: a name must be present: %2s") %linecount %sLine), true);
+			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: a name must be present: %2s") %linecount %sLine));
 			continue;
 		}
 
@@ -255,36 +255,37 @@ bool SeeYou::Read(const std::string& fileName) {
 
 		// Latitude
 		if (!ParseLatitude(*(++token), latitude)) {
-			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: invalid latitude: %2s") %linecount %(*token)), true);
+			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: invalid latitude: %2s") %linecount %(*token)));
 			continue;
 		}
 
 		// Longitude
 		if (!ParseLongitude(*(++token), longitude)) {
-			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR on line %1d: invalid longitude: %2s") %linecount %(*token)), true);
+			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: invalid longitude: %2s") %linecount %(*token)));
 			continue;
 		}
 
 		// Elevation
 		if (!ParseAltitude(*(++token), altitude))
-			AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %(*token)), true);
+			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %(*token)));
 
 		// Waypoint style
 		if (!ParseStyle(*(++token),type))
-			AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid waypoint style: %2s, assuming unknown") %linecount %(*token)), true);
+			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid waypoint style: %2s, assuming unknown") %linecount %(*token)));
 
 		// If it's an airfield...
 		if(Waypoint::IsTypeAirfield((Waypoint::WaypointType)type)) {
 			// Runway direction
 			if (!ParseRunwayDir(*(++token),runwayDir))
-				AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid runway direction: %2s") % linecount % (*token)), true);
+				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid runway direction: %2s") % linecount % (*token)));
 
 			// Runway length
 			if (!ParseRunwayLength(*(++token),runwayLength))
-				AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid runway length: %2s") %linecount %(*token)), true);
+				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid runway length: %2s") %linecount %(*token)));
 
 			// Radio frequency
-			if (!ParseAirfieldFrequencies(*(++token),radioFreq,altRadioFreq)) AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid radio frequency for airfield: %2s") %linecount %(*token)), true);
+			if (!ParseAirfieldFrequencies(*(++token),radioFreq,altRadioFreq))
+				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid radio frequency for airfield: %2s") %linecount %(*token)));
 
 			// Description
 			std::string description = *(++token);
@@ -303,7 +304,7 @@ bool SeeYou::Read(const std::string& fileName) {
 
 			// Frequency may be used for VOR and NDB
 			if (!ParseOtherFrequency(*(++token), type, radioFreq))
-				AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: invalid frequency for non airfield waypoint: %2s") %linecount %(*token)), true);
+				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid frequency for non airfield waypoint: %2s") %linecount %(*token)));
 
 			// Description
 			std::string description = *(++token);
@@ -326,16 +327,16 @@ bool SeeYou::Read(const std::string& fileName) {
 
 bool SeeYou::Write(const std::string& fileName) {
 	if (waypoints.empty()) {
-		AirspaceConverter::LogMessage("SeeYou output: no waypoints, nothing to write", false);
+		AirspaceConverter::LogMessage("SeeYou output: no waypoints, nothing to write");
 		return false;
 	}
 	std::ofstream file;
 	file.open(fileName, std::ios::out | std::ios::trunc | std::ios::binary);
 	if (!file.is_open() || file.bad()) {
-		AirspaceConverter::LogMessage("ERROR: Unable to open output file: " + fileName, true);
+		AirspaceConverter::LogError("Unable to open output file: " + fileName);
 		return false;
 	}
-	AirspaceConverter::LogMessage("Writing output file: " + fileName, false);
+	AirspaceConverter::LogMessage("Writing SeeYou output file: " + fileName);
 
 	// Write default CUP header on first line
 	file << "name, code, country, lat, lon, elev, style, rwydir, rwylen, freq, desc\r\n\r\n";
@@ -353,7 +354,7 @@ bool SeeYou::Write(const std::string& fileName) {
 
 		// Name is mandatory according to SeeYou specs
 		if (w.GetName().empty()) {
-			AirspaceConverter::LogMessage("Warning: skipping waypoint with long name empty: " + w.GetCode(), true);
+			AirspaceConverter::LogWarning("skipping waypoint with long name empty: " + w.GetCode());
 			continue;
 		}
 
