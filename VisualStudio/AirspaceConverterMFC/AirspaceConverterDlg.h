@@ -57,7 +57,9 @@ private:
 	afx_msg void OnBnClickedOutputTypeCombo();
 	LRESULT OnEndJob(WPARAM, LPARAM);
 
-	void LogMessage(const std::string& text, const bool isError = false);
+	void LogMessage(const std::string& text);
+	void LogWarning(const std::string& text);
+	void LogError(const std::string& text);
 	void UpdateOutputFilename();
 	void EndBusy(const bool takeTime = false);
 	void StartBusy();

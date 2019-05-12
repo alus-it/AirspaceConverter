@@ -207,7 +207,9 @@ BOOL CAirspaceConverterDlg::OnInitDialog() {
 	progressBar.ModifyStyle(PBS_MARQUEE, 0); // MARQUEE set here, not in the resource file
 
 	// Set the logging function (to write in the logging texbox... and not on the default Linux console)
-	AirspaceConverter::SetLogMessageFunction(std::function<void(const std::string&, const bool)>(std::bind(&CAirspaceConverterDlg::LogMessage, this, std::placeholders::_1, std::placeholders::_2)));
+	AirspaceConverter::SetLogMessageFunction(std::function<void(const std::string&)>(std::bind(&CAirspaceConverterDlg::LogMessage, this, std::placeholders::_1)));
+	AirspaceConverter::SetLogWarningFunction(std::function<void(const std::string&)>(std::bind(&CAirspaceConverterDlg::LogWarning, this, std::placeholders::_1)));
+	AirspaceConverter::SetLogErrorFunction(std::function<void(const std::string&)>(std::bind(&CAirspaceConverterDlg::LogError, this, std::placeholders::_1)));
 
 	// Buld the "converter"
 	converter = new AirspaceConverter();
@@ -346,13 +348,41 @@ void CAirspaceConverterDlg::UpdateOutputFilename() {
 	if (!AirspaceConverter::PutTypeExtension((AirspaceConverter::OutputType)OutputTypeCombo.GetCurSel(), outputFile)) outputFile.clear();
 }
 
-void CAirspaceConverterDlg::LogMessage(const std::string& text, const bool isError /*= false*/) {
+void CAirspaceConverterDlg::LogMessage(const std::string& text) {
 	CString message(CA2T((boost::locale::conv::between(text, "ISO8859-1", "utf-8") + '\n').c_str()));
 	CHARFORMAT cf = { 0 };
 	cf.cbSize = sizeof(CHARFORMAT);
-	cf.dwMask = isError ? CFM_BOLD | CFM_COLOR : CFM_COLOR;
-	cf.dwEffects = isError ? CFE_BOLD | ~CFE_AUTOCOLOR : ~CFE_AUTOCOLOR;
-	cf.crTextColor = isError ? RGB(255, 0, 0) : RGB(0, 0, 0);
+	cf.dwMask = CFM_COLOR;
+	cf.dwEffects = (DWORD)~CFE_AUTOCOLOR;
+	cf.crTextColor = RGB(0, 0, 0);
+	LoggingBox.SetSel(-1, -1); // Set the cursor to the end of the text area and deselect everything.
+	LoggingBox.SetSelectionCharFormat(cf);
+	LoggingBox.ReplaceSel(message); // Inserts when nothing is selected.
+	int linesToScroll = LoggingBox.GetLineCount() - LoggingBox.GetFirstVisibleLine() - 13;
+	if (linesToScroll > 0) LoggingBox.LineScroll(linesToScroll);
+}
+
+void CAirspaceConverterDlg::LogWarning(const std::string& text) {
+	CString message(CA2T((boost::locale::conv::between("Warning: " + text, "ISO8859-1", "utf-8") + '\n').c_str()));
+	CHARFORMAT cf = { 0 };
+	cf.cbSize = sizeof(CHARFORMAT);
+	cf.dwMask = CFM_COLOR;
+	cf.dwEffects = (DWORD)~CFE_AUTOCOLOR;
+	cf.crTextColor = RGB(255, 204, 0);
+	LoggingBox.SetSel(-1, -1); // Set the cursor to the end of the text area and deselect everything.
+	LoggingBox.SetSelectionCharFormat(cf);
+	LoggingBox.ReplaceSel(message); // Inserts when nothing is selected.
+	int linesToScroll = LoggingBox.GetLineCount() - LoggingBox.GetFirstVisibleLine() - 13;
+	if (linesToScroll > 0) LoggingBox.LineScroll(linesToScroll);
+}
+
+void CAirspaceConverterDlg::LogError(const std::string& text) {
+	CString message(CA2T((boost::locale::conv::between("ERROR: " + text, "ISO8859-1", "utf-8") + '\n').c_str()));
+	CHARFORMAT cf = { 0 };
+	cf.cbSize = sizeof(CHARFORMAT);
+	cf.dwMask = CFM_BOLD | CFM_COLOR;
+	cf.dwEffects = (DWORD)CFE_BOLD | ~CFE_AUTOCOLOR;
+	cf.crTextColor = RGB(255, 0, 0);
 	LoggingBox.SetSel(-1, -1); // Set the cursor to the end of the text area and deselect everything.
 	LoggingBox.SetSelectionCharFormat(cf);
 	LoggingBox.ReplaceSel(message); // Inserts when nothing is selected.
