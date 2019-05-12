@@ -30,7 +30,7 @@ Processor::~Processor() {}
 
 bool Processor::cGPSmapper(const std::string& polishFile, const std::string& outputFile) const {
 	// Here we call cGPSmapper in the Windows way.... anyaway it works also with system(".\\cGPSmapper\\cgpsmapper.exe <args>"); on Windows as well
-	AirspaceConverter::LogMessage("Invoking cGPSmapper to make: " + outputFile, false);
+	AirspaceConverter::LogMessage("Invoking cGPSmapper to make: " + outputFile);
 
 	//TODO: add arguments to create files also for other software like Garmin BaseCamp
 	const std::string args(boost::str(boost::format("%1s -o %2s") % polishFile %outputFile));
@@ -52,7 +52,7 @@ bool Processor::cGPSmapper(const std::string& polishFile, const std::string& out
 		std::remove(polishFile.c_str()); // Delete polish file
 		return true;
 	}
-	AirspaceConverter::LogMessage("ERROR: Failed to start cGPSmapper process.", true);
+	AirspaceConverter::LogError("Failed to start cGPSmapper process.");
 	return false;
 }
 
