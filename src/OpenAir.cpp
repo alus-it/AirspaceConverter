@@ -123,10 +123,10 @@ bool OpenAir::ParseCoordinates(const std::string& text, Geometry::LatLon& point)
 bool OpenAir::Read(const std::string& fileName) {
 	std::ifstream input(fileName, std::ios::binary);
 	if (!input.is_open() || input.bad()) {
-		AirspaceConverter::LogMessage("ERROR: Unable to open input file: " + fileName, true);
+		AirspaceConverter::LogError("Unable to open input file: " + fileName);
 		return false;
 	}
-	AirspaceConverter::LogMessage("Reading OpenAir file: " + fileName, false);
+	AirspaceConverter::LogMessage("Reading OpenAir file: " + fileName);
 	int linecount = 0;
 	std::string sLine;
 	bool allParsedOK = true, isCRLF = false, CRLFwarningGiven = false;
@@ -139,7 +139,7 @@ bool OpenAir::Read(const std::string& fileName) {
 
 		// Verify line ending
 		if (!CRLFwarningGiven && !isCRLF) {
-			AirspaceConverter::LogMessage(boost::str(boost::format("WARNING on line %1d: not valid Windows style end of line (expected CR LF).") % linecount), true);
+			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: not valid Windows style end of line (expected CR LF).") % linecount));
 
 			// OpenAir files may contain thousands of lines we don't want to print this warning all the time
 			CRLFwarningGiven = true;
@@ -216,7 +216,7 @@ bool OpenAir::Read(const std::string& fileName) {
 				break;
 			case 'Y': // DY
 				//ParseDY(sLine, airspace); // Airway not yet supported
-				AirspaceConverter::LogMessage(boost::str(boost::format("Warning: skipping airway segment (not yet supported) on line %1d: %2s") %linecount %sLine), false);
+				AirspaceConverter::LogWarning(boost::str(boost::format("skipping airway segment (not yet supported) on line %1d: %2s") %linecount %sLine));
 				lineParsedOK = false; 
 				break;
 			default:
@@ -238,7 +238,7 @@ bool OpenAir::Read(const std::string& fileName) {
 			continue;
 		}
 		if (!lineParsedOK) {
-			AirspaceConverter::LogMessage(boost::str(boost::format("ERROR: unable to parse OpenAir line %1d: %2s") %linecount %sLine), true);
+			AirspaceConverter::LogError(boost::str(boost::format("unable to parse OpenAir line %1d: %2s") %linecount %sLine));
 			allParsedOK = false;
 		}
 	}
@@ -291,7 +291,7 @@ bool OpenAir::ParseAN(const std::string & line, Airspace& airspace) {
 		else airspace.SetName(name);
 		return true;
 	}
-	AirspaceConverter::LogMessage(boost::str(boost::format("ERROR: airspace %1s has already a name.") % airspace.GetName()), true);
+	AirspaceConverter::LogError(boost::str(boost::format("airspace %1s has already a name.") % airspace.GetName()));
 	return false;	
 }
 
@@ -443,21 +443,21 @@ bool OpenAir::InsertAirspace(Airspace& airspace) {
 	bool validAirspace(airspace.GetNumberOfGeometries() > 0);
 
 	if (!validAirspace)
-		AirspaceConverter::LogMessage(boost::str(boost::format("ERROR at line %1d: skip airspace %2s with no geometries.") % lastACline % airspace.GetName()), true);
+		AirspaceConverter::LogError(boost::str(boost::format("at line %1d: skip airspace %2s with no geometries.") % lastACline % airspace.GetName()));
 
 	if (validAirspace && airspace.GetTopAltitude() <= airspace.GetBaseAltitude()) {
-		AirspaceConverter::LogMessage(boost::str(boost::format("ERROR at line %1d: skip airspace %2s with top and base equal or inverted.") % lastACline % airspace.GetName()), true);
+		AirspaceConverter::LogError(boost::str(boost::format("at line %1d: skip airspace %2s with top and base equal or inverted.") % lastACline % airspace.GetName()));
 		validAirspace = false;
 	}
 
 	if (validAirspace && airspace.GetTopAltitude().IsGND()) {
-		AirspaceConverter::LogMessage(boost::str(boost::format("ERROR at line %1d: skip airspace %2s with top at GND.") % lastACline % airspace.GetName()), true);
+		AirspaceConverter::LogError(boost::str(boost::format("at line %1d: skip airspace %2s with top at GND.") % lastACline % airspace.GetName()));
 		validAirspace = false;
 	}
 
 	// Ensure that the points are closed
 	if (validAirspace && !airspace.ClosePoints()) {
-		AirspaceConverter::LogMessage(boost::str(boost::format("ERROR at line %1d: skip airspace %2s with less than 3 points.") % lastACline % airspace.GetName()), true);
+		AirspaceConverter::LogError(boost::str(boost::format("at line %1d: skip airspace %2s with less than 3 points.") % lastACline % airspace.GetName()));
 		validAirspace = false;
 	}
 
@@ -465,7 +465,7 @@ bool OpenAir::InsertAirspace(Airspace& airspace) {
 	if (validAirspace) {
 
 		// This should be just a warning
-		if (airspace.GetName().empty()) AirspaceConverter::LogMessage(boost::str(boost::format("WARNING at line %1d: airspace without name.") % lastACline), true);
+		if (airspace.GetName().empty()) AirspaceConverter::LogWarning(boost::str(boost::format("at line %1d: airspace without name.") % lastACline));
 		
 		airspaces.insert(std::pair<int, Airspace>(airspace.GetType(), std::move(airspace)));
 	}
@@ -478,16 +478,16 @@ bool OpenAir::InsertAirspace(Airspace& airspace) {
 
 bool OpenAir::Write(const std::string& fileName) {
 	if (airspaces.empty()) {
-		AirspaceConverter::LogMessage("OpenAir output: no airspace, nothing to write", false);
+		AirspaceConverter::LogMessage("OpenAir output: no airspace, nothing to write");
 		return false;
 	}
 	if (file.is_open()) file.close();
 	file.open(fileName, std::ios::out | std::ios::trunc | std::ios::binary);
 	if (!file.is_open() || file.bad()) {
-		AirspaceConverter::LogMessage("ERROR: Unable to open output file: " + fileName, true);
+		AirspaceConverter::LogError("Unable to open output file: " + fileName);
 		return false;
 	}
-	AirspaceConverter::LogMessage("Writing output file: " + fileName, false);
+	AirspaceConverter::LogMessage("Writing OpenAir output file: " + fileName);
 
 	WriteHeader();
 
@@ -582,7 +582,7 @@ bool OpenAir::WriteCategory(const Airspace& airspace) {
 				case Airspace::CLASSG:	openAirCategory = "G"; break;
 				case Airspace::UNDEFINED:
 					openAirCategory = "CTR";
-					AirspaceConverter::LogMessage(boost::str(boost::format("Warning: TMA %1s written as CTR.") % airspace.GetName()), false);
+					AirspaceConverter::LogWarning(boost::str(boost::format("TMA %1s written as CTR.") % airspace.GetName()));
 					break;
 				default: assert(false);
 			}
@@ -593,7 +593,7 @@ bool OpenAir::WriteCategory(const Airspace& airspace) {
 		case Airspace::NOGLIDER:	openAirCategory = "GP"; break;
 		case Airspace::UNKNOWN:		openAirCategory = "UNKNOWN"; break;
 		default: // other cases not existent in OpenAir: FIR, UIR, OTH, GLIDING, UNDEFINED
-			AirspaceConverter::LogMessage(boost::str(boost::format("Warning: skipping airspace %1s of category %2s not existent in OpenAir.") % airspace.GetName() % Airspace::CategoryName(airspace.GetType())), false);
+			AirspaceConverter::LogWarning(boost::str(boost::format("skipping airspace %1s of category %2s not existent in OpenAir.") % airspace.GetName() % Airspace::CategoryName(airspace.GetType())));
 			return false;
 	}
 	file << "AC " << openAirCategory << "\r\n";

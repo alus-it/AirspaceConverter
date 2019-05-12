@@ -28,7 +28,9 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
 
-std::function<void(const std::string&, const bool)> AirspaceConverter::LogMessage = DefaultLogMessage;
+std::function<void(const std::string&)> AirspaceConverter::LogMessage = DefaultLogMessage;
+std::function<void(const std::string&)> AirspaceConverter::LogWarning = DefaultLogWarning;
+std::function<void(const std::string&)> AirspaceConverter::LogError = DefaultLogError;
 std::function<bool(const std::string&, const std::string&)> AirspaceConverter::cGPSmapper = Default_cGPSmapper;
 std::string AirspaceConverter::cGPSmapperCommand = "cgpsmapper";
 
@@ -68,30 +70,30 @@ AirspaceConverter::~AirspaceConverter() {
 	UnloadWaypoints();
 }
 
-void AirspaceConverter::DefaultLogMessage(const std::string& msgText, const bool isError) {
-	(isError ? std::cerr : std::cout) << msgText << std::endl;
+void AirspaceConverter::DefaultLogMessage(const std::string& text) {
+	std::cout << text << std::endl;
 }
 
-/*void AirspaceConverter::DefaultLogMessage(const std::string& text) {
-	std::cout << text << std::endl;
-}*/
+void AirspaceConverter::DefaultLogWarning(const std::string& text) {
+	std::clog << "Warning: " << text << std::endl;
+}
 
 void AirspaceConverter::DefaultLogError(const std::string& text) {
-	std::cerr << text << std::endl;
+	std::cerr << "ERROR:" << text << std::endl;
 }
 
 bool AirspaceConverter::Default_cGPSmapper(const std::string& polishFile, const std::string& outputFile) {
-	LogMessage("Invoking cGPSmapper to make: " + outputFile, false);
+	LogMessage("Invoking cGPSmapper to make: " + outputFile);
 
 	//TODO: add arguments to create files also for other software like Garmin BaseCamp
 	const std::string cmd(boost::str(boost::format("%1s %2s -o %3s") %cGPSmapperCommand %polishFile %outputFile));
-	LogMessage("Executing: " + cmd, false);
+	LogMessage("Executing: " + cmd);
 	if(system(cmd.c_str()) == EXIT_SUCCESS) {
 		std::remove(polishFile.c_str()); // Delete polish file
 		return true;
 	}
 
-	LogMessage("ERROR: returned by cGPSmapper.",true);
+	LogError("returned by cGPSmapper.");
 	return false;
 }
 
@@ -206,7 +208,7 @@ void AirspaceConverter::LoadAirspaces(const OutputType suggestedTypeForOutputFil
 				outputFile = boost::filesystem::path(inputFile).replace_extension(".img").string();
 		}
 	}
-	LogMessage(boost::str(boost::format("Read %1d airspace definition(s) from %2d file(s).") %(airspaces.size() - initialAirspacesNumber) %airspaceFiles.size()), false);
+	LogMessage(boost::str(boost::format("Read %1d airspace definition(s) from %2d file(s).") %(airspaces.size() - initialAirspacesNumber) %airspaceFiles.size()));
 	airspaceFiles.clear();
 }
 
@@ -221,7 +223,7 @@ void AirspaceConverter::LoadTerrainRasterMaps() {
 	int counter = 0;
 	for (const std::string& demFile : terrainRasterMapFiles) if (KML::AddTerrainMap(demFile)) counter++;
 	terrainRasterMapFiles.clear();
-	if (counter > 0) LogMessage(boost::str(boost::format("Read successfully %1d terrain raster map file(s).") % counter), false);
+	if (counter > 0) LogMessage(boost::str(boost::format("Read successfully %1d terrain raster map file(s).") % counter));
 }
 
 void AirspaceConverter::UnloadRasterMaps() {
@@ -240,7 +242,7 @@ void AirspaceConverter::LoadWaypoints() {
 		if (readOk && outputFile.empty()) outputFile = boost::filesystem::path(inputFile).replace_extension(".kmz").string(); // Default output as KMZ
 	}
 	waypointFiles.clear();
-	if (counter > 0) LogMessage(boost::str(boost::format("Read successfully %1d waypoint(s) from %2d file(s).") % (waypoints.size() - wptCounter) %counter), false);
+	if (counter > 0) LogMessage(boost::str(boost::format("Read successfully %1d waypoint(s) from %2d file(s).") % (waypoints.size() - wptCounter) %counter));
 }
 
 void AirspaceConverter::UnloadWaypoints() {
@@ -275,8 +277,8 @@ bool AirspaceConverter::Convert() {
 			KML writer(airspaces, waypoints);
 			if (writer.Write(outputFile)) {
 				conversionDone = true;
-				if(KML::GetNumOfRasterMaps() == 0) LogMessage("Warning: no raster terrain map loaded, used default terrain height for all applicable AGL points.", true);
-				else if(!writer.WereAllAGLaltitudesCovered()) LogMessage("Warning: not all AGL altitudes were under coverage of the loaded terrain map(s).", true);
+				if(KML::GetNumOfRasterMaps() == 0) LogWarning("no raster terrain map loaded, used default terrain height for all applicable AGL points.");
+				else if(!writer.WereAllAGLaltitudesCovered()) LogWarning("not all AGL altitudes were under coverage of the loaded terrain map(s).");
 			}
 		}
 		break;
@@ -293,7 +295,7 @@ bool AirspaceConverter::Convert() {
 		{
 			// First make the Polish file
 			const std::string polishFile(boost::filesystem::path(outputFile).replace_extension(".mp").string());
-			LogMessage("Building Polish file: " + polishFile, false);
+			LogMessage("Building Polish file: " + polishFile);
 			if(!Polish().Write(polishFile, airspaces)) break;
 
 			// Then call cGPSmapper
@@ -301,7 +303,7 @@ bool AirspaceConverter::Convert() {
 		}
 		break;
 	default:
-		LogMessage("ERROR: Output file extension/type unknown.", true);
+		LogError("Output file extension/type unknown.");
 		assert(false);
 		break;
 	}
@@ -326,9 +328,9 @@ bool AirspaceConverter::ConvertOpenAIPdir(const std::string openAIPdir) {
 				UnloadAirspaces(); //of course always unload airspace before to load the next file
 			}
 		}
-		if (counter == 0) LogMessage("ERROR: no valid .aip files found in that directory.", true);
+		if (counter == 0) LogError("no valid .aip files found in that directory.");
 		else return true;
-	} else LogMessage("ERROR: input openAIP airspace directory is not a valid directory.", true);
+	} else LogError("input openAIP airspace directory is not a valid directory.");
 	return false;
 }
 
@@ -476,7 +478,7 @@ bool AirspaceConverter::FilterOnLatLonLimits(const double& topLat, const double&
 			if ((*it).second.IsWithinLimits(limits)) ++it;
 			else it = airspaces.erase(it);
 		}
-		LogMessage(boost::str(boost::format("Filtering airspaces... excluded: %1d, remaining: %2d") %(origAirspaces - GetNumOfAirspaces()) %GetNumOfAirspaces()), false);
+		LogMessage(boost::str(boost::format("Filtering airspaces... excluded: %1d, remaining: %2d") %(origAirspaces - GetNumOfAirspaces()) %GetNumOfAirspaces()));
 	}
 
 	// Filter waypoints
@@ -490,7 +492,7 @@ bool AirspaceConverter::FilterOnLatLonLimits(const double& topLat, const double&
 				delete(w);
 			}
 		}
-		LogMessage(boost::str(boost::format("Filtering waypoints... excluded: %1d, remaining: %2d ") %(origWaypoints - GetNumOfWaypoints()) %GetNumOfWaypoints()), false);
+		LogMessage(boost::str(boost::format("Filtering waypoints... excluded: %1d, remaining: %2d ") %(origWaypoints - GetNumOfWaypoints()) %GetNumOfWaypoints()));
 	}
 
 	return true;

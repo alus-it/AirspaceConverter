@@ -335,13 +335,13 @@ bool KML::Write(const std::string& filename) {
 	const bool airspacesPresent = !airspaces.empty();
 	const bool waypointsPresent = !waypoints.empty();
 	if((!airspacesPresent && !waypointsPresent) || filename.empty()) {
-		AirspaceConverter::LogMessage("KML output: no airspace and no waypoints, nothing to write", false);
+		AirspaceConverter::LogMessage("KML output: no airspace and no waypoints, nothing to write");
 		return false;
 	}
 	
 	// The file must be a KMZ
 	if (!boost::iequals(boost::filesystem::path(filename).extension().string(), ".kmz")) {
-		AirspaceConverter::LogMessage("ERROR: Expected KMZ extension but found: " + boost::filesystem::path(filename).extension().string(), true);
+		AirspaceConverter::LogError("Expected KMZ extension but found: " + boost::filesystem::path(filename).extension().string());
 		return false;
 	}
 
@@ -354,10 +354,10 @@ bool KML::Write(const std::string& filename) {
 	// Open the output file
 	outputFile.open(fileKML, std::ios::out | std::ios::trunc | std::ios::binary);
 	if (!outputFile.is_open() || outputFile.bad()) {
-		AirspaceConverter::LogMessage("ERROR: Unable to open output file: " + filename, true);
+		AirspaceConverter::LogError("Unable to open output file: " + filename);
 		return false;
 	}
-	AirspaceConverter::LogMessage("Writing output file: " + fileKML, false);
+	AirspaceConverter::LogMessage("Writing output file: " + fileKML);
 
 	// Assume all points have AGL altitude covered (no point processed yet)
 	allAGLaltitudesCovered = true;
@@ -572,7 +572,7 @@ bool KML::Write(const std::string& filename) {
 	outputFile.close();
 
 	// Compress (ZIP) and do make the KMZ file
-	AirspaceConverter::LogMessage("Compressing into KMZ: " + filename, false);
+	AirspaceConverter::LogMessage("Compressing into KMZ: " + filename);
 
 	// To avoid problems it is better to delete the KMZ file if already existing, user has already been warned
 	if (boost::filesystem::exists(filename)) std::remove(filename.c_str()); // Delete KMZ file
@@ -581,7 +581,7 @@ bool KML::Write(const std::string& filename) {
 	int error = 0;
 	zip* archive = zip_open(filename.c_str(), ZIP_CREATE, &error);
 	if (error) {
-		AirspaceConverter::LogMessage("ERROR: Could not open or create archive: " + filename, true);
+		AirspaceConverter::LogError("Could not open or create archive: " + filename);
 		return false;
 	}
 
@@ -595,7 +595,7 @@ bool KML::Write(const std::string& filename) {
 #else
 		zip_close(archive);
 #endif
-		AirspaceConverter::LogMessage("ERROR: Failed to create zip source buffer to read: " + fileKML, true);
+		AirspaceConverter::LogError("Failed to create zip source buffer to read: " + fileKML);
 		return false;
 	}
 
@@ -612,7 +612,7 @@ bool KML::Write(const std::string& filename) {
 		zip_close(archive);
 #endif
 		zip_source_free(source); // The sorce buffer have to be freed in this case
-		AirspaceConverter::LogMessage("ERROR: While compressing, failed to add: doc.kml", true);
+		AirspaceConverter::LogError("While compressing, failed to add: doc.kml");
 		return false;
 	}
 
@@ -632,7 +632,7 @@ bool KML::Write(const std::string& filename) {
 
 			// Check if we can get that PNG file
 			if (!boost::filesystem::exists(iconPath)) {
-				AirspaceConverter::LogMessage("ERROR: Unable to find icon PNG file: " + iconPath, true);
+				AirspaceConverter::LogError("Unable to find icon PNG file: " + iconPath);
 				continue;
 			}
 
@@ -644,7 +644,7 @@ bool KML::Write(const std::string& filename) {
 #else
 				zip_close(archive);
 #endif
-				AirspaceConverter::LogMessage("ERROR: Failed to create zip source buffer to read: " + iconPath, true);
+				AirspaceConverter::LogError("Failed to create zip source buffer to read: " + iconPath);
 				return false;
 			}
 
@@ -662,7 +662,7 @@ bool KML::Write(const std::string& filename) {
 				zip_close(archive);
 #endif
 				zip_source_free(source); // The sorce buffer have to be freed in this case
-				AirspaceConverter::LogMessage("ERROR: While compressing, failed to add: " + iconFile, true);
+				AirspaceConverter::LogError("While compressing, failed to add: " + iconFile);
 				return false;
 			}
 		}
@@ -673,7 +673,7 @@ bool KML::Write(const std::string& filename) {
 		std::remove(fileKML.c_str()); // Delete KML file
 		return true;
 	}
-	AirspaceConverter::LogMessage("ERROR: While finalizing the archive.", true);
+	AirspaceConverter::LogError("While finalizing the archive.");
 	return false;
 }
 
@@ -682,19 +682,19 @@ bool KML::ReadKMZ(const std::string& filename) {
 	int error = 0;
 	zip* archive = zip_open(filename.c_str(), 0, &error);
 	if (error) {
-		AirspaceConverter::LogMessage("ERROR: Could not open KMZ file: " + filename, true);
+		AirspaceConverter::LogError("Could not open KMZ file: " + filename);
 		return false;
 	}
 
 	// Get the number of files in the ZIP
 	const long nFiles = (long)zip_get_num_entries(archive, 0);
 	if(nFiles < 1) {
-		AirspaceConverter::LogMessage("ERROR: KMZ file seems empty or not valid: " + filename, true);
+		AirspaceConverter::LogError("KMZ file seems empty or not valid: " + filename);
 		zip_close(archive);
 		return false;
 	}
 
-	AirspaceConverter::LogMessage("Opened KMZ file: " + filename, false);
+	AirspaceConverter::LogMessage("Opened KMZ file: " + filename);
 
 	std::string extractedKmlFile;
 	struct zip_stat sb;
@@ -702,7 +702,7 @@ bool KML::ReadKMZ(const std::string& filename) {
 	// Iterate trough the contents: look for the first KML file in the root of the ZIP file
 	for (long i=0; i<nFiles; i++) {
 		if (zip_stat_index(archive, i, 0, &sb) != 0) {
-			AirspaceConverter::LogMessage("ERROR: while reading KMZ, unable to get details of a file in the ZIP.", true);
+			AirspaceConverter::LogError("while reading KMZ, unable to get details of a file in the ZIP.");
 			continue;
 		}
 		int len = (int)strlen(sb.name);
@@ -723,7 +723,7 @@ bool KML::ReadKMZ(const std::string& filename) {
 
 		struct zip_file* zf = zip_fopen_index(archive, i, 0);
 		if (zf == nullptr) {
-			AirspaceConverter::LogMessage("ERROR: while extracting, unable to open KML file from KMZ: " + filename, true);
+			AirspaceConverter::LogError("while extracting, unable to open KML file from KMZ: " + filename);
 			continue;
 		}
 
@@ -737,7 +737,7 @@ bool KML::ReadKMZ(const std::string& filename) {
 		std::ofstream kmlFile;
 		kmlFile.open(extractedKmlFile, std::ios::out | std::ios::trunc | std::ios::binary);
 		if (!kmlFile.is_open() || kmlFile.bad()) {
-			AirspaceConverter::LogMessage("ERROR: While extracting KML file, unable to write: " + extractedKmlFile, true);
+			AirspaceConverter::LogError("While extracting KML file, unable to write: " + extractedKmlFile);
 			zip_fclose(zf);
 			zip_close(archive);
 			return false;
@@ -749,7 +749,7 @@ bool KML::ReadKMZ(const std::string& filename) {
 		while (sum < sb.size) {
 			len = (int)zip_fread(zf, buf, 8000);
 			if (len < 0) {
-				AirspaceConverter::LogMessage("ERROR: While extracting KML file, unable read compressed data from: " + filename, true);
+				AirspaceConverter::LogError("While extracting KML file, unable read compressed data from: " + filename);
 				kmlFile.close();
 				zip_fclose(zf);
 				zip_close(archive);
@@ -763,7 +763,7 @@ bool KML::ReadKMZ(const std::string& filename) {
 		kmlFile.close();
 		zip_fclose(zf);
 
-		AirspaceConverter::LogMessage("Extracted KML file: " + std::string(sb.name), false);
+		AirspaceConverter::LogMessage("Extracted KML file: " + std::string(sb.name));
 
 		// If we arrived at this point we assume that we just found and correctly extracted the KML file and so we don't need to go further in the KMZ
 		break;
@@ -836,7 +836,7 @@ bool KML::ProcessFolder(const boost::property_tree::ptree& folder, const int upp
 		}
 	}
 	catch (...) {
-		AirspaceConverter::LogMessage("ERROR: Exception while parsing Folder tag.", true);
+		AirspaceConverter::LogError("Exception while parsing Folder tag.");
 		folderCategory = upperCategory;
 		return false;
 	}
@@ -1006,7 +1006,7 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 					else if (simpleData.second.data() == "No glider") category = Airspace::Type::NOGLIDER;
 					else if (simpleData.second.data() == "Wave window") category = Airspace::Type::WAVE;
 					else if (simpleData.second.data() == "Unknown") category = Airspace::Type::UNKNOWN;
-					else AirspaceConverter::LogMessage("ERROR: Unable to parse airspace category in the label: " + simpleData.second.data(), true);
+					else AirspaceConverter::LogError("Unable to parse airspace category in the label: " + simpleData.second.data());
 				}
 			}
 
@@ -1100,14 +1100,14 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 					if (!basePresent) {
 						if (baseFound) airspace.SetBaseAltitude(base);
 						else {
-							AirspaceConverter::LogMessage("Warning: skipping MultiGeometry with invalid base altitude: " + airspace.GetName(), false);
+							AirspaceConverter::LogWarning("skipping MultiGeometry with invalid base altitude: " + airspace.GetName());
 							return false;
 						}
 					}
 					if (!topPresent) {
 						if (topFound) airspace.SetTopAltitude(top);
 						else {
-							AirspaceConverter::LogMessage("Warning: skipping MultiGeometry with invalid top altitude: " + airspace.GetName(), false);
+							AirspaceConverter::LogWarning("skipping MultiGeometry with invalid top altitude: " + airspace.GetName());
 							return false;
 						}
 					}
@@ -1148,7 +1148,7 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 				airspace.SetBaseAltitude(alt);
 				alt.SetAltMt(1000, false); // We put here a defualt altitude of 1000 m AGL
 				airspace.SetTopAltitude(alt);
-				AirspaceConverter::LogMessage("Warning: treating track as airspace: " + airspace.GetName(), false);
+				AirspaceConverter::LogWarning("treating track as airspace: " + airspace.GetName());
 			}
 		}
 
@@ -1157,7 +1157,7 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 			if (airspace.GetBaseAltitude() < airspace.GetTopAltitude()) {
 				airspaces.insert(std::pair<int, Airspace>(airspace.GetType(), std::move(airspace)));
 				return true;
-			} else AirspaceConverter::LogMessage("Warning: skipping Placemark with invalid altitudes: " + airspace.GetName(), false);
+			} else AirspaceConverter::LogWarning("skipping Placemark with invalid altitudes: " + airspace.GetName());
 		}
 
 	} catch (...) {}
@@ -1167,10 +1167,10 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 bool KML::ReadKML(const std::string& filename) {
 	std::ifstream input(filename);
 	if (!input.is_open() || input.bad()) {
-		AirspaceConverter::LogMessage("ERROR: Unable to open KML file: " + filename, true);
+		AirspaceConverter::LogError("Unable to open KML file: " + filename);
 		return false;
 	}
-	AirspaceConverter::LogMessage("Reading KML file: " + filename, false);
+	AirspaceConverter::LogMessage("Reading KML file: " + filename);
 	boost::property_tree::ptree root;
 	boost::property_tree::read_xml(input, root);
 	input.close();
@@ -1181,7 +1181,7 @@ bool KML::ReadKML(const std::string& filename) {
 			else if (element.first == "Placemark") ProcessPlacemark(element.second);
 		}
 	} catch (...) {
-		AirspaceConverter::LogMessage("ERROR: Exception while parsing basic elements of KML file.", true);
+		AirspaceConverter::LogError("Exception while parsing basic elements of KML file.");
 		return false;
 	}
 	return true;
