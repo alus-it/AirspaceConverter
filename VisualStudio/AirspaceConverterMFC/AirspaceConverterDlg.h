@@ -60,6 +60,7 @@ private:
 	void LogMessage(const std::string& text);
 	void LogWarning(const std::string& text);
 	void LogError(const std::string& text);
+	void AppendAndScrollDownLog(const CString& text, CHARFORMAT& charFormat);
 	void UpdateOutputFilename();
 	void EndBusy(const bool takeTime = false);
 	void StartBusy();
