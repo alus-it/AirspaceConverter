@@ -73,19 +73,21 @@ MainWindow::~MainWindow() {
 // These are the "local" MainWindow members functons to append a new message on the log
 void MainWindow::logMessage(const QString& message) {
     ui->loggingTextBox->setTextColor(Qt::black);
-    ui->loggingTextBox->append(message);
-    ui->loggingTextBox->verticalScrollBar()->setValue(ui->loggingTextBox->verticalScrollBar()->maximum());
+    appendAndScrollLog(message);
 }
 
 void MainWindow::logWarning(const QString& message) {
     ui->loggingTextBox->setTextColor(Qt::darkYellow);
-    ui->loggingTextBox->append("Warning: " + message);
-    ui->loggingTextBox->verticalScrollBar()->setValue(ui->loggingTextBox->verticalScrollBar()->maximum());
+    appendAndScrollLog("Warning: " + message);
 }
 
 void MainWindow::logError(const QString& message) {
     ui->loggingTextBox->setTextColor(Qt::red);
-    ui->loggingTextBox->append("ERROR: " + message);
+    appendAndScrollLog("ERROR: " + message);
+}
+
+void MainWindow::appendAndScrollLog(const QString& text) {
+    ui->loggingTextBox->append(text);
     ui->loggingTextBox->verticalScrollBar()->setValue(ui->loggingTextBox->verticalScrollBar()->maximum());
 }
 

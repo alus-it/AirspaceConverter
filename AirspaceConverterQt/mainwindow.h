@@ -36,6 +36,7 @@ private:
     void postMessage(const std::string& text);
     void postWarning(const std::string& text);
     void postError(const std::string& text);
+    void appendAndScrollLog(const QString& text);
     void startBusy();
     void laodAirspacesThread();
     void refreshUI();
