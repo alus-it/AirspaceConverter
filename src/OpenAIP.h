@@ -37,7 +37,7 @@ private:
 
 	bool ParseAirports(const boost::property_tree::ptree& airportsNode);
 	bool ParseNavAids(const boost::property_tree::ptree& navAidsNode);
-	bool ParseHotSpots(const boost::property_tree::ptree& hotSpotsNode);
+	//bool ParseHotSpots(const boost::property_tree::ptree& hotSpotsNode);
 
 	std::multimap<int,Airspace>& airspaces;
 	std::multimap<int,Waypoint*>& waypoints;
