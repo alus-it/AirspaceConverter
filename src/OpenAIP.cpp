@@ -16,7 +16,6 @@
 #include <fstream>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
-#include <boost/optional/optional.hpp>
 #include <boost/tokenizer.hpp>
 
 using boost::property_tree::ptree;
@@ -255,7 +254,7 @@ bool OpenAIP::ReadAirspaces(const std::string& fileName) {
 }
 
 bool OpenAIP::ReadWaypoints(const std::string& fileName) {
-	/*std::ifstream input(fileName);
+	std::ifstream input(fileName);
 	if (!input.is_open() || input.bad()) {
 		AirspaceConverter::LogError("Unable to open openAIP waypoints input file: " + fileName);
 		return false;
@@ -275,34 +274,30 @@ bool OpenAIP::ReadWaypoints(const std::string& fileName) {
 		}
 
 		// Look for the 'root' of airports: WAYPOINTS tag
-		//boost::optional<const ptree&>
-		boost::optional<ptree> node = root.get_child_optional("WAYPOINTS");
-		if (node) wptFound=ParseAirports((ptree&)node);
+		if(root.count("WAYPOINTS") > 0) wptFound = ParseAirports(root.get_child("WAYPOINTS"));
 
 		// Look for the 'root' of navigation aids: NAVAIDS tag
-		node = root.get_child_optional("NAVAIDS");
-		if (node) wptFound = wptFound || ParseNavAids(node);
+		if(root.count("NAVAIDS") > 0) wptFound = wptFound || ParseNavAids(root.get_child("NAVAIDS"));
 
 		// Look for the 'root' of hot spots: HOTSPOTS tag
-		node = root.get_child_optional("HOTSPOTS");
-		if (node) AirspaceConverter::LogWarning("openAIP hotspots not parsed because not supported yet."); //TODO: wptFound = wptFound || ParseHotSpots(node);
+		if(root.count("NAVAIDS") > 0) AirspaceConverter::LogWarning("openAIP hotspots not parsed because not supported yet."); //TODO: wptFound = wptFound || ParseNavAids(root.get_child("NAVAIDS"));
 	} catch (...) {
 		AirspaceConverter::LogError("Exception while parsing openAIP waypoints file: " + fileName);
 		assert(false);
 		return false;
 	}
 	if(!wptFound) AirspaceConverter::LogWarning("Waypoints of any kind not found in this OpenAIP file: " + fileName);
-	return wptFound;*/
-	return false;
+	return wptFound;
 }
 
-bool ParseAirports(const ptree& airportsNode) {
-	/*int numOfAirports = airportsNode.nChildNode(TEXT("AIRPORT")); //count number of airports in the file
+bool OpenAIP::ParseAirports(const ptree& airportsNode) {
+	int numOfAirports = airportsNode.count("AIRPORT"); //count number of airports in the file
 	if (numOfAirports < 1) {
 		AirspaceConverter::LogError("Expected to find at least one AIRPORT tag inside WAYPOINTS tag.");
 		return false;
 	}
-	if (numOfAirports != airportsNode.nChildNode()) {
+
+	/*if (numOfAirports != airportsNode.nChildNode()) {
 		AirspaceConverter::LogError("Expected to find only AIRPORT tags inside WAYPOINTS tag.");
 		return false;
 	} else AirspaceConverter::LogMessage("openAIP number of airports found: " + numOfAirports);
@@ -556,16 +551,13 @@ bool ParseAirports(const ptree& airportsNode) {
 	return false;
 }
 
-bool ParseNavAids(const ptree& navAidsNode) {
-	/*int numOfNavAids = navAidsNode.nChildNode(TEXT("NAVAID")); //count number of navaids in the file
+bool OpenAIP::ParseNavAids(const ptree& navAidsNode) {
+	int numOfNavAids = navAidsNode.count("NAVAID"); //count number of navaids in the file
 	if (numOfNavAids < 1) {
-		StartupStore(
-				TEXT(
-						".. Expected to find at least one NAVAID tag inside NAVAIDS tag.%s"),
-				NEWLINE);
+		AirspaceConverter::LogError("Expected to find at least one NAVAID tag inside NAVAIDS tag.");
 		return false;
 	}
-	if (numOfNavAids != navAidsNode.nChildNode()) {
+	/*if (numOfNavAids != navAidsNode.nChildNode()) {
 		StartupStore(
 				TEXT(
 						".. Expected to find only NAVAID tags inside NAVAIDS tag.%s"),
