@@ -297,12 +297,9 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 		return false;
 	}
 
-	/*if (numOfAirports != airportsNode.nChildNode()) {
-		AirspaceConverter::LogError("Expected to find only AIRPORT tags inside WAYPOINTS tag.");
-		return false;
-	} else AirspaceConverter::LogMessage("openAIP number of airports found: " + numOfAirports);
+	AirspaceConverter::LogMessage("openAIP number of airports found: " + numOfAirports);
 
-	bool return_success = true;
+	/*bool return_success = true;
 	XMLNode AirportNode;
 	LPCTSTR dataStr = nullptr;
 	for (int i = 0; i < numOfAirports && return_success; i++) {
@@ -851,47 +848,59 @@ bool ParseHotSpots(const ptree& hotSpotsNode) {
 }*/
 
 bool OpenAIP::ParseGeolocation(const ptree& parentNode, double &lat, double &lon, double &alt) {
-	/*ptree node = parentNode.get_child("GEOLOCATION");
-	if (!node.isEmpty()) {
-		if (!GetValue(node, TEXT("LAT"), lat) || lat < -90 || lat > 90)
-			return false;
-		if (!GetValue(node, TEXT("LON"), lon) || lon < -180 || lon > 180)
-			return false;
-		if (!GetMeasurement(node, TEXT("ELEV"), 'M', alt))
-			return false;
+	try {
+		ptree node = parentNode.get_child("GEOLOCATION");
+		if (!ParseValue(node,"LAT",lat) || lat < -90 || lat > 90) return false;
+		if (!ParseValue(node,"LON",lon) || lon < -180 || lon > 180) return false;
+		if (!ParseMeasurement(node,"ELEV",'M',alt)) return false;
 		return true;
-	}*/
+	} catch(...) {
+		AirspaceConverter::LogError("Unable to parse GEOLOCATION tag");
+	}
 	return false;
 }
 
 bool OpenAIP::ParseContent(const ptree& parentNode, const std::string& tagName, std::string& outputString) {
-	/*XMLNode node = parentNode.getChildNode(tagName);
-	return (!node.isEmpty() && (outputString = node.getText(0)) != nullptr && outputString[0] != '\0');*/
+	try {
+		outputString = parentNode.get<std::string>(tagName);
+		return true;
+	} catch(...) {
+		AirspaceConverter::LogError("Unable to parse content of tag: " + tagName);
+	}
 	return false;
 }
 
 bool OpenAIP::ParseAttribute(const ptree& node, const std::string& attributeName, std::string& outputString) {
-	//return (!node.isEmpty() && (outputString = node.getAttribute(attributeName)) != nullptr && outputString[0] != '\0');
+	try {
+		outputString = node.get_child("<xmlattr>").get<std::string>(attributeName);
+		return true;
+	} catch(...) {
+		AirspaceConverter::LogError("Unable to parse attribute: " + attributeName);
+	}
 	return false;
 }
 
 bool OpenAIP::ParseValue(const ptree& parentNode, const std::string& tagName, double &value) {
-	/*std::string dataStr;
-	if (GetContent(parentNode, tagName, dataStr)) {
-		value = _tcstod(dataStr, nullptr);
-		return true;
-	}*/
+	std::string dataStr;
+	if (ParseContent(parentNode,tagName,dataStr)) {
+		try {
+				value = std::stod(dataStr);
+				return true;
+		} catch(...) {
+			AirspaceConverter::LogError("Unable to parse numerical value from tag: " + tagName);
+		}
+	}
 	return false;
 }
 
 bool OpenAIP::ParseMeasurement(const ptree& parentNode, const std::string& tagName, char expectedUnit, double &value) {
-	/*XMLNode node = parentNode.getChildNode(tagName);
-	std::string dataStrr;
-	if (GetAttribute(node, TEXT("UNIT"), dataStr) && _tcslen(dataStr) == 1
-			&& dataStr[0] == expectedUnit
-			&& (dataStr = node.getText(0)) != nullptr && dataStr[0] != '\0') {
-		value = _tcstod(dataStr, nullptr);
-		return true;
-	}*/
+	try {
+		ptree node = parentNode.get_child(tagName);
+		std::string dataStr;
+		if (ParseAttribute(node,"UNIT",dataStr) && dataStr.length() == 1 && dataStr.at(0) == expectedUnit) return ParseValue(parentNode,tagName,value);
+		else AirspaceConverter::LogError("Expected measure unit not found for tag: " + tagName);
+	} catch(...) {
+		AirspaceConverter::LogError("Unable to parse tag: " + tagName);
+	}
 	return false;
 }
