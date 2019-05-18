@@ -259,10 +259,10 @@ bool OpenAIP::ReadAirspaces(const std::string& fileName) {
 bool OpenAIP::ReadWaypoints(const std::string& fileName) {
 	std::ifstream input(fileName);
 	if (!input.is_open() || input.bad()) {
-		AirspaceConverter::LogError("Unable to open openAIP waypoints input file: " + fileName);
+		AirspaceConverter::LogError("Unable to open openAIP waypoint input file: " + fileName);
 		return false;
 	}
-	AirspaceConverter::LogMessage("Reading openAIP waypoints file: " + fileName);
+	AirspaceConverter::LogMessage("Reading openAIP waypoint file: " + fileName);
 	ptree tree;
 	read_xml(input, tree);
 	input.close();
@@ -283,9 +283,9 @@ bool OpenAIP::ReadWaypoints(const std::string& fileName) {
 		if(root.count("NAVAIDS") > 0) wptFound = wptFound || ParseNavAids(root.get_child("NAVAIDS"));
 
 		// Look for the 'root' of hot spots: HOTSPOTS tag
-		if(root.count("HOTSPOTS") > 0) AirspaceConverter::LogWarning("openAIP hotspots not parsed because not supported yet."); //TODO: wptFound = wptFound || ParseNavAids(root.get_child("NAVAIDS"));
+		if(root.count("HOTSPOTS") > 0) AirspaceConverter::LogWarning("openAIP hotspot file not parsed because not supported yet."); //TODO: wptFound = wptFound || ParseNavAids(root.get_child("NAVAIDS"));
 	} catch (...) {
-		AirspaceConverter::LogError("Exception while parsing openAIP waypoints file: " + fileName);
+		AirspaceConverter::LogError("Exception while parsing openAIP waypoint file: " + fileName);
 		assert(false);
 		return false;
 	}
@@ -299,13 +299,7 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 		AirspaceConverter::LogError("Expected to find at least one AIRPORT tag inside WAYPOINTS tag.");
 		return false;
 	}
-	AirspaceConverter::LogMessage(boost::str(boost::format("Opening openAIP waypoint file number of airports found: %1d") %numOfAirports));
-
-	std::string dataStr, longName, shortName, countryCode;
-	double lat, lon, alt;
-	float freq, secondaryFreq;
-	int style, rwyDir, rwyLen;
-	std::stringstream comments;
+	AirspaceConverter::LogMessage(boost::str(boost::format("Opening openAIP waypoint file, number of airports found: %1d") %numOfAirports));
 
 	try {
 		for (ptree::value_type const& ap : airportsNode) { // for all children of WAYPOINTS tag
@@ -313,8 +307,10 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 			const ptree& airportNode(ap.second);
 
 			// Airfield type
+			std::string dataStr;
 			if (!ParseAttribute(airportNode, "TYPE", dataStr)) continue; // skip not valid AIRPORT tags and TYPE attributes
-			style = Waypoint::airfieldSolid; // deafult style
+			std::stringstream comments;
+			int style(Waypoint::airfieldSolid); // deafult style
 			switch (dataStr.at(0)) {
 				case 'A':
 					if (dataStr.compare("AF_CIVIL") == 0) comments << "Civil Airfield";
@@ -352,21 +348,24 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 			}
 
 			// Country
+			std::string countryCode;
 			ParseContent(airportNode, "COUNTRY", countryCode);
 
 			// Name
+			std::string longName;
 			if (!ParseContent(airportNode, "NAME", longName)) continue;
 
 			// ICAO code
+			std::string shortName;
 			ParseContent(airportNode, "ICAO", shortName);
 
 			// Geolocation
+			double lat, lon, alt;
 			if (!ParseGeolocation(airportNode, lat, lon, alt)) continue;
 
 			// Runways: take the longest one
-			rwyDir=0;
-			rwyLen=0;
-			int maxstyle = Waypoint::airfieldGrass;
+			int rwyDir(0), rwyLen(0);
+			int maxstyle(Waypoint::airfieldGrass);
 
 			// For each runway...
 			for (ptree::value_type const& rwy : airportNode) {
@@ -395,7 +394,7 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 				double dir = std::stod(dataStr);
 
 				// Add runway to comments
-				comments << rwyName << " " << surface << " " << length << "m " << std::setw(3) << std::setfill('0') << dir;
+				comments << ", " << rwyName << ' ' << surface << ' ' << length << "m " << std::setw(3) << std::setfill('0') << dir;
 
 				// Check if we found the longest one
 				if (length > rwyLen) {
@@ -408,10 +407,8 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 			if (rwyLen > 0 && style != Waypoint::gliderSite) style = maxstyle; //if is not already a gliding site we just check if is "solid" surface or not...
 
 			//Radio frequencies: if more than one just take the first "communication"
-
 			const int numOfFreq = airportNode.count("RADIO");
-			freq = 0;
-			secondaryFreq = 0;
+			float freq(0), secondaryFreq(0);
 			if (numOfFreq > 0) for (ptree::value_type const& radio : airportNode) {
 				if (radio.first != "RADIO") continue;
 				const ptree& radioNode(radio.second);
@@ -763,9 +760,7 @@ bool OpenAIP::ParseContent(const ptree& parentNode, const std::string& tagName, 
 	try {
 		outputString = parentNode.get<std::string>(tagName);
 		return true;
-	} catch(...) {
-		AirspaceConverter::LogError("Unable to parse content of tag: " + tagName);
-	}
+	} catch(...) {}
 	return false;
 }
 

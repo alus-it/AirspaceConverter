@@ -177,6 +177,7 @@ bool AirspaceConverter::PutTypeExtension(const OutputType type, std::string& fil
 }
 
 void AirspaceConverter::LoadAirspaces(const OutputType suggestedTypeForOutputFilename /* = OutputType::KMZ_Format */) {
+	if (airspaceFiles.empty()) return;
 	conversionDone = false;
 	OpenAir openAir(airspaces);
 	OpenAIP openAIP(airspaces, waypoints);
@@ -223,6 +224,7 @@ void AirspaceConverter::UnloadAirspaces() {
 }
 
 void AirspaceConverter::LoadTerrainRasterMaps() {
+	if (terrainRasterMapFiles.empty()) return;
 	conversionDone = false;
 	int counter = 0;
 	for (const std::string& demFile : terrainRasterMapFiles) if (KML::AddTerrainMap(demFile)) counter++;
@@ -236,16 +238,16 @@ void AirspaceConverter::UnloadRasterMaps() {
 }
 
 void AirspaceConverter::LoadWaypoints() {
+	if (waypointFiles.empty()) return;
 	conversionDone = false;
 	int counter = 0;
 	const size_t wptCounter = waypoints.size();
 	SeeYou cu(waypoints);
 	OpenAIP openAIP(airspaces, waypoints);
-
 	for (const std::string& inputFile : waypointFiles) {
 		bool readOk(false);
 		const std::string ext(boost::filesystem::path(inputFile).extension().string());
-		if(boost::iequals(ext, ".cu")) readOk = cu.Read(inputFile);
+		if(boost::iequals(ext, ".cup")) readOk = cu.Read(inputFile);
 		else if (boost::iequals(ext, ".aip")) readOk = openAIP.ReadWaypoints(inputFile);
 		else {
 			LogWarning("Unknown extension for waypoint file: " + inputFile);
