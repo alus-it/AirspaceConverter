@@ -13,10 +13,13 @@
 #include "OpenAIP.h"
 #include "Airspace.h"
 #include "AirspaceConverter.h"
+#include "Waypoint.h"
+#include "Airfield.h"
 #include <fstream>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/tokenizer.hpp>
+#include <boost/format.hpp>
 
 using boost::property_tree::ptree;
 
@@ -280,7 +283,7 @@ bool OpenAIP::ReadWaypoints(const std::string& fileName) {
 		if(root.count("NAVAIDS") > 0) wptFound = wptFound || ParseNavAids(root.get_child("NAVAIDS"));
 
 		// Look for the 'root' of hot spots: HOTSPOTS tag
-		if(root.count("NAVAIDS") > 0) AirspaceConverter::LogWarning("openAIP hotspots not parsed because not supported yet."); //TODO: wptFound = wptFound || ParseNavAids(root.get_child("NAVAIDS"));
+		if(root.count("HOTSPOTS") > 0) AirspaceConverter::LogWarning("openAIP hotspots not parsed because not supported yet."); //TODO: wptFound = wptFound || ParseNavAids(root.get_child("NAVAIDS"));
 	} catch (...) {
 		AirspaceConverter::LogError("Exception while parsing openAIP waypoints file: " + fileName);
 		assert(false);
@@ -296,255 +299,151 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 		AirspaceConverter::LogError("Expected to find at least one AIRPORT tag inside WAYPOINTS tag.");
 		return false;
 	}
+	AirspaceConverter::LogMessage(boost::str(boost::format("Opening openAIP waypoint file number of airports found: %1d") %numOfAirports));
 
-	AirspaceConverter::LogMessage("openAIP number of airports found: " + numOfAirports);
+	std::string dataStr, longName, shortName, countryCode;
+	double lat, lon, alt;
+	float freq, secondaryFreq;
+	int style, rwyDir, rwyLen;
+	std::stringstream comments;
 
-	/*bool return_success = true;
-	XMLNode AirportNode;
-	LPCTSTR dataStr = nullptr;
-	for (int i = 0; i < numOfAirports && return_success; i++) {
-		AirportNode = airportsNode.getChildNode(i);
+	try {
+		for (ptree::value_type const& ap : airportsNode) { // for all children of WAYPOINTS tag
+			if (ap.first != "AIRPORT") continue;
+			const ptree& airportNode(ap.second);
 
-		// Skip not valid AIRPORT tags and TYPE attributes
-		if (!GetAttribute(AirportNode, TEXT("TYPE"), dataStr))
-			continue;
-
-		// Prepare the new waypoint
-		WAYPOINT new_waypoint;
-		new_waypoint.Details = nullptr;
-		new_waypoint.Comment = nullptr;
-		new_waypoint.Visible = true; // default all waypoints visible at start
-		new_waypoint.FarVisible = true;
-		new_waypoint.Format = LKW_OPENAIP;
-		new_waypoint.Number = WayPointList.size();
-		new_waypoint.FileNum = globalFileNum;
-		new_waypoint.Style = STYLE_AIRFIELDSOLID; // default style: solid
-		new_waypoint.Flags = AIRPORT + LANDPOINT;
-
-		std::basic_stringstream<TCHAR> comments;
-
-		switch (dataStr[0]) {
-		case 'A':
-			if (_tcsicmp(dataStr, _T("AF_CIVIL")) == 0)
-				comments << "Civil Airfield" << std::endl;
-			else if (_tcsicmp(dataStr, _T("AF_MIL_CIVIL")) == 0)
-				comments << "Civil and Military Airport" << std::endl;
-			else if (_tcsicmp(dataStr, _T("APT")) == 0)
-				comments << "Airport resp. Airfield IFR" << std::endl;
-			else if (_tcsicmp(dataStr, _T("AD_CLOSED")) == 0)
-				comments << "CLOSED Airport" << std::endl;
-			else if (_tcsicmp(dataStr, _T("AD_MIL")) == 0)
-				comments << "Military Airport" << std::endl;
-			else if (_tcsicmp(dataStr, _T("AF_WATER")) == 0) {
-				new_waypoint.Style = STYLE_AIRFIELDGRASS;
-				comments << "Waterfield" << std::endl;
-			}
-			break;
-		case 'G':
-			if (_tcsicmp(dataStr, _T("GLIDING")) == 0) {
-				new_waypoint.Style = STYLE_GLIDERSITE;
-				comments << "Glider site" << std::endl;
-			}
-			break;
-		case 'H':
-			if (!ISGAAIRCRAFT)
-				continue; // Consider heliports only for GA aircraft
-			if (_tcsicmp(dataStr, _T("HELI_CIVIL")) == 0) {
-				new_waypoint.Style = STYLE_AIRFIELDSOLID;
-				comments << "Civil Heliport" << std::endl;
-			} else if (_tcsicmp(dataStr, _T("HELI_MIL")) == 0) {
-				new_waypoint.Style = STYLE_AIRFIELDSOLID;
-				comments << "Military Heliport" << std::endl;
-			}
-			break;
-		case 'I':
-			if (_tcsicmp(dataStr, _T("INTL_APT")) == 0)
-				comments << "International Airport" << std::endl;
-			break;
-		case 'L':
-			if (_tcsicmp(dataStr, _T("LIGHT_AIRCRAFT")) == 0) {
-				new_waypoint.Style = STYLE_AIRFIELDGRASS;
-				comments << "Ultralight site" << std::endl;
-			}
-			break;
-		default:
-			continue;
-		}
-		// Skip unknown waypoints
-		if (new_waypoint.Style == -1)
-			continue;
-
-		// Country
-		if (GetContent(AirportNode, TEXT("COUNTRY"), dataStr)) {
-			LK_tcsncpy(new_waypoint.Country, dataStr, CUPSIZE_COUNTRY);
-			if (_tcslen(dataStr) > 3)
-				new_waypoint.Country[3] = _T('\0');
-		}
-
-		// Name
-		if (GetContent(AirportNode, TEXT("NAME"), dataStr)) {
-			CopyTruncateString(new_waypoint.Name, NAME_SIZE, dataStr);
-		} else
-			continue;
-
-		// ICAO code
-		if (GetContent(AirportNode, TEXT("ICAO"), dataStr)) {
-			LK_tcsncpy(new_waypoint.Code, dataStr, CUPSIZE_CODE);
-			if (_tcslen(dataStr) > CUPSIZE_CODE)
-				new_waypoint.Code[CUPSIZE_CODE] = _T('\0');
-		}
-
-		// Geolocation
-		if (!GetGeolocation(AirportNode, new_waypoint.Latitude,
-				new_waypoint.Longitude, new_waypoint.Altitude))
-			continue;
-
-		//Radio frequencies: if more than one just take the first "communication"
-		int numOfNodes = AirportNode.nChildNode(TEXT("RADIO"));
-		XMLNode node, subNode;
-		bool found = false, toWrite(numOfNodes == 1);
-		for (int j = 0; j < numOfNodes; j++) {
-			node = AirportNode.getChildNode(TEXT("RADIO"), j);
-			LPCTSTR type = nullptr;
-			if (GetAttribute(node, TEXT("CATEGORY"), dataStr)
-					&& GetContent(node, TEXT("TYPE"), type)) {
-				LPCTSTR freq = nullptr;
-				if (!GetContent(node, TEXT("FREQUENCY"), freq))
-					continue;
-				switch (dataStr[0]) { //AlphaLima
-				case 'C': //COMMUNICATION Frequency used for communication
-					comments << type << " " << new_waypoint.Name << " " << freq
-							<< " MHz " << std::endl;
-					if (!found)
-						toWrite = true;
+			// Airfield type
+			if (!ParseAttribute(airportNode, "TYPE", dataStr)) continue; // skip not valid AIRPORT tags and TYPE attributes
+			style = Waypoint::airfieldSolid; // deafult style
+			switch (dataStr.at(0)) {
+				case 'A':
+					if (dataStr.compare("AF_CIVIL") == 0) comments << "Civil Airfield";
+					else if (dataStr.compare("AF_MIL_CIVIL") == 0) comments << "Civil and Military Airport";
+					else if (dataStr.compare("APT") == 0) comments << "Airport resp. Airfield IFR";
+					else if (dataStr.compare("AD_CLOSED") == 0) comments << "CLOSED Airport";
+					else if (dataStr.compare("AD_MIL") == 0) comments << "Military Airport";
+					else if (dataStr.compare("AF_WATER") == 0) {
+						style = Waypoint::airfieldGrass;
+						comments << "Waterfield";
+					} else continue;
 					break;
-				case 'I': //INFORMATION Frequency to automated information service
-					comments << type << " " << new_waypoint.Name << " " << freq
-							<< " MHz " << std::endl;
+				case 'G':
+					if (dataStr.compare("GLIDING") == 0) {
+						style = Waypoint::gliderSite;
+						comments << "Glider site";
+					} else continue;
 					break;
-				case 'N': //NAVIGATION Frequency used for navigation
-					comments << type << " " << new_waypoint.Name << " " << freq
-							<< " MHz " << std::endl;
+				case 'H':
+					if (dataStr.compare("HELI_CIVIL") == 0) comments << "Civil Heliport";
+					else if (dataStr.compare("HELI_MIL") == 0) comments << "Military Heliport";
+					else continue;
 					break;
-				case 'O': //OHER Other frequency purpose
-					comments << type << " " << new_waypoint.Name << " " << freq
-							<< " MHz " << std::endl;
+				case 'I':
+					if (dataStr.compare("INTL_APT") == 0) comments << "International Airport";
+					break;
+				case 'L':
+					if (dataStr.compare("LIGHT_AIRCRAFT") == 0) {
+						style = Waypoint::airfieldGrass;
+						comments << "Ultralight site";
+					} else continue;
 					break;
 				default:
 					continue;
+			}
+
+			// Country
+			ParseContent(airportNode, "COUNTRY", countryCode);
+
+			// Name
+			if (!ParseContent(airportNode, "NAME", longName)) continue;
+
+			// ICAO code
+			ParseContent(airportNode, "ICAO", shortName);
+
+			// Geolocation
+			if (!ParseGeolocation(airportNode, lat, lon, alt)) continue;
+
+			// Runways: take the longest one
+			rwyDir=0;
+			rwyLen=0;
+			int maxstyle = Waypoint::airfieldGrass;
+
+			// For each runway...
+			for (ptree::value_type const& rwy : airportNode) {
+				if (rwy.first != "RWY") continue;
+				const ptree& runwyNode(rwy.second);
+
+				// Consider only active runways
+				if (!ParseAttribute(runwyNode, "OPERATIONS", dataStr) || dataStr.compare("ACTIVE") != 0) continue;
+
+				// Get runway name
+				std::string rwyName;
+				if (!ParseContent(runwyNode, "NAME", rwyName)) continue;
+
+				// Get surface type
+				std::string surface;
+				if (!ParseContent(runwyNode, "SFC", surface)) continue;
+				int rwyStyle = surface.at(0) == 'A' || surface.at(0) == 'C' ? Waypoint::airfieldSolid : Waypoint::airfieldGrass; // Default grass
+
+				// Runway length
+				double length = 0;
+				if (!ParseMeasurement(runwyNode, "LENGTH", 'M', length)) continue;
+
+				// Runway direction
+				const ptree& dirNode(runwyNode.get_child("DIRECTION"));
+				if (!ParseAttribute(dirNode, "TC", dataStr)) continue;
+				double dir = std::stod(dataStr);
+
+				// Add runway to comments
+				comments << rwyName << " " << surface << " " << length << "m " << std::setw(3) << std::setfill('0') << dir;
+
+				// Check if we found the longest one
+				if (length > rwyLen) {
+					rwyLen = length;
+					rwyDir = dir;
+					maxstyle = rwyStyle;
 				}
-				if (toWrite) {
-					LK_tcsncpy(new_waypoint.Freq, freq, CUPSIZE_FREQ);
-					if (_tcslen(freq) > CUPSIZE_FREQ)
-						new_waypoint.Freq[CUPSIZE_FREQ] = _T('\0');
-					toWrite = false;
-					found = true;
+			} // for each runway
+
+			if (rwyLen > 0 && style != Waypoint::gliderSite) style = maxstyle; //if is not already a gliding site we just check if is "solid" surface or not...
+
+			//Radio frequencies: if more than one just take the first "communication"
+
+			const int numOfFreq = airportNode.count("RADIO");
+			freq = 0;
+			secondaryFreq = 0;
+			if (numOfFreq > 0) for (ptree::value_type const& radio : airportNode) {
+				if (radio.first != "RADIO") continue;
+				const ptree& radioNode(radio.second);
+				std::string type;
+				if (ParseAttribute(radioNode, "CATEGORY", dataStr) && ParseContent(radioNode, "TYPE", type)) {
+					double frequency;
+					if (!ParseValue(radioNode, "FREQUENCY", frequency)) continue;
+					if (AirspaceConverter::IsValidAirbandFrequency((float)frequency)) switch (dataStr.at(0)) {
+						case 'C': //COMMUNICATION Frequency used for communication
+							if (freq == 0) freq = (float)frequency;
+							else if (secondaryFreq == 0) secondaryFreq = (float)frequency;
+							/* no break */
+						case 'I': //INFORMATION Frequency to automated information service
+						case 'N': //NAVIGATION Frequency used for navigation
+						case 'O': //OHER Other frequency purpose
+							comments << ", " << type << " " << std::fixed << std::setprecision(3) << frequency << " MHz";
+							break;
+						default:
+							continue;
+					}
 				}
 			}
+
+			Airfield* airfield = new Airfield(longName, shortName, countryCode, lat, lon, (float)alt, style, rwyDir, rwyLen, freq, comments.str());
+			if (AirspaceConverter::IsValidAirbandFrequency(secondaryFreq)) airfield->SetOtherFrequency(secondaryFreq);
+			waypoints.insert(std::pair<int, Waypoint*>(style, (Waypoint*)airfield));
 		}
-
-		// Runways: take the longest one
-		double maxlength = 0, maxdir = 0;
-		short maxstyle = STYLE_AIRFIELDGRASS;
-
-		// For each runway...
-		numOfNodes = AirportNode.nChildNode(TEXT("RWY"));
-		for (int k = 0; k < numOfNodes; k++) {
-			node = AirportNode.getChildNode(TEXT("RWY"), k);
-
-			// Consider only active runways
-			if (!GetAttribute(node, TEXT("OPERATIONS"), dataStr)
-					|| _tcsicmp(dataStr, _T("ACTIVE")) != 0)
-				continue;
-
-			// Get runway name
-			LPCTSTR name = nullptr;
-			if (!GetContent(node, TEXT("NAME"), name))
-				continue;
-
-			// Get surface type
-			LPCTSTR surface = nullptr;
-			if (!GetContent(node, TEXT("SFC"), surface))
-				continue;
-			short style =
-					surface[0] == 'A' || surface[0] == 'C' ?
-							STYLE_AIRFIELDSOLID : STYLE_AIRFIELDGRASS; // Default grass
-//            switch(surface[0]) {
-//            case 'A': // ASPH Asphalt
-//                style=STYLE_AIRFIELDSOLID;
-//                break;
-//            case 'C': // CONC Concrete
-//                style=STYLE_AIRFIELDSOLID;
-//                break;
-//            case 'G': //GRAS Grass GRVL Gravel
-//                break;
-//            case 'I': // ICE
-//                break;
-//            case 'S': //SAND SNOW SOIL
-//                break;
-//            case 'U': //UNKN Unknown
-//                break;
-//            case 'W': //WATE Water
-//                break;
-//            default:
-//                continue;
-//            }
-
-			// Runway length
-			double length = 0;
-			if (!GetMeasurement(node, TEXT("LENGTH"), 'M', length))
-				continue;
-
-			// Runway direction
-			subNode = node.getChildNode(TEXT("DIRECTION"), 0);
-			if (!GetAttribute(subNode, TEXT("TC"), dataStr))
-				continue;
-			double dir = _tcstod(dataStr, nullptr);
-
-			// Add runway to comments
-			comments << name << " " << surface << " " << length << "m " << dir
-					<< MsgToken(2179) << std::endl;
-
-			// Check if we found the longest one
-			if (length > maxlength) {
-				maxlength = length;
-				maxdir = dir;
-				maxstyle = style;
-			}
-		} // for each runway
-
-		if (maxlength > 0) {
-			new_waypoint.RunwayLen = maxlength;
-			new_waypoint.RunwayDir = maxdir;
-			if (new_waypoint.Style != STYLE_GLIDERSITE)
-				new_waypoint.Style = maxstyle; //if is not already a gliding site we just check if is "solid" surface or not...
-		}
-
-		// Add the comments
-		std::basic_string<TCHAR> str(comments.str());
-		new_waypoint.Comment = (TCHAR*) malloc(
-				(str.length() + 1) * sizeof(TCHAR));
-		if (new_waypoint.Comment != nullptr) {
-			std::copy(str.begin(), str.end(), new_waypoint.Comment);
-			new_waypoint.Comment[str.length()] = '\0';
-		}
-
-		// Add the new waypoint
-		if (WaypointInTerrainRange(&new_waypoint)) {
-			if (AddWaypoint(new_waypoint)) {
-				// ownership of this 2 pointer has benn transfered to WaypointList
-				new_waypoint.Details = nullptr;
-				new_waypoint.Comment = nullptr;
-			} else {
-				return_success = false;
-			}
-		}
-		free(new_waypoint.Comment);
-		free(new_waypoint.Details);
-		new_waypoint.Details = nullptr;
-		new_waypoint.Comment = nullptr;
+		return true;
+	} catch(...) {
+		AirspaceConverter::LogError("Exception while reading openAIP airports file");
 	}
-	return return_success;*/
+
 	return false;
 }
 

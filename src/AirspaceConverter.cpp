@@ -79,7 +79,7 @@ void AirspaceConverter::DefaultLogWarning(const std::string& text) {
 }
 
 void AirspaceConverter::DefaultLogError(const std::string& text) {
-	std::cerr << "ERROR:" << text << std::endl;
+	std::cerr << "ERROR: " << text << std::endl;
 }
 
 bool AirspaceConverter::Default_cGPSmapper(const std::string& polishFile, const std::string& outputFile) {
@@ -189,6 +189,10 @@ void AirspaceConverter::LoadAirspaces(const OutputType suggestedTypeForOutputFil
 		else if (boost::iequals(ext, ".aip")) openAIP.ReadAirspaces(inputFile);
 		else if (boost::iequals(ext, ".kmz")) kml.ReadKMZ(inputFile);
 		else if (boost::iequals(ext, ".kml")) kml.ReadKML(inputFile);
+		else {
+			LogWarning("Unknown extension for airspace file: " + inputFile);
+			continue;
+		}
 
 		// Set (suggest) the output file name if still not defined by the user
 		if (airspaces.size() > initialAirspacesNumber && outputFile.empty()) switch (suggestedTypeForOutputFilename) {
@@ -236,8 +240,17 @@ void AirspaceConverter::LoadWaypoints() {
 	int counter = 0;
 	const size_t wptCounter = waypoints.size();
 	SeeYou cu(waypoints);
+	OpenAIP openAIP(airspaces, waypoints);
+
 	for (const std::string& inputFile : waypointFiles) {
-		const bool readOk = cu.Read(inputFile);
+		bool readOk(false);
+		const std::string ext(boost::filesystem::path(inputFile).extension().string());
+		if(boost::iequals(ext, ".cu")) readOk = cu.Read(inputFile);
+		else if (boost::iequals(ext, ".aip")) readOk = openAIP.ReadWaypoints(inputFile);
+		else {
+			LogWarning("Unknown extension for waypoint file: " + inputFile);
+			continue;
+		}
 		if (readOk) counter++;
 		if (readOk && outputFile.empty()) outputFile = boost::filesystem::path(inputFile).replace_extension(".kmz").string(); // Default output as KMZ
 	}
