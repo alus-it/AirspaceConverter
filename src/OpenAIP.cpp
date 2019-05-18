@@ -544,10 +544,8 @@ bool OpenAIP::ParseNavAids(const ptree& navAidsNode) {
 
 		//Radio frequency
 		XMLNode node = NavAidNode.getChildNode(TEXT("RADIO"));
-		if (node.isEmpty())
-			continue;
-		if (!GetContent(node, TEXT("FREQUENCY"), dataStr))
-			continue;
+		if (node.isEmpty()) continue;
+		if (!GetContent(node, TEXT("FREQUENCY"), dataStr)) continue;
 		comments << "Frequency: " << dataStr << " MHz";
 		LK_tcsncpy(new_waypoint.Freq, dataStr, CUPSIZE_FREQ);
 		if (_tcslen(dataStr) > CUPSIZE_FREQ)
@@ -581,20 +579,7 @@ bool OpenAIP::ParseNavAids(const ptree& navAidsNode) {
 			new_waypoint.Comment[str.length()] = '\0';
 		}
 
-		// Add the new waypoint
-		if (WaypointInTerrainRange(&new_waypoint)) {
-			if (AddWaypoint(new_waypoint)) {
-				// ownership of this 2 pointer has been transfered to WaypointList
-				new_waypoint.Details = nullptr;
-				new_waypoint.Comment = nullptr;
-			} else {
-				return_success = false;
-			}
-		}
-		free(new_waypoint.Comment);
-		free(new_waypoint.Details);
-		new_waypoint.Details = nullptr;
-		new_waypoint.Comment = nullptr;
+		// Add the new waypoint....
 	} // end of for each nav aid
 	return return_success;*/
 	return false;
@@ -731,14 +716,8 @@ bool ParseHotSpots(const ptree& hotSpotsNode) {
 				// ownership of this 2 pointer has been transfered to WaypointList
 				new_waypoint.Details = nullptr;
 				new_waypoint.Comment = nullptr;
-			} else {
-				return_success = false;
-			}
+			} else return_success = false;
 		}
-		free(new_waypoint.Comment);
-		free(new_waypoint.Details);
-		new_waypoint.Details = nullptr;
-		new_waypoint.Comment = nullptr;
 	} // end of for each nav aid
 	return return_success;
 }*/
