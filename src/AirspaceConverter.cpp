@@ -24,6 +24,8 @@
 #include <chrono>
 #include <iomanip>
 #include <cmath>
+#include <map>
+#include <tuple>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
@@ -327,26 +329,84 @@ bool AirspaceConverter::Convert() {
 
 bool AirspaceConverter::ConvertOpenAIPdir(const std::string openAIPdir) {
 	if (openAIPdir.empty()) return false;
-	boost::filesystem::path openAIPpath(openAIPdir);
-	if(boost::filesystem::is_directory(openAIPpath)) {
-		UnloadAirspaces(); // make sure there is no airspace before to start
-		int counter(0);
-		for (boost::filesystem::directory_iterator itr(openAIPpath); itr!=boost::filesystem::directory_iterator(); ++itr) {
-			if (boost::filesystem::is_regular_file(itr->status()) && boost::filesystem::file_size(itr->path()) && boost::iequals(itr->path().extension().string(), ".aip")) {
-				AddAirspaceFile(itr->path().relative_path().string());
-				LoadAirspaces();
-				Convert();
-				boost::filesystem::path currentFilePath(itr->path());
-				outputFile = currentFilePath.replace_extension(".txt").string();
-				Convert();
-				counter++;
-				UnloadAirspaces(); //of course always unload airspace before to load the next file
-			}
+	const boost::filesystem::path openAIPpath(openAIPdir);
+	if(!boost::filesystem::is_directory(openAIPpath)) {
+		LogError("input openAIP airspace directory is not a valid directory: " + openAIPdir);
+		return false;
+	}
+	UnloadAirspaces(); // make sure there is no airspace before to start...
+	UnloadWaypoints(); // ... and also no waypoints
+
+	// Build an index of openAIP contents for each country
+	std::map<std::string,std::tuple<bool,bool,bool,bool>> aipFilesIndex;
+	for (boost::filesystem::directory_iterator itr(openAIPpath); itr!=boost::filesystem::directory_iterator(); ++itr) {
+		if (boost::filesystem::is_regular_file(itr->status()) && boost::filesystem::file_size(itr->path()) && boost::iequals(itr->path().extension().string(), ".aip")) {
+			//const std::string openAIPfile(itr->path().relative_path().string());
+			const std::string filename(itr->path().stem().string());
+			if (filename.length() == 6 && filename.at(2)=='_') {
+				const std::string countryCode(filename.substr(0,2));
+				std::tuple<bool,bool,bool,bool> newContent(false,false,false,false); // 0:asp (airspace), 1:hot (hotspots), 2:nav (navaids), 3:wpt (airports)
+				if (boost::ends_with(filename,"asp"))      std::get<0>(newContent) = true;
+				else if (boost::ends_with(filename,"wpt")) std::get<3>(newContent) = true;
+				else if (boost::ends_with(filename,"nav")) std::get<2>(newContent) = true;
+				else if (boost::ends_with(filename,"hot")) std::get<1>(newContent) = true;
+				else {
+					LogWarning("not able to understand the content type from the name of openAIP file: " + filename);
+					continue;
+				}
+				auto jtr = aipFilesIndex.find(countryCode);
+				if (jtr == aipFilesIndex.end()) aipFilesIndex[countryCode] = newContent;
+				else {
+					std::tuple<bool,bool,bool,bool>& contents(jtr->second);
+					std::get<0>(contents) = std::get<0>(contents) || std::get<0>(newContent);
+					std::get<1>(contents) = std::get<1>(contents) || std::get<1>(newContent);
+					std::get<2>(contents) = std::get<2>(contents) || std::get<2>(newContent);
+					std::get<3>(contents) = std::get<3>(contents) || std::get<3>(newContent);
+				}
+			} else LogWarning("openAIP filename expected as <country code>_<content code> but found: " + filename);
 		}
-		if (counter == 0) LogError("no valid .aip files found in that directory.");
-		else return true;
-	} else LogError("input openAIP airspace directory is not a valid directory.");
-	return false;
+	}
+
+	if (aipFilesIndex.empty()) {
+		LogError("no .aip files found in directory: " + openAIPdir);
+		return false;
+	}
+
+	for (const auto& record : aipFilesIndex) {
+		const std::string& countryCode(record.first);
+		const bool& asp(std::get<0>(record.second));
+		//TODO: const bool& hot(std::get<1>(record.second));
+		//TODO: const bool& nav(std::get<2>(record.second));
+		const bool& wpt(std::get<3>(record.second));
+
+		if (asp) {
+			boost::filesystem::path aspPath(openAIPpath / std::string(countryCode + "_asp.aip"));
+			AddAirspaceFile(aspPath.string());
+			LoadAirspaces();
+
+			// Make OpenAir airspace file
+			outputFile = aspPath.replace_extension(".txt").string();
+			Convert();
+		}
+
+		if (wpt) {
+			boost::filesystem::path wptPath(openAIPpath / std::string(countryCode + "_wpt.aip"));
+			AddWaypointFile(wptPath.string());
+			LoadWaypoints();
+
+			// Make SeeYou airports file
+			outputFile = wptPath.replace_extension(".cup").string();
+			Convert();
+		}
+
+		// Make GoogleEarth KMZ file with all
+		outputFile = boost::filesystem::path(openAIPpath / std::string(countryCode + ".kmz")).string();
+		Convert();
+
+		UnloadAirspaces(); //of course always unload airspace before to load the next file
+		UnloadWaypoints();
+	}
+	return true;
 }
 
 int AirspaceConverter::GetNumOfTerrainMaps() const {
