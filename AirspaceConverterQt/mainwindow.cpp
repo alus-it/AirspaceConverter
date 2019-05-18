@@ -256,7 +256,8 @@ void MainWindow::on_unloadAirspacesButton_clicked() {
 }
 
 void MainWindow::on_loadWaypointFileButton_clicked() {
-    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Waypoints files"), suggestedInputDir, tr("CUP files(*.cup *.CUP);;") );
+    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Waypoints files"), suggestedInputDir, tr("All waypoints files(*.cup *.CUP *.aip *.AIP);;SeeYou files(*.cup *.CUP);;openAIP(*.aip *.AIP);;") );
+
     if(filenames.empty()) return;
 
     // Start to work...
