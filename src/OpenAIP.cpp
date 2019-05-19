@@ -267,7 +267,7 @@ bool OpenAIP::ReadWaypoints(const std::string& fileName) {
 	read_xml(input, tree);
 	input.close();
 	ptree root;
-	bool wptFound = false;
+	bool wptFound(false);
 	try {
 		root = tree.get_child("OPENAIP");
 		double value = root.get_child("<xmlattr>").get<double>("DATAFORMAT");
@@ -407,9 +407,8 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 			if (rwyLen > 0 && style != Waypoint::gliderSite) style = maxstyle; //if is not already a gliding site we just check if is "solid" surface or not...
 
 			//Radio frequencies: if more than one just take the first "communication"
-			const int numOfFreq = airportNode.count("RADIO");
 			float freq(0), secondaryFreq(0);
-			if (numOfFreq > 0) for (ptree::value_type const& radio : airportNode) {
+			if (airportNode.count("RADIO") > 0) for (ptree::value_type const& radio : airportNode) {
 				if (radio.first != "RADIO") continue;
 				const ptree& radioNode(radio.second);
 				std::string type;
@@ -441,7 +440,6 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 	} catch(...) {
 		AirspaceConverter::LogError("Exception while reading openAIP airports file");
 	}
-
 	return false;
 }
 
@@ -457,7 +455,6 @@ bool OpenAIP::ParseNavAids(const ptree& navAidsNode) {
 		for (ptree::value_type const& na : navAidsNode) { // for all children of WAYPOINTS tag
 			if (na.first != "NAVAID") continue;
 			const ptree& navAidNode(na.second);
-
 
 			// Skip not valid NAVAID tags and TYPE attributes
 			std::string dataStr;
@@ -503,183 +500,48 @@ bool OpenAIP::ParseNavAids(const ptree& navAidsNode) {
 			double lat, lon, alt;
 			if (!ParseGeolocation(navAidNode, lat, lon, alt)) continue;
 
+			//Radio frequency
+			double freq(0);
+			if(navAidNode.count("RADIO") > 0) {
+				const ptree& radioNode = navAidNode.get_child("RADIO");
+				if (ParseValue(radioNode, "FREQUENCY", freq)) {
+					if ((style == Waypoint::VOR && AirspaceConverter::IsValidVORfrequency(freq)) || (style == Waypoint::NDB && AirspaceConverter::IsValidNDBfrequency(freq)))
+						comments << ", Frequency: " << std::fixed << std::setprecision(style != Waypoint::NDB ? 3 : 1) << freq << (style != Waypoint::NDB ? " MHz" : " kHz");
+					else {
+						AirspaceConverter::LogWarning("skipping not valid frequency for VOR or DME for navaid: " + longName);
+						freq = 0;
+					}
+				}
+				if (ParseContent(radioNode, "CHANNEL", dataStr)) comments << ", Channel: " << dataStr;
+			}
+
+			// Parameters
+			if(navAidNode.count("PARAMS") > 0) {
+				const ptree& paramsNode = navAidNode.get_child("PARAMS");
+				double value(0);
+				if (ParseValue(paramsNode, "RANGE", value)) comments << ", Range: " << std::setprecision(0) << value << " NM";
+				if (ParseValue(paramsNode, "DECLINATION", value)) comments << ", Declination: " << value << " deg";
+				if (ParseContent(paramsNode, "ALIGNEDTOTRUENORTH", dataStr)) {
+					if (dataStr.compare("TRUE") == 0) comments << " true north";
+					else if (dataStr.compare("FALSE") == 0) comments << " magnetic north";
+				}
+			}
+
 			// Build and store the waypoint
 			Waypoint* waypoint = new Waypoint(longName, shortName, countryCode, lat, lon, (float)alt, style, comments.str());
+			if (freq > 0) waypoint->SetOtherFrequency((float)freq);
 			waypoints.insert(std::pair<int, Waypoint*>(style, waypoint));
 		}
 		return true;
 	} catch(...) {
 		AirspaceConverter::LogError("Exception while reading openAIP navaids file");
 	}
-
-	/* TODO:
-		//Radio frequency
-		XMLNode node = NavAidNode.getChildNode(TEXT("RADIO"));
-		if (node.isEmpty()) continue;
-		if (!GetContent(node, TEXT("FREQUENCY"), dataStr)) continue;
-		comments << "Frequency: " << dataStr << " MHz";
-		LK_tcsncpy(new_waypoint.Freq, dataStr, CUPSIZE_FREQ);
-		if (_tcslen(dataStr) > CUPSIZE_FREQ)
-			new_waypoint.Freq[CUPSIZE_FREQ] = _T('\0');
-		if (GetContent(node, TEXT("CHANNEL"), dataStr))
-			comments << " Channel: " << dataStr;
-		comments << std::endl;
-
-		// Parameters
-		node = NavAidNode.getChildNode(TEXT("PARAMS"));
-		if (node.isEmpty())
-			continue;
-		double value = 0;
-		if (GetValue(node, TEXT("RANGE"), value))
-			comments << "Range: " << value << " NM ";
-		if (GetValue(node, TEXT("DECLINATION"), value))
-			comments << "Declination: " << value << MsgToken(2179);
-		if (GetContent(node, TEXT("ALIGNEDTOTRUENORTH"), dataStr)) {
-			if (_tcsicmp(dataStr, _T("TRUE")) == 0)
-				comments << " True north";
-			else if (_tcsicmp(dataStr, _T("TRUE")) == 0)
-				comments << " Magnetic north";
-		}
-*/
 	return false;
 }
 
-/* TODO:
-bool ParseHotSpots(const ptree& hotSpotsNode) {
-	int numOfHotSpots = hotSpotsNode.nChildNode(TEXT("HOTSPOT")); //count number of hotspots in the file
-	if (numOfHotSpots < 1) {
-		StartupStore(
-				TEXT(
-						".. Expected to find at least one HOTSPOT tag inside HOTSPOTS tag.%s"),
-				NEWLINE);
-		return false;
-	}
-	if (numOfHotSpots != hotSpotsNode.nChildNode()) {
-		StartupStore(
-				TEXT(
-						".. Expected to find only HOTSPOT tags inside HOTSPOTS tag.%s"),
-				NEWLINE);
-		return false;
-	} else
-		StartupStore(
-				TEXT(".. OpenAIP hot spots file contains: %u hot spots.%s"),
-				(unsigned) numOfHotSpots, NEWLINE);
-
-	bool return_success = true;
-	XMLNode HotSpotNode;
-	LPCTSTR dataStr = nullptr;
-	for (int i = 0; i < numOfHotSpots && return_success; i++) {
-		HotSpotNode = hotSpotsNode.getChildNode(i);
-
-		// Skip not valid HOTSPOT tags and TYPE attributes
-		if (!GetAttribute(HotSpotNode, TEXT("TYPE"), dataStr))
-			continue;
-
-		// Thermal type
-		switch (dataStr[0]) {
-		case 'A':
-			if (_tcsicmp(dataStr, _T("ARTIFICIAL")) != 0)
-				continue;
-			break;
-		case 'N':
-			if (_tcsicmp(dataStr, _T("NATURAL")) != 0)
-				continue;
-			break;
-		default:
-			continue;
-		}
-
-		// Write type down in the comments
-		std::basic_stringstream<TCHAR> comments;
-		comments << dataStr;
-
-		// Aircraftcategories: if glider ignore small thermals for paragliders
-		XMLNode node = HotSpotNode.getChildNode(TEXT("AIRCRAFTCATEGORIES"));
-		if (!node.isEmpty()) {
-			int numOfCategories = node.nChildNode(TEXT("AIRCRAFTCATEGORY"));
-			if (numOfCategories != node.nChildNode())
-				continue;
-			bool gliders = false, hangGliders = false; //, paraGliders=false
-			for (int j = 0; j < numOfCategories; j++) {
-				XMLNode subNode = node.getChildNode(j);
-				if (!subNode.isEmpty()
-						&& (dataStr = subNode.getText(0)) != nullptr
-						&& dataStr[0] != '\0') {
-					if (_tcsicmp(dataStr, _T("GLIDER")) == 0)
-						gliders = true;
-					else if (_tcsicmp(dataStr, _T("HANG_GLIDER")) == 0)
-						hangGliders = true;
-					//else if(_tcsicmp(dataStr,_T("PARAGLIDER"))==0) paraGliders=true;
-				}
-			}
-			if ((ISGLIDER || ISGAAIRCRAFT) && !gliders && !hangGliders)
-				continue;
-		}
-
-		// Prepare the new waypoint
-		WAYPOINT new_waypoint;
-		new_waypoint.Details = nullptr;
-		new_waypoint.Comment = nullptr;
-		new_waypoint.Visible = true; // default all waypoints visible at start
-		new_waypoint.FarVisible = true;
-		new_waypoint.Format = LKW_OPENAIP;
-		new_waypoint.Number = WayPointList.size();
-		new_waypoint.FileNum = globalFileNum;
-		new_waypoint.Style = STYLE_THERMAL; // default style: thermal
-
-		// Country
-		if (GetContent(HotSpotNode, TEXT("COUNTRY"), dataStr)) {
-			LK_tcsncpy(new_waypoint.Country, dataStr, CUPSIZE_COUNTRY);
-			if (_tcslen(dataStr) > 3)
-				new_waypoint.Country[3] = _T('\0');
-		}
-
-		// Name
-		if (GetContent(HotSpotNode, TEXT("NAME"), dataStr)) {
-			CopyTruncateString(new_waypoint.Name, NAME_SIZE, dataStr);
-		} else
-			continue;
-
-		// Geolocation
-		if (!GetGeolocation(HotSpotNode, new_waypoint.Latitude,
-				new_waypoint.Longitude, new_waypoint.Altitude))
-			continue;
-
-		// Reliability
-		double reliability = 0;
-		if (!GetValue(HotSpotNode, TEXT("RELIABILITY"), reliability))
-			continue;
-		comments << " " << reliability * 100 << "% ";
-
-		// Occourrence
-		if (!GetContent(HotSpotNode, TEXT("OCCURRENCE"), dataStr))
-			continue;
-		comments << dataStr << std::endl;
-
-		// Comment
-		if (GetContent(HotSpotNode, TEXT("COMMENT"), dataStr))
-			comments << dataStr;
-
-		// Add the comments
-		std::basic_string<TCHAR> str(comments.str());
-		new_waypoint.Comment = (TCHAR*) malloc(
-				(str.length() + 1) * sizeof(TCHAR));
-		if (new_waypoint.Comment != nullptr) {
-			std::copy(str.begin(), str.end(), new_waypoint.Comment);
-			new_waypoint.Comment[str.length()] = '\0';
-		}
-
-		// Add the new waypoint
-		if (WaypointInTerrainRange(&new_waypoint)) {
-			if (AddWaypoint(new_waypoint)) {
-				// ownership of this 2 pointer has been transfered to WaypointList
-				new_waypoint.Details = nullptr;
-				new_waypoint.Comment = nullptr;
-			} else return_success = false;
-		}
-	} // end of for each nav aid
-	return return_success;
-}*/
+//TODO: bool ParseHotSpots(const ptree& hotSpotsNode) {
+//	return false;
+//}
 
 bool OpenAIP::ParseGeolocation(const ptree& parentNode, double &lat, double &lon, double &alt) {
 	try {
