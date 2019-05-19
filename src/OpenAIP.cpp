@@ -299,7 +299,7 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 		AirspaceConverter::LogError("Expected to find at least one AIRPORT tag inside WAYPOINTS tag.");
 		return false;
 	}
-	AirspaceConverter::LogMessage(boost::str(boost::format("Opening openAIP waypoint file, number of airports found: %1d") %numOfAirports));
+	AirspaceConverter::LogMessage(boost::str(boost::format("This openAIP waypoint file contains %1d airfields") %numOfAirports));
 
 	try {
 		for (ptree::value_type const& ap : airportsNode) { // for all children of WAYPOINTS tag
@@ -432,6 +432,7 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 				}
 			}
 
+			// Build and store the airfield
 			Airfield* airfield = new Airfield(longName, shortName, countryCode, lat, lon, (float)alt, style, rwyDir, rwyLen, freq, comments.str());
 			if (AirspaceConverter::IsValidAirbandFrequency(secondaryFreq)) airfield->SetOtherFrequency(secondaryFreq);
 			waypoints.insert(std::pair<int, Waypoint*>(style, (Waypoint*)airfield));
@@ -450,98 +451,68 @@ bool OpenAIP::ParseNavAids(const ptree& navAidsNode) {
 		AirspaceConverter::LogError("Expected to find at least one NAVAID tag inside NAVAIDS tag.");
 		return false;
 	}
-	/*if (numOfNavAids != navAidsNode.nChildNode()) {
-		StartupStore(
-				TEXT(
-						".. Expected to find only NAVAID tags inside NAVAIDS tag.%s"),
-				NEWLINE);
-		return false;
-	} else
-		StartupStore(TEXT(".. OpenAIP nav aids file contains: %u nav aids.%s"),
-				(unsigned) numOfNavAids, NEWLINE);
+	AirspaceConverter::LogMessage(boost::str(boost::format("This openAIP navaids file contains %1d navigation aids") %numOfNavAids));
 
-	XMLNode NavAidNode;
-	LPCTSTR dataStr = nullptr;
+	try {
+		for (ptree::value_type const& na : navAidsNode) { // for all children of WAYPOINTS tag
+			if (na.first != "NAVAID") continue;
+			const ptree& navAidNode(na.second);
 
-	bool return_success = true;
 
-	for (int i = 0; i < numOfNavAids && return_success; i++) {
-		NavAidNode = navAidsNode.getChildNode(i);
+			// Skip not valid NAVAID tags and TYPE attributes
+			std::string dataStr;
+			if (!ParseAttribute(navAidNode, "TYPE", dataStr)) continue;
 
-		// Skip not valid NAVAID tags and TYPE attributes
-		if (!GetAttribute(NavAidNode, TEXT("TYPE"), dataStr))
-			continue;
+			// Waypoint type
+			int style(Waypoint::unknown); // deafult style
+			switch (dataStr.at(0)) {
+				case 'D':
+					if (dataStr.compare("DME") == 0 || dataStr.compare("DVOR") == 0 || dataStr.compare("DVOR-DME") == 0 || dataStr.compare("DVORTAC") == 0) style = Waypoint::VOR;
+					break;
+				case 'N':
+					if (dataStr.compare("NDB") == 0) style = Waypoint::NDB;
+					break;
+				case 'V':
+					if (dataStr.compare("VOR") == 0 || dataStr.compare("VOR-DME") == 0 || dataStr.compare("VORTAC") == 0) style = Waypoint::VOR;
+					break;
+				case 'T':
+					if (dataStr.compare("TACAN") == 0) style = Waypoint::VOR;
+					break;
+				default:
+					continue; // skip unknown waypoints
+			}
+			if (style == Waypoint::unknown) continue; // skip unknown waypoints
 
-		// Prepare the new waypoint
-		WAYPOINT new_waypoint;
-		new_waypoint.Details = nullptr;
-		new_waypoint.Comment = nullptr;
-		new_waypoint.Visible = true; // default all waypoints visible at start
-		new_waypoint.FarVisible = true;
-		new_waypoint.Format = LKW_OPENAIP;
-		new_waypoint.Number = WayPointList.size();
-		new_waypoint.FileNum = globalFileNum;
-		new_waypoint.Style = STYLE_NORMAL; // default style: normal
+			// Write down in the comments what it is
+			std::stringstream comments;
+			comments << dataStr;
 
-		std::basic_stringstream<TCHAR> comments;
+			// Country
+			std::string countryCode;
+			ParseContent(navAidNode, "COUNTRY", countryCode);
 
-		switch (dataStr[0]) {
-		case 'D': //STYLE_VOR //
-			if (_tcsicmp(dataStr, _T("DME")) == 0
-					|| _tcsicmp(dataStr, _T("DVOR")) == 0
-					|| _tcsicmp(dataStr, _T("DVOR-DME")) == 0
-					|| _tcsicmp(dataStr, _T("DVORTAC")) == 0)
-				new_waypoint.Style = STYLE_VOR;
-			break;
-		case 'N':
-			if (_tcsicmp(dataStr, _T("NDB")) == 0)
-				new_waypoint.Style = STYLE_NDB;
-			break;
-		case 'V':
-			if (_tcsicmp(dataStr, _T("VOR")) == 0
-					|| _tcsicmp(dataStr, _T("VOR-DME")) == 0
-					|| _tcsicmp(dataStr, _T("VORTAC")) == 0)
-				new_waypoint.Style = STYLE_VOR;
-			break;
-		case 'T':
-			if (_tcsicmp(dataStr, _T("TACAN")) == 0)
-				new_waypoint.Style = STYLE_VOR;
-			break;
-		default:
-			continue;
+			// Name
+			std::string longName;
+			if (!ParseContent(navAidNode, "NAME", longName)) continue;
+
+			// ID code
+			std::string shortName;
+			ParseContent(navAidNode, "ID", shortName);
+
+			// Geolocation
+			double lat, lon, alt;
+			if (!ParseGeolocation(navAidNode, lat, lon, alt)) continue;
+
+			// Build and store the waypoint
+			Waypoint* waypoint = new Waypoint(longName, shortName, countryCode, lat, lon, (float)alt, style, comments.str());
+			waypoints.insert(std::pair<int, Waypoint*>(style, waypoint));
 		}
-		// Skip unknown waypoints
-		if (new_waypoint.Style == STYLE_NORMAL)
-			continue;
+		return true;
+	} catch(...) {
+		AirspaceConverter::LogError("Exception while reading openAIP navaids file");
+	}
 
-		// Write down in the comments what it is
-		comments << dataStr << std::endl;
-
-		// Country
-		if (GetContent(NavAidNode, TEXT("COUNTRY"), dataStr)) {
-			LK_tcsncpy(new_waypoint.Country, dataStr, CUPSIZE_COUNTRY);
-			if (_tcslen(dataStr) > 3)
-				new_waypoint.Country[3] = _T('\0');
-		}
-
-		// Name
-		if (GetContent(NavAidNode, TEXT("NAME"), dataStr)) {
-			CopyTruncateString(new_waypoint.Name, NAME_SIZE, dataStr);
-		} else
-			continue;
-
-		// Navigational aid ID
-		if (GetContent(NavAidNode, TEXT("ID"), dataStr)) {
-			LK_tcsncpy(new_waypoint.Code, dataStr, CUPSIZE_CODE);
-			if (_tcslen(dataStr) > CUPSIZE_CODE)
-				new_waypoint.Code[CUPSIZE_CODE] = _T('\0');
-		}
-
-		// Geolocation
-		if (!GetGeolocation(NavAidNode, new_waypoint.Latitude,
-				new_waypoint.Longitude, new_waypoint.Altitude))
-			continue;
-
+	/* TODO:
 		//Radio frequency
 		XMLNode node = NavAidNode.getChildNode(TEXT("RADIO"));
 		if (node.isEmpty()) continue;
@@ -569,19 +540,7 @@ bool OpenAIP::ParseNavAids(const ptree& navAidsNode) {
 			else if (_tcsicmp(dataStr, _T("TRUE")) == 0)
 				comments << " Magnetic north";
 		}
-
-		// Add the comments
-		std::basic_string<TCHAR> str(comments.str());
-		new_waypoint.Comment = (TCHAR*) malloc(
-				(str.length() + 1) * sizeof(TCHAR));
-		if (new_waypoint.Comment != nullptr) {
-			std::copy(str.begin(), str.end(), new_waypoint.Comment);
-			new_waypoint.Comment[str.length()] = '\0';
-		}
-
-		// Add the new waypoint....
-	} // end of for each nav aid
-	return return_success;*/
+*/
 	return false;
 }
 
