@@ -376,8 +376,9 @@ bool AirspaceConverter::ConvertOpenAIPdir(const std::string openAIPdir) {
 		const std::string& countryCode(record.first);
 		const bool& asp(std::get<0>(record.second));
 		//TODO: const bool& hot(std::get<1>(record.second));
-		//TODO: const bool& nav(std::get<2>(record.second));
+		const bool& nav(std::get<2>(record.second));
 		const bool& wpt(std::get<3>(record.second));
+		std::string airfieldsFile;
 
 		if (asp) {
 			boost::filesystem::path aspPath(openAIPpath / std::string(countryCode + "_asp.aip"));
@@ -391,7 +392,8 @@ bool AirspaceConverter::ConvertOpenAIPdir(const std::string openAIPdir) {
 
 		if (wpt) {
 			boost::filesystem::path wptPath(openAIPpath / std::string(countryCode + "_wpt.aip"));
-			AddWaypointFile(wptPath.string());
+			airfieldsFile = wptPath.string(); // remember the airfields file
+			AddWaypointFile(airfieldsFile);
 			LoadWaypoints();
 
 			// Make SeeYou airports file
@@ -399,11 +401,29 @@ bool AirspaceConverter::ConvertOpenAIPdir(const std::string openAIPdir) {
 			Convert();
 		}
 
+		if (nav) {
+			if (wpt) UnloadWaypoints(); // In case there were already airfield loaded unload them
+
+			boost::filesystem::path navPath(openAIPpath / std::string(countryCode + "_nav.aip"));
+			AddWaypointFile(navPath.string());
+			LoadWaypoints(); // here load ONLY navaids
+
+			// Make SeeYou navaids file
+			outputFile = navPath.replace_extension(".cup").string();
+			Convert();
+		}
+
+		// In case airfields were unloaded reload them
+		if (!airfieldsFile.empty()) {
+			AddWaypointFile(airfieldsFile);
+			LoadWaypoints();
+		}
+
 		// Make GoogleEarth KMZ file with all
 		outputFile = boost::filesystem::path(openAIPpath / std::string(countryCode + ".kmz")).string();
 		Convert();
 
-		UnloadAirspaces(); //of course always unload airspace before to load the next file
+		UnloadAirspaces(); //of course always unload everything before to load the next files
 		UnloadWaypoints();
 	}
 	return true;
