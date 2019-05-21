@@ -446,7 +446,7 @@ void CAirspaceConverterDlg::OnBnClickedInputFile() {
 	assert(converter != nullptr);
 	assert(processor != nullptr);
 	if (!UpdateData(TRUE)) return; // Force the user to enter valid QNH
-	CFileDialog dlg(TRUE, NULL, NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("All airspace files|*.txt; *.aip; *.kmz; *.kml|openAIP|*.aip|OpenAir|*.txt|Google Earth|*.kmz; *.kml||"), (CWnd*)this, 0, TRUE);
+	CFileDialog dlg(TRUE, NULL, NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("All airspace files|*.txt; *.aip; *.kmz; *.kml|openAIP airspace|*.aip|OpenAir|*.txt|Google Earth|*.kmz; *.kml||"), (CWnd*)this, 0, TRUE);
 	if (dlg.DoModal() == IDOK) {
 		outputFile.clear();
 		conversionDone = false;
@@ -466,7 +466,7 @@ void CAirspaceConverterDlg::OnBnClickedInputFile() {
 void CAirspaceConverterDlg::OnBnClickedInputWaypoints() {
 	assert(converter != nullptr);
 	assert(processor != nullptr);
-	CFileDialog dlg(TRUE, _T("cup"), NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("SeeYou waypoints|*.cup||"), (CWnd*)this, 0, TRUE);
+	CFileDialog dlg(TRUE, NULL, NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("All waypoint files|*.cup; *.aip;|SeeYou waypoints|*.cup|openAIP waypoints|*.aip||"), (CWnd*)this, 0, TRUE);
 	if (dlg.DoModal() == IDOK) {
 		POSITION pos(dlg.GetStartPosition());
 		while (pos) {
@@ -520,7 +520,11 @@ void CAirspaceConverterDlg::OnBnClickedInputFolderBt() {
 	boost::filesystem::path root(inputPath);
 	if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
 	for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
-		if (!boost::filesystem::is_regular_file(*it)) continue;
+		if (!boost::filesystem::is_regular_file(*it) || (
+				!boost::iequals(it->path().extension().string(), ".txt") &&
+				!boost::iequals(it->path().extension().string(), ".aip") &&
+				!boost::iequals(it->path().extension().string(), ".kmz") &&
+				!boost::iequals(it->path().extension().string(), ".kml"))) continue;
 		converter->AddAirspaceFile(it->path().string());
 		if (outputFile.empty()) outputFile = it->path().string();
 	}
@@ -550,7 +554,7 @@ void CAirspaceConverterDlg::OnBnClickedInputWaypointsFolderBt() {
 	boost::filesystem::path root(inputPath);
 	if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
 	for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
-		if (boost::filesystem::is_regular_file(*it) && boost::iequals(it->path().extension().string(), ".cup")) {
+		if (boost::filesystem::is_regular_file(*it) && (boost::iequals(it->path().extension().string(), ".cup") || boost::iequals(it->path().extension().string(), ".aip"))) {
 			converter->AddWaypointFile(it->path().string());
 			if (outputFile.empty()) outputFile = it->path().string();
 		}
