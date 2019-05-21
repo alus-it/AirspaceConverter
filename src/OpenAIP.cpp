@@ -15,6 +15,7 @@
 #include "AirspaceConverter.h"
 #include "Waypoint.h"
 #include "Airfield.h"
+#include <cmath>
 #include <fstream>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -398,8 +399,8 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 
 				// Check if we found the longest one
 				if (length > rwyLen) {
-					rwyLen = length;
-					rwyDir = dir;
+					rwyLen = (int)std::round(length);
+					rwyDir = (int)std::round(dir);
 					maxstyle = rwyStyle;
 				}
 			} // for each runway
@@ -505,7 +506,7 @@ bool OpenAIP::ParseNavAids(const ptree& navAidsNode) {
 			if(navAidNode.count("RADIO") > 0) {
 				const ptree& radioNode = navAidNode.get_child("RADIO");
 				if (ParseValue(radioNode, "FREQUENCY", freq)) {
-					if ((style == Waypoint::VOR && AirspaceConverter::IsValidVORfrequency(freq)) || (style == Waypoint::NDB && AirspaceConverter::IsValidNDBfrequency(freq)))
+					if ((style == Waypoint::VOR && AirspaceConverter::IsValidVORfrequency((float)freq)) || (style == Waypoint::NDB && AirspaceConverter::IsValidNDBfrequency((float)freq)))
 						comments << ", Frequency: " << std::fixed << std::setprecision(style != Waypoint::NDB ? 3 : 1) << freq << (style != Waypoint::NDB ? " MHz" : " kHz");
 					else {
 						AirspaceConverter::LogWarning("skipping not valid frequency for VOR or DME for navaid: " + longName);
