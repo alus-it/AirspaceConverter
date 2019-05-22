@@ -235,15 +235,11 @@ bool Airspace::SetTransponderCode(const std::string& code) {
 	for (char c : code) {
 		if (c < '0' || c > '7') return false;
 	}
-	try
-	{
+	try {
 		transponderCode = (short)std::stoi(code, 0, 8);
-	}
-	catch ( ... )
-	{
-		return false;
-	}
-	return true;
+		return true;
+	} catch ( ... ) {}
+	return false;
 }
 
 std::string Airspace::GetTransponderCode() const {
