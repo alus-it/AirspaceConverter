@@ -288,7 +288,7 @@ bool OpenAir::ParseAN(const std::string & line, Airspace& airspace) {
 	if (airspace.GetName().empty()) {
 		const std::string name(line.substr(3));
 		if (name == "COLORENTRY") airspace.SetType(Airspace::UNDEFINED); // Skip Strepla colortable entries
-		else airspace.SetName(name);
+		else airspace.SetName(boost::locale::conv::between(name,"utf-8","ISO8859-1"));
 		return true;
 	}
 	AirspaceConverter::LogError(boost::str(boost::format("airspace %1s has already a name.") % airspace.GetName()));
@@ -306,7 +306,7 @@ bool OpenAir::ParseAF(const std::string& line, Airspace& airspace) {
 			descr.erase(0,pos);
 			if (descr.at(0) == ' ') descr.erase(0,1); // remove the separating space
 		} else descr.erase();
-		airspace.AddRadioFrequency(freq,descr);
+		airspace.AddRadioFrequency(freq,boost::locale::conv::between(descr,"utf-8","ISO8859-1"));
 		return true;
 	} catch(...) {
 		return false;
@@ -518,7 +518,7 @@ bool OpenAir::Write(const std::string& fileName) {
 		for (unsigned int i=0; i<a.GetNumberOfRadioFrequencies(); i++) {
 			const std::pair<float, std::string>& f = a.GetRadioFrequencyAt(i);
 			file << "AF " << std::fixed << std::setprecision(3) << f.first;
-			if (!f.second.empty()) file << ' ' << f.second;
+			if (!f.second.empty()) file << ' ' << boost::locale::conv::between(f.second,"ISO8859-1","utf-8");
 			file << "\r\n";
 		}
 
