@@ -119,6 +119,13 @@ bool OpenAir::ParseCoordinates(const std::string& text, Geometry::LatLon& point)
 	return true;
 }
 
+bool OpenAir::IsFileUTF8(std::ifstream& inputFile) {
+	if (inputFile.get() == 0xef && inputFile.get() == 0xbb && inputFile.get() == 0xbf) return true; // Check if first three characters are the UTF-8 BOM
+	inputFile.seekg(0); //re-wind
+	//TODO: Very few UTF-8 file has BOM, so here we should scan the file and verify if it is UTF-8
+	return false;
+}
+
 // Reading and parsing OpenAir airspace file
 bool OpenAir::Read(const std::string& fileName) {
 	std::ifstream input(fileName, std::ios::binary);
@@ -127,6 +134,10 @@ bool OpenAir::Read(const std::string& fileName) {
 		return false;
 	}
 	AirspaceConverter::LogMessage("Reading OpenAir file: " + fileName);
+
+	// Check if the input file is encoded in UTF-8
+	const bool isUTF8 = IsFileUTF8(input);
+
 	int linecount = 0;
 	std::string sLine;
 	bool allParsedOK = true, isCRLF = false, CRLFwarningGiven = false;
@@ -175,7 +186,7 @@ bool OpenAir::Read(const std::string& fileName) {
 				if (lineParsedOK) lastACline = linecount;
 				break;
 			case 'N': //AN
-				lineParsedOK = ParseAN(sLine, airspace);
+				lineParsedOK = ParseAN(sLine, airspace, isUTF8);
 				break;
 			case 'L': //AL
 				lineParsedOK = ParseAltitude(sLine, false, airspace);
@@ -184,7 +195,7 @@ bool OpenAir::Read(const std::string& fileName) {
 				lineParsedOK = ParseAltitude(sLine, true, airspace);
 				break;
 			case 'F': //AF radio frequency
-				lineParsedOK = ParseAF(sLine, airspace);
+				lineParsedOK = ParseAF(sLine, airspace, isUTF8);
 				break;
 			case 'X': //AX: transponder code
 				lineParsedOK = airspace.SetTransponderCode(sLine.substr(3));
@@ -282,20 +293,20 @@ bool OpenAir::ParseAC(const std::string & line, Airspace& airspace) {
 	return true;
 }
 
-bool OpenAir::ParseAN(const std::string & line, Airspace& airspace) {
+bool OpenAir::ParseAN(const std::string & line, Airspace& airspace, const bool isUTF8) {
 	if (airspace.GetType() == Airspace::UNDEFINED) return true;
 	if (line.size() < 4) return false;
 	if (airspace.GetName().empty()) {
 		const std::string name(line.substr(3));
 		if (name == "COLORENTRY") airspace.SetType(Airspace::UNDEFINED); // Skip Strepla colortable entries
-		else airspace.SetName(boost::locale::conv::between(name,"utf-8","ISO8859-1"));
+		else airspace.SetName(isUTF8 ? name : boost::locale::conv::between(name,"utf-8","ISO8859-1"));
 		return true;
 	}
 	AirspaceConverter::LogError(boost::str(boost::format("airspace %1s has already a name.") % airspace.GetName()));
 	return false;	
 }
 
-bool OpenAir::ParseAF(const std::string& line, Airspace& airspace) {
+bool OpenAir::ParseAF(const std::string& line, Airspace& airspace, const bool isUTF8) {
 	if (line.size() < 4) return false;
 	std::string descr(line.substr(3));
 	try {
@@ -306,7 +317,7 @@ bool OpenAir::ParseAF(const std::string& line, Airspace& airspace) {
 			descr.erase(0,pos);
 			if (descr.at(0) == ' ') descr.erase(0,1); // remove the separating space
 		} else descr.erase();
-		airspace.AddRadioFrequency(freq,boost::locale::conv::between(descr,"utf-8","ISO8859-1"));
+		airspace.AddRadioFrequency(freq, isUTF8 ? descr : boost::locale::conv::between(descr,"utf-8","ISO8859-1"));
 		return true;
 	} catch(...) {
 		return false;
