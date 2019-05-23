@@ -33,17 +33,19 @@ private:
 	static std::string& RemoveComments(std::string &s);
 	static bool ParseDegrees(const std::string& dddmmss, double& deg);
 	static bool ParseCoordinates(const std::string& text, Geometry::LatLon& point);
-	static bool ParseAN(const std::string& line, Airspace& airspace);
+	static bool ParseAN(const std::string& line, Airspace& airspace, const bool isUTF8 = false);
+	static bool ParseAF(const std::string& line, Airspace& airspace, const bool isUTF8 = false);
 	static bool ParseAltitude(const std::string& line, const bool isTop, Airspace& airspace);
 	static bool ParseS (const std::string& line);
 	static bool ParseT (const std::string& line);
 	static bool ParseDP(const std::string& line, Airspace& airspace);
+	static bool IsFileUTF8 (std::ifstream& inputFile);
 	bool ParseAC(const std::string& line, Airspace& airspace);
 	bool ParseV(const std::string& line, Airspace& airspace);
 	bool ParseDA(const std::string& line, Airspace& airspace);
 	bool ParseDB(const std::string& line, Airspace& airspace);
 	bool ParseDC(const std::string& line, Airspace& airspace);
-	bool ParseAF(const std::string& line, Airspace& airspace);
+
 	//bool ParseDY(const std::string& line, Airspace& airspace); // Airway not yet supported
 	bool InsertAirspace(Airspace& airspace);
 	void WriteHeader();
