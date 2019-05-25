@@ -26,10 +26,10 @@ Why this software?
 ------------------
 Airspace represented in 3D in Google Earth can help to visualize and better understand the airspace structure.
 Not only, having the planned route or track of a flight (as GPX file), displayed as well in Google Earth will make easy to check for airspace crossed or to be avoided.  
-This software can also be useful for maintainers of OpenAir airspace and SeeYou .CUP waypoints files, not only to visualize airspace and waypoints but also to verify the syntax of OpenAir and CUP commands entered.  
+This software can also be useful for maintainers of OpenAir airspace and SeeYou waypoints files, not only to visualize airspace and waypoints but also to verify the syntax of OpenAir or SeeYou lines entered.  
 For the "landable" waypoints in the CUP files an estimation of the runway perimeter is drawn on the earth surface, in order to do that not only the position is used but also the runway orientation and length. This is particularly useful to verify that the position of the airfield in the CUP file matches exactly the runway in Google Earth.  In software like LK8000 the airfield position is considered as the exact center of the runway, orientation and length are used to assist for landing with an HSI and glide slope indications thus the correctness of position, orientation and length becomes really important.  
-openAIP (http://www.openaip.net/) provides a free, worldwide and updated airspace repository but in his own format, while many devices and software support OpenAir airspace files. This software can convert also to OpenAir so making openAIP data available to many portable devices.  
-AirspaceConverter can be used also to merge together several airspace files (openAIP repeated airspaces will be automatically removed) and filter the result on a specific range of latitudes and longitudes.  
+openAIP (http://www.openaip.net/) provides a free, worldwide and updated airspace and waypoint repository but in his own format, while many devices and software support OpenAir airspace files. This software can convert: openAIP airspace to OpenAir and openAIP waypoints to SeeYou; so making openAIP data available to many portable devices.  
+AirspaceConverter can be used also to merge together several airspace or waypoint files (openAIP repeated airspaces will be automatically removed) and filter the result on a specific range of latitudes and longitudes.  
 Converting openAIP files to OpenAir has also the advantage to reduce significantly the size of the total airspace database used on a portable device. For example LK8000 recently supports also the openAIP format (feature that I implemented) but it is not always possible to load bigger openAIP files on older PNA devices, while the same files converted in OpenAir yes.  
 There are also cases where the "official" airspace files are available only in KML format like the Austrian airspace from Austrocontrol, also in this case is possible to convert it to OpenAir.  
 In case is required to import long lists of points (like state borders) from KML LineString tracks: just use the option -t and the tracks found will be closed and treated as unknown airspace. Then it will be possible to adapt the airspace definitions manually in the so converted OpenAir file.
@@ -58,7 +58,7 @@ All the reading, writing and conversion features are in a common shared library:
 Command line version
 --------------------
 The command line version, compiled both for Linux and Windows, works taking several arguments, for example:  
-`AirspaceConverter -q 1013 -a 35 -i inputFileOpenAir.txt -i openAIP_asp.aip -w waypoints.cup -w openAIP_wpt.aip -m terrainMap.dem -o outputFile.kmz`  
+`airspaceconverter -q 1013 -a 35 -i inputFileOpenAir.txt -i openAIP_asp.aip -w waypoints.cup -w openAIP_wpt.aip -m terrainMap.dem -o outputFile.kmz`  
 
 Possible options:  
   -q: optional, specify the QNH in hPa used to calculate height of flight levels  
@@ -72,7 +72,7 @@ Possible options:
   -s: optional, when writing in OpenAir use coordinates with minutes and seconds (DD:MM:SS) instead of decimal minutes (DD:MM.MMM)  
   -t: optional, when reading KML/KMZ files treat also "LineString" tracks as airspaces  
   -v: print version number  
-  -h: print this guide  
+  -h: print short guide  
 
 At least one input airspace or waypoint file must be present.  
 Warning: any already existing output file will be overwritten.
@@ -81,7 +81,7 @@ Graphical user interface
 ------------------------
 This is the default way to use the graphical user interface:  
 
-1. Choose the desired output format
+1. Choose the desired output format.
 2. If needed, specify the QNH to be used for calculating the height of flight levels, this must be done before reading airspace files.
 3. Specify a default terrain altitude to be used for the points not under terrain raster map coverage.
 4. Select as input multiple openAIP (.aip) OpenAir (.txt) and/or openAIP (.aip) files or the folder containing them.
@@ -94,7 +94,7 @@ This is the default way to use the graphical user interface:
 
 Windows MFC user interface
 --------------------------
-The UI comes as native Windows MFC application which needs just a couple of small DLLs: zip.dll zlib.dll to be kept in the same folder.  
+Also the Windows MFC user interface relies on the same code of the library recompiled under Windows.  
 If you get the error about VCRUNTIME140.dll missing: it can be easily and quickly fixed installing the: MS VC++ redistributable, this will allow this software to run also on older Windows versions such us WindowsXP.
 
 Qt user interface
@@ -112,7 +112,7 @@ Downloads
 ---------
 The already compiled executables for Windows can be downloaded from the project page:  
 http://www.alus.it/AirspaceConverter
-For the Linux distributions based on Debian there is a also repository available. 
+For the Linux distributions based on Debian there is a also repository available.
 
 Build dependencies
 ------------------
