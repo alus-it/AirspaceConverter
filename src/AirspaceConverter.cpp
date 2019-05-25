@@ -519,12 +519,22 @@ bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop,
 std::string AirspaceConverter::GetCreationDateString() {
 	const time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 	std::stringstream ss;
+#ifdef __GNUC__
+#if __GNUC__ > 4
+	ss << "This file was created on: " << std::put_time(gmtime(&now), "%a %d %B %Y at %T UTC");
+#else
+	char dateString[40];
+	struct tm *utc;
+	utc = gmtime(&now);
+	strftime(dateString, sizeof(dateString), "%a %d %B %Y at %T UTC", utc);
+	ss << "This file was created on: " << dateString;
+#endif
+#else
 #ifdef _WIN32
 	struct tm utc;
 	gmtime_s(&utc, &now);
 	ss << "This file was created on: " << std::put_time(&utc, "%a %d %B %Y at %T UTC");
-#else
-	ss << "This file was created on: " << std::put_time(gmtime(&now), "%a %d %B %Y at %T UTC");
+#endif
 #endif
 	return ss.str();
 }
