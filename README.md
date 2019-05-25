@@ -1,15 +1,17 @@
 AirspaceConverter
 =================
-This is a free, open source and multi-platform tool to convert between different airspace formats.  
+This is a free, open source and multi-platform tool to convert between different airspace and waypoint formats.  
 
-Can read airspace files in the following formats:  
+Can read airspace and waypoint files in the following formats:  
   - OpenAir  
   - openAIP  
   - KML/KMZ  
+  - SeeYou  
 
 And the output can be done in the following formats:  
   - KMZ  
   - OpenAir  
+  - SeeYou  
   - Polish  
   - Garmin IMG  
 
@@ -56,16 +58,16 @@ All the reading, writing and conversion features are in a common shared library:
 Command line version
 --------------------
 The command line version, compiled both for Linux and Windows, works taking several arguments, for example:  
-`AirspaceConverter -q 1013 -a 35 -i inputFileOpenAir.txt -i inputFileOpenAIP.aip -w waypoints.cup -m terrainMap.dem -o outputFile.kmz`  
+`AirspaceConverter -q 1013 -a 35 -i inputFileOpenAir.txt -i openAIP_asp.aip -w waypoints.cup -w openAIP_wpt.aip -m terrainMap.dem -o outputFile.kmz`  
 
 Possible options:  
   -q: optional, specify the QNH in hPa used to calculate height of flight levels  
   -a: optional, specify a default terrain altitude in meters to calculate AGL heights of points not covered by loaded terrain map(s)  
   -i: multiple, input file(s) can be OpenAir (.txt), openAIP (.aip), Google Earth (.kmz, .kml)  
-  -w: multiple, input waypoint file(s) in the SeeYou CUP format (.cup)  
+  -w: multiple, input waypoint file(s) can be SeeYou (.cup) or openAIP (.aip)  
   -m: optional, multiple, terrain map file(s) (.dem) used to lookup terrain heights  
   -l: optional, set filter limits in latitude and longitude for the output, followed by the 4 limit values: northLat,southLat,westLon,eastLon where the limits are comma separated, expressed in degrees, without spaces, negative for west longitudes and south latitudes  
-  -o: optional, output file .kmz, .mp (Polish) or .txt (OpenAir) if not specified will be used the name of first input file as KMZ  
+  -o: optional, output file .kmz, .txt (OpenAir), .cup (SeeYou), .img (Garmin) or .mp (Polish). If not specified will be used the name of first input file as KMZ  
   -p: optional, when writing in OpenAir avoid to use arcs and circles but only points (DP)  
   -s: optional, when writing in OpenAir use coordinates with minutes and seconds (DD:MM:SS) instead of decimal minutes (DD:MM.MMM)  
   -t: optional, when reading KML/KMZ files treat also "LineString" tracks as airspaces  

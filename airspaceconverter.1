@@ -9,21 +9,27 @@ airspaceconverter \- convert between different airspace formats
 [\fB\-w\fR \fIwaypointFile\fR]
 [\fB\-m\fR \fIterrainMapFile\fR]
 [\fB\-l\fR \fInorthLat,southLat,westLon,eastLon\fR]
+[\fB\-p\fR]
+[\fB\-s\fR]
+[\fB\-t\fR]
 [\fB\-o\fR \fIoutputFile\fR]
+
 .PP
-Example: airspaceconverter -q 1013 -a 35 -i fileOpenAir.txt -i fileOpenAIP.aip -w waypoints.cup -m terrainMap.dem -l 58,52,0.2,8.4 -o outputFile.kmz
+Example: airspaceconverter -q 1013 -a 35 -i fileOpenAir.txt -i openAIP_asp.aip -w waypoints.cup -w openAIP_wpt.aip -m terrainMap.dem -l 58,52,0.2,8.4 -o outputFile.kmz
 .SH DESCRIPTION
 .B airspaceconverter
-an open source and multi-platform tool to convert between different airspace formats.
+an open source and multi-platform tool to convert between different airspace and waypoint formats.
 .PP
-Can read airspace files in the following formats:
+Can read airspace and waypoint files in the following formats:
     - OpenAir
     - openAIP
     - KML/KMZ
+    - SeeYou
 .PP
 And the output can be done in the following formats:
     - KMZ
     - OpenAir
+    - SeeYou
     - Polish
     - Garmin IMG
 .PP
@@ -67,12 +73,14 @@ Default is 20 m.
 Multiple, input airspace file(s) can be OpenAir (.txt), openAIP (.aip), Google Earth (.kmz, .kml).
 At least one input airspace or waypoint file must be present.
 Additional input airspace files must be specified repeating the option \-i in front of each of them.
+OpenAir input files are expected to be encoded in ANSI but if encoded in UTF-8 with BOM they will be also read properly.
 .TP
 .BR \-w " " \fIwaypointFile\fR
-Multiple, input waypoint file(s) in the SeeYou CUP format (.cup).
+Multiple, input waypoint file(s) can be SeeYou (.cup) or openAIP (.aip).
 At least one input airspace or waypoint file must be present.
 Additional input waypoint files must be specified repeating the option \-w in front of each of them.
-The waypoints will be used only if converting to KMZ.
+The waypoints will be used only if converting to KMZ or to SeeYou.
+Hotspots files from openAIP are not supported while nav aids and airports yes.
 .TP
 .BR \-m " " \fIterrainMapFile\fR
 Multiple, terrain map file(s) (.dem) used to lookup terrain heights.
@@ -85,9 +93,14 @@ The limits are comma separated, expressed in degrees, without spaces.
 Negative values represent south latitudes or west longitudes.
 .TP
 .BR \-o " " \fIoutputFile\fR
-Output file, can be: .kmz (Google Earth), .txt (OpenAir), .img (Garmin) or .mp (Polish).
+Output file, can be: .kmz (Google Earth), .txt (OpenAir), .cup (SeeYou), .img (Garmin) or .mp (Polish).
 If not specified will be used the name of first input file as KMZ.
+Output OpenAir files will be always encoded in ANSI.
 WARNING: any already existing output file will be automatically overwritten.
+.TP
+.BR \-d " " \fIopenAIPinputDir\fR
+It will convert all openAIP files in the specified directory. If used the options: -i, -w and -o are no longer valid.
+All airspace files (*_asp.aip) will be converted to OpenAir, while all waypoint files (*_wpt.aip and *_nav.aip) will be converted to SeeYou.
 .TP
 .BR \-p
 If writing to OpenAir with this option arcs (DA) and circles (DC) definitions are avoided.
