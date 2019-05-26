@@ -12,6 +12,7 @@
 #include "Airspace.h"
 #include <algorithm>
 #include <cassert>
+#include <iomanip>
 #include <boost/version.hpp>
 #ifdef _WIN32
 #pragma warning( push )
@@ -21,6 +22,7 @@
 #pragma warning( pop )
 #endif
 #include <boost/geometry.hpp>
+#include <boost/geometry/geometries/polygon.hpp>
 #include <boost/geometry/geometries/adapted/boost_tuple.hpp>
 
 const double Altitude::FEET2METER = 0.3048; // 1 Ft = 0.3048 m
