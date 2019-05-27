@@ -12,7 +12,7 @@
 #============================================================================
 
 # Determine if we want to compile or just copy binaries
-printf "Compile [C] on this machine or only build the DEB packge [D] from existing binaries [C/D]? "
+printf "Compile [C] on this machine or only build the DEB package [D] from existing binaries [C/D]? "
 read -r ACTION
 
 if [[ "$ACTION" == "C" || "$ACTION" == "c" || "$ACTION" == "" ]]; then
@@ -79,7 +79,7 @@ elif [[ "$ACTION" == "D" || "$ACTION" == "d" ]]; then
 	mv airspaceconverter-gui ./buildQt/airspaceconverter-gui
 
 	# Ask the user for which version of Debian we are building the packages	
-	printf "Enter target Debian (7, 8 or 9) or Ubuntu (16.04) release number [7,8,9,16.04]: "
+	printf "Enter target Debian [7,8,9] or Ubuntu [16.04,18.04] release number: "
 	read -r OSVER
 
 	# Ask the packager for which architecure are built the copied binaries
@@ -136,11 +136,22 @@ case $OSVER in
 	16.04)
 		echo "Packaging for Ubuntu Xenial..."
 		DISTR=ubn
-		LIBCVER=2.23	
-		ZIPLIB=libzip4		
+		LIBCVER=2.23
+		ZIPLIB=libzip4
 		ZIPVER=1.0.1
 		BOOSTVER=1.58.0
 		QTVER=5.5.1
+		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER}), libgl1-mesa-glx (>= 10.3.2)"
+		MANT="Valerio Messina <efa@iol.it>"
+		;;
+	18.04)
+		echo "Packaging for Ubuntu Bionic..."
+		DISTR=ubn
+		LIBCVER=2.27
+		ZIPLIB=libzip4
+		ZIPVER=1.1.2
+		BOOSTVER=1.65.0
+		QTVER=5.9.5
 		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER}), libgl1-mesa-glx (>= 10.3.2)"
 		MANT="Valerio Messina <efa@iol.it>"
 		;;
@@ -163,7 +174,7 @@ fi
 # Get version number, try from the sources (sources should be present)
 VERSION="$(grep -s "define VERSION" src/AirspaceConverter.h | awk -F\" '{print $2}')"
 
-# Other possibility: get version number from compiled executable (not needed it should ve the same as from the sources)
+# Other possibility: get version number from compiled executable (not needed it should be the same as from the sources)
 #cd Release # so find local shared object: libairspaceconverter.so #WARNING: not always true, can be also the installed lib!!
 #VERSION="$(./airspaceconverter -v | head -n 1 | sed -r 's/^[^0-9]+([0-9]+.[0-9]+.[0-9]+).*/\1/g')"
 #cd ..
@@ -427,12 +438,17 @@ rm -f airspaceconverter-gui_${VERSION}-${DISTR}${OSVER}_${ARCH}.deb
 dpkg-deb --build airspaceconverter-gui_${VERSION}-${DISTR}${OSVER}_${ARCH}
 
 # Clean
-echo Cleaning...
-rm -R buildQt
+echo Cleaning temp files...
 sudo rm -R airspaceconverter_${VERSION}-${DISTR}${OSVER}_${ARCH}
 sudo rm -R airspaceconverter-gui_${VERSION}-${DISTR}${OSVER}_${ARCH}
-if [[ "$ACTION" == "D" || "$ACTION" == "d" ]]; then
-	make clean
+printf "Clean build directory [Y/N]: "
+read -r CLEAN
+if [[ "$CLEAN" == "Y" || "$CLEAN" == "y" ]]; then
+	echo Cleaning...
+	#rm -R buildQt
+	#make clean
+	./clean.sh
 fi
 
 exit 0
+
