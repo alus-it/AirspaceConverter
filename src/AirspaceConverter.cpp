@@ -122,8 +122,7 @@ std::istream& AirspaceConverter::SafeGetline(std::istream& is, std::string& line
 			}
 			proceed = false;
 			break;
-		case EOF:
-			// Also handle the case when the last line has no line ending
+		case EOF: // Also handle the case when the last line has no line ending
 			if(line.empty()) is.setstate(std::ios::eofbit);
 			isCRLF = true; // no problem in this case
 			proceed = false;

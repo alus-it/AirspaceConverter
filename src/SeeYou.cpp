@@ -366,14 +366,15 @@ bool SeeYou::Write(const std::string& fileName) {
 		double min; // the minutes must be expressed with 3 decimals so they have to be rounded on three decimals
 		const Geometry::LatLon& pos(w.GetPosition());
 		pos.GetLatDegMin(deg,min);
-		file << std::setw(2) << std::setfill('0') << deg << std::setw(6) << std::setfill('0') << std::fixed << std::setprecision(3) << std::round(min*1000)/1000 << pos.GetNorS() << ',';
+		file << std::setfill('0') << std::fixed << std::setprecision(3);
+		file << std::setw(2) << deg << std::setw(6) << std::round(min*1000)/1000 << pos.GetNorS() << ',';
 
 		// Longitude
 		pos.GetLonDegMin(deg,min);
-		file << std::setw(3) << std::setfill('0') << deg << std::setw(6) << std::setfill('0') << std::fixed << std::setprecision(3) << std::round(min*1000)/1000 << pos.GetEorW() << ',';
+		file << std::setw(3) << deg << std::setw(6) << std::round(min*1000)/1000 << pos.GetEorW() << ',';
 
 		// Altitude
-		if (w.GetAltitude() != 0) file << std::fixed << std::setprecision(1) << std::round(w.GetAltitude()*10)/10 << "m,"; // round altitude in meters on one decimal
+		if (w.GetAltitude() != 0) file << std::setprecision(1) << std::round(w.GetAltitude()*10)/10 << "m,"; // round altitude in meters on one decimal
 		else file << "0,";
 
 		// Waypoint style
@@ -383,7 +384,7 @@ bool SeeYou::Write(const std::string& fileName) {
 			const Airfield& a((const Airfield&)w);
 
 			// Runway direction
-			if (a.HasRunwayDir()) file << std::setw(3) << std::setfill('0') << a.GetRunwayDir();
+			if (a.HasRunwayDir()) file << std::setw(3) << a.GetRunwayDir();
 			file << ',';
 
 			// Runway length
@@ -392,17 +393,17 @@ bool SeeYou::Write(const std::string& fileName) {
 
 			// Radio frequency
 			if (a.HasRadioFrequency()) {
-				file << std::fixed << std::setprecision(3) << a.GetRadioFrequency();
-				if (a.HasOtherFrequency()) file << '-' << std::fixed << std::setprecision(3) << a.GetOtherFrequency();
+				file << std::setprecision(3) << a.GetRadioFrequency();
+				if (a.HasOtherFrequency()) file << '-' << a.GetOtherFrequency();
 			}
 		} else {
 			file << ",,"; // Skip runway length and direction
 
 			// Other frequency
 			if (w.HasOtherFrequency()) {
-				if (w.GetType() == Waypoint::WaypointType::NDB) file << std::fixed << std::setprecision(1) << w.GetOtherFrequency(); // 1 decimal for NDB freq [kHz]
-				else if (w.GetType() == Waypoint::WaypointType::VOR) file << std::fixed << std::setprecision(2) << w.GetOtherFrequency(); // 2 decimals for VOR freq [MHz]
-				else file << std::fixed << std::setprecision(3) << w.GetOtherFrequency(); // assuming all other VHF freq [MHz]
+				if (w.GetType() == Waypoint::WaypointType::NDB) file << std::setprecision(1) << w.GetOtherFrequency(); // 1 decimal for NDB freq [kHz]
+				else if (w.GetType() == Waypoint::WaypointType::VOR) file << std::setprecision(2) << w.GetOtherFrequency(); // 2 decimals for VOR freq [MHz]
+				else file << std::setprecision(3) << w.GetOtherFrequency(); // assuming all other VHF freq [MHz]
 			}
 		}
 		file << ',';

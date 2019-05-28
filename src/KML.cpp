@@ -201,18 +201,20 @@ void KML::OpenPlacemark(const Airspace& airspace) {
 		<< "<SimpleData name=\"Category\">" << (airspace.GetType() <= Airspace::CLASSG ? ("Class " + airspace.GetCategoryName()) : airspace.GetCategoryName() ) << "</SimpleData>\n"
 		<< "<SimpleData name=\"Top\">" << airspace.GetTopAltitude().ToString() << "</SimpleData>\n"
 		<< "<SimpleData name=\"Base\">" << airspace.GetBaseAltitude().ToString() << "</SimpleData>\n";
+	outputFile << std::fixed << std::setprecision(3);
 	for (unsigned int i=0; i<airspace.GetNumberOfRadioFrequencies(); i++) {
 		const std::pair<float, std::string>& f = airspace.GetRadioFrequencyAt(i);
 		outputFile << "<SimpleData name=\"Radio frequency\">";
 		if (!f.second.empty()) outputFile << f.second << ": ";
-		outputFile << std::fixed << std::setprecision(3) << f.first << " MHz</SimpleData>\n";
+		outputFile << f.first << " MHz</SimpleData>\n";
 	}
 	if (airspace.HasTransponderCode())
 		outputFile << "<SimpleData name=\"Transponder code\">" << airspace.GetTransponderCode() << "</SimpleData>\n";
-	outputFile << "<SimpleData name=\"Area\">" << area << " Km2</SimpleData>\n" // <sup>2</sup> doesn't work...
+	outputFile << std::setprecision(1) << "<SimpleData name=\"Area\">" << area << " Km2</SimpleData>\n" // <sup>2</sup> doesn't work...
 		<< "<SimpleData name=\"Perimeter\">" << perimeter << " Km</SimpleData>\n"
 		<< "</SchemaData>\n"
 		<< "</ExtendedData>\n";
+	outputFile << std::defaultfloat;
 }
 
 void KML::OpenPlacemark(const Waypoint* waypoint) {
@@ -230,12 +232,13 @@ void KML::OpenPlacemark(const Waypoint* waypoint) {
 		<< "<SimpleData name=\"Code\">" << waypoint->GetCode() << "</SimpleData>\n"
 		<< "<SimpleData name=\"Country\">" << waypoint->GetCountry() << "</SimpleData>\n"
 		<< "<SimpleData name=\"Altitude\">" << altMt << " m - " << altFt << " ft" << "</SimpleData>\n";
+	outputFile << std::fixed << std::setprecision(3);
 	if(isAirfield) {
 		const Airfield* airfield = (const Airfield*)waypoint;
 		outputFile << "<SimpleData name=\"Runway direction\">" << (airfield->HasRunwayDir() ? std::to_string(airfield->GetRunwayDir()) + " deg" : "UNKNOWN") << "</SimpleData>\n"
 		<< "<SimpleData name=\"Runway length\">" << (airfield->HasRunwayLength() ? std::to_string(airfield->GetRunwayLength()) + " m" : "UNKNOWN") << "</SimpleData>\n"
 		<< "<SimpleData name=\"Radio frequency\">";
-		if (airfield->HasRadioFrequency()) outputFile << std::fixed << std::setprecision(3) << airfield->GetRadioFrequency() << " MHz";
+		if (airfield->HasRadioFrequency()) outputFile << airfield->GetRadioFrequency() << " MHz";
 		else outputFile << "UNKNOWN";
 		outputFile << "</SimpleData>\n";
 		if (airfield->HasOtherFrequency())
@@ -243,10 +246,11 @@ void KML::OpenPlacemark(const Waypoint* waypoint) {
 	}
 	if (waypoint->HasOtherFrequency()) {
 		if (waypoint->GetType() == Waypoint::WaypointType::VOR)
-			outputFile << "<SimpleData name=\"VOR frequency\">" << std::fixed << std::setprecision(3) << waypoint->GetOtherFrequency() << " MHz</SimpleData>\n";
+			outputFile << "<SimpleData name=\"VOR frequency\">" << waypoint->GetOtherFrequency() << " MHz</SimpleData>\n";
 		else if (waypoint->GetType() == Waypoint::WaypointType::NDB)
-			outputFile << "<SimpleData name=\"NDB frequency\">" << std::fixed << std::setprecision(1) << waypoint->GetOtherFrequency() << " kHz</SimpleData>\n";
+			outputFile << "<SimpleData name=\"NDB frequency\">" << std::setprecision(1) << waypoint->GetOtherFrequency() << " kHz</SimpleData>\n";
 	}
+	outputFile << std::defaultfloat;
 	outputFile << "<SimpleData name=\"Description\">" << waypoint->GetDescription() << "</SimpleData>\n"
 		<< "</SchemaData>\n"
 		<< "</ExtendedData>\n";
@@ -270,6 +274,7 @@ void KML::ClosePolygon() {
 
 void KML::WriteBaseOrTop(const Airspace& airspace, const Altitude& alt, const bool extrudeToGround /*= false*/) {
 	OpenPolygon(extrudeToGround, alt.IsAMSL());
+	outputFile << std::setprecision(6);
 	double altitude = alt.GetAltMt();
 	for (const Geometry::LatLon& p : airspace.GetPoints()) outputFile << p.Lon() << "," << p.Lat() << "," << altitude << "\n";
 	ClosePolygon();
@@ -278,6 +283,7 @@ void KML::WriteBaseOrTop(const Airspace& airspace, const Altitude& alt, const bo
 void KML::WriteBaseOrTop(const Airspace& airspace, const std::vector<double>& altitudesAmsl, const bool extrudeToGround /*= false*/) {
 	OpenPolygon(extrudeToGround, true);
 	assert(airspace.GetNumberOfPoints() == altitudesAmsl.size());
+	outputFile << std::setprecision(6);
 	for (unsigned int i = 0; i < altitudesAmsl.size(); i++) {
 		const Geometry::LatLon p = airspace.GetPointAt(i);
 		outputFile << p.Lon() << "," << p.Lat() << "," << altitudesAmsl.at(i) << "\n";
@@ -427,6 +433,7 @@ bool KML::Write(const std::string& filename) {
 								<< "<coordinates>\n";
 
 							// Add the four points
+							outputFile << std::setprecision(6);
 							for (const Geometry::LatLon& p : airfieldPerimeter)
 								outputFile << p.Lon() << "," << p.Lat() << "," << a->GetAltitude() << "\n";
 							
@@ -446,7 +453,7 @@ bool KML::Write(const std::string& filename) {
 				outputFile << "<Point>\n"
 					<< "<extrude>0</extrude>\n"
 					<< "<altitudeMode>" << (t != Waypoint::normal ? "clampToGround" : "absolute") << "</altitudeMode>\n" // Except "normal" are all objects on the ground
-					<< "<coordinates>" << w->GetLongitude() << "," << w->GetLatitude() << "," << (int)std::round(w->GetAltitude()) << "</coordinates>\n"
+					<< "<coordinates>" << std::setprecision(6) << w->GetLongitude() << "," << w->GetLatitude() << "," << (int)std::round(w->GetAltitude()) << "</coordinates>\n"
 					<< "</Point>\n";
 
 				// If the perimeter was drawn the the multigeometry have to be closed
