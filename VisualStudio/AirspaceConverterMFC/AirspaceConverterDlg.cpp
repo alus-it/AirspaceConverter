@@ -447,6 +447,7 @@ void CAirspaceConverterDlg::OnBnClickedInputFile() {
 	assert(processor != nullptr);
 	if (!UpdateData(TRUE)) return; // Force the user to enter valid QNH
 	CFileDialog dlg(TRUE, NULL, NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("All airspace files|*.txt; *.aip; *.kmz; *.kml|openAIP airspace|*.aip|OpenAir|*.txt|Google Earth|*.kmz; *.kml||"), (CWnd*)this, 0, TRUE);
+	dlg.GetOFN().lpstrTitle = L"Load airspace file(s)";
 	if (dlg.DoModal() == IDOK) {
 		outputFile.clear();
 		conversionDone = false;
@@ -467,6 +468,7 @@ void CAirspaceConverterDlg::OnBnClickedInputWaypoints() {
 	assert(converter != nullptr);
 	assert(processor != nullptr);
 	CFileDialog dlg(TRUE, NULL, NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("All waypoint files|*.cup; *.aip;|SeeYou waypoints|*.cup|openAIP waypoints|*.aip||"), (CWnd*)this, 0, TRUE);
+	dlg.GetOFN().lpstrTitle = L"Load waypoint file(s)";
 	if (dlg.DoModal() == IDOK) {
 		POSITION pos(dlg.GetStartPosition());
 		while (pos) {
@@ -485,6 +487,7 @@ void CAirspaceConverterDlg::OnBnClickedLoadDEM() {
 	assert(converter != nullptr);
 	assert(processor != nullptr);
 	CFileDialog dlg(TRUE, _T("dem"), NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("Terrain raster map|*.dem||"), (CWnd*)this, 0, TRUE);
+	dlg.GetOFN().lpstrTitle = L"Load terrain map file(s)";
 	if (dlg.DoModal() == IDOK) {
 		POSITION pos(dlg.GetStartPosition());
 		while (pos) {
@@ -508,6 +511,7 @@ void CAirspaceConverterDlg::OnBnClickedInputFolderBt() {
 	if (!isWinXPorOlder) {
 #endif
 		CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
+		dlgFolder.GetOFN().lpstrTitle = L"Select airspace folder";
 		if (dlgFolder.DoModal() == IDOK) inputPath = CT2CA(dlgFolder.GetFolderPath());
 		else return;
 #ifndef _WIN64
@@ -543,6 +547,7 @@ void CAirspaceConverterDlg::OnBnClickedInputWaypointsFolderBt() {
 	if (!isWinXPorOlder) {
 #endif
 		CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
+		dlgFolder.GetOFN().lpstrTitle = L"Select waypoints folder";
 		if (dlgFolder.DoModal() == IDOK) inputPath = CT2CA(dlgFolder.GetFolderPath());
 		else return;
 #ifndef _WIN64
@@ -574,6 +579,7 @@ void CAirspaceConverterDlg::OnBnClickedLoadDemFolderBt() {
 	if (!isWinXPorOlder) {
 #endif
 		CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
+		dlgFolder.GetOFN().lpstrTitle = L"Select terrain maps folder";
 		if (dlgFolder.DoModal() == IDOK) inputPath = CT2CA(dlgFolder.GetFolderPath());
 		else return;
 #ifndef _WIN64
