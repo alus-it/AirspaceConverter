@@ -188,7 +188,6 @@ bool SeeYou::Read(const std::string& fileName) {
 	int type, runwayDir, runwayLength;
 	float altitude, radioFreq, altRadioFreq;
 
-
 	while (!input.eof() && input.good()) {
 
 		// Get the line
@@ -209,6 +208,7 @@ bool SeeYou::Read(const std::string& fileName) {
 		// Skip eventual header
 		if (!firstWaypointFound && (
 				sLine.find("name, code, country, lat, lon, elev, style, rwydir, rwylen, freq, desc") != std::string::npos ||
+				sLine.find("name, code, country, lat, lon, elev, style, rwdir, rwlen, freq, desc") != std::string::npos ||
 				sLine.find("name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc") != std::string::npos)) continue;
 
 		// Remove front spaces
@@ -338,14 +338,8 @@ bool SeeYou::Write(const std::string& fileName) {
 	}
 	AirspaceConverter::LogMessage("Writing SeeYou output file: " + fileName);
 
-	// Write default CUP header on first line
-	file << "name, code, country, lat, lon, elev, style, rwydir, rwylen, freq, desc\r\n\r\n";
-
-	// Write our disclaimer
-	for(const std::string& line: AirspaceConverter::disclaimer) file << "* " << line << "\r\n";
-
-	// Write creation date
-	file << "\r\n* " << AirspaceConverter::GetCreationDateString() << "\r\n\r\n";
+	// Write default CUP header on first line, and for compatibilty with "Strepla" do not write any disclaimer or comments 
+	file << "name, code, country, lat, lon, elev, style, rwydir, rwylen, freq, desc\r\n";
 
 	// Go trough all waypoints
 	for (const std::pair<int,Waypoint*>& pair : waypoints) {
