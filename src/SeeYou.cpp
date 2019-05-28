@@ -39,7 +39,7 @@ bool SeeYou::ParseLatitude(const std::string& text, double& lat) {
 	const char sign = text.back();
 	if (sign == 'S' || sign == 's') lat = -lat;
 	else if (sign != 'N' && sign != 'n') return false;
-	return true;
+	return Geometry::LatLon::IsValidLat(lat);
 }
 
 bool SeeYou::ParseLongitude(const std::string& text, double& lon) {
@@ -54,7 +54,7 @@ bool SeeYou::ParseLongitude(const std::string& text, double& lon) {
 	const char sign = text.back();
 	if (sign == 'W' || sign == 'w') lon = -lon;
 	else if (sign != 'E' && sign != 'e') return false;
-	return true;
+	return Geometry::LatLon::IsValidLon(lon);
 }
 
 bool SeeYou::ParseAltitude(const std::string& text, float& alt) {
