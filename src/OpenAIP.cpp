@@ -578,6 +578,10 @@ bool OpenAIP::ParseAttribute(const ptree& node, const std::string& attributeName
 bool OpenAIP::ParseValue(const ptree& parentNode, const std::string& tagName, double &value) {
 	std::string dataStr;
 	if (ParseContent(parentNode,tagName,dataStr)) {
+		if (dataStr.empty()) {
+			AirspaceConverter::LogWarning("Empty content found while expecting a numerical value from tag: " + tagName);
+			return false;
+		}
 		try {
 				value = std::stod(dataStr);
 				return true;
