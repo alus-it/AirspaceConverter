@@ -526,15 +526,22 @@ bool OpenAir::Write(const std::string& fileName) {
 		file << "AH " << a.GetTopAltitude().ToString() << "\r\n";
 
 		// Write frequencies
-		for (unsigned int i=0; i<a.GetNumberOfRadioFrequencies(); i++) {
-			const std::pair<float, std::string>& f = a.GetRadioFrequencyAt(i);
-			file << "AF " << std::fixed << std::setprecision(3) << f.first;
-			if (!f.second.empty()) file << ' ' << boost::locale::conv::between(f.second,"ISO8859-1","utf-8");
-			file << "\r\n";
+		if (a.GetNumberOfRadioFrequencies() > 0) {
+			file << std::fixed << std::setprecision(3);
+			for (unsigned int i=0; i<a.GetNumberOfRadioFrequencies(); i++) {
+				const std::pair<float, std::string>& f = a.GetRadioFrequencyAt(i);
+				file << "AF " << f.first;
+				if (!f.second.empty()) file << ' ' << boost::locale::conv::between(f.second,"ISO8859-1","utf-8");
+				file << "\r\n";
+			}
+			file << std::defaultfloat;
 		}
 
 		// Write transponder code
 		if (a.HasTransponderCode()) file << "AX " << a.GetTransponderCode() << "\r\n";
+
+		// Set the stream
+		file << std::setfill('0');
 
 		// Write the geometries
 		if (calculateArcs) {
@@ -622,9 +629,9 @@ void OpenAir::WriteLatLon(const Geometry::LatLon& point) {
 	} else {
 		int min, sec;
 		point.GetLatDegMinSec(deg, min, sec);
-		file << std::setw(2) << std::setfill('0') << deg << ":" << std::setw(2) << std::setfill('0') << min << ":" << std::setw(2) << std::setfill('0') << sec << " " << point.GetNorS() << " ";
+		file << std::setw(2) << deg << ":" << std::setw(2) << min << ":" << std::setw(2) << sec << " " << point.GetNorS() << " ";
 		point.GetLonDegMinSec(deg, min, sec);
-		file << std::setw(3) << std::setfill('0') << deg << ":" << std::setw(2) << std::setfill('0') << min << ":" << std::setw(2) << std::setfill('0') << sec <<" " << point.GetEorW();
+		file << std::setw(3) << deg << ":" << std::setw(2) << min << ":" << std::setw(2) << sec <<" " << point.GetEorW();
 	}
 }
 
