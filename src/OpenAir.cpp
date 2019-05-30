@@ -534,7 +534,7 @@ bool OpenAir::Write(const std::string& fileName) {
 				if (!f.second.empty()) file << ' ' << boost::locale::conv::between(f.second,"ISO8859-1","utf-8");
 				file << "\r\n";
 			}
-			file << std::defaultfloat;
+			file.unsetf(std::ios_base::floatfield); //file << std::defaultfloat; not supported by older GCC 4.9.0
 		}
 
 		// Write transponder code

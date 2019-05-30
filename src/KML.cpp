@@ -214,7 +214,7 @@ void KML::OpenPlacemark(const Airspace& airspace) {
 		<< "<SimpleData name=\"Perimeter\">" << perimeter << " Km</SimpleData>\n"
 		<< "</SchemaData>\n"
 		<< "</ExtendedData>\n";
-	outputFile << std::defaultfloat;
+	outputFile.unsetf(std::ios_base::floatfield); //outputFile << std::defaultfloat; not supported by older GCC 4.9.0
 }
 
 void KML::OpenPlacemark(const Waypoint* waypoint) {
@@ -250,7 +250,7 @@ void KML::OpenPlacemark(const Waypoint* waypoint) {
 		else if (waypoint->GetType() == Waypoint::WaypointType::NDB)
 			outputFile << "<SimpleData name=\"NDB frequency\">" << std::setprecision(1) << waypoint->GetOtherFrequency() << " kHz</SimpleData>\n";
 	}
-	outputFile << std::defaultfloat;
+	outputFile.unsetf(std::ios_base::floatfield); //outputFile << std::defaultfloat; not supported by older GCC 4.9.0
 	outputFile << "<SimpleData name=\"Description\">" << waypoint->GetDescription() << "</SimpleData>\n"
 		<< "</SchemaData>\n"
 		<< "</ExtendedData>\n";
