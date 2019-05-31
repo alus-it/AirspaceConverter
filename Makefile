@@ -92,7 +92,7 @@ $(DEPDIR)%.d: ;
 .PHONY: clean
 clean:
 	@echo Cleaning all
-	@rm -rf $(BIN)*
+	@rm -rf $(BIN)
 
 # Install
 .PHONY: install
