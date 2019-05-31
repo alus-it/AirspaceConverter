@@ -293,7 +293,11 @@ bool SeeYou::Read(const std::string& fileName) {
 
 			// Build the airfield
 			Airfield* airfield = new Airfield(name, code, country, latitude, longitude, altitude, type, runwayDir, runwayLength, radioFreq, description);
-			if (altRadioFreq > 0) airfield->SetOtherFrequency(altRadioFreq);
+			if (altRadioFreq > 0) {
+				assert(radioFreq > 0);
+				if (altRadioFreq == radioFreq) AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: skipping repeated secondary radio frequency for airfield.") %linecount));
+				else airfield->SetOtherFrequency(altRadioFreq);
+			}
 
 			// Add it to the multimap
 			waypoints.insert(std::pair<int, Waypoint*>(type, (Waypoint*)airfield));
