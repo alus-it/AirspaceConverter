@@ -92,6 +92,9 @@ bool OpenAir::ParseCoordinates(const std::string& text, Geometry::LatLon& point)
 	if (sign == 'S' || sign == 's') lat = -lat;
 	else if (sign != 'N' && sign != 'n') return false;
 
+	// Verify validity of latitude
+	if (!Geometry::LatLon::IsValidLat(lat)) return false;
+
 	// Longitude degrees, minutes and seconds
 	if (++token == tokens.end()) return false;
 	coord = *token;
@@ -113,6 +116,9 @@ bool OpenAir::ParseCoordinates(const std::string& text, Geometry::LatLon& point)
 	// Apply the longitude sign E or W
 	if (sign == 'W' || sign == 'w') lon = -lon;
 	else if (sign != 'E' && sign != 'e') return false;
+
+	// Verify validity of longitude
+	if (!Geometry::LatLon::IsValidLon(lon)) return false;
 
 	// Finally set the point coordinates
 	point.SetLatLon(lat,lon);
