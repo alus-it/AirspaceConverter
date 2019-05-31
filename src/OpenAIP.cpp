@@ -408,7 +408,7 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 			if (rwyLen > 0 && style != Waypoint::gliderSite) style = maxstyle; //if is not already a gliding site we just check if is "solid" surface or not...
 
 			//Radio frequencies: if more than one just take the first "communication"
-			float freq(0), secondaryFreq(0);
+			double freq(0), secondaryFreq(0);
 			if (airportNode.count("RADIO") > 0) for (ptree::value_type const& radio : airportNode) {
 				if (radio.first != "RADIO") continue;
 				const ptree& radioNode(radio.second);
@@ -416,10 +416,10 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 				if (ParseAttribute(radioNode, "CATEGORY", dataStr) && ParseContent(radioNode, "TYPE", type)) {
 					double frequency;
 					if (!ParseValue(radioNode, "FREQUENCY", frequency)) continue;
-					if (AirspaceConverter::IsValidAirbandFrequency((float)frequency)) switch (dataStr.at(0)) {
+					if (AirspaceConverter::IsValidAirbandFrequency(frequency)) switch (dataStr.at(0)) {
 						case 'C': //COMMUNICATION Frequency used for communication
-							if (freq == 0) freq = (float)frequency;
-							else if (secondaryFreq == 0) secondaryFreq = (float)frequency;
+							if (freq == 0) freq = frequency;
+							else if (secondaryFreq == 0) secondaryFreq = frequency;
 							/* no break */
 						case 'I': //INFORMATION Frequency to automated information service
 						case 'N': //NAVIGATION Frequency used for navigation
@@ -506,7 +506,7 @@ bool OpenAIP::ParseNavAids(const ptree& navAidsNode) {
 			if(navAidNode.count("RADIO") > 0) {
 				const ptree& radioNode = navAidNode.get_child("RADIO");
 				if (ParseValue(radioNode, "FREQUENCY", freq)) {
-					if ((style == Waypoint::VOR && AirspaceConverter::IsValidVORfrequency((float)freq)) || (style == Waypoint::NDB && AirspaceConverter::IsValidNDBfrequency((float)freq)))
+					if ((style == Waypoint::VOR && AirspaceConverter::IsValidVORfrequency(freq)) || (style == Waypoint::NDB && AirspaceConverter::IsValidNDBfrequency(freq)))
 						comments << ", Frequency: " << std::fixed << std::setprecision(style != Waypoint::NDB ? 3 : 1) << freq << (style != Waypoint::NDB ? " MHz" : " kHz");
 					else {
 						AirspaceConverter::LogWarning("skipping not valid frequency for VOR or DME for navaid: " + longName);

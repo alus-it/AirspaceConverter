@@ -317,7 +317,7 @@ bool OpenAir::ParseAF(const std::string& line, Airspace& airspace, const bool is
 	std::string descr(line.substr(3));
 	try {
 		size_t pos(0);
-		const float freq = std::stof(descr,&pos);
+		const double freq = std::stod(descr,&pos);
 		if (!AirspaceConverter::IsValidAirbandFrequency(freq)) return false;
 		if (pos<descr.length()) {
 			descr.erase(0,pos);

@@ -135,19 +135,19 @@ bool SeeYou::ParseRunwayLength(const std::string& text, int& length) {
 	return false;
 }
 
-bool SeeYou::ParseAirfieldFrequencies(const std::string& text, float& freq, float& secondaryFreq) {
+bool SeeYou::ParseAirfieldFrequencies(const std::string& text, double& freq, double& secondaryFreq) {
 	freq = 0;
 	secondaryFreq = 0;
 	if (text.empty()) return true;
 	try {
 		size_t pos;
-		freq = std::stof(text,&pos);
+		freq = std::stod(text,&pos);
 		if (!AirspaceConverter::IsValidAirbandFrequency(freq)) { // Invalid main frequency for radio communication
 			freq = 0;
 			return false;
 		}
 		if (pos < text.length()) {
-			secondaryFreq = std::fabs(std::stof(text.substr(pos)));
+			secondaryFreq = std::fabs(std::stod(text.substr(pos)));
 			if (!AirspaceConverter::IsValidAirbandFrequency(secondaryFreq)) { // Invalid secondary frequency for radio communication
 				secondaryFreq = 0;
 				return false;
@@ -158,12 +158,12 @@ bool SeeYou::ParseAirfieldFrequencies(const std::string& text, float& freq, floa
 	return false;
 }
 
-bool SeeYou::ParseOtherFrequency(const std::string& text, const int type, float& freq) {
+bool SeeYou::ParseOtherFrequency(const std::string& text, const int type, double& freq) {
 	freq = 0;
 	if (text.empty()) return true;
 	if (type != Waypoint::WaypointType::VOR && type != Waypoint::WaypointType::NDB) return false; // This waypoint type is not supposed to have a frequency associated
 	try {
-		freq = std::stof(text);
+		freq = std::stod(text);
 		if (type == Waypoint::WaypointType::VOR ? AirspaceConverter::IsValidVORfrequency(freq) : AirspaceConverter::IsValidNDBfrequency(freq)) return true;
 		else { // Invalid frequency for VOR or DME
 			freq = 0;
@@ -184,9 +184,9 @@ bool SeeYou::Read(const std::string& fileName) {
 	std::string sLine;
 	bool isCRLF = false, CRLFwarningGiven = false, firstWaypointFound = false;
 
-	double latitude, longitude;
+	double latitude, longitude, radioFreq, altRadioFreq;
 	int type, runwayDir, runwayLength;
-	float altitude, radioFreq, altRadioFreq;
+	float altitude;
 
 	while (!input.eof() && input.good()) {
 

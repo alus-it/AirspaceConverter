@@ -538,7 +538,7 @@ std::string AirspaceConverter::GetCreationDateString() {
 	return ss.str();
 }
 
-bool AirspaceConverter::IsValidAirbandFrequency(const float& frequency) {
+bool AirspaceConverter::IsValidAirbandFrequency(const double& frequency) {
 	// Check if the frequency is within the airband for communication [MHz]
 	if (frequency < 118 || frequency > 137) return false;
 
@@ -547,7 +547,7 @@ bool AirspaceConverter::IsValidAirbandFrequency(const float& frequency) {
 	return true;
 }
 
-bool AirspaceConverter::IsValidVORfrequency(const float& frequency) {
+bool AirspaceConverter::IsValidVORfrequency(const double& frequency) {
 	// Check if the frequency is within VOR band [MHz]
 	if (frequency < 108 || frequency > 117.95) return false;
 
@@ -558,7 +558,7 @@ bool AirspaceConverter::IsValidVORfrequency(const float& frequency) {
 	return true;
 }
 
-bool AirspaceConverter::IsValidNDBfrequency(const float& frequency) {
+bool AirspaceConverter::IsValidNDBfrequency(const double& frequency) {
 	// Check if the frequency is within the NDB band [kHz]
 	if (frequency < 190 || frequency > 1750) return false;
 	return true;
