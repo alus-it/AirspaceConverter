@@ -203,7 +203,7 @@ void KML::OpenPlacemark(const Airspace& airspace) {
 		<< "<SimpleData name=\"Base\">" << airspace.GetBaseAltitude().ToString() << "</SimpleData>\n";
 	outputFile << std::fixed << std::setprecision(3);
 	for (unsigned int i=0; i<airspace.GetNumberOfRadioFrequencies(); i++) {
-		const std::pair<float, std::string>& f = airspace.GetRadioFrequencyAt(i);
+		const std::pair<double, std::string>& f = airspace.GetRadioFrequencyAt(i);
 		outputFile << "<SimpleData name=\"Radio frequency\">";
 		if (!f.second.empty()) outputFile << f.second << ": ";
 		outputFile << f.first << " MHz</SimpleData>\n";

@@ -552,7 +552,7 @@ bool AirspaceConverter::IsValidVORfrequency(const double& frequency) {
 	if (frequency < 108 || frequency > 117.95) return false;
 
 	// Check if the frequency is a multiple of 50 kHz
-	const float chan = frequency / 0.05f;
+	const double chan = frequency / 0.05;
 	if (std::trunc(chan) != chan) return false;
 
 	return true;

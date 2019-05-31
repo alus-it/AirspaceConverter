@@ -535,7 +535,7 @@ bool OpenAir::Write(const std::string& fileName) {
 		if (a.GetNumberOfRadioFrequencies() > 0) {
 			file << std::fixed << std::setprecision(3);
 			for (unsigned int i=0; i<a.GetNumberOfRadioFrequencies(); i++) {
-				const std::pair<float, std::string>& f = a.GetRadioFrequencyAt(i);
+				const std::pair<double, std::string>& f = a.GetRadioFrequencyAt(i);
 				file << "AF " << f.first;
 				if (!f.second.empty()) file << ' ' << boost::locale::conv::between(f.second,"ISO8859-1","utf-8");
 				file << "\r\n";
