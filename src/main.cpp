@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 	for(int i=1; i<argc; i++) {
 		size_t len=strlen(argv[i]);
 		if(len != 2 || argv[i][0]!='-') {
-			std::cerr << "Expected an option but found: " << argv[i] << std::endl;
+			std::cerr << "Expected an option but found: " << argv[i] << std::endl << std::endl;
 			return EXIT_FAILURE;
 		}
 
@@ -155,7 +155,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (openAIPdir.empty() && ac.GetNumberOfAirspaceFiles() == 0 && ac.GetNumberOfWaypointFiles() == 0) {
-		std::cerr << "ERROR: No input files (airspace or waypoint) specified." << std::endl;
+		std::cerr << "ERROR: No input files (airspace or waypoint) specified." << std::endl << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -181,7 +181,7 @@ int main(int argc, char *argv[]) {
 
 		// Verify that there is at least one airspace or waypoint
 		if(ac.GetNumOfAirspaces() == 0 && ac.GetNumOfWaypoints() == 0) {
-			std::cerr << "ERROR: no usable data found in the input files specified." << std::endl;
+			std::cerr << "ERROR: no usable data found in the input files specified." << std::endl << std::endl;
 			return EXIT_FAILURE;
 		}
 
