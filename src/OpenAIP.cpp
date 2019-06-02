@@ -369,6 +369,7 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 			int maxstyle(Waypoint::airfieldGrass);
 
 			// For each runway...
+			comments << std::fixed;
 			for (ptree::value_type const& rwy : airportNode) {
 				if (rwy.first != "RWY") continue;
 				const ptree& runwyNode(rwy.second);
@@ -395,7 +396,7 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 				double dir = std::stod(dataStr);
 
 				// Add runway to comments
-				comments << ", " << rwyName << ' ' << surface << ' ' << length << "m " << std::setw(3) << std::setfill('0') << dir;
+				comments << ", " << rwyName << ' ' << surface << ' ' << std::setprecision(0) << length << "m " << std::setw(3) << std::setfill('0') << dir;
 
 				// Check if we found the longest one
 				if (length > rwyLen) {
@@ -409,25 +410,28 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 
 			//Radio frequencies: if more than one just take the first "communication"
 			double freq(0), secondaryFreq(0);
-			if (airportNode.count("RADIO") > 0) for (ptree::value_type const& radio : airportNode) {
-				if (radio.first != "RADIO") continue;
-				const ptree& radioNode(radio.second);
-				std::string type;
-				if (ParseAttribute(radioNode, "CATEGORY", dataStr) && ParseContent(radioNode, "TYPE", type)) {
-					double frequency;
-					if (!ParseValue(radioNode, "FREQUENCY", frequency)) continue;
-					if (AirspaceConverter::IsValidAirbandFrequency(frequency)) switch (dataStr.at(0)) {
-						case 'C': //COMMUNICATION Frequency used for communication
-							if (freq == 0) freq = frequency;
-							else if (secondaryFreq == 0) secondaryFreq = frequency;
-							/* no break */
-						case 'I': //INFORMATION Frequency to automated information service
-						case 'N': //NAVIGATION Frequency used for navigation
-						case 'O': //OHER Other frequency purpose
-							comments << ", " << type << " " << std::fixed << std::setprecision(3) << frequency << " MHz";
-							break;
-						default:
-							continue;
+			if (airportNode.count("RADIO") > 0) {
+				comments << std::setprecision(3);
+				for (ptree::value_type const& radio : airportNode) {
+					if (radio.first != "RADIO") continue;
+					const ptree& radioNode(radio.second);
+					std::string type;
+					if (ParseAttribute(radioNode, "CATEGORY", dataStr) && ParseContent(radioNode, "TYPE", type)) {
+						double frequency;
+						if (!ParseValue(radioNode, "FREQUENCY", frequency)) continue;
+						if (AirspaceConverter::IsValidAirbandFrequency(frequency)) switch (dataStr.at(0)) {
+							case 'C': //COMMUNICATION Frequency used for communication
+								if (freq == 0) freq = frequency;
+								else if (secondaryFreq == 0) secondaryFreq = frequency;
+								/* no break */
+							case 'I': //INFORMATION Frequency to automated information service
+							case 'N': //NAVIGATION Frequency used for navigation
+							case 'O': //OHER Other frequency purpose
+								comments << ", " << type << " " << frequency << " MHz";
+								break;
+							default:
+								continue;
+						}
 					}
 				}
 			}
@@ -506,7 +510,7 @@ bool OpenAIP::ParseNavAids(const ptree& navAidsNode) {
 				const ptree& radioNode = navAidNode.get_child("RADIO");
 				if (ParseValue(radioNode, "FREQUENCY", freq)) {
 					if ((style == Waypoint::VOR && AirspaceConverter::IsValidVORfrequency(freq)) || (style == Waypoint::NDB && AirspaceConverter::IsValidNDBfrequency(freq)))
-						comments << ", Frequency: " << std::fixed << std::setprecision(style != Waypoint::NDB ? 3 : 1) << freq << (style != Waypoint::NDB ? " MHz" : " kHz");
+						comments << ", Frequency: " << std::fixed << std::setprecision(style != Waypoint::NDB ? 2 : 1) << freq << (style != Waypoint::NDB ? " MHz" : " kHz");
 					else {
 						AirspaceConverter::LogWarning("skipping not valid frequency for VOR or DME for navaid: " + longName);
 						freq = 0;
@@ -519,11 +523,11 @@ bool OpenAIP::ParseNavAids(const ptree& navAidsNode) {
 			if(navAidNode.count("PARAMS") > 0) {
 				const ptree& paramsNode = navAidNode.get_child("PARAMS");
 				double value(0);
-				if (ParseValue(paramsNode, "RANGE", value)) comments << ", Range: " << std::setprecision(0) << value << " NM";
-				if (ParseValue(paramsNode, "DECLINATION", value)) comments << ", Declination: " << value << " deg";
+				if (ParseValue(paramsNode, "RANGE", value)) comments << ", Range: " << std::fixed << std::setprecision(0) << value << " NM";
+				if (ParseValue(paramsNode, "DECLINATION", value)) comments << ", Declination: " << std::setprecision(2) << value << " deg";
 				if (ParseContent(paramsNode, "ALIGNEDTOTRUENORTH", dataStr)) {
-					if (dataStr.compare("TRUE") == 0) comments << " true north";
-					else if (dataStr.compare("FALSE") == 0) comments << " magnetic north";
+					if (dataStr.compare("TRUE") == 0) comments << " true";
+					else if (dataStr.compare("FALSE") == 0) comments << " magnetic";
 				}
 			}
 
