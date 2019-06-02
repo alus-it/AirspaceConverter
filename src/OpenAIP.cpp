@@ -302,8 +302,8 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 	}
 	AirspaceConverter::LogMessage(boost::str(boost::format("This openAIP waypoint file contains %1d airfields") %numOfAirports));
 
-	try {
-		for (ptree::value_type const& ap : airportsNode) { // for all children of WAYPOINTS tag
+	for (ptree::value_type const& ap : airportsNode) { // for all children of WAYPOINTS tag
+		try {
 			if (ap.first != "AIRPORT") continue;
 			const ptree& airportNode(ap.second);
 
@@ -383,7 +383,7 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 				// Get surface type
 				std::string surface;
 				if (!ParseContent(runwyNode, "SFC", surface)) continue;
-				int rwyStyle = surface.at(0) == 'A' || surface.at(0) == 'C' ? Waypoint::airfieldSolid : Waypoint::airfieldGrass; // Default grass
+				const int rwyStyle = !surface.empty() && (surface.at(0) == 'A' || surface.at(0) == 'C') ? Waypoint::airfieldSolid : Waypoint::airfieldGrass; // Default grass
 
 				// Runway length
 				double length = 0;
@@ -436,12 +436,11 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 			Airfield* airfield = new Airfield(longName, shortName, countryCode, lat, lon, (float)alt, style, rwyDir, rwyLen, freq, comments.str());
 			if (AirspaceConverter::IsValidAirbandFrequency(secondaryFreq)) airfield->SetOtherFrequency(secondaryFreq);
 			waypoints.insert(std::pair<int, Waypoint*>(style, (Waypoint*)airfield));
+		} catch(...) {
+			AirspaceConverter::LogError("Exception while reading openAIP airports: airfield skipped");
 		}
-		return true;
-	} catch(...) {
-		AirspaceConverter::LogError("Exception while reading openAIP airports file");
 	}
-	return false;
+	return true;
 }
 
 bool OpenAIP::ParseNavAids(const ptree& navAidsNode) {
@@ -452,8 +451,8 @@ bool OpenAIP::ParseNavAids(const ptree& navAidsNode) {
 	}
 	AirspaceConverter::LogMessage(boost::str(boost::format("This openAIP navaids file contains %1d navigation aids") %numOfNavAids));
 
-	try {
-		for (ptree::value_type const& na : navAidsNode) { // for all children of WAYPOINTS tag
+	for (ptree::value_type const& na : navAidsNode) { // for all children of WAYPOINTS tag
+		try {
 			if (na.first != "NAVAID") continue;
 			const ptree& navAidNode(na.second);
 
@@ -532,12 +531,11 @@ bool OpenAIP::ParseNavAids(const ptree& navAidsNode) {
 			Waypoint* waypoint = new Waypoint(longName, shortName, countryCode, lat, lon, (float)alt, style, comments.str());
 			if (freq > 0) waypoint->SetOtherFrequency((float)freq);
 			waypoints.insert(std::pair<int, Waypoint*>(style, waypoint));
+		} catch(...) {
+			AirspaceConverter::LogError("Exception while reading openAIP navaids: waypoint skipped");
 		}
-		return true;
-	} catch(...) {
-		AirspaceConverter::LogError("Exception while reading openAIP navaids file");
 	}
-	return false;
+	return true;
 }
 
 //TODO: bool ParseHotSpots(const ptree& hotSpotsNode) {
