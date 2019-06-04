@@ -10,9 +10,9 @@
 # This script is part of AirspaceConverter project
 #============================================================================
 
-# Compile everithing
+# Compile everything
 
-echo Building everithing...
+echo Building everything...
 
 # Get number of processors available
 PROCESSORS="$(grep -c ^processor /proc/cpuinfo)"

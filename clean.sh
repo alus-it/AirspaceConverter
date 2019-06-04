@@ -10,8 +10,8 @@
 # This script is part of AirspaceConverter project
 #============================================================================
 
-# Clean everithing
-echo Clean everithing...
+# Clean everything
+echo Clean everything...
 
 # Clean Qt user interface
 rm -R -f buildQt

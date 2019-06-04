@@ -162,7 +162,7 @@ esac
 
 if [[ "$ACTION" == "C" || "$ACTION" == "c" || "$ACTION" == "" ]]; then
 	
-	# Compile everithing
+	# Compile everything
 	./build.sh
 
 	# Abort if compile failed	
