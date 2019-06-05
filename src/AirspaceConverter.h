@@ -50,6 +50,8 @@ public:
 	inline static void Set_cGPSmapperFunction(std::function<bool(const std::string&, const std::string&)> func) { cGPSmapper = func; }
 	inline static void Set_cGPSmapperCommand(const std::string& cGPSmapperCmd) { cGPSmapperCommand = cGPSmapperCmd; }
 	inline static std::string& Get_cGPSmapperCommand() { return cGPSmapperCommand; }
+	static double FrequencyMHz(const int& frequencyHz) { return 0.000001 * frequencyHz; }
+	static double FrequencykHz(const int& frequencyHz) { return 0.001 * frequencyHz; }
 	static void SetIconsPath(const std::string& iconsPath);
 	static std::istream& SafeGetline(std::istream& is, std::string& line, bool& isCRLF);
 	static OutputType DetermineType(const std::string& filename);
@@ -57,9 +59,9 @@ public:
 	static bool ParseAltitude(const std::string& text, const bool isTop, Airspace& airspace);
 	inline static bool isDigit(const char c) { return (c >= '0' && c <= '9'); }
 	static std::string GetCreationDateString();
-	static bool IsValidAirbandFrequency(const double& frequency);
-	static bool IsValidVORfrequency(const double& frequency);
-	static bool IsValidNDBfrequency(const double& frequency);
+	static bool CheckAirbandFrequency(const double& frequencyMHz, int& frequencyHz);
+	static bool CheckVORfrequency(const double& frequencyMHz, int& frequencyHz);
+	static bool CheckNDBfrequency(const double& frequencykHz, int& frequencyHz);
 	inline void AddAirspaceFile(const std::string& inputFile) { airspaceFiles.push_back(inputFile); }
 	inline void AddWaypointFile(const std::string& waypointsFile) { waypointFiles.push_back(waypointsFile); }
 	inline void AddTerrainRasterMapFile(const std::string& rasterMapFile) { terrainRasterMapFiles.push_back(rasterMapFile); }

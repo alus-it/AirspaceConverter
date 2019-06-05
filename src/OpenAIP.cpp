@@ -409,7 +409,7 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 			if (rwyLen > 0 && style != Waypoint::gliderSite) style = maxstyle; //if is not already a gliding site we just check if is "solid" surface or not...
 
 			//Radio frequencies: if more than one just take the first "communication"
-			double freq(0), secondaryFreq(0);
+			int freqHz(0), secondaryFreqHz(0);
 			if (airportNode.count("RADIO") > 0) {
 				comments << std::setprecision(3);
 				for (ptree::value_type const& radio : airportNode) {
@@ -417,17 +417,18 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 					const ptree& radioNode(radio.second);
 					std::string type;
 					if (ParseAttribute(radioNode, "CATEGORY", dataStr) && ParseContent(radioNode, "TYPE", type)) {
-						double frequency;
-						if (!ParseValue(radioNode, "FREQUENCY", frequency)) continue;
-						if (AirspaceConverter::IsValidAirbandFrequency(frequency)) switch (dataStr.at(0)) {
+						double frequencyMHz;
+						if (!ParseValue(radioNode, "FREQUENCY", frequencyMHz)) continue;
+						int frequencyHz;
+						if (AirspaceConverter::CheckAirbandFrequency(frequencyMHz,frequencyHz)) switch (dataStr.at(0)) {
 							case 'C': //COMMUNICATION Frequency used for communication
-								if (freq == 0) freq = frequency;
-								else if (secondaryFreq == 0) secondaryFreq = frequency;
+								if (freqHz == 0) freqHz = frequencyHz;
+								else if (secondaryFreqHz == 0) secondaryFreqHz = frequencyHz;
 								/* no break */
 							case 'I': //INFORMATION Frequency to automated information service
 							case 'N': //NAVIGATION Frequency used for navigation
 							case 'O': //OHER Other frequency purpose
-								comments << ", " << type << " " << frequency << " MHz";
+								comments << ", " << type << " " << frequencyMHz << " MHz";
 								break;
 							default:
 								continue;
@@ -437,8 +438,8 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 			}
 
 			// Build and store the airfield
-			Airfield* airfield = new Airfield(longName, shortName, countryCode, lat, lon, (float)alt, style, rwyDir, rwyLen, freq, comments.str());
-			if (AirspaceConverter::IsValidAirbandFrequency(secondaryFreq)) airfield->SetOtherFrequency(secondaryFreq);
+			Airfield* airfield = new Airfield(longName, shortName, countryCode, lat, lon, (float)alt, style, rwyDir, rwyLen, freqHz, comments.str());
+			if (secondaryFreqHz != 0) airfield->SetOtherFrequency(secondaryFreqHz);
 			waypoints.insert(std::pair<int, Waypoint*>(style, (Waypoint*)airfield));
 		} catch(...) {
 			AirspaceConverter::LogError("Exception while reading openAIP airports: airfield skipped");
@@ -505,16 +506,14 @@ bool OpenAIP::ParseNavAids(const ptree& navAidsNode) {
 			if (!ParseGeolocation(navAidNode, lat, lon, alt)) continue;
 
 			//Radio frequency
-			double freq(0);
+			int freqHz(0);
 			if(navAidNode.count("RADIO") > 0) {
 				const ptree& radioNode = navAidNode.get_child("RADIO");
+				double freq(0);
 				if (ParseValue(radioNode, "FREQUENCY", freq)) {
-					if ((style == Waypoint::VOR && AirspaceConverter::IsValidVORfrequency(freq)) || (style == Waypoint::NDB && AirspaceConverter::IsValidNDBfrequency(freq)))
+					if ((style == Waypoint::VOR && AirspaceConverter::CheckVORfrequency(freq,freqHz)) || (style == Waypoint::NDB && AirspaceConverter::CheckNDBfrequency(freq,freqHz)))
 						comments << ", Frequency: " << std::fixed << std::setprecision(style != Waypoint::NDB ? 2 : 1) << freq << (style != Waypoint::NDB ? " MHz" : " kHz");
-					else {
-						AirspaceConverter::LogWarning("skipping not valid frequency for VOR or DME for navaid: " + longName);
-						freq = 0;
-					}
+					else AirspaceConverter::LogWarning("skipping not valid frequency for VOR or DME for navaid: " + longName);
 				}
 				if (ParseContent(radioNode, "CHANNEL", dataStr)) comments << ", Channel: " << dataStr;
 			}
@@ -533,7 +532,7 @@ bool OpenAIP::ParseNavAids(const ptree& navAidsNode) {
 
 			// Build and store the waypoint
 			Waypoint* waypoint = new Waypoint(longName, shortName, countryCode, lat, lon, (float)alt, style, comments.str());
-			if (freq > 0) waypoint->SetOtherFrequency((float)freq);
+			if (freqHz > 0) waypoint->SetOtherFrequency(freqHz);
 			waypoints.insert(std::pair<int, Waypoint*>(style, waypoint));
 		} catch(...) {
 			AirspaceConverter::LogError("Exception while reading openAIP navaids: waypoint skipped");

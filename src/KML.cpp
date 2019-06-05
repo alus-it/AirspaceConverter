@@ -203,10 +203,10 @@ void KML::OpenPlacemark(const Airspace& airspace) {
 		<< "<SimpleData name=\"Base\">" << airspace.GetBaseAltitude().ToString() << "</SimpleData>\n";
 	outputFile << std::fixed << std::setprecision(3);
 	for (unsigned int i=0; i<airspace.GetNumberOfRadioFrequencies(); i++) {
-		const std::pair<double, std::string>& f = airspace.GetRadioFrequencyAt(i);
+		const std::pair<int, std::string>& f = airspace.GetRadioFrequencyAt(i);
 		outputFile << "<SimpleData name=\"Radio frequency\">";
 		if (!f.second.empty()) outputFile << f.second << ": ";
-		outputFile << f.first << " MHz</SimpleData>\n";
+		outputFile << AirspaceConverter::FrequencyMHz(f.first) << " MHz</SimpleData>\n";
 	}
 	if (airspace.HasTransponderCode())
 		outputFile << "<SimpleData name=\"Transponder code\">" << airspace.GetTransponderCode() << "</SimpleData>\n";
@@ -238,17 +238,17 @@ void KML::OpenPlacemark(const Waypoint* waypoint) {
 		outputFile << "<SimpleData name=\"Runway direction\">" << (airfield->HasRunwayDir() ? std::to_string(airfield->GetRunwayDir()) + " deg" : "UNKNOWN") << "</SimpleData>\n"
 		<< "<SimpleData name=\"Runway length\">" << (airfield->HasRunwayLength() ? std::to_string(airfield->GetRunwayLength()) + " m" : "UNKNOWN") << "</SimpleData>\n"
 		<< "<SimpleData name=\"Radio frequency\">";
-		if (airfield->HasRadioFrequency()) outputFile << airfield->GetRadioFrequency() << " MHz";
+		if (airfield->HasRadioFrequency()) outputFile << AirspaceConverter::FrequencyMHz(airfield->GetRadioFrequency()) << " MHz";
 		else outputFile << "UNKNOWN";
 		outputFile << "</SimpleData>\n";
 		if (airfield->HasOtherFrequency())
-			outputFile << "<SimpleData name=\"Radio frequency\">" << airfield->GetOtherFrequency() << " MHz</SimpleData>\n";
+			outputFile << "<SimpleData name=\"Radio frequency\">" << AirspaceConverter::FrequencyMHz(airfield->GetOtherFrequency()) << " MHz</SimpleData>\n";
 	}
 	if (waypoint->HasOtherFrequency()) {
 		if (waypoint->GetType() == Waypoint::WaypointType::VOR)
-			outputFile << "<SimpleData name=\"VOR frequency\">" << waypoint->GetOtherFrequency() << " MHz</SimpleData>\n";
+			outputFile << "<SimpleData name=\"VOR frequency\">" << AirspaceConverter::FrequencyMHz(waypoint->GetOtherFrequency()) << " MHz</SimpleData>\n";
 		else if (waypoint->GetType() == Waypoint::WaypointType::NDB)
-			outputFile << "<SimpleData name=\"NDB frequency\">" << std::setprecision(1) << waypoint->GetOtherFrequency() << " kHz</SimpleData>\n";
+			outputFile << "<SimpleData name=\"NDB frequency\">" << std::setprecision(1) << AirspaceConverter::FrequencykHz(waypoint->GetOtherFrequency()) << " kHz</SimpleData>\n";
 	}
 	outputFile.unsetf(std::ios_base::floatfield); //outputFile << std::defaultfloat; not supported by older GCC 4.9.0
 	outputFile << "<SimpleData name=\"Description\">" << waypoint->GetDescription() << "</SimpleData>\n"

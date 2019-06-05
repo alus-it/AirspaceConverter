@@ -228,8 +228,9 @@ void Airspace::SetClass(const Type& airspClass) {
 	if (type <= CLASSG && type != airspClass) type = airspClass;
 }
 
-void Airspace::AddRadioFrequency(const double frequency, const std::string& description) {
-	radioFrequencies.push_back(std::make_pair(frequency,description)); // here we expect alredy validated airband radio frequencies
+void Airspace::AddRadioFrequency(const int frequencyHz, const std::string& description) {
+	assert(frequencyHz > 0);
+	radioFrequencies.push_back(std::make_pair(frequencyHz,description)); // here we expect alredy validated airband radio frequencies
 }
 
 bool Airspace::SetTransponderCode(const std::string& code) {

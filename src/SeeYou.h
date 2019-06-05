@@ -30,8 +30,8 @@ private:
 	static bool ParseStyle(const std::string& text, int& type);
 	static bool ParseRunwayDir(const std::string& text, int& dir);
 	static bool ParseRunwayLength(const std::string& text, int& length);
-	static bool ParseAirfieldFrequencies(const std::string& text, double& mainFreq, double& secondaryFreq);
-	static bool ParseOtherFrequency(const std::string& text, const int type, double& freq);
+	static bool ParseAirfieldFrequencies(const std::string& text, int& mainFreqHz, int& secondaryFreqHz);
+	static bool ParseOtherFrequency(const std::string& text, const int type, int& freqHz);
 
 	std::multimap<int,Waypoint*>& waypoints;
 };

@@ -135,40 +135,26 @@ bool SeeYou::ParseRunwayLength(const std::string& text, int& length) {
 	return false;
 }
 
-bool SeeYou::ParseAirfieldFrequencies(const std::string& text, double& freq, double& secondaryFreq) {
-	freq = 0;
-	secondaryFreq = 0;
+bool SeeYou::ParseAirfieldFrequencies(const std::string& text, int& freqHz, int& secondaryFreqHz) {
+	freqHz = 0;
+	secondaryFreqHz = 0;
 	if (text.empty()) return true;
 	try {
 		size_t pos;
-		freq = std::stod(text,&pos);
-		if (!AirspaceConverter::IsValidAirbandFrequency(freq)) { // Invalid main frequency for radio communication
-			freq = 0;
-			return false;
-		}
-		if (pos < text.length()) {
-			secondaryFreq = std::fabs(std::stod(text.substr(pos)));
-			if (!AirspaceConverter::IsValidAirbandFrequency(secondaryFreq)) { // Invalid secondary frequency for radio communication
-				secondaryFreq = 0;
-				return false;
-			}
-		}
+		if (!AirspaceConverter::CheckAirbandFrequency(std::stod(text, &pos),freqHz)) return false;
+		if (pos < text.length()) return AirspaceConverter::CheckAirbandFrequency(std::fabs(std::stod(text.substr(pos))),secondaryFreqHz);
 		return true;
 	} catch(...) {}
 	return false;
 }
 
-bool SeeYou::ParseOtherFrequency(const std::string& text, const int type, double& freq) {
-	freq = 0;
+bool SeeYou::ParseOtherFrequency(const std::string& text, const int type, int& freqHz) {
+	freqHz = 0;
 	if (text.empty()) return true;
 	if (type != Waypoint::WaypointType::VOR && type != Waypoint::WaypointType::NDB) return false; // This waypoint type is not supposed to have a frequency associated
 	try {
-		freq = std::stod(text);
-		if (type == Waypoint::WaypointType::VOR ? AirspaceConverter::IsValidVORfrequency(freq) : AirspaceConverter::IsValidNDBfrequency(freq)) return true;
-		else { // Invalid frequency for VOR or DME
-			freq = 0;
-			return false;
-		}
+		const double freq = std::stod(text);
+		return type == Waypoint::WaypointType::VOR ? AirspaceConverter::CheckVORfrequency(freq,freqHz) : AirspaceConverter::CheckNDBfrequency(freq,freqHz);
 	} catch(...) {}
 	return false;
 }
@@ -184,8 +170,8 @@ bool SeeYou::Read(const std::string& fileName) {
 	std::string sLine;
 	bool isCRLF = false, CRLFwarningGiven = false, firstWaypointFound = false;
 
-	double latitude, longitude, radioFreq, altRadioFreq;
-	int type, runwayDir, runwayLength;
+	double latitude, longitude;
+	int type, runwayDir, runwayLength, radioFreq, altRadioFreq;
 	float altitude;
 
 	while (!input.eof() && input.good()) {
@@ -397,24 +383,23 @@ bool SeeYou::Write(const std::string& fileName) {
 
 			// Radio frequency
 			if (a.HasRadioFrequency()) {
-				file << std::setprecision(3) << a.GetRadioFrequency();
-				if (a.HasOtherFrequency()) file << '-' << a.GetOtherFrequency();
+				file << std::setprecision(3) << AirspaceConverter::FrequencyMHz(a.GetRadioFrequency());
+				if (a.HasOtherFrequency()) file << '-' << AirspaceConverter::FrequencyMHz(a.GetOtherFrequency());
 			}
 		} else {
 			file << ",,"; // Skip runway length and direction
 
 			// Other frequency
 			if (w.HasOtherFrequency()) {
-				if (w.GetType() == Waypoint::WaypointType::NDB) file << std::setprecision(1) << w.GetOtherFrequency(); // 1 decimal for NDB freq [kHz]
-				else if (w.GetType() == Waypoint::WaypointType::VOR) file << std::setprecision(2) << w.GetOtherFrequency(); // 2 decimals for VOR freq [MHz]
-				else file << std::setprecision(3) << w.GetOtherFrequency(); // assuming all other VHF freq [MHz]
+				if (w.GetType() == Waypoint::WaypointType::NDB) file << std::setprecision(1) << AirspaceConverter::FrequencykHz(w.GetOtherFrequency()); // 1 decimal for NDB freq [kHz]
+				else if (w.GetType() == Waypoint::WaypointType::VOR) file << std::setprecision(2) << AirspaceConverter::FrequencyMHz(w.GetOtherFrequency()); // 2 decimals for VOR freq [MHz]
+				else file << std::setprecision(3) << AirspaceConverter::FrequencyMHz(w.GetOtherFrequency()); // assuming all other VHF freq [MHz]
 			}
 		}
 		file << ',';
 
 		// Description
 		if (!w.GetDescription().empty()) file << '"' << w.GetDescription() << '"';
-
 		file << "\r\n";
 	}
 

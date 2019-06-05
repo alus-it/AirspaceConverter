@@ -317,13 +317,14 @@ bool OpenAir::ParseAF(const std::string& line, Airspace& airspace, const bool is
 	std::string descr(line.substr(3));
 	try {
 		size_t pos(0);
-		const double freq = std::stod(descr,&pos);
-		if (!AirspaceConverter::IsValidAirbandFrequency(freq)) return false;
+		const double freqMHz = std::stod(descr,&pos);
+		int freqHz;
+		if (!AirspaceConverter::CheckAirbandFrequency(freqMHz,freqHz)) return false;
 		if (pos<descr.length()) {
 			descr.erase(0,pos);
 			if (descr.at(0) == ' ') descr.erase(0,1); // remove the separating space
 		} else descr.erase();
-		airspace.AddRadioFrequency(freq, isUTF8 ? descr : boost::locale::conv::between(descr,"utf-8","ISO8859-1"));
+		airspace.AddRadioFrequency(freqHz, isUTF8 ? descr : boost::locale::conv::between(descr,"utf-8","ISO8859-1"));
 		return true;
 	} catch(...) {
 		return false;
@@ -535,8 +536,8 @@ bool OpenAir::Write(const std::string& fileName) {
 		if (a.GetNumberOfRadioFrequencies() > 0) {
 			file << std::fixed << std::setprecision(3);
 			for (unsigned int i=0; i<a.GetNumberOfRadioFrequencies(); i++) {
-				const std::pair<double, std::string>& f = a.GetRadioFrequencyAt(i);
-				file << "AF " << f.first;
+				const std::pair<int, std::string>& f = a.GetRadioFrequencyAt(i);
+				file << "AF " << AirspaceConverter::FrequencyMHz(f.first);
 				if (!f.second.empty()) file << ' ' << boost::locale::conv::between(f.second,"ISO8859-1","utf-8");
 				file << "\r\n";
 			}

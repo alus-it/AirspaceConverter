@@ -538,34 +538,46 @@ std::string AirspaceConverter::GetCreationDateString() {
 	return ss.str();
 }
 
-bool AirspaceConverter::IsValidAirbandFrequency(const double& frequency) {
-	// Check if the frequency is within the airband for communication [MHz]
-	if (frequency < 118 || frequency > 137) return false;
+bool AirspaceConverter::CheckAirbandFrequency(const double& frequencyMHz, int& frequencyHz) {
+	// Convert the frequency in Hz
+	frequencyHz = (int)std::round(frequencyMHz * 1000000.0);
 
-	// Check if the frequency has not more than 3 decimals
-	if (frequency != std::trunc(frequency * 1000) / 1000) return false;
-	return true;
-}
-
-bool AirspaceConverter::IsValidVORfrequency(const double& frequency) {
-	// Check if the frequency is within VOR band [MHz]
-	if (frequency < 108 || frequency > 117.95) return false;
-
-	// Check if the frequency is a multiple of 50 kHz
-	const double chan = frequency / 0.05;
-	if (std::trunc(chan) != chan) return false;
+	// Check if the frequency is within the airband for communication (118.000 - 137.000 MHz) and if the frequency is a multiple of 1 kHz
+	if (frequencyHz < 118000000 || frequencyHz > 137000000 || frequencyHz % 1000 != 0) {
+		frequencyHz = 0;
+		return false;
+	}
 
 	return true;
 }
 
-bool AirspaceConverter::IsValidNDBfrequency(const double& frequency) {
-	// Check if the frequency is within the NDB band [kHz]
-	if (frequency < 190 || frequency > 1750) return false;
+bool AirspaceConverter::CheckVORfrequency(const double& frequencyMHz, int& frequencyHz) {
+	// Convert the frequency in Hz
+	frequencyHz = (int)std::round(frequencyMHz * 1000000.0);
+	
+	// Check if the frequency is within VOR band (108.00 - 117.95 MHz) and if the frequency is a multiple of 50 kHz
+	if (frequencyHz < 108000000 || frequencyHz > 117950000 || frequencyHz % 50000 != 0) {
+		frequencyHz = 0;
+		return false;
+	}
+
+	return true;
+}
+
+bool AirspaceConverter::CheckNDBfrequency(const double& frequencykHz, int& frequencyHz) {
+	// Convert the frequency in Hz
+	frequencyHz = (int)std::round(frequencykHz * 1000.0);
+
+	// Check if the frequency is within the NDB band (190.0 - 1750.0 kHz) and if the frequency is a multiple of 0.1 kHz
+	if (frequencyHz < 190000 || frequencyHz > 1750000 || frequencyHz % 100 != 0) {
+		frequencyHz = 0;
+		return false;
+	}
+
 	return true;
 }
 
 bool AirspaceConverter::FilterOnLatLonLimits(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon) {
-
 	// Check if it is necessary to filter
 	if (topLat == 90 && bottomLat == -90 && leftLon == -180 && rightLon == 180) return true;
 
