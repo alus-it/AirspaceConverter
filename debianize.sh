@@ -4,7 +4,7 @@
 # Since       : 10/9/2017
 # Authors     : Alberto Realis-Luc <alberto.realisluc@gmail.com>
 #               Valerio Messina <efa@iol.it>
-# Web         : http://www.alus.it/AirspaceConverter
+# Web         : https://www.alus.it/AirspaceConverter
 # Copyright   : (C) 2016-2019 Alberto Realis-Luc
 # License     : GNU GPL v3
 #
@@ -305,7 +305,7 @@ Description: Airspace Converter
  to recalculate arcs and circles (possible definitions in OpenAir) in order to
  contain the size of output files. This software, written entirely in C++, has a
  portable "core", it works from "command line" on Linux.
-Homepage: http://www.alus.it/AirspaceConverter/
+Homepage: https://www.alus.it/AirspaceConverter/
 ' > control
 
 cd ..
@@ -407,7 +407,7 @@ Description: Qt GUI for Airspace Converter
  to recalculate arcs and circles (possible definitions in OpenAir) in order to
  contain the size of output files. This software, written entirely in C++, has a
  portable "core", it works from "command line" on Linux.
-Homepage: http://www.alus.it/AirspaceConverter/
+Homepage: https://www.alus.it/AirspaceConverter/
 ' > control
 #chmod 0755 control
 

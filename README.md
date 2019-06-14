@@ -19,7 +19,7 @@ This utility can convert also SeeYou .CUP waypoint files to KMZ (for Google Eart
 While converting to OpenAir this software estimates if the points entered are part of arcs or circumferences in order to make use of arc and circumference definitions of the OpeanAir format and so avoiding to output all points one by one.  
 The ability to read KML/KMZ is based on the KMZ airspace files produced by Austrocontrol.  
 AirspaceConverter is written in C++11 can be ran both on Linux and on Windows. It has a Qt user interface and Windows MFC UI as well in order to be immediately easy to use. But it can also work also from command line to be usable from shell scripts on Linux or batch files on Windows.  
-For more information's about this project: http://www.alus.it/AirspaceConverter  
+For more information's about this project: https://www.alus.it/AirspaceConverter  
 Contributors are, always, warmly welcome!
 
 Why this software?
@@ -111,7 +111,7 @@ Please always refer to official AIP publications for valid and updated airspace 
 Downloads
 ---------
 The already compiled executables for Windows can be downloaded from the project page:  
-http://www.alus.it/AirspaceConverter
+https://www.alus.it/AirspaceConverter
 For the Linux distributions based on Debian there is a also repository available.
 
 Build dependencies
@@ -160,5 +160,5 @@ Contributors
 Contacts
 --------
 Author: Alberto Realis-Luc  
-Web: http://www.alus.it/AirspaceConverter/  
+Web: https://www.alus.it/AirspaceConverter/  
 E-mail: info@alus.it

@@ -147,7 +147,7 @@
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For more info click this link to visit AirspaceConverter website.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="text">
-    <string>&lt;a href=&quot;http://www.alus.it/AirspaceConverter/&quot;&gt;www.alus.it/AirspaceConverter&lt;/a&gt;</string>
+    <string>&lt;a href=&quot;https://www.alus.it/AirspaceConverter/&quot;&gt;www.alus.it/AirspaceConverter&lt;/a&gt;</string>
    </property>
    <property name="textFormat">
     <enum>Qt::RichText</enum>

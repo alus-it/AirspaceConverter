@@ -3,7 +3,7 @@
 # AirspaceConverter
 # Since       : 8/12/2017
 # Author      : Valerio Messina <efa@iol.it>
-# Web         : http://www.alus.it/AirspaceConverter
+# Web         : https://www.alus.it/AirspaceConverter
 # Copyright   : (C) 2016-2019 Valerio Messina
 # License     : GNU GPL v3
 #
