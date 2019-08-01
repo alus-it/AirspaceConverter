@@ -38,7 +38,7 @@ private:
 	static bool ParseAltitude(const std::string& line, const bool isTop, Airspace& airspace);
 	static bool ParseS (const std::string& line);
 	static bool ParseT (const std::string& line);
-	static bool ParseDP(const std::string& line, Airspace& airspace);
+	static bool ParseDP(const std::string& line, Airspace& airspace, const int& linenumber);
 	static bool IsFileUTF8 (std::ifstream& inputFile);
 	bool ParseAC(const std::string& line, Airspace& airspace);
 	bool ParseV(const std::string& line, Airspace& airspace);

@@ -914,9 +914,10 @@ bool KML::ProcessCoordinates(const boost::property_tree::ptree& parent, Airspace
 						}
 						else alt = value;
 					}
-					airsp.AddSinglePointOnly(lat, lon);
-					numOfPoints++;
-					avgAltitude += value;
+					if (airsp.AddSinglePointOnly(lat, lon)) {
+						numOfPoints++;
+						avgAltitude += value;
+					}
 					expected = 0;
 					break;
 				default:

@@ -106,12 +106,12 @@ public:
 	inline void SetBaseAltitude(const Altitude& alt) { base = alt; }
 	inline void SetName(const std::string& airspaceName) { name = airspaceName; }
 	bool SetTransponderCode(const std::string& code);
-	inline void AddSinglePointOnly(const double& lat, const double& lon) { points.push_back(Geometry::LatLon(lat, lon)); }
+	bool AddSinglePointOnly(const double& lat, const double& lon);
 	void AddRadioFrequency(const int frequencyHz, const std::string& description);
 	void Clear(); // Clear name, type, points and geometries
 	void ClearPoints(); // Clear points and geometries
 	void ClearGeometries(); // Clear geometries only
-	void AddPoint(const Geometry::LatLon& point);
+	bool AddPoint(const Geometry::LatLon& point);
 	void AddGeometry(const Geometry* geometry);
 	bool ClosePoints();
 	bool ArePointsValid() const;

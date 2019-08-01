@@ -337,9 +337,29 @@ void Airspace::ClearGeometries() {
 	geometries.clear();
 }
 
-void Airspace::AddPoint(const Geometry::LatLon& point) {
-	geometries.push_back(new Point(point));
+bool Airspace::AddSinglePointOnly(const double& lat, const double& lon) {
+	Geometry::LatLon point(lat, lon);
+
+	// Make sure the point is not a duplicate of the last, not necessary to add it
+	if (!points.empty() && points.back() == point) return false;
+
+	// Add the point
 	points.push_back(point);
+
+	return true;
+}
+
+bool Airspace::AddPoint(const Geometry::LatLon& point) {
+	// Make sure the point is not a duplicate of the last, not necessary to add it
+	if (!points.empty() && points.back() == point) return false;
+	
+	// Make the new single "Point" geometry
+	geometries.push_back(new Point(point));
+
+	// Add the point
+	points.push_back(point);
+
+	return true;
 }
 
 bool Airspace::ArePointsValid() const {
@@ -515,4 +535,3 @@ void Airspace::CalculateSurface(double& area, double& perimeter) const {
 	perimeter = (double)boost::geometry::perimeter(polygon) * earthRadiusKm; // [Km]
 #endif
 }
-

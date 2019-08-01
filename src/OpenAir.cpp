@@ -220,7 +220,7 @@ bool OpenAir::Read(const std::string& fileName) {
 		case 'D':
 			switch (sLine.at(1)) {
 			case 'P': // DP
-				lineParsedOK = ParseDP(sLine, airspace);
+				lineParsedOK = ParseDP(sLine, airspace, linecount);
 				break;
 			case 'A': // DA
 				lineParsedOK = ParseDA(sLine, airspace);
@@ -348,12 +348,12 @@ bool OpenAir::ParseT(const std::string& line) {
 	return false;
 }
 
-bool OpenAir::ParseDP(const std::string& line, Airspace& airspace) {
+bool OpenAir::ParseDP(const std::string& line, Airspace& airspace, const int& linenumber) {
 	if (airspace.GetType() == Airspace::UNDEFINED) return true;
 	if (line.length() < 14) return false;
 	Geometry::LatLon point;
 	if (ParseCoordinates(line.substr(3), point)) {
-		airspace.AddPoint(point);
+		if (!airspace.AddPoint(point)) AirspaceConverter::LogWarning(boost::str(boost::format("skipping unnecessary repeated point on line %1d: %2s") % linenumber % line));
 		return true;
 	}
 	return false;
