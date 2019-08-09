@@ -42,6 +42,7 @@ The PFM "Polish" format, (file .mp), can be used with cGPSmapper. This utility u
 .PP
 The output in OpenAir is useful to make the data from openAIP suitable for many devices which support OpenAir only format; in particular this feature attempts to recalculate arcs and circles (possible definitions in OpenAir) in order to contain the size of output files.
 This software can also be useful for maintainers of OpenAir airspace and SeeYou .CUP waypoints files, not only to visualize airspace and waypoints but also to verify the syntax of OpenAir and CUP commands entered.
+Duplicate consecutive points will be ignored, the converter will warn about them while reading OpenAir files. This will also detect the special case of an unnecessary point repeating the end of the arc defined on the previous line.
 .PP
 For the "landable" waypoints in the CUP files an estimation of the runway perimeter is drawn on the earth surface, in order to do that not only the position is used but also the runway orientation and length.
 This is particularly useful to verify that the position of the airfield in the CUP file matches exactly the runway in Google Earth.
