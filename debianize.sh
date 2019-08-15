@@ -150,7 +150,7 @@ case $OSVER in
 		LIBCVER=2.27
 		ZIPLIB=libzip4
 		ZIPVER=1.1.2
-		BOOSTVER=1.65.0
+		BOOSTVER=1.65.1
 		QTVER=5.9.5
 		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER}), libgl1-mesa-glx (>= 10.3.2)"
 		MANT="Valerio Messina <efa@iol.it>"
