@@ -3,8 +3,9 @@
 // Since       : 14/6/2016
 // Authors     : Alberto Realis-Luc <alberto.realisluc@gmail.com>
 //               Valerio Messina <efa@iol.it>
+// Repository  : https://github.com/alus-it/AirspaceConverter.git
 // Web         : https://www.alus.it/AirspaceConverter
-// Copyright   : (C) 2016-2019 Alberto Realis-Luc
+// Copyright   : (C) 2016-2020 Alberto Realis-Luc
 // License     : GNU GPL v3
 //
 // This source file is part of AirspaceConverter project
