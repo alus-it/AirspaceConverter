@@ -120,11 +120,11 @@ const bool Airspace::CATEGORY_VISIBILITY[] = {
 	false, //CLASSE
 	false, //CLASSF
 	false, //CLASSG
-	true, //DANGER
-	true, //PROHIBITED
-	true, //RESTRICTED
-	true, //CTR
-	true, //TMA
+	true,  //DANGER
+	true,  //PROHIBITED
+	true,  //RESTRICTED
+	true,  //CTR
+	true,  //TMA
 	false, //TMZ
 	false, //RMZ
 	false, //FIR
@@ -133,6 +133,7 @@ const bool Airspace::CATEGORY_VISIBILITY[] = {
 	false, //GLIDING
 	false, //NOGLIDER
 	false, //WAVE
+	true,  //NOTAM
 	false, //UNKNOWN
 	false  //UNDEFINED
 };
@@ -158,6 +159,7 @@ const std::string Airspace::CATEGORY_NAMES[] = {
 	"Gliding area", //GLIDING
 	"No glider", //NOGLIDER
 	"Wave window", //WAVE
+	"NOTAM", //NOTAM
 	"Unknown", //UNKNOWN
 	"UNDEFINED" //UNDEFINED
 };

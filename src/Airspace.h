@@ -84,7 +84,8 @@ public:
 		GLIDING,
 		NOGLIDER,
 		WAVE,
-		UNKNOWN, // "UNKNOWN" can be used in OpenAir files
+		NOTAM,    // "NOTAM" airspace category can be used in OpenAir files
+		UNKNOWN,  // "UNKNOWN" as well can be used in OpenAir files
 		UNDEFINED // also the last one
 	} Type;
 

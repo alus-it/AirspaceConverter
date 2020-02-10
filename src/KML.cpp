@@ -47,6 +47,7 @@ const std::string KML::colors[][2] = {
 	{ "ff00aa55", "7f00e2e2" }, //GLIDING
 	{ "400000FF", "7fd4d4d4" }, //NOGLIDER
 	{ "403399ff", "7fd4d4d4" }, //WAVE
+	{ "500000FF", "7F0000FF" }, //NOTAM
 	{ "40000000", "7fd4d4d4" }, //UNKNOWN
 	{ "40000000", "7fd4d4d4" }  //UNDEFINED
 };

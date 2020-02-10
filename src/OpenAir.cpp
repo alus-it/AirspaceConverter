@@ -293,6 +293,7 @@ bool OpenAir::ParseAC(const std::string & line, Airspace& airspace) {
 			else if (line.at(3) == 'R') type = Airspace::RMZ;
 		}
 	} else if (length == 5 && line.at(3)=='G' && line.at(4) == 'P') type = Airspace::NOGLIDER; //GP glider prohibited
+	else if (length == 8 && line.substr(3) == "NOTAM") type = Airspace::NOTAM;
 	else if (length == 10 && line.substr(3) == "UNKNOWN") type = Airspace::UNKNOWN; // UKNOWN can be used in OpneAir
 	if (type == Airspace::UNDEFINED) return false;
 	airspace.SetType(type);
