@@ -157,33 +157,101 @@ void KML::WriteHeader(const bool airspacePresent, const bool waypointsPresent) {
 		<< "<kml xmlns = \"http://www.opengis.net/kml/2.2\">\n"
 		<< "<Document>\n"
 		<< "<open>true</open>\n";
-		if (airspacePresent) for (int t = Airspace::CLASSA; t <= Airspace::UNDEFINED; t++) {
-			outputFile << "<Style id = \"Style" << Airspace::CategoryName((Airspace::Type)t) << "\">\n"
-				<< "<LineStyle>\n"
-				<< "<color>" << colors[t][0] << "</color>\n"
-				<< "<width>1.5</width>\n"
-				<< "</LineStyle>\n"
-				<< "<PolyStyle>\n"
-				<< "<color>" << colors[t][1] << "</color>\n"
-				<< "</PolyStyle>\n"
-				<< "</Style>\n";
-		}
-		if (waypointsPresent) for (int t = Waypoint::normal; t < Waypoint::numOfWaypointTypes; t++) {
-			outputFile << "<Style id = \"Style" << Waypoint::TypeName((Waypoint::WaypointType)t) << "\">\n"
-				<< "<IconStyle>\n"
-				<< "<Icon>\n"
-				<< "<href>icons/" << waypointIcons[t] <<"</href>\n"
-				<< "</Icon>\n"
-				<< "</IconStyle>\n";
-			if (Waypoint::IsTypeAirfield((Waypoint::WaypointType)t))
-				outputFile << "<LineStyle>\n"
-					<< "<color>" << airfieldColors[t][0] << "</color>\n"
+		if (airspacePresent) {
+			for (int t = Airspace::CLASSA; t <= Airspace::UNDEFINED; t++) {
+				outputFile << "<Style id = \"Style" << Airspace::CategoryName((Airspace::Type)t) << "\">\n"
+					<< "<LineStyle>\n"
+					<< "<color>" << colors[t][0] << "</color>\n"
 					<< "<width>1.5</width>\n"
 					<< "</LineStyle>\n"
 					<< "<PolyStyle>\n"
-					<< "<color>" << airfieldColors[t][1] << "</color>\n"
-					<< "</PolyStyle>\n";
-			outputFile << "</Style>\n";
+					<< "<color>" << colors[t][1] << "</color>\n"
+					<< "</PolyStyle>\n"
+					<< "</Style>\n";
+			}
+			outputFile << "<Schema name=\"\" id=\"AirspaceId\">\n"
+				<< "<SimpleField type=\"string\" name=\"Name\">\n"
+				<< "<displayName><![CDATA[<b>Name:</b>]]></displayName>\n"
+				<< "</SimpleField>\n"
+				<< "<SimpleField type=\"string\" name=\"Category\">\n"
+				<< "<displayName><![CDATA[<b>Category:</b>]]></displayName>\n"
+				<< "</SimpleField>\n"
+				<< "<SimpleField type=\"string\" name=\"Top\">\n"
+				<< "<displayName><![CDATA[<b>Ceiling:</b>]]></displayName>\n"
+				<< "</SimpleField>\n"
+				<< "<SimpleField type=\"string\" name=\"Base\">\n"
+				<< "<displayName><![CDATA[<b>Floor:</b>]]></displayName>\n"
+				<< "</SimpleField>\n"
+				<< "<SimpleField type=\"string\" name=\"Radio\">\n"
+				<< "<displayName><![CDATA[<b>Radio frequency (MHz):</b>]]></displayName>\n"
+				<< "</SimpleField>\n"
+				<< "<SimpleField type=\"string\" name=\"Xpndr\">\n"
+				<< "<displayName><![CDATA[<b>Transponder code:</b>]]></displayName>\n"
+				<< "</SimpleField>\n"
+				<< "<SimpleField type=\"double\" name=\"Area\">\n"
+				<< "<displayName><![CDATA[<b>Area (Km<sup>2</sup>):</b>]]></displayName>\n"
+				<< "</SimpleField>\n"
+				<< "<SimpleField type=\"double\" name=\"Perimeter\">\n"
+				<< "<displayName><![CDATA[<b>Perimeter (Km):</b>]]></displayName>\n"
+				<< "</SimpleField>\n"
+				<< "</Schema>\n";
+		}
+		if (waypointsPresent) {
+			for (int t = Waypoint::normal; t < Waypoint::numOfWaypointTypes; t++) {
+				outputFile << "<Style id = \"Style" << Waypoint::TypeName((Waypoint::WaypointType)t) << "\">\n"
+					<< "<IconStyle>\n"
+					<< "<Icon>\n"
+					<< "<href>icons/" << waypointIcons[t] <<"</href>\n"
+					<< "</Icon>\n"
+					<< "</IconStyle>\n";
+				if (Waypoint::IsTypeAirfield((Waypoint::WaypointType)t))
+					outputFile << "<LineStyle>\n"
+						<< "<color>" << airfieldColors[t][0] << "</color>\n"
+						<< "<width>1.5</width>\n"
+						<< "</LineStyle>\n"
+						<< "<PolyStyle>\n"
+						<< "<color>" << airfieldColors[t][1] << "</color>\n"
+						<< "</PolyStyle>\n";
+				outputFile << "</Style>\n";
+			}
+			outputFile << "<Schema name=\"\" id=\"WaypointId\">\n"
+				<< "<SimpleField type=\"string\" name=\"Name\">\n"
+				<< "<displayName><![CDATA[<b>Name:</b>]]></displayName>\n"
+				<< "</SimpleField>\n"
+				<< "<SimpleField type=\"string\" name=\"Type\">\n"
+				<< "<displayName><![CDATA[<b>Type:</b>]]></displayName>\n"
+				<< "</SimpleField>\n"
+				<< "<SimpleField type=\"string\" name=\"Code\">\n"
+				<< "<displayName><![CDATA[<b>Code:</b>]]></displayName>\n"
+				<< "</SimpleField>\n"
+				<< "<SimpleField type=\"string\" name=\"Country\">\n"
+				<< "<displayName><![CDATA[<b>Country:</b>]]></displayName>\n"
+				<< "</SimpleField>\n"
+				<< "<SimpleField type=\"int\" name=\"AltMt\">\n"
+				<< "<displayName><![CDATA[<b>Altitude (m):</b>]]></displayName>\n"
+				<< "</SimpleField>\n"
+				<< "<SimpleField type=\"int\" name=\"AltFt\">\n"
+				<< "<displayName><![CDATA[<b>Altitude (ft):</b>]]></displayName>\n"
+				<< "</SimpleField>\n"
+				<< "<SimpleField type=\"int\" name=\"RwyDir\">\n"
+				<< "<displayName><![CDATA[<b>Runway direction (deg):</b>]]></displayName>\n"
+				<< "</SimpleField>\n"
+				<< "<SimpleField type=\"int\" name=\"RwyLen\">\n"
+				<< "<displayName><![CDATA[<b>Runway length (m):</b>]]></displayName>\n"
+				<< "</SimpleField>\n"
+				<< "<SimpleField type=\"double\" name=\"Radio\">\n"
+				<< "<displayName><![CDATA[<b>Radio frequency (MHz):</b>]]></displayName>\n"
+				<< "</SimpleField>\n"
+				<< "<SimpleField type=\"string\" name=\"Desc\">\n"
+				<< "<displayName><![CDATA[<b>Description:</b>]]></displayName>\n"
+				<< "</SimpleField>\n"
+				<< "<SimpleField type=\"double\" name=\"VOR\">\n"
+				<< "<displayName><![CDATA[<b>VOR frequency (MHz):</b>]]></displayName>\n"
+				<< "</SimpleField>\n"
+				<< "<SimpleField type=\"double\" name=\"NDB\">\n"
+				<< "<displayName><![CDATA[<b>NDB frequency (kHz):</b>]]></displayName>\n"
+				<< "</SimpleField>\n"
+				<< "</Schema>\n";
 		}
 }
 
@@ -197,7 +265,7 @@ void KML::OpenPlacemark(const Airspace& airspace) {
 		<< "<styleUrl>#Style" << airspace.GetCategoryName() << "</styleUrl>\n"
 		<< "<visibility>" << (airspace.IsVisibleByDefault() ? 1 : 0) << "</visibility>\n"
 		<< "<ExtendedData>\n"
-		<< "<SchemaData>\n"
+		<< "<SchemaData schemaUrl=\"#AirspaceId\">\n"
 		<< "<SimpleData name=\"Name\">" << name << "</SimpleData>\n"
 		<< "<SimpleData name=\"Category\">" << (airspace.GetType() <= Airspace::CLASSG ? ("Class " + airspace.GetCategoryName()) : airspace.GetCategoryName() ) << "</SimpleData>\n"
 		<< "<SimpleData name=\"Top\">" << airspace.GetTopAltitude().ToString() << "</SimpleData>\n"
@@ -205,14 +273,13 @@ void KML::OpenPlacemark(const Airspace& airspace) {
 	outputFile << std::fixed << std::setprecision(3);
 	for (unsigned int i=0; i<airspace.GetNumberOfRadioFrequencies(); i++) {
 		const std::pair<int, std::string>& f = airspace.GetRadioFrequencyAt(i);
-		outputFile << "<SimpleData name=\"Radio frequency\">";
+		outputFile << "<SimpleData name=\"Radio\">";
 		if (!f.second.empty()) outputFile << f.second << ": ";
-		outputFile << AirspaceConverter::FrequencyMHz(f.first) << " MHz</SimpleData>\n";
+		outputFile << AirspaceConverter::FrequencyMHz(f.first) << "</SimpleData>\n";
 	}
-	if (airspace.HasTransponderCode())
-		outputFile << "<SimpleData name=\"Transponder code\">" << airspace.GetTransponderCode() << "</SimpleData>\n";
-	outputFile << std::setprecision(1) << "<SimpleData name=\"Area\">" << area << " Km2</SimpleData>\n" // <sup>2</sup> doesn't work...
-		<< "<SimpleData name=\"Perimeter\">" << perimeter << " Km</SimpleData>\n"
+	if (airspace.HasTransponderCode()) outputFile << "<SimpleData name=\"Xpndr\">" << airspace.GetTransponderCode() << "</SimpleData>\n";
+	outputFile << std::setprecision(1) << "<SimpleData name=\"Area\">" << area << "</SimpleData>\n"
+		<< "<SimpleData name=\"Perimeter\">" << perimeter << "</SimpleData>\n"
 		<< "</SchemaData>\n"
 		<< "</ExtendedData>\n";
 	outputFile.unsetf(std::ios_base::floatfield); //outputFile << std::defaultfloat; not supported by older GCC 4.9.0
@@ -227,32 +294,30 @@ void KML::OpenPlacemark(const Waypoint* waypoint) {
 		<< "<styleUrl>#Style" << waypoint->GetTypeName() << "</styleUrl>\n";
 	outputFile << "<visibility>" << (isAirfield ? 1 : 0) << "</visibility>\n"
 		<< "<ExtendedData>\n"
-		<< "<SchemaData>\n"
+		<< "<SchemaData schemaUrl=\"#WaypointId\">\n"
 		<< "<SimpleData name=\"Name\">" << waypoint->GetName() << "</SimpleData>\n"
 		<< "<SimpleData name=\"Type\">" << waypoint->GetTypeName() << "</SimpleData>\n"
 		<< "<SimpleData name=\"Code\">" << waypoint->GetCode() << "</SimpleData>\n"
 		<< "<SimpleData name=\"Country\">" << waypoint->GetCountry() << "</SimpleData>\n"
-		<< "<SimpleData name=\"Altitude\">" << altMt << " m - " << altFt << " ft" << "</SimpleData>\n";
+		<< "<SimpleData name=\"AltMt\">" << altMt << "</SimpleData>\n"
+		<< "<SimpleData name=\"AltFt\">" << altFt << "</SimpleData>\n";
 	outputFile << std::fixed << std::setprecision(3);
 	if(isAirfield) {
 		const Airfield* airfield = (const Airfield*)waypoint;
-		outputFile << "<SimpleData name=\"Runway direction\">" << (airfield->HasRunwayDir() ? std::to_string(airfield->GetRunwayDir()) + " deg" : "UNKNOWN") << "</SimpleData>\n"
-		<< "<SimpleData name=\"Runway length\">" << (airfield->HasRunwayLength() ? std::to_string(airfield->GetRunwayLength()) + " m" : "UNKNOWN") << "</SimpleData>\n"
-		<< "<SimpleData name=\"Radio frequency\">";
-		if (airfield->HasRadioFrequency()) outputFile << AirspaceConverter::FrequencyMHz(airfield->GetRadioFrequency()) << " MHz";
-		else outputFile << "UNKNOWN";
-		outputFile << "</SimpleData>\n";
-		if (airfield->HasOtherFrequency())
-			outputFile << "<SimpleData name=\"Radio frequency\">" << AirspaceConverter::FrequencyMHz(airfield->GetOtherFrequency()) << " MHz</SimpleData>\n";
+
+		if (airfield->HasRunwayDir()) outputFile << "<SimpleData name=\"RwyDir\">" << airfield->GetRunwayDir() << "</SimpleData>\n";
+		if (airfield->HasRunwayLength()) outputFile << "<SimpleData name=\"RwyLen\">" << airfield->GetRunwayLength() << "</SimpleData>\n";
+		if (airfield->HasRadioFrequency()) outputFile << "<SimpleData name=\"Radio\">" << AirspaceConverter::FrequencyMHz(airfield->GetRadioFrequency()) << "</SimpleData>\n";
+		if (airfield->HasOtherFrequency()) outputFile << "<SimpleData name=\"Radio\">" << AirspaceConverter::FrequencyMHz(airfield->GetOtherFrequency()) << "</SimpleData>\n";
 	}
 	if (waypoint->HasOtherFrequency()) {
 		if (waypoint->GetType() == Waypoint::WaypointType::VOR)
-			outputFile << "<SimpleData name=\"VOR frequency\">" << AirspaceConverter::FrequencyMHz(waypoint->GetOtherFrequency()) << " MHz</SimpleData>\n";
+			outputFile << "<SimpleData name=\"VOR\">" << AirspaceConverter::FrequencyMHz(waypoint->GetOtherFrequency()) << "</SimpleData>\n";
 		else if (waypoint->GetType() == Waypoint::WaypointType::NDB)
-			outputFile << "<SimpleData name=\"NDB frequency\">" << std::setprecision(1) << AirspaceConverter::FrequencykHz(waypoint->GetOtherFrequency()) << " kHz</SimpleData>\n";
+			outputFile << "<SimpleData name=\"NDB\">" << std::setprecision(1) << AirspaceConverter::FrequencykHz(waypoint->GetOtherFrequency()) << "</SimpleData>\n";
 	}
 	outputFile.unsetf(std::ios_base::floatfield); //outputFile << std::defaultfloat; not supported by older GCC 4.9.0
-	outputFile << "<SimpleData name=\"Description\">" << waypoint->GetDescription() << "</SimpleData>\n"
+	outputFile << "<SimpleData name=\"Desc\">" << waypoint->GetDescription() << "</SimpleData>\n"
 		<< "</SchemaData>\n"
 		<< "</ExtendedData>\n";
 }
