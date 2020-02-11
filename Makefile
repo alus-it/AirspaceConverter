@@ -27,7 +27,7 @@ ifeq ($(PLATFORM),Linux)
 	LIB = /usr/lib/x86_64-linux-gnu
 	LIBFILE = lib$(APPNAME).so
 	LFLAGS += -lboost_locale
-	DYNLIBFLAGS = $(LFLAGS) -Wl,-soname,$(LIBNAME)
+	DYNLIBFLAGS = $(LFLAGS) -Wl,-soname,$(LIBFILE)
 	STRIP += --strip-unneeded
 else
 	LIB = /usr/local/lib
