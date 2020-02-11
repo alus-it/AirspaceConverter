@@ -293,6 +293,7 @@ bool OpenAir::ParseAC(const std::string & line, Airspace& airspace) {
 			else if (line.at(3) == 'R') type = Airspace::RMZ;
 		}
 	} else if (length == 5 && line.at(3)=='G' && line.at(4) == 'P') type = Airspace::NOGLIDER; //GP glider prohibited
+	else if (length == 7 && line.substr(3) == "GSEC") type = Airspace::GLIDING; //GSEC glider sector
 	else if (length == 8 && line.substr(3) == "NOTAM") type = Airspace::NOTAM;
 	else if (length == 10 && line.substr(3) == "UNKNOWN") type = Airspace::UNKNOWN; // UKNOWN can be used in OpneAir
 	if (type == Airspace::UNDEFINED) return false;
@@ -617,6 +618,8 @@ bool OpenAir::WriteCategory(const Airspace& airspace) {
 		case Airspace::RMZ:			openAirCategory = "RMZ"; break;
 		case Airspace::TMZ:			openAirCategory = "TMZ"; break;
 		case Airspace::NOGLIDER:	openAirCategory = "GP"; break;
+		case Airspace::GLIDING:		openAirCategory = "GSEC"; break;
+		case Airspace::NOTAM:		openAirCategory = "NOTAM"; break;
 		case Airspace::UNKNOWN:		openAirCategory = "UNKNOWN"; break;
 		default: // other cases not existent in OpenAir: FIR, UIR, OTH, GLIDING, UNDEFINED
 			AirspaceConverter::LogWarning(boost::str(boost::format("skipping airspace %1s of category %2s not existent in OpenAir.") % airspace.GetName() % Airspace::CategoryName(airspace.GetType())));
