@@ -4,7 +4,7 @@
 # Authors     : Alberto Realis-Luc <alberto.realisluc@gmail.com>
 #               Valerio Messina <efa@iol.it>
 # Web         : https://www.alus.it/AirspaceConverter
-# Copyright   : (C) 2016-2019 Alberto Realis-Luc
+# Copyright   : (C) 2016-2020 Alberto Realis-Luc
 # License     : GNU GPL v3
 #
 # This source file is part of AirspaceConverter project
@@ -13,9 +13,28 @@
 # Compiler options
 CPPFLAGS = -std=c++0x -Wall -Werror -fmessage-length=0
 
-# Linker options
-LIB = /usr/lib/x86_64-linux-gnu
-LFLAGS = -lzip -lboost_system -lboost_filesystem -lboost_locale
+# Product name
+APPNAME = airspaceconverter
+
+# Platform
+PLATFORM=$(shell uname -s)
+
+# Linker and strip options
+LFLAGS = -lzip -lboost_system -lboost_filesystem
+STRIP = -S
+
+ifeq ($(PLATFORM),Linux)
+	LIB = /usr/lib/x86_64-linux-gnu
+	LIBFILE = lib$(APPNAME).so
+	LFLAGS += -lboost_locale
+	DYNLIBFLAGS = $(LFLAGS) -Wl,-soname,$(LIBNAME)
+	STRIP += --strip-unneeded
+else
+	LIB = /usr/local/lib
+	LIBFILE = lib$(APPNAME).dylib
+	LFLAGS += -lboost_locale-mt
+	DYNLIBFLAGS = $(LFLAGS) -Wl
+endif
 
 # Source path
 SRC = src/
@@ -56,22 +75,22 @@ CPPFILES =                \
 OBJS = $(patsubst %.cpp, $(BIN)%.o, $(CPPFILES))
 
 # Build all
-all: $(BIN)airspaceconverter
+all: $(BIN)$(APPNAME)
 
 # Build the command line program
-$(BIN)airspaceconverter: $(BIN)libairspaceconverter.so $(SRC)main.cpp
+$(BIN)$(APPNAME): $(BIN)$(LIBFILE) $(SRC)main.cpp
 	@echo Building executable: $@
-	@g++ $(CPPFLAGS) -L$(BIN) $(SRC)main.cpp -lairspaceconverter $(LFLAGS) -o $@
+	@g++ $(CPPFLAGS) -L$(BIN) $(SRC)main.cpp -l$(APPNAME) $(LFLAGS) -o $@
 ifeq ($(DEBUG),0)
-	@strip -S --strip-unneeded $@
+	@strip $(STRIP) $@
 endif
 
 # Build the shared library
-$(BIN)libairspaceconverter.so: $(OBJS)
+$(BIN)$(LIBFILE): $(OBJS)
 	@echo Building shared library: $@
-	@g++ -L$(LIB) $(LFLAGS) -Wl,-soname,libairspaceconverter.so -shared $(OBJS) -o $@
+	@g++ -L$(LIB) $(DYNLIBFLAGS) -shared $(OBJS) -o $@
 ifeq ($(DEBUG),0)
-	@strip -S --strip-unneeded $@
+	@strip $(STRIP) $@
 endif
 	@chmod a-x $@
 

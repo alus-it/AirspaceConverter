@@ -4,7 +4,7 @@
 # Author      : Alberto Realis-Luc <alberto.realisluc@gmail.com>
 # Web         : https://www.alus.it/AirspaceConverter
 # Repository  : https://github.com/alus-it/AirspaceConverter.git
-# Copyright   : (C) 2016-2018 Alberto Realis-Luc
+# Copyright   : (C) 2016-2020 Alberto Realis-Luc
 # License     : GNU GPL v3
 #
 # This Qt project was created on: 2017-01-29T12:24:53
@@ -41,11 +41,11 @@ FORMS    += mainwindow.ui \
 INCLUDEPATH += $$PWD/../src/
 DEPENDPATH += $$PWD/../src/
 
+# libAirspaceConverter libary for Linux and Mac
+unix: LIBS += -L$$PWD/../Release/ -lairspaceconverter
+
 
 ## Linux libraries
-
-# libAirspaceConverter
-unix:!macx: LIBS += -L$$PWD/../Release/ -lairspaceconverter
 
 # Boost libraries
 unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu/ -lboost_filesystem
@@ -54,6 +54,18 @@ unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu/ -lboost_locale
 
 # Zip library
 unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu/ -lzip
+
+
+## Mac libraries
+macx: INCLUDEPATH += /usr/local/include/
+
+# Boost libraries
+macx: LIBS += -L/usr/local/lib/ -lboost_filesystem
+macx: LIBS += -L/usr/local/lib/ -lboost_system
+macx: LIBS += -L/usr/local/lib/ -lboost_locale-mt
+
+# Zip library
+macx: LIBS += -L/usr/local/lib/ -lzip
 
 
 ## Windows libraries on 64 bit
