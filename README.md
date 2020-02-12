@@ -145,10 +145,10 @@ On Windows, the folder `icons` with the placemarks PNG icons must be kept in the
 
 Contributors
 ------------
-- _Valerio Messina_, efa@iol.it: packaging for _Ubuntu_, various issues fixed and testing
+- _[Valerio Messina](mailto:efa@iol.it)_ : packaging for _Ubuntu_, various issues fixed and testing
 
 Contacts
 --------
 Author: _Alberto Realis-Luc_  
 Web: [alus.it/AirspaceConverter](https://www.alus.it/AirspaceConverter/)  
-E-mail: [info@alus.it](mailto:info@alus.it)
+E-mail: [info@alus.it](mailto:info@alus.it?subject=AirspaceConverter)
