@@ -33,7 +33,7 @@ else
 	LIB = /usr/local/lib
 	LIBFILE = lib$(APPNAME).dylib
 	LFLAGS += -lboost_locale-mt
-	DYNLIBFLAGS = $(LFLAGS) -Wl
+	DYNLIBFLAGS = $(LFLAGS) -Wl,-install_name,$(LIBFILE)
 endif
 
 # Source path
