@@ -24,6 +24,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/tokenizer.hpp>
+#include <boost/dll/runtime_symbol_info.hpp>
 #include <cmath>
 
 const std::string KML::colors[][2] = {
@@ -84,7 +85,18 @@ const std::string KML::waypointIcons[] = {
 
 std::vector<RasterMap*> KML::terrainMaps;
 double KML::defaultTerrainAltitudeMt = 20;
-std::string KML::iconsPath = "/usr/share/airspaceconverter/icons/"; // Default installed Linux location
+std::string KML::iconsPath(DetectIconsPath());
+
+std::string KML::DetectIconsPath() {
+	std::string path = boost::filesystem::path(boost::filesystem::path(boost::dll::program_location()).parent_path() / boost::filesystem::path("icons/")).string();
+	if (boost::filesystem::exists(path)) return path;
+
+	path = "/usr/share/airspaceconverter/icons/"; // Default installed Linux location
+	if (boost::filesystem::exists(path)) return path;
+
+	path = "./icons/";
+	return path;
+}
 
 KML::KML(std::multimap<int, Airspace>& airspacesMap, std::multimap<int, Waypoint*>& waypointsMap):
 		airspaces(airspacesMap),
@@ -691,17 +703,9 @@ bool KML::Write(const std::string& filename) {
 
 	// If it is necessary to add also the icons
 	if (!waypoints.empty()) {
-		std::string path(iconsPath);
-
-		// Check if the configured icons path exits, user may be wrong...
-		if (!boost::filesystem::exists(path)) {
-			// Don't be so inflexible... Please try again in the current directory...
-			path = std::string("./icons/");
-			if (!boost::filesystem::exists(path)) path = std::string("./");
-		}
 		for (int i = Waypoint::unknown; i < Waypoint::numOfWaypointTypes; i++) {
 			// Get the icon PNG filename and prepare the path in the ZIP and the path from current dir
-			const std::string iconPath = path + waypointIcons[i];
+			const std::string iconPath = iconsPath + waypointIcons[i];
 
 			// Check if we can get that PNG file
 			if (!boost::filesystem::exists(iconPath)) {

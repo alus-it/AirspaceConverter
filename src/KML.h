@@ -54,6 +54,7 @@ private:
 	bool ProcessPlacemark(const boost::property_tree::ptree& placemark);
 	static bool ProcessPolygon(const boost::property_tree::ptree& polygon, Airspace& airspace, bool& isExtruded, Altitude& avgAltitude);
 	static bool ProcessCoordinates(const boost::property_tree::ptree& coordinates, Airspace& airspace, double& avgAltitude);
+	static std::string DetectIconsPath();
 
 	static const std::string colors[][2];
 	static const std::string airfieldColors[][2];
