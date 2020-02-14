@@ -137,7 +137,7 @@ public:
 	inline bool IsAGLtopped() const { return top.IsAGL(); }
 	inline bool IsAMSLtopped() const { return top.IsAMSL(); }
 	inline bool IsVisibleByDefault() const { return CategoryVisibleByDefault(type); }
-	inline unsigned int GetNumberOfRadioFrequencies() const { return radioFrequencies.size(); }
+	inline unsigned int GetNumberOfRadioFrequencies() const { return (unsigned int)radioFrequencies.size(); }
 	inline const std::pair<int, std::string>& GetRadioFrequencyAt(unsigned int pos) const { return radioFrequencies.at(pos); }
 	std::string GetTransponderCode() const;
 	inline bool HasTransponderCode() const { return transponderCode >= 0; }

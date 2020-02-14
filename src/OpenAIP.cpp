@@ -295,7 +295,7 @@ bool OpenAIP::ReadWaypoints(const std::string& fileName) {
 }
 
 bool OpenAIP::ParseAirports(const ptree& airportsNode) {
-	int numOfAirports = airportsNode.count("AIRPORT"); //count number of airports in the file
+	size_t numOfAirports = airportsNode.count("AIRPORT"); //count number of airports in the file
 	if (numOfAirports < 1) {
 		AirspaceConverter::LogError("Expected to find at least one AIRPORT tag inside WAYPOINTS tag.");
 		return false;
@@ -449,7 +449,7 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 }
 
 bool OpenAIP::ParseNavAids(const ptree& navAidsNode) {
-	int numOfNavAids = navAidsNode.count("NAVAID"); //count number of navaids in the file
+	size_t numOfNavAids = navAidsNode.count("NAVAID"); //count number of navaids in the file
 	if (numOfNavAids < 1) {
 		AirspaceConverter::LogError("Expected to find at least one NAVAID tag inside NAVAIDS tag.");
 		return false;
