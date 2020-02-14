@@ -85,17 +85,17 @@ const std::string KML::waypointIcons[] = {
 
 std::vector<RasterMap*> KML::terrainMaps;
 double KML::defaultTerrainAltitudeMt = 20;
-std::string KML::iconsPath(DetectIconsPath());
+const std::string KML::iconsPath(DetectIconsPath());
 
-std::string KML::DetectIconsPath() {
-	std::string path = boost::filesystem::path(boost::filesystem::path(boost::dll::program_location()).parent_path() / boost::filesystem::path("icons/")).string();
+const std::string KML::DetectIconsPath() {
+	std::string 
+#ifdef __linux__
+	path("/usr/share/airspaceconverter/icons/"); // Default installed Linux location
 	if (boost::filesystem::exists(path)) return path;
-
-	path = "/usr/share/airspaceconverter/icons/"; // Default installed Linux location
+#endif
+	path = boost::filesystem::path(boost::filesystem::path(boost::dll::program_location()).parent_path() / boost::filesystem::path("icons/")).string();
 	if (boost::filesystem::exists(path)) return path;
-
-	path = "./icons/";
-	return path;
+	return "./icons/";
 }
 
 KML::KML(std::multimap<int, Airspace>& airspacesMap, std::multimap<int, Waypoint*>& waypointsMap):

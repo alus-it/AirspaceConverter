@@ -229,7 +229,6 @@ BOOL CAirspaceConverterDlg::OnInitDialog() {
 	
 	// Configure the paths to icons and to cGPSmapper
 	assert(!basePath.empty());
-	converter->SetIconsPath(std::string(basePath + "\\icons\\"));
 	converter->Set_cGPSmapperCommand('"' + basePath + "\\cGPSmapper\\cgpsmapper.exe\"");
 
 	// Buld the "processor"

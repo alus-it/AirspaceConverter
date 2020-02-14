@@ -52,7 +52,6 @@ public:
 	inline static std::string& Get_cGPSmapperCommand() { return cGPSmapperCommand; }
 	static double FrequencyMHz(const int& frequencyHz) { return 0.000001 * frequencyHz; }
 	static double FrequencykHz(const int& frequencyHz) { return 0.001 * frequencyHz; }
-	static void SetIconsPath(const std::string& iconsPath);
 	static std::istream& SafeGetline(std::istream& is, std::string& line, bool& isCRLF);
 	static OutputType DetermineType(const std::string& filename);
 	static bool PutTypeExtension(const OutputType type, std::string& filename);

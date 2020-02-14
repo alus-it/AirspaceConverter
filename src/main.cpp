@@ -162,7 +162,6 @@ int main(int argc, char *argv[]) {
 	// If on Windows determine the proper paths
 #ifdef _WIN32
 	const std::string basePath(boost::filesystem::system_complete(boost::filesystem::path(argv[0])).parent_path().string());
-	ac.SetIconsPath(basePath + "\\icons\\");
 	ac.Set_cGPSmapperCommand('"' + basePath + "\\cGPSmapper\\cgpsmapper.exe\"");
 #endif
 

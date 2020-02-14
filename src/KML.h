@@ -32,7 +32,6 @@ public:
 	static void ClearTerrainMaps();
 	inline static void SetDefaultTerrainAltitude(const double& defaultAltMt) { defaultTerrainAltitudeMt = defaultAltMt; }
 	inline static double GetDefaultTerrainAltitude() { return defaultTerrainAltitudeMt; }
-	inline static void SetIconsPath(const std::string& path) { iconsPath = path; } // To set the directory containing the waypoints icons...
 	inline bool WereAllAGLaltitudesCovered() const { return allAGLaltitudesCovered; }
 	inline void ProcessLineStrings(bool LineStringAsAirspaces = true) { processLineString = LineStringAsAirspaces; }
 	bool ReadKMZ(const std::string& filename);
@@ -54,14 +53,14 @@ private:
 	bool ProcessPlacemark(const boost::property_tree::ptree& placemark);
 	static bool ProcessPolygon(const boost::property_tree::ptree& polygon, Airspace& airspace, bool& isExtruded, Altitude& avgAltitude);
 	static bool ProcessCoordinates(const boost::property_tree::ptree& coordinates, Airspace& airspace, double& avgAltitude);
-	static std::string DetectIconsPath();
+	static const std::string DetectIconsPath();
 
 	static const std::string colors[][2];
 	static const std::string airfieldColors[][2];
 	static const std::string waypointIcons[];
 	static std::vector<RasterMap*> terrainMaps;
 	static double defaultTerrainAltitudeMt;
-	static std::string iconsPath;
+	static const std::string iconsPath;
 	std::multimap<int, Airspace>& airspaces;
 	std::multimap<int, Waypoint*>& waypoints;
 	std::ofstream outputFile;
