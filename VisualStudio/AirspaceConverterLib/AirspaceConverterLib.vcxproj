@@ -22,7 +22,7 @@
     <ProjectGuid>{1412BB18-5649-411D-B0A2-0A32E6402939}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>AirspaceConverterLib</RootNamespace>
-    <WindowsTargetPlatformVersion>7.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -41,13 +41,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -71,8 +71,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\local\boost_1_68_0;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>C:\local\boost_1_68_0\lib32-msvc-14.1;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <IncludePath>C:\local\boost_1_72_0;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSdk_71A_IncludePath)</IncludePath>
+    <LibraryPath>C:\local\boost_1_72_0\lib32-msvc-14.1;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
     <IntDir>$(Configuration)\$(Platform)\</IntDir>
     <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
     <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
@@ -80,8 +80,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\local\boost_1_68_0;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>C:\local\boost_1_68_0\lib64-msvc-14.1;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>C:\local\boost_1_72_0;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>C:\local\boost_1_72_0\lib64-msvc-14.2;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
     <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(Configuration)\$(Platform)\</IntDir>
     <TargetExt>.lib</TargetExt>
@@ -89,8 +89,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\local\boost_1_68_0;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>C:\local\boost_1_68_0\lib32-msvc-14.1;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <IncludePath>C:\local\boost_1_72_0;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSdk_71A_IncludePath)</IncludePath>
+    <LibraryPath>C:\local\boost_1_72_0\lib32-msvc-14.1;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
     <IntDir>$(Configuration)\$(Platform)\</IntDir>
     <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
     <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
@@ -98,8 +98,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\local\boost_1_68_0;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>C:\local\boost_1_68_0\lib64-msvc-14.1;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>C:\local\boost_1_72_0;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>C:\local\boost_1_72_0\lib64-msvc-14.2;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
     <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(Configuration)\$(Platform)\</IntDir>
     <TargetExt>.lib</TargetExt>
@@ -210,6 +210,8 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\libzip.redist.1.1.2.7\build\native\libzip.redist.targets" Condition="Exists('..\packages\libzip.redist.1.1.2.7\build\native\libzip.redist.targets')" />
     <Import Project="..\packages\libzip.1.1.2.7\build\native\libzip.targets" Condition="Exists('..\packages\libzip.1.1.2.7\build\native\libzip.targets')" />
+    <Import Project="..\packages\zlib_native.redist.1.2.11\build\native\zlib_native.redist.targets" Condition="Exists('..\packages\zlib_native.redist.1.2.11\build\native\zlib_native.redist.targets')" />
+    <Import Project="..\packages\zlib_native.1.2.11\build\native\zlib_native.targets" Condition="Exists('..\packages\zlib_native.1.2.11\build\native\zlib_native.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -217,5 +219,7 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\libzip.redist.1.1.2.7\build\native\libzip.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\libzip.redist.1.1.2.7\build\native\libzip.redist.targets'))" />
     <Error Condition="!Exists('..\packages\libzip.1.1.2.7\build\native\libzip.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\libzip.1.1.2.7\build\native\libzip.targets'))" />
+    <Error Condition="!Exists('..\packages\zlib_native.redist.1.2.11\build\native\zlib_native.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\zlib_native.redist.1.2.11\build\native\zlib_native.redist.targets'))" />
+    <Error Condition="!Exists('..\packages\zlib_native.1.2.11\build\native\zlib_native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\zlib_native.1.2.11\build\native\zlib_native.targets'))" />
   </Target>
 </Project>
