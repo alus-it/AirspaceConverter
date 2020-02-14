@@ -48,7 +48,6 @@ MainWindow::MainWindow(QWidget *parent) :
     // On Windows set the path and command of cGPSmapper that will be invoked by libAirspaceConverter
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
     converter->Set_cGPSmapperCommand(".\\cGPSmapper\\cgpsmapper.exe");
-    converter->SetIconsPath(".\\icons\\");
 #endif
 
     // Set up UI and signals
