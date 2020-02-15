@@ -28,6 +28,7 @@ fi
 mkdir -p buildQt
 cd buildQt
 qmake ../AirspaceConverterQt/AirspaceConverterQt.pro -r -spec linux-g++-64
+# On macOS: qmake ../AirspaceConverterQt/AirspaceConverterQt.pro -r -spec macx-clang CONFIG+=x86_64 CONFIG+=qtquickcompiler
 make -j${PROCESSORS} all
 
 if [ "$?" -ne 0 ]; then
@@ -37,10 +38,10 @@ if [ "$?" -ne 0 ]; then
 fi
 
 strip -S --strip-unneeded ./airspaceconverter-gui
+# On macOS: strip -S ./airspaceconverter-gui.app/Contents/MacOS/airspaceconverter-gui
 
 cd ..
 
 echo Done.
 
 exit 0
-

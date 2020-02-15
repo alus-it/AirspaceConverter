@@ -10,6 +10,10 @@
 # This script is part of AirspaceConverter project
 #============================================================================
 
+# First clean older build
+rm -rf AirspaceConverter.app
+rm -rf AirspaceConverter.dmg
+
 # Build directory structure
 mkdir AirspaceConverter.app
 cd AirspaceConverter.app
@@ -57,6 +61,9 @@ install_name_tool -change /usr/local/opt/boost/lib/libboost_locale-mt.dylib @exe
 install_name_tool -change @rpath/QtWidgets.framework/Versions/5/QtWidgets @executable_path/QtWidgets ./airspaceconverter-gui
 install_name_tool -change @rpath/QtGui.framework/Versions/5/QtGui @executable_path/QtGui ./airspaceconverter-gui
 install_name_tool -change @rpath/QtCore.framework/Versions/5/QtCore @executable_path/QtCore ./airspaceconverter-gui
+
+# Strip the executable
+strip -S ./airspaceconverter-gui
 
 # Tell libairspaceconverter.dylib to use the libraries in the same folder
 install_name_tool -change /usr/local/opt/libzip/lib/libzip.5.dylib @loader_path/libzip.5.dylib ./libairspaceconverter.dylib
