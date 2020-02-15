@@ -184,7 +184,11 @@ BOOL CAirspaceConverterDlg::OnInitDialog() {
 	OutputTypeCombo.InsertString(-1, _T("OpenAir (airspace only)"));
 	OutputTypeCombo.InsertString(-1, _T("CUP SeeYou (waypoints only)"));
 	OutputTypeCombo.InsertString(-1, _T("Polish format for cGPSmapper"));
-	OutputTypeCombo.InsertString(-1, _T("IMG file for Garmin devices"));
+
+	// Add option to conver to Garmin IMG only if cGPSmapper was found 
+	if (AirspaceConverter::Is_cGPSmapperAvailable()) OutputTypeCombo.InsertString(-1, _T("IMG file for Garmin devices"));
+	else LogWarning("cGPSmapper not found so the conversion to Garmin IMG is not possible.");
+
 	OutputTypeCombo.SetCurSel(AirspaceConverter::OutputType::KMZ_Format);
 
 	// Check if is running on Windows XP (v 5.2) or older. Only on the 32 bit version, on 64 bit we assume that we are using something newer than WinXP

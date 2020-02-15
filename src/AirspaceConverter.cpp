@@ -94,7 +94,7 @@ const std::string AirspaceConverter::Detect_cGPSmapperPath() {
 	const std::string cGPSmapperCmd(basePath + "/cgpsmapper");
 	if (boost::filesystem::exists(cGPSmapperCmd)) return cGPSmapperCmd;
 #elif _WIN32 // If on Windows determine the proper paths
-	const std::string cGPSmapperCmd('"' + basePath + "\\cGPSmapper\\cgpsmapper.exe\"");
+	const std::string cGPSmapperCmd(basePath + "\\cGPSmapper\\cgpsmapper.exe");
 	if (boost::filesystem::exists(cGPSmapperCmd)) return cGPSmapperCmd;
 #elif __APPLE__
 	// Unfortunately there in no version of cGPSmapper available for macOS
