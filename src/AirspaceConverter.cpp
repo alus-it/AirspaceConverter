@@ -91,8 +91,8 @@ void AirspaceConverter::DefaultLogError(const std::string& text) {
 const std::string AirspaceConverter::Detect_cGPSmapperPath() {
 #ifdef __linux__ // If on linux...
 	if (boost::filesystem::exists("/usr/bin/cgpsmapper")) return "cgpsmapper";
-	const std::string cGPSmapperCmd('"' + basePath + "/cgpsmapper\"");
-	if (boost::filesystem::exists(cGPSmapperCommand)) return cGPSmapperCmd;
+	const std::string cGPSmapperCmd(basePath + "/cgpsmapper");
+	if (boost::filesystem::exists(cGPSmapperCmd)) return cGPSmapperCmd;
 #elif _WIN32 // If on Windows determine the proper paths
 	const std::string cGPSmapperCmd('"' + basePath + "\\cGPSmapper\\cgpsmapper.exe\"");
 	if (boost::filesystem::exists(cGPSmapperCmd)) return cGPSmapperCmd;
@@ -106,7 +106,7 @@ bool AirspaceConverter::Default_cGPSmapper(const std::string& polishFile, const 
 	LogMessage("Invoking cGPSmapper to make: " + outputFile);
 
 	//TODO: add arguments to create files also for other software like Garmin BaseCamp
-	const std::string cmd(boost::str(boost::format("%1s %2s -o %3s") %cGPSmapperCommand %polishFile %outputFile));
+	const std::string cmd(boost::str(boost::format("%1s \"%2s\" -o \"%3s\"") %cGPSmapperCommand %polishFile %outputFile));
 	LogMessage("Executing: " + cmd);
 	if(system(cmd.c_str()) == EXIT_SUCCESS) {
 		std::remove(polishFile.c_str()); // Delete polish file
