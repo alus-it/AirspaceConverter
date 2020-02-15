@@ -219,17 +219,17 @@ BOOL CAirspaceConverterDlg::OnInitDialog() {
 	}
 
 	// Find the path where the current executable is running
-	TCHAR szPath[_MAX_PATH];
-	VERIFY(::GetModuleFileName(AfxGetApp()->m_hInstance, szPath, _MAX_PATH));
-	CString csPath(szPath);
-	const int nIndex(csPath.ReverseFind(_T('\\')));
-	if (nIndex > 0) csPath = csPath.Left(nIndex);
-	else csPath.Empty();
-	const std::string basePath = CT2CA(csPath);
+	//TCHAR szPath[_MAX_PATH];
+	//VERIFY(::GetModuleFileName(AfxGetApp()->m_hInstance, szPath, _MAX_PATH));
+	//CString csPath(szPath);
+	//const int nIndex(csPath.ReverseFind(_T('\\')));
+	//if (nIndex > 0) csPath = csPath.Left(nIndex);
+	//else csPath.Empty();
+	//const std::string basePath = CT2CA(csPath);
 	
-	// Configure the paths to icons and to cGPSmapper
-	assert(!basePath.empty());
-	converter->Set_cGPSmapperCommand('"' + basePath + "\\cGPSmapper\\cgpsmapper.exe\"");
+	// Configure path to cGPSmapper (now it is done in the AirspaceConverter library)
+	//assert(!basePath.empty());
+	//converter->Set_cGPSmapperCommand('"' + basePath + "\\cGPSmapper\\cgpsmapper.exe\"");
 
 	// Buld the "processor"
 	processor = new Processor(this->GetSafeHwnd(), converter);	

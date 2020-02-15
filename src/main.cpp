@@ -15,9 +15,6 @@
 #include <cstring>
 #include <chrono>
 #include <boost/tokenizer.hpp>
-#ifdef _WIN32
-#include <boost/filesystem/operations.hpp>
-#endif
 
 void printHelp() {
 	std::cout << "Example usage: airspaceconverter -q 1013 -a 35 -i inputFileOpenAir.txt -i openAIP_asp.aip -w waypoints.cup -w openAIP_wpt.aip -m terrainMap.dem -o outputFile.kmz" << std::endl << std::endl;
@@ -162,12 +159,6 @@ int main(int argc, char *argv[]) {
 		std::cerr << "ERROR: No input files (airspace or waypoint) specified." << std::endl << std::endl;
 		return EXIT_FAILURE;
 	}
-
-	// If on Windows determine the proper paths
-#ifdef _WIN32
-	const std::string basePath(boost::filesystem::system_complete(boost::filesystem::path(argv[0])).parent_path().string());
-	ac.Set_cGPSmapperCommand('"' + basePath + "\\cGPSmapper\\cgpsmapper.exe\"");
-#endif
 
 	// Start the timer
 	const auto startTime = std::chrono::high_resolution_clock::now();

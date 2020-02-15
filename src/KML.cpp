@@ -24,7 +24,6 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/tokenizer.hpp>
-#include <boost/dll/runtime_symbol_info.hpp>
 #include <cmath>
 
 const std::string KML::colors[][2] = {
@@ -93,7 +92,7 @@ const std::string KML::DetectIconsPath() {
 	path("/usr/share/airspaceconverter/icons/"); // Default installed Linux location
 	if (boost::filesystem::exists(path)) return path;
 #endif
-	path = boost::filesystem::path(boost::filesystem::path(boost::dll::program_location()).parent_path() / boost::filesystem::path("icons/")).string();
+	path = boost::filesystem::path(boost::filesystem::path(AirspaceConverter::basePath) / boost::filesystem::path("icons/")).string();
 	if (boost::filesystem::exists(path)) return path;
 	return "./icons/";
 }

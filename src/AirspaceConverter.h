@@ -48,8 +48,7 @@ public:
 	inline static void SetLogWarningFunction(std::function<void(const std::string&)> func) { LogWarning = func; }
 	inline static void SetLogErrorFunction(std::function<void(const std::string&)> func) { LogError = func; }
 	inline static void Set_cGPSmapperFunction(std::function<bool(const std::string&, const std::string&)> func) { cGPSmapper = func; }
-	inline static void Set_cGPSmapperCommand(const std::string& cGPSmapperCmd) { cGPSmapperCommand = cGPSmapperCmd; }
-	inline static std::string& Get_cGPSmapperCommand() { return cGPSmapperCommand; }
+	inline static bool Is_cGPSmapperAvailable() { return !cGPSmapperCommand.empty(); }
 	static double FrequencyMHz(const int& frequencyHz) { return 0.000001 * frequencyHz; }
 	static double FrequencykHz(const int& frequencyHz) { return 0.001 * frequencyHz; }
 	static std::istream& SafeGetline(std::istream& is, std::string& line, bool& isCRLF);
@@ -92,14 +91,16 @@ public:
 	inline void ProcessTracksAsAirspaces(const bool treatTracksAsAirspaces = true) { processLineStrings = treatTracksAsAirspaces; }
 
 	static const std::vector<std::string> disclaimer;
+	static const std::string basePath;
+	static const std::string cGPSmapperCommand;
 
 private:
 	static void DefaultLogMessage(const std::string& text);
 	static void DefaultLogWarning(const std::string& text);
 	static void DefaultLogError(const std::string& text);
 	static bool Default_cGPSmapper(const std::string& polishFile, const std::string& outputFile);
+	static const std::string Detect_cGPSmapperPath();
 
-	static std::string cGPSmapperCommand;
 	std::multimap<int, Airspace> airspaces;
 	std::multimap<int, Waypoint*> waypoints;
 	std::string outputFile;

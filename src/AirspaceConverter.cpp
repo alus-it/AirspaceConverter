@@ -29,12 +29,13 @@
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
+#include <boost/dll/runtime_symbol_info.hpp>
 
+const std::string AirspaceConverter::basePath = boost::filesystem::path(boost::dll::program_location().parent_path()).string();
 std::function<void(const std::string&)> AirspaceConverter::LogMessage = DefaultLogMessage;
 std::function<void(const std::string&)> AirspaceConverter::LogWarning = DefaultLogWarning;
 std::function<void(const std::string&)> AirspaceConverter::LogError = DefaultLogError;
 std::function<bool(const std::string&, const std::string&)> AirspaceConverter::cGPSmapper = Default_cGPSmapper;
-std::string AirspaceConverter::cGPSmapperCommand = "cgpsmapper";
 
 const std::vector<std::string> AirspaceConverter::disclaimer = {
 	"This file has been produced with: \"AirspaceConverter\" Version: " VERSION,
@@ -60,6 +61,9 @@ const std::vector<std::string> AirspaceConverter::disclaimer = {
 	"Error reports, complaints and suggestions please email to: info@alus.it",
 };
 
+const std::string AirspaceConverter::cGPSmapperCommand = Detect_cGPSmapperPath();
+
+
 AirspaceConverter::AirspaceConverter() :
 	conversionDone(false),
 	doNotCalculateArcs(false),
@@ -82,6 +86,20 @@ void AirspaceConverter::DefaultLogWarning(const std::string& text) {
 
 void AirspaceConverter::DefaultLogError(const std::string& text) {
 	std::cerr << "ERROR: " << text << std::endl;
+}
+
+const std::string AirspaceConverter::Detect_cGPSmapperPath() {
+#ifdef __linux__ // If on linux...
+	if (boost::filesystem::exists("/usr/bin/cgpsmapper")) return "cgpsmapper";
+	const std::string cGPSmapperCmd('"' + basePath + "/cgpsmapper\"");
+	if (boost::filesystem::exists(cGPSmapperCommand)) return cGPSmapperCmd;
+#elif _WIN32 // If on Windows determine the proper paths
+	const std::string cGPSmapperCmd('"' + basePath + "\\cGPSmapper\\cgpsmapper.exe\"");
+	if (boost::filesystem::exists(cGPSmapperCmd)) return cGPSmapperCmd;
+#elif __APPLE__
+	// Unfortunately there in no version of cGPSmapper available for macOS
+#endif
+	return "";
 }
 
 bool AirspaceConverter::Default_cGPSmapper(const std::string& polishFile, const std::string& outputFile) {
