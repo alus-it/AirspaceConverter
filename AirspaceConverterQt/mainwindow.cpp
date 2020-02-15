@@ -27,6 +27,7 @@
 #include <QDesktopServices>
 #include <QFuture>
 #include <QFutureWatcher>
+#include <QtWidgets>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -57,6 +58,13 @@ MainWindow::MainWindow(QWidget *parent) :
     AirspaceConverter::SetLogMessageFunction(std::function<void(const std::string&)>(std::bind(&MainWindow::postMessage, this, std::placeholders::_1)));
     AirspaceConverter::SetLogWarningFunction(std::function<void(const std::string&)>(std::bind(&MainWindow::postWarning, this, std::placeholders::_1)));
     AirspaceConverter::SetLogErrorFunction(std::function<void(const std::string&)>(std::bind(&MainWindow::postError, this, std::placeholders::_1)));
+
+    // Enable the option to make a Garmin IMG file only if cGPSmapper is available
+    QStandardItemModel *model = qobject_cast<QStandardItemModel *>(ui->outputFormatComboBox->model());
+    assert(model != nullptr);
+    QStandardItem* item = model->item((int)AirspaceConverter::Garmin_Format);
+    assert(item != nullptr);
+    item->setFlags(AirspaceConverter::Is_cGPSmapperAvailable() ? item->flags() | Qt::ItemIsEnabled : item->flags() & ~Qt::ItemIsEnabled);
 }
 
 MainWindow::~MainWindow() {
