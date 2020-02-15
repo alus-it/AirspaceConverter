@@ -128,7 +128,7 @@ To uninstall (from the root of the project): `./uninstall.sh`
 Compiling AirspaceConverter on macOS
 ------------------------------------
 As on Linux first it is necessary to install _Qt_ and the other dependencies:  
-`brew install zlib libzip boost`  
+`brew install libzip boost`  
 Then, to compile, from the root of this project: `make all`
 
 Compiling AirspaceConverter on Windows
