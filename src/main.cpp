@@ -189,7 +189,8 @@ int main(int argc, char *argv[]) {
 
 	// Stop the timer
 	const double elapsedTimeSec = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - startTime).count() / 1e6;
-	std::cout<<"Total execution time: " << elapsedTimeSec << " sec." << std::endl << std::endl;
+	std::cout << "Total execution time: " << elapsedTimeSec << " sec." << std::endl << std::endl;
 
+	// The End
 	return result ? EXIT_SUCCESS : EXIT_FAILURE;
 }

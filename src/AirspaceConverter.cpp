@@ -89,17 +89,17 @@ void AirspaceConverter::DefaultLogError(const std::string& text) {
 }
 
 const std::string AirspaceConverter::Detect_cGPSmapperPath() {
-#ifdef __linux__ // If on linux...
-	if (boost::filesystem::exists("/usr/bin/cgpsmapper")) return "cgpsmapper";
-	const std::string cGPSmapperCmd(basePath + "/cgpsmapper");
+#ifdef __linux__ // If on Linux...
+	if (boost::filesystem::exists("/usr/bin/cgpsmapper")) return "cgpsmapper"; // Check the default installation path then use the "cgpsmapper" command
+	const std::string cGPSmapperCmd(basePath + "/cgpsmapper"); // Otherwise try to look in the same folder as the executable
 	if (boost::filesystem::exists(cGPSmapperCmd)) return cGPSmapperCmd;
-#elif _WIN32 // If on Windows determine the proper paths
-	const std::string cGPSmapperCmd(basePath + "\\cGPSmapper\\cgpsmapper.exe");
-	if (boost::filesystem::exists(cGPSmapperCmd)) return cGPSmapperCmd;
-#elif __APPLE__
+#elif _WIN32 // or if on Windows...
+	const std::string cGPSmapperCmd(basePath + "\\cGPSmapper\\cgpsmapper.exe"); // Check the default installation path ... 
+	if (boost::filesystem::exists(cGPSmapperCmd)) return cGPSmapperCmd; // then use it as command
+#elif __APPLE__ // or if on macOS
 	// Unfortunately there in no version of cGPSmapper available for macOS
 #endif
-	return "";
+	return ""; // cGPSmapper not found: return empty string 
 }
 
 bool AirspaceConverter::Default_cGPSmapper(const std::string& polishFile, const std::string& outputFile) {
