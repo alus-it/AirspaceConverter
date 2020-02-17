@@ -15,9 +15,11 @@
 
 #if QT_VERSION >= 0x050000
     #include <QtConcurrent/QtConcurrent>
+    #include <QtWidgets>
 #else
     #include <QtConcurrentRun> // Use this instead of the previous to compile with older Qt versions
     #include <QUrl>
+    #include <QtGui>
 #endif
 
 #include <QFileDialog>
@@ -27,7 +29,6 @@
 #include <QDesktopServices>
 #include <QFuture>
 #include <QFutureWatcher>
-#include <QtWidgets>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/operations.hpp>

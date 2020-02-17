@@ -59,6 +59,7 @@
 */*/Release
 build-*
 /buildQt
+/AirspaceConverterQt-build*
 
 # Ignore Eclipse project files
 .project

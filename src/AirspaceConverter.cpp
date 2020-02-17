@@ -29,9 +29,17 @@
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
+
+#if BOOST_VERSION >= 106100
 #include <boost/dll/runtime_symbol_info.hpp>
 
-const std::string AirspaceConverter::basePath = boost::filesystem::path(boost::dll::program_location().parent_path()).string();
+const std::string AirspaceConverter::basePath(boost::filesystem::path(boost::dll::program_location().parent_path()).string());
+#else
+
+// This is for older Linux distributions where boost::dll is not available
+const std::string AirspaceConverter::basePath(boost::filesystem::exists("/usr/bin/airspaceconverter") ? "/usr/bin" : ".");
+#endif
+
 std::function<void(const std::string&)> AirspaceConverter::LogMessage = DefaultLogMessage;
 std::function<void(const std::string&)> AirspaceConverter::LogWarning = DefaultLogWarning;
 std::function<void(const std::string&)> AirspaceConverter::LogError = DefaultLogError;
