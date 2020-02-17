@@ -12,7 +12,6 @@
 
 # First clean older build
 rm -rf AirspaceConverter.app
-rm -rf AirspaceConverter.dmg
 
 # Build directory structure
 mkdir AirspaceConverter.app
@@ -32,14 +31,17 @@ cp ../../../AirspaceConverter.icns ./
 
 cd ../MacOS
 
-# Copy AirspaceConverter exectutable
-cp ../../../../build-AirspaceConverterQt-Desktop_Qt_5_12_5_clang_64bit-Release/airspaceconverter-gui.app/Contents/MacOS/airspaceconverter-gui ./
-
-# Copy AirspaceConverter library
+# Copy AirspaceConverter dynamic shared library
 cp ../../../../Release/libairspaceconverter.dylib ./
 
+# Copy AirspaceConverter CLI
+cp ../../../../Release/airspaceconverter ./
+
+# Copy AirspaceConverter Qt GUI exectutable
+cp ../../../../build-AirspaceConverterQt-Desktop_Qt_5_12_5_clang_64bit-Release/airspaceconverter-gui.app/Contents/MacOS/airspaceconverter-gui ./
+
 # To find out the required libraries:
-#$ otool -L airspaceconverter-gui
+#$ otool -L airspaceconverter
 
 # Copy all the other the required libaries into the bundle
 cp /usr/local/opt/libzip/lib/libzip.5.dylib ./
@@ -52,17 +54,24 @@ cp /Users/arealis/Qt/5.12.5/clang_64/lib/QtWidgets.framework/Versions/5/QtWidget
 cp /Users/arealis/Qt/5.12.5/clang_64/lib/QtGui.framework/Versions/5/QtGui ./
 cp /Users/arealis/Qt/5.12.5/clang_64/lib/QtCore.framework/Versions/5/QtCore ./
 
-# Tell the executable to use the libraries in the same folder
+# Tell the CLI executable to use the libraries in the same folder
+install_name_tool -change libairspaceconverter.dylib @executable_path/libairspaceconverter.dylib ./airspaceconverter
+install_name_tool -change /usr/local/opt/libzip/lib/libzip.5.dylib @executable_path/libzip.5.dylib ./airspaceconverter
+install_name_tool -change /usr/local/opt/boost/lib/libboost_system.dylib @executable_path/libboost_system.dylib ./airspaceconverter
+install_name_tool -change /usr/local/opt/boost/lib/libboost_filesystem.dylib @executable_path/libboost_filesystem.dylib ./airspaceconverter
+install_name_tool -change /usr/local/opt/boost/lib/libboost_locale-mt.dylib @executable_path/libboost_locale-mt.dylib ./airspaceconverter
+
+# Tell the GUI executable to use the libraries in the same folder
 install_name_tool -change libairspaceconverter.dylib @executable_path/libairspaceconverter.dylib ./airspaceconverter-gui
 install_name_tool -change /usr/local/opt/libzip/lib/libzip.5.dylib @executable_path/libzip.5.dylib ./airspaceconverter-gui
-install_name_tool -change /usr/local/opt/boost/lib/libboost_filesystem.dylib @executable_path/libboost_filesystem.dylib ./airspaceconverter-gui
 install_name_tool -change /usr/local/opt/boost/lib/libboost_system.dylib @executable_path/libboost_system.dylib ./airspaceconverter-gui
+install_name_tool -change /usr/local/opt/boost/lib/libboost_filesystem.dylib @executable_path/libboost_filesystem.dylib ./airspaceconverter-gui
 install_name_tool -change /usr/local/opt/boost/lib/libboost_locale-mt.dylib @executable_path/libboost_locale-mt.dylib ./airspaceconverter-gui
 install_name_tool -change @rpath/QtWidgets.framework/Versions/5/QtWidgets @executable_path/QtWidgets ./airspaceconverter-gui
 install_name_tool -change @rpath/QtGui.framework/Versions/5/QtGui @executable_path/QtGui ./airspaceconverter-gui
 install_name_tool -change @rpath/QtCore.framework/Versions/5/QtCore @executable_path/QtCore ./airspaceconverter-gui
 
-# Strip the executable
+# Strip the GUI executable
 strip -S ./airspaceconverter-gui
 
 # Tell libairspaceconverter.dylib to use the libraries in the same folder
@@ -77,16 +86,7 @@ install_name_tool -change @rpath/QtCore.framework/Versions/5/QtCore @loader_path
 install_name_tool -change @rpath/QtGui.framework/Versions/5/QtGui @loader_path/QtGui ./QtWidgets
 
 # Copy KML icons
-cp -r ../../../../icons ./
+cp -r ../../../../icons ./../Resources
 
 # Get out
 cd ../../..
-
-# Create distribution DMG disk image
-mkdir DiskImage
-mv ./AirspaceConverter.app ./DiskImage/
-hdiutil create ./DiskImage.dmg -ov -volname "AirspaceConverter" -fs HFS+ -srcfolder "./DiskImage/"
-hdiutil convert ./DiskImage.dmg -format UDZO -o AirspaceConverter.dmg
-rm DiskImage.dmg
-mv ./DiskImage/AirspaceConverter.app ./
-rm -r DiskImage

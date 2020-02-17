@@ -88,7 +88,10 @@ const std::string KML::iconsPath(DetectIconsPath());
 
 const std::string KML::DetectIconsPath() {
 	std::string 
-#ifdef __linux__
+#ifdef __APPLE__
+	path(boost::filesystem::path(boost::filesystem::path(AirspaceConverter::basePath) / boost::filesystem::path("../Resources/icons/")).string());
+	if (boost::filesystem::exists(path)) return path;
+#elif __linux__
 	path("/usr/share/airspaceconverter/icons/"); // Default installed Linux location
 	if (boost::filesystem::exists(path)) return path;
 #endif
