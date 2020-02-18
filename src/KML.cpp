@@ -285,7 +285,7 @@ void KML::OpenPlacemark(const Airspace& airspace) {
 		<< "<SimpleData name=\"Top\">" << airspace.GetTopAltitude().ToString() << "</SimpleData>\n"
 		<< "<SimpleData name=\"Base\">" << airspace.GetBaseAltitude().ToString() << "</SimpleData>\n";
 	outputFile << std::fixed << std::setprecision(3);
-	for (unsigned int i=0; i<airspace.GetNumberOfRadioFrequencies(); i++) {
+	for (size_t i=0; i<airspace.GetNumberOfRadioFrequencies(); i++) {
 		const std::pair<int, std::string>& f = airspace.GetRadioFrequencyAt(i);
 		outputFile << "<SimpleData name=\"Radio\">";
 		if (!f.second.empty()) outputFile << f.second << ": ";
@@ -364,7 +364,7 @@ void KML::WriteBaseOrTop(const Airspace& airspace, const std::vector<double>& al
 	OpenPolygon(extrudeToGround, true);
 	assert(airspace.GetNumberOfPoints() == altitudesAmsl.size());
 	outputFile << std::setprecision(6);
-	for (unsigned int i = 0; i < altitudesAmsl.size(); i++) {
+	for (size_t i = 0; i < altitudesAmsl.size(); i++) {
 		const Geometry::LatLon p = airspace.GetPointAt(i);
 		outputFile << p.Lon() << "," << p.Lat() << "," << altitudesAmsl.at(i) << "\n";
 	}
@@ -378,7 +378,7 @@ void KML::WriteSideWalls(const Airspace& airspace) {
 	double lon1, lat1, lon2, lat2;
 
 	// Build walls from first, point to point, until the last one
-	for (unsigned int i = 0; i < airspace.GetNumberOfPoints() - 1; i++) {
+	for (size_t i = 0; i < airspace.GetNumberOfPoints() - 1; i++) {
 		OpenPolygon(false, airspace.GetBaseAltitude().IsAMSL());
 		airspace.GetPointAt(i).GetLatLon(lat1, lon1);
 		airspace.GetPointAt(i + 1).GetLatLon(lat2, lon2);
@@ -398,7 +398,7 @@ void KML::WriteSideWalls(const Airspace& airspace, const std::vector<double>& al
 	double top1, base1, top2, base2, lon1, lat1, lon2, lat2;
 
 	// Build walls from first, point to point, until the last one
-	for (unsigned int i = 0; i < airspace.GetNumberOfPoints() - 1; i++) {
+	for (size_t i = 0; i < airspace.GetNumberOfPoints() - 1; i++) {
 		OpenPolygon(false, true);
 		top1 = isBase ? airspace.GetTopAltitude().GetAltMt() : altitudesAmsl.at(i);
 		base1 = isBase ? altitudesAmsl.at(i) : airspace.GetBaseAltitude().GetAltMt();
@@ -986,7 +986,7 @@ bool KML::ProcessCoordinates(const boost::property_tree::ptree& parent, Airspace
 						}
 						else alt = value;
 					}
-					if (airsp.AddSinglePointOnly(lat, lon)) {
+					if (airsp.AddPointLatLonOnly(lat, lon)) {
 						numOfPoints++;
 						avgAltitude += value;
 					}

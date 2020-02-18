@@ -141,7 +141,7 @@ bool Polish::Write(const std::string& filename, const std::multimap<int, Airspac
 		// Insert all the points
 		file << "Data0=";
 		double lat,lon;
-		for (unsigned int i=0; i<a.GetNumberOfPoints()-1; i++) {
+		for (size_t i=0; i<a.GetNumberOfPoints()-1; i++) {
 			a.GetPointAt(i).GetLatLon(lat,lon);
 			file << "(" << lat << "," << lon << "),";
 		}

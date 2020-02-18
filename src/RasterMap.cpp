@@ -150,7 +150,7 @@ bool RasterMap::Open(const std::string& filename) {
 		return false;
 	}
 
-	unsigned int nValues = TerrainInfo.Rows * TerrainInfo.Columns;
+	size_t nValues = TerrainInfo.Rows * TerrainInfo.Columns;
 	size_t size = nValues * sizeof(short);
 
 	// Allocate the terrain map 
@@ -170,7 +170,7 @@ bool RasterMap::Open(const std::string& filename) {
 		return false;
 	}
 
-	for (unsigned int i = 0; i<nValues; i++) max_field_value = std::max(TerrainMem[i], max_field_value);
+	for (size_t i = 0; i<nValues; i++) max_field_value = std::max(TerrainMem[i], max_field_value);
 
 	terrain_valid = true;
 	SetFieldRounding(0, 0);

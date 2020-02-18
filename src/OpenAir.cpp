@@ -537,7 +537,7 @@ bool OpenAir::Write(const std::string& fileName) {
 		// Write frequencies
 		if (a.GetNumberOfRadioFrequencies() > 0) {
 			file << std::fixed << std::setprecision(3);
-			for (unsigned int i=0; i<a.GetNumberOfRadioFrequencies(); i++) {
+			for (size_t i=0; i<a.GetNumberOfRadioFrequencies(); i++) {
 				const std::pair<int, std::string>& f = a.GetRadioFrequencyAt(i);
 				file << "AF " << AirspaceConverter::FrequencyMHz(f.first);
 				if (!f.second.empty()) file << ' ' << boost::locale::conv::between(f.second,"ISO8859-1","utf-8");
@@ -556,7 +556,7 @@ bool OpenAir::Write(const std::string& fileName) {
 		if (calculateArcs) {
 
 			// Get number of geometries
-			unsigned int numOfGeometries = a.GetNumberOfGeometries();
+			size_t numOfGeometries = a.GetNumberOfGeometries();
 
 			// If no geometries are defined we have to calculate them
 			if (numOfGeometries == 0) {
@@ -566,11 +566,11 @@ bool OpenAir::Write(const std::string& fileName) {
 			assert(numOfGeometries > 0);
 
 			// Write each geometry
-			for (unsigned int i = 0; i < numOfGeometries; i++) a.GetGeometryAt(i)->WriteOpenAirGeometry(*this);
+			for (size_t i = 0; i < numOfGeometries; i++) a.GetGeometryAt(i)->WriteOpenAirGeometry(*this);
 		}
 		
 		// Otherwise write every single point (except the last one which is the same)
-		else for (unsigned int i = 0; i < a.GetNumberOfPoints() - 1; i++) WritePoint(a.GetPointAt(i));
+		else for (size_t i = 0; i < a.GetNumberOfPoints() - 1; i++) WritePoint(a.GetPointAt(i));
 
 		// Add an empty line at the end of the airspace
 		file << "\r\n";
