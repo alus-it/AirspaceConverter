@@ -11,6 +11,12 @@
 # This script is part of AirspaceConverter project
 #============================================================================
 
+# Make sure that we are on Linux
+if [[ "$(uname)" == "Darwin" || "$(expr substr $(uname -s) 1 5)" != "Linux" ]]; then
+	echo "ERROR: this script is only for Linux ..."
+	exit 1
+fi
+
 # Determine if we want to compile or just copy binaries
 printf "Compile [C] on this machine or only build the DEB package [D] from existing binaries [C/D]? "
 read -r ACTION

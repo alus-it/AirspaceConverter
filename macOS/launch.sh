@@ -16,9 +16,6 @@ if [ "$(uname)" != "Darwin" ]; then
 	exit 1
 fi
 
-# First clean older files
-rm -rf AirspaceConverter*.zip
-
 # Build macOS application bundle if not yet done
 if [[ ! -d ./AirspaceConverter.app ]]
 then
@@ -26,24 +23,6 @@ then
 	./makeApp.sh
 fi
 
-# Get version number, try from the sources (sources should be present)
-VERSION="$(grep -s "define VERSION" ../src/AirspaceConverter.h | awk -F\" '{print $2}')"
-
-# If no valid version number, then ask the user
-if [[ "$VERSION" =~ [0-9].[0-9].[0-9] ]]; then
-	echo "Detected AirspaceConverter version: ${VERSION}"
-else
-	printf "Enter new airspaceconverter version: "
-	read -r VERSION
-fi
-
-# Remove the dots from the version string
-IFS='.'
-arr=($VERSION)
-VER="${arr[0]]}${arr[1]]}${arr[2]]}"
-
-# Create distribution ZIP file
-echo "Building distribution ZIP file ..."
-zip -9 -T -r AirspaceConverter${VER}.zip AirspaceConverter.app/
-
-echo "Distribution ZIP file: AirspaceConverter${VER}.zip done."
+# Launch the AirspaceConverter application from here (not the installed one)
+echo "Launching local AirspaceConverter application"
+open ./AirspaceConverter.app

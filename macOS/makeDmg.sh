@@ -10,6 +10,12 @@
 # This script is part of AirspaceConverter project
 #============================================================================
 
+# Make sure that we are on macOS
+if [ "$(uname)" != "Darwin" ]; then
+	echo "ERROR: this script is only for macOS ..."
+	exit 1
+fi
+
 # First clean older files
 rm -rf AirspaceConverter*.dmg
 
@@ -46,3 +52,5 @@ hdiutil convert ./DiskImage.dmg -format UDZO -o AirspaceConverter${VER}.dmg
 rm DiskImage.dmg
 mv ./DiskImage/AirspaceConverter.app ./
 rm -r DiskImage
+
+echo "Distribution disk image: AirspaceConverter${VER}.dmg done."

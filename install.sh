@@ -10,6 +10,12 @@
 # This script is part of AirspaceConverter project
 #============================================================================
 
+# Make sure that we are on Linux
+if [[ "$(uname)" == "Darwin" || "$(expr substr $(uname -s) 1 5)" != "Linux" ]]; then
+	echo "ERROR: this script is only for Linux ..."
+	exit 1
+fi
+
 echo Installing everything...
 
 # Compile

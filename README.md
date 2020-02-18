@@ -114,8 +114,8 @@ In order to compile this project the following libraries are required:
 - libzip2 (`libzip-dev`) and dependencies (zlib)
 - Boost libraries (`libboost-filesystem-dev` and `libboost-locale-dev`)
 
-Compiling and installing AirspaceConverter on Linux
----------------------------------------------------
+Compiling and installing AirspaceConverter from sources on Linux
+----------------------------------------------------------------
 First it is necessary to install the dependencies, on a _Debian_ based distribution it would be:  
 `sudo apt install libzip-dev libboost-filesystem-dev libboost-locale-dev libqt4-dev`  
 Then, to compile, from the root of this project: `./build.sh`  
@@ -125,11 +125,15 @@ After it will be possible to run AirspaceConverter CLI from anywhere simply call
 The same for the AirspaceConverter _Qt_ GUI graphical interface: `airspaceconverter-gui`  
 To uninstall (from the root of the project): `./uninstall.sh`
 
-Compiling AirspaceConverter on macOS
-------------------------------------
-As on Linux first it is necessary to install _Qt_ and the other dependencies:  
+Compiling and installing AirspaceConverter from sources on macOS
+----------------------------------------------------------------
+First it is necessary to install _Qt_ and the other dependencies:  
 `brew install libzip boost`  
-Then, to compile, from the root of this project: `make all`
+Make sure to have the Qt tools reachable from your `$PATH`. This can be done, for example, adding to `.bash_profile` a line like:  
+`export PATH="$HOME/Qt/<Qt version>/clang_64/bin":"$PATH"`  
+Then, from the macOS directory of this project: `cd macOS`  
+- To compile and install: `./install.sh`  
+- To uninstall: `./uninstall.sh`  
 
 Compiling AirspaceConverter on Windows
 --------------------------------------

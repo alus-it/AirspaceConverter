@@ -10,10 +10,22 @@
 # This script is part of AirspaceConverter project
 #============================================================================
 
-# First clean older build
-rm -rf AirspaceConverter.app
+# Make sure that we are on macOS
+if [ "$(uname)" != "Darwin" ]; then
+	echo "ERROR: this script is only for macOS ..."
+	exit 1
+fi
+
+# First of all: build if necessary
+cd ..
+./build.sh
+cd macOS
+
+# Clean older distribution files
+./clean.sh
 
 # Build directory structure
+echo "Building AirspaceConverter.app application bundle ..."
 mkdir AirspaceConverter.app
 cd AirspaceConverter.app
 mkdir Contents
@@ -38,7 +50,7 @@ cp ../../../../Release/libairspaceconverter.dylib ./
 cp ../../../../Release/airspaceconverter ./
 
 # Copy AirspaceConverter Qt GUI exectutable
-cp ../../../../build-AirspaceConverterQt-Desktop_Qt_5_12_5_clang_64bit-Release/airspaceconverter-gui.app/Contents/MacOS/airspaceconverter-gui ./
+cp ../../../../buildQt/airspaceconverter-gui.app/Contents/MacOS/airspaceconverter-gui ./
 
 # To find out the required libraries:
 #$ otool -L airspaceconverter
@@ -71,9 +83,6 @@ install_name_tool -change @rpath/QtWidgets.framework/Versions/5/QtWidgets @execu
 install_name_tool -change @rpath/QtGui.framework/Versions/5/QtGui @executable_path/QtGui ./airspaceconverter-gui
 install_name_tool -change @rpath/QtCore.framework/Versions/5/QtCore @executable_path/QtCore ./airspaceconverter-gui
 
-# Strip the GUI executable
-strip -S ./airspaceconverter-gui
-
 # Tell libairspaceconverter.dylib to use the libraries in the same folder
 install_name_tool -change /usr/local/opt/libzip/lib/libzip.5.dylib @loader_path/libzip.5.dylib ./libairspaceconverter.dylib
 install_name_tool -change /usr/local/opt/boost/lib/libboost_filesystem.dylib @loader_path/libboost_filesystem.dylib ./libairspaceconverter.dylib
@@ -90,3 +99,5 @@ cp -r ../../../../icons ./../Resources
 
 # Get out
 cd ../../..
+
+echo "Application bundle: AirspaceConverter.app done."

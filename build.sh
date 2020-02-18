@@ -10,14 +10,22 @@
 # This script is part of AirspaceConverter project
 #============================================================================
 
-# Compile everything
-
-echo Building everything...
-
-# Get number of processors available
-PROCESSORS="$(grep -c ^processor /proc/cpuinfo)"
+# Find out where whe want to build and number of processors available
+if [ "$(uname)" == "Darwin" ]; then
+	SYSTEM="macOS"
+	PROCESSORS=2
+	echo "Building everything for macOS ..."
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+	SYSTEM="Linux"
+	PROCESSORS="$(grep -c ^processor /proc/cpuinfo)"
+	echo "Building everything for Linux ..."
+else
+	echo "ERROR: Unknown operating system."
+	exit 1
+fi
 
 # Build shared library and command line version
+echo "Building AirspaceConverter shared library and CLI executable ..."
 make -j${PROCESSORS} all
 if [ "$?" -ne 0 ]; then
 	echo "ERROR: Failed to compile shared library and CLI executable."
@@ -25,23 +33,31 @@ if [ "$?" -ne 0 ]; then
 fi
 
 # Build Qt user interface
+echo "Building AirspaceConverter Qt GUI ..."
 mkdir -p buildQt
 cd buildQt
-qmake ../AirspaceConverterQt/AirspaceConverterQt.pro -r -spec linux-g++-64
-# On macOS: qmake ../AirspaceConverterQt/AirspaceConverterQt.pro -r -spec macx-clang CONFIG+=x86_64 CONFIG+=qtquickcompiler
+if [ ${SYSTEM} == "Linux" ]; then
+	qmake ../AirspaceConverterQt/AirspaceConverterQt.pro -r -spec linux-g++-64
+else
+	qmake ../AirspaceConverterQt/AirspaceConverterQt.pro -r -spec macx-clang CONFIG+=x86_64 CONFIG+=qtquickcompiler
+fi
+if [ "$?" -ne 0 ]; then
+	echo "ERROR: Failed to run qmake."
+	cd ..
+	exit 1
+fi
 make -j${PROCESSORS} all
-
 if [ "$?" -ne 0 ]; then
 	echo "ERROR: Failed to compile Qt user interface."
 	cd ..
 	exit 1
 fi
-
-strip -S --strip-unneeded ./airspaceconverter-gui
-# On macOS: strip -S ./airspaceconverter-gui.app/Contents/MacOS/airspaceconverter-gui
-
+if [ ${SYSTEM} == "Linux" ]; then
+	strip -S --strip-unneeded ./airspaceconverter-gui
+else
+	strip -S ./airspaceconverter-gui.app/Contents/MacOS/airspaceconverter-gui
+fi
 cd ..
 
-echo Done.
-
+echo "Done with compiling."
 exit 0
