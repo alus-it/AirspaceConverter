@@ -340,8 +340,21 @@ void Airspace::ClearGeometries() {
 	geometries.clear();
 }
 
-bool Airspace::AddSinglePointOnly(const double& lat, const double& lon) {
-	Geometry::LatLon point(lat, lon);
+bool Airspace::AddPoint(const Geometry::LatLon& point) {
+	// Make sure the point is not a duplicate of the last, not necessary to add it
+	if (!points.empty() && points.back() == point) return false;
+
+	// Make the new single "Point" geometry
+	geometries.push_back(new Point(point));
+
+	// Add the point
+	points.push_back(point);
+
+	return true;
+}
+
+bool Airspace::AddPointLatLonOnly(const double& lat, const double& lon) {
+	const Geometry::LatLon point(lat, lon);
 
 	// Make sure the point is not a duplicate of the last, not necessary to add it
 	if (!points.empty() && points.back() == point) return false;
@@ -352,15 +365,12 @@ bool Airspace::AddSinglePointOnly(const double& lat, const double& lon) {
 	return true;
 }
 
-bool Airspace::AddPoint(const Geometry::LatLon& point) {
+bool Airspace::AddPointGeometryOnly(const Geometry::LatLon& point) {
 	// Make sure the point is not a duplicate of the last, not necessary to add it
-	if (!points.empty() && points.back() == point) return false;
+	if (!geometries.empty() && geometries.back()->IsPoint() && geometries.back()->GetCenterPoint() == point) return false;
 	
 	// Make the new single "Point" geometry
 	geometries.push_back(new Point(point));
-
-	// Add the point
-	points.push_back(point);
 
 	return true;
 }
@@ -411,7 +421,9 @@ void Airspace::AddGeometry(const Geometry* geometry) {
 
 void Airspace::EvaluateAndAddArc(std::vector<Geometry::LatLon*>& arcPoints, std::vector<std::pair<const double, const double>>& centerPoints, const bool& clockwise) {
 	if (arcPoints.size() > 4) geometries.push_back(new Sector(Geometry::AveragePoints(centerPoints), *arcPoints.front(), *arcPoints.back(), clockwise));
-	else for(const Geometry::LatLon* p : arcPoints) geometries.push_back(new Point(*p));
+	else for(const Geometry::LatLon* p : arcPoints) {
+			AddPointGeometryOnly(*p);
+	}
 	arcPoints.clear();
 	centerPoints.clear();
 }
@@ -430,35 +442,35 @@ void Airspace::EvaluateAndAddCircle(const std::vector<Geometry::LatLon*>& arcPoi
 
 		// Finally add the so resulting circle
 		geometries.push_back(new Circle(center, radius));
-	} else for (const Geometry::LatLon* p : arcPoints) geometries.push_back(new Point(*p));
+	} else for (const Geometry::LatLon* p : arcPoints) AddPointGeometryOnly(*p);
 }
 
 bool Airspace::Undiscretize() {
 	if (!geometries.empty()) return true;
 	if (points.empty()) return false;
 	assert(points.size() >= 4);
-	const unsigned int steps = (unsigned int)points.size() - 2;
+	const size_t steps = points.size() - 2;
 	std::vector<Geometry::LatLon*> arcPoints;
 	std::vector<std::pair<const double, const double>> centerPoints;
 	bool alreadyOnArc = false;
 	bool alwaysOnSameArc = false;
 	bool isClockwise;
 	double prevRadius = 0;
-	for (unsigned int i = 0; i < steps; i++) {
+	for (size_t a = 0, b = 1, c = 2; a < steps; a++, b++, c++) {
 		double latc = -7, lonc = -7, radius = 0;
 		bool clockwise;
-		if (Geometry::ArePointsOnArc(points.at(i), points.at(i + 1), points.at(i + 2), latc, lonc, radius, clockwise)) {
+		if (Geometry::ArePointsOnArc(points.at(a), points.at(b), points.at(c), latc, lonc, radius, clockwise)) {
 			if (alreadyOnArc) { // the arc seems to continue
 				assert(prevRadius != 0);
 				const double smallDst = std::min(radius, prevRadius) / 10; // Find a small distance to compare with
 
 				// If the radius is similar to the previous and the new center is enough near to the previous consider this as the same arc
 				if (std::fabs(radius-prevRadius) < smallDst && Geometry::CalcAngularDist(latc, lonc, centerPoints.back().first, centerPoints.back().second) < smallDst) {
-					arcPoints.push_back(&points.at(i + 2));
+					arcPoints.push_back(&points.at(c));
 					centerPoints.emplace_back(latc, lonc);
 					prevRadius = radius;
 				} else { // Not on the same arc but another new one
-					assert(i > 0);
+					assert(a > 0);
 					assert(!arcPoints.empty());
 					assert(!centerPoints.empty());
 					EvaluateAndAddArc(arcPoints, centerPoints, isClockwise);
@@ -469,14 +481,15 @@ bool Airspace::Undiscretize() {
 			} else { // New arc
 				assert(arcPoints.empty());
 				assert(centerPoints.empty());
-				arcPoints.push_back(&points.at(i));
-				arcPoints.push_back(&points.at(i + 1));
-				arcPoints.push_back(&points.at(i + 2));
+				arcPoints.reserve(3);
+				arcPoints.push_back(&points.at(a));
+				arcPoints.push_back(&points.at(b));
+				arcPoints.push_back(&points.at(c));
 				centerPoints.emplace_back(latc, lonc);
 				isClockwise = clockwise;
 				alreadyOnArc = true;
 				prevRadius = radius;
-				if (i == 0) alwaysOnSameArc = true;
+				if (a == 0) alwaysOnSameArc = true;
 			}
 		} else {
 			if (alreadyOnArc) {
@@ -484,7 +497,7 @@ bool Airspace::Undiscretize() {
 				alwaysOnSameArc = false;
 				EvaluateAndAddArc(arcPoints, centerPoints, isClockwise);
 				prevRadius = 0;
-			} else geometries.push_back(new Point(points.at(i)));
+			} else AddPointGeometryOnly(points.at(a));
 		}
 	}
 	if (alreadyOnArc) { // Add the remaining curve to geometries
@@ -492,8 +505,8 @@ bool Airspace::Undiscretize() {
 		if (alwaysOnSameArc) EvaluateAndAddCircle(arcPoints, centerPoints);	// If we were always on arc then here we have a circle
 		else EvaluateAndAddArc(arcPoints, centerPoints, isClockwise);
 	} else { // Otherwise add the remaining 2 points
-		geometries.push_back(new Point(points.at(steps)));
-		geometries.push_back(new Point(points.at(steps+1)));
+		if (!geometries.empty() && geometries.back()->GetCenterPoint() != points.at(steps)) AddPointGeometryOnly(points.at(steps));
+		if (!geometries.empty() && geometries.back()->GetCenterPoint() != points.at(steps+1)) AddPointGeometryOnly(points.at(steps+1));
 	}
 	return true;
 }

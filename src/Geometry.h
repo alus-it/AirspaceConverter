@@ -124,6 +124,7 @@ private:
 	static const double PI;
 	static const double TOL;
 	virtual void WriteOpenAirGeometry(OpenAir& openAir) const = 0;
+	virtual bool IsPoint() const = 0;
 };
 
 class Point : public Geometry {
@@ -136,6 +137,7 @@ public:
 
 private:
 	void WriteOpenAirGeometry(OpenAir& openAir) const;
+	inline bool IsPoint() const { return true; }
 };
 
 class Sector : public Geometry {
@@ -152,6 +154,7 @@ public:
 
 private:
 	void WriteOpenAirGeometry(OpenAir& openAir) const;
+	inline bool IsPoint() const { return false; }
 
 	const bool clockwise;
 	const double latc, lonc; // [rad]
@@ -169,10 +172,11 @@ public:
 	inline double GetRadiusNM() const { return RAD2NM * radius; }
 
 private:
+	void WriteOpenAirGeometry(OpenAir& openAir) const;
+	inline bool IsPoint() const { return false; }
+
 	const double radius; // [rad]
 	const double latc, lonc; // [rad]
-
-	void WriteOpenAirGeometry(OpenAir& openAir) const;
 };
 
 /* Airway for now not supported

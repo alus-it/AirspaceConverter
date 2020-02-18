@@ -213,7 +213,7 @@ bool OpenAIP::ReadAirspaces(const std::string& fileName) {
 								break;
 							}
 							expectedLon = true;
-							airspace.AddSinglePointOnly(lat, lon);
+							airspace.AddPointLatLonOnly(lat, lon);
 						}
 					}
 				} catch (...) {

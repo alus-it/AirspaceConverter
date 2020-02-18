@@ -107,12 +107,12 @@ public:
 	inline void SetBaseAltitude(const Altitude& alt) { base = alt; }
 	inline void SetName(const std::string& airspaceName) { name = airspaceName; }
 	bool SetTransponderCode(const std::string& code);
-	bool AddSinglePointOnly(const double& lat, const double& lon);
 	void AddRadioFrequency(const int frequencyHz, const std::string& description);
 	void Clear(); // Clear name, type, points and geometries
 	void ClearPoints(); // Clear points and geometries
 	void ClearGeometries(); // Clear geometries only
 	bool AddPoint(const Geometry::LatLon& point);
+	bool AddPointLatLonOnly(const double& lat, const double& lon);
 	void AddGeometry(const Geometry* geometry);
 	bool ClosePoints();
 	bool ArePointsValid() const;
@@ -125,25 +125,26 @@ public:
 	inline const Altitude& GetTopAltitude() const { return top; }
 	inline const Altitude& GetBaseAltitude() const { return base; }
 	inline const std::string& GetName() const { return name; }
-	inline unsigned int GetNumberOfGeometries() const { return (unsigned int)geometries.size(); }
-	inline const Geometry* GetGeometryAt(unsigned int i) { return i < geometries.size() ? geometries.at(i) : nullptr; }
+	inline size_t GetNumberOfGeometries() const { return geometries.size(); }
+	inline const Geometry* GetGeometryAt(size_t i) { return i < geometries.size() ? geometries.at(i) : nullptr; }
 	inline const std::vector<Geometry::LatLon>& GetPoints() const { return points; }
 	inline const Geometry::LatLon& GetFirstPoint() const { return points.front(); }
 	inline const Geometry::LatLon& GetLastPoint() const { return points.back(); }
-	inline unsigned int GetNumberOfPoints() const { return (unsigned int)points.size(); }
-	inline const Geometry::LatLon& GetPointAt(unsigned int pos) const { return points.at(pos); }
+	inline size_t GetNumberOfPoints() const { return points.size(); }
+	inline const Geometry::LatLon& GetPointAt(size_t pos) const { return points.at(pos); }
 	inline bool IsGNDbased() const { return base.IsGND(); }
 	inline bool IsMSLbased() const { return base.IsMSL(); }
 	inline bool IsAGLtopped() const { return top.IsAGL(); }
 	inline bool IsAMSLtopped() const { return top.IsAMSL(); }
 	inline bool IsVisibleByDefault() const { return CategoryVisibleByDefault(type); }
-	inline unsigned int GetNumberOfRadioFrequencies() const { return (unsigned int)radioFrequencies.size(); }
-	inline const std::pair<int, std::string>& GetRadioFrequencyAt(unsigned int pos) const { return radioFrequencies.at(pos); }
+	inline size_t GetNumberOfRadioFrequencies() const { return radioFrequencies.size(); }
+	inline const std::pair<int, std::string>& GetRadioFrequencyAt(size_t pos) const { return radioFrequencies.at(pos); }
 	std::string GetTransponderCode() const;
 	inline bool HasTransponderCode() const { return transponderCode >= 0; }
 	void CalculateSurface(double& areaKm2, double& perimeterKm) const;
 
 private:
+	bool AddPointGeometryOnly(const Geometry::LatLon& point);
 	void EvaluateAndAddArc(std::vector<Geometry::LatLon*>& arcPoints, std::vector<std::pair<const double, const double>>& centerPoints, const bool& clockwise);
 	void EvaluateAndAddCircle(const std::vector<Geometry::LatLon*>& arcPoints, const std::vector<std::pair<const double, const double>>& centerPoints);
 
