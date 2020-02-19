@@ -39,7 +39,7 @@ cd buildQt
 if [ ${SYSTEM} == "Linux" ]; then
 	qmake ../AirspaceConverterQt/AirspaceConverterQt.pro -r -spec linux-g++-64
 else
-	qmake ../AirspaceConverterQt/AirspaceConverterQt.pro -r -spec macx-clang CONFIG+=x86_64 CONFIG+=qtquickcompiler
+	qmake ../AirspaceConverterQt/AirspaceConverterQt.pro -r -spec macx-clang CONFIG+=x86_64
 fi
 if [ "$?" -ne 0 ]; then
 	echo "ERROR: Failed to run qmake."
