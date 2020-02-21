@@ -24,24 +24,35 @@ cd macOS
 # Clean older distribution files
 ./clean.sh
 
-# Build directory structure
+# Start building application bundle
 echo "Building AirspaceConverter.app application bundle ..."
 mkdir AirspaceConverter.app
 cd AirspaceConverter.app
 mkdir Contents
 cd Contents
-mkdir MacOS
-mkdir Resources
 
 # Copy Info.plist and Pkginfo
 cp ../../Info.plist ./
 cp ../../PkgInfo ./
+chmod a-w *
 
-# Copy application icons
+# Prepare Resoulces folder
+mkdir Resources
 cd Resources
-cp ../../../AirspaceConverter.icns ./
 
-cd ../MacOS
+# Copy application icon
+cp ../../../AirspaceConverter.icns ./
+chmod a-w ./AirspaceConverter.icns
+
+# Copy KML icons
+cp -r ../../../../icons ./
+chmod a-w ./icons/*
+
+cd ..
+
+# Prepare MacOS directory (for binaries)
+mkdir MacOS
+cd MacOS
 
 # Copy AirspaceConverter dynamic shared library
 cp ../../../../Release/libairspaceconverter.dylib ./
@@ -59,9 +70,13 @@ cp ../../../../buildQt/airspaceconverter-gui.app/Contents/MacOS/airspaceconverte
 cp /usr/local/opt/libzip/lib/libzip.5.dylib ./
 cp /usr/local/opt/boost/lib/libboost_filesystem.dylib ./
 cp /usr/local/opt/boost/lib/libboost_system.dylib ./
+cp /usr/local/opt/boost/lib/libboost_system-mt.dylib ./
 cp /usr/local/opt/boost/lib/libboost_locale-mt.dylib ./
 cp /usr/local/opt/boost/lib/libboost_chrono-mt.dylib ./
 cp /usr/local/opt/boost/lib/libboost_thread-mt.dylib ./
+cp /usr/local/opt/icu4c/lib/libicudata.64.dylib ./
+cp /usr/local/opt/icu4c/lib/libicui18n.64.dylib ./
+cp /usr/local/opt/icu4c/lib/libicuuc.64.dylib ./
 cp /Users/arealis/Qt/5.12.5/clang_64/lib/QtWidgets.framework/Versions/5/QtWidgets ./
 cp /Users/arealis/Qt/5.12.5/clang_64/lib/QtGui.framework/Versions/5/QtGui ./
 cp /Users/arealis/Qt/5.12.5/clang_64/lib/QtCore.framework/Versions/5/QtCore ./
@@ -89,13 +104,21 @@ install_name_tool -change /usr/local/opt/boost/lib/libboost_filesystem.dylib @lo
 install_name_tool -change /usr/local/opt/boost/lib/libboost_system.dylib @loader_path/libboost_system.dylib ./libairspaceconverter.dylib
 install_name_tool -change /usr/local/opt/boost/lib/libboost_locale-mt.dylib @loader_path/libboost_locale-mt.dylib ./libairspaceconverter.dylib
 
-# And also the Qt libs
+# Tell Boost locale library to use the libraries in the same folder
+chmod u+w libboost_locale-mt.dylib
+install_name_tool -change /usr/local/opt/icu4c/lib/libicudata.64.dylib @loader_path/libicudata.64.dylib ./libboost_locale-mt.dylib
+install_name_tool -change /usr/local/opt/icu4c/lib/libicui18n.64.dylib @loader_path/libicui18n.64.dylib ./libboost_locale-mt.dylib
+install_name_tool -change /usr/local/opt/icu4c/lib/libicuuc.64.dylib @loader_path/libicuuc.64.dylib ./libboost_locale-mt.dylib
+
+# And also for the Qt libs
 install_name_tool -change @rpath/QtCore.framework/Versions/5/QtCore @loader_path/QtCore ./QtGui
 install_name_tool -change @rpath/QtCore.framework/Versions/5/QtCore @loader_path/QtCore ./QtWidgets
 install_name_tool -change @rpath/QtGui.framework/Versions/5/QtGui @loader_path/QtGui ./QtWidgets
 
-# Copy KML icons
-cp -r ../../../../icons ./../Resources
+
+# Set executables and libraries permissions
+chmod a-w *
+chmod a+x *
 
 # Get out
 cd ../../..
