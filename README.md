@@ -41,7 +41,7 @@ About KML format
 The _[Keyhole Markup Language](https://developers.google.com/kml/)_, used by _Google Earth_ is probably a good format to define models of buildings but it is not exactly practical to define airspace. This because it not possible, at least from my understanding, to define in the same 3D object points at altitudes with different references: it is the typical case of an airspace with AGL floor and AMSL ceiling.  
 One possible solution is to translate, where necessary all the altitudes to the same reference but to do that we need the know the altitude of the terrain at every location, reason why this software uses terrain maps.  
 Another important limitation of KML is that surfaces which follow the terrain are possible only at terrain altitude.  
-So please, be advised that, what you will see in _Google Earth_ will not exactly match how airspace definitions are really intended.
+So please, be advised that, what you will see in _Google Earth_ will not exactly match how airspace definitions are really intended.  
 
 LK8000 terrain raster map files
 -------------------------------
@@ -50,12 +50,12 @@ In case the loaded terrain maps are overlapping, the one with the best resolutio
 On the _LK8000_ website there is a [wide terrain raster map collection](https://www.lk8000.it/download/maps.html).  
 The part of this program reading and using the terrain maps has been derived and adapted from _LK8000_ project.  
 To know more about _LK8000_ project: [lk8000.it](https://www.lk8000.it/)  
-The repository of _LK8000_ is available here: [github.com/LK8000](https://github.com/LK8000/LK8000)
+The repository of _LK8000_ is available here: [github.com/LK8000](https://github.com/LK8000/LK8000)  
 
 AirspaceConverter shared library
 --------------------------------
 This software is designed to keep completely separated functionalities from the user interfaces.  
-All the reading, writing and conversion features are in a common shared library: libAirspaceConverter can be compiled under different platforms and so used from different user interfaces.
+All the reading, writing and conversion features are in a common shared library: libAirspaceConverter can be compiled under different platforms and so used from different user interfaces.  
 
 AirspaceConverter command line
 ------------------------------
@@ -77,7 +77,7 @@ Possible options:
   - **-h**: print short guide  
 
 At least one input airspace or waypoint file must be present.  
-Warning: any already existing output file will be overwritten.
+Warning: any already existing output file will be overwritten.  
 
 Graphical user interface
 ------------------------
@@ -100,19 +100,19 @@ Disclaimer
 **WARNING**: this program is experimental. The generated output files may contains errors.  
 So please always verify the generated files before using in flight and report any error found.  
 By using this program you understand and completely agree that the generated output files (maybe wrong) are just for demonstration purposes and they do not absolutely substitute the official AIP publications.  
-Please always refer to official AIP publications for valid and updated airspace definitions.
+Please always refer to official AIP publications for valid and updated airspace definitions.  
 
 Downloads
 ---------
 The already compiled executables are available to download from the [project downloads page](https://www.alus.it/AirspaceConverter/download.php)  
-For the Linux distributions based on _Debian_ there is a also an _APT_ repository available.
+For the Linux distributions based on _Debian_ there is a also an _APT_ repository available.  
 
 Build dependencies
 ------------------
 In order to compile this project the following libraries are required:  
 - Qt (`libqt4-dev`)
 - libzip2 (`libzip-dev`) and dependencies (zlib)
-- Boost libraries (`libboost-filesystem-dev` and `libboost-locale-dev`)
+- Boost libraries (`libboost-filesystem-dev` and `libboost-locale-dev`)  
 
 Compiling and installing AirspaceConverter from sources on Linux
 ----------------------------------------------------------------
@@ -123,7 +123,7 @@ To install: `./install.sh`
 This will install everything: the shared library the command line executable and the _Qt_ GUI interface.  
 After it will be possible to run AirspaceConverter CLI from anywhere simply calling: `airspaceconverter`  
 The same for the AirspaceConverter _Qt_ GUI graphical interface: `airspaceconverter-gui`  
-To uninstall (from the root of the project): `./uninstall.sh`
+To uninstall (from the root of the project): `./uninstall.sh`  
 
 Compiling and installing AirspaceConverter from sources on macOS
 ----------------------------------------------------------------
@@ -131,9 +131,11 @@ First it is necessary to install _Qt_ and the other dependencies:
 `brew install libzip boost`  
 Make sure to have the Qt tools reachable from your `$PATH`. This can be done, for example, adding to `.bash_profile` a line like:  
 `export PATH="$HOME/Qt/<Qt version>/clang_64/bin":"$PATH"`  
-Then, from the macOS directory of this project: `cd macOS`  
-- To compile and install: `./install.sh`  
-- To uninstall: `./uninstall.sh`  
+Then, to compile and install, from the root of this project: `./install.sh`  
+This will install everything: the shared library the command line executable and the _Qt_ GUI interface.  
+After it will be possible to run AirspaceConverter CLI from anywhere simply calling: `airspaceconverter`  
+While the AirspaceConverter _Qt_ GUI graphical interface will be directly available from the Launchpad menu.  
+To uninstall (from the root of the project): `./uninstall.sh`  
 
 Compiling AirspaceConverter on Windows
 --------------------------------------
@@ -142,12 +144,12 @@ It requires to have the proper Boost libraries installed, with their location co
 From [SourceForge](https://sourceforge.net/projects/boost/files/boost-binaries/) download the latest version of Boost libraries alredy compiled for VisualStudio.  
 While libzip and zlib (also not included in this repository) can be obtained via nuget.  
 When compiling with VisualStudio 2017 (vs141), and newer, in order to link with libzip it is necessary to modify `libzip.targets` located in `VisualStudio\packages\libzip.1.1.2.7\build\native` replacing all occurrencies of `PlatformToolset.ToLower().IndexOf('v140')` with `PlatformToolset.ToLower().IndexOf('v14')`  
-If required _cGPSmapper_ can be found in the portable distribution archive of this project.
+If required _cGPSmapper_ can be found in the portable distribution archive of this project.  
 
 Placemarks icons credits
 ------------------------
 Some of the placemark icons used for displaying the waypoints in _Google Earth_ included in the produced KMZ file (and so used by this project) are coming from: [Maps Icons Collection](https://mapicons.mapsmarker.com)  
-On Windows, the folder `icons` with the placemarks PNG icons must be kept in the same location of AirspaceConverter executable.
+On Windows, the folder `icons` with the placemarks PNG icons must be kept in the same location of AirspaceConverter executable.  
 
 Contributors
 ------------
@@ -157,4 +159,4 @@ Contacts
 --------
 Author: _Alberto Realis-Luc_  
 Web: [alus.it/AirspaceConverter](https://www.alus.it/AirspaceConverter/)  
-E-mail: [info@alus.it](mailto:info@alus.it?subject=AirspaceConverter)
+E-mail: [info@alus.it](mailto:info@alus.it?subject=AirspaceConverter)  

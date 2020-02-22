@@ -26,10 +26,10 @@ then
 	./makeApp.sh
 fi
 
-# Installing...
-echo "Installing ..."
+# Install AirspaceConverter Qt GUI application ...
+echo "Installing  AirspaceConverter GUI application ..."
 cp -r ./AirspaceConverter.app /Applications
-echo "AirspaceConverter installation  done."
+echo "MacOS application installation done."
 
 # Launch installed application
 open /Applications/AirspaceConverter.app

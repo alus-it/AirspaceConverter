@@ -59,5 +59,5 @@ else
 fi
 cd ..
 
-echo "Done with compiling."
+echo "Full build done."
 exit 0

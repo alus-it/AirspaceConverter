@@ -123,4 +123,4 @@ chmod a+x *
 # Get out
 cd ../../..
 
-echo "Application bundle: AirspaceConverter.app done."
+echo "Make macOS application bundle done."

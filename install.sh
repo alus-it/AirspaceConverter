@@ -10,28 +10,36 @@
 # This script is part of AirspaceConverter project
 #============================================================================
 
-# Make sure that we are on Linux
-if [[ "$(uname)" == "Darwin" || "$(expr substr $(uname -s) 1 5)" != "Linux" ]]; then
-	echo "ERROR: this script is only for Linux ..."
-	exit 1
-fi
-
-echo Installing everything...
-
-# Compile
+# First compile
 ./build.sh
 
-# Abort if compile failed	
+# Abort if build failed	
 if [ "$?" -ne 0 ]; then
 	exit 1
 fi
 
-# Install shared library and CLI
-sudo make install
+if [ "$(uname)" == "Darwin" ]; then
+	echo "Installing everything on macOS..."
+	
+	# Install shared library and CLI
+	make install
+	
+	# Install GUI
+	cd macOS
+	./install.sh
+	cd ..
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+	echo "Installing everything on Linux ..."
+	
+	# Install shared library and CLI
+	sudo make install
+	
+	# Install GUI
+	sudo cp ./buildQt/airspaceconverter-gui /usr/bin
+	sudo chmod 0755 /usr/bin/airspaceconverter-gui
+else
+	echo "ERROR: this script is only for Linux or macOS ..."
+	exit 1
+fi
 
-# Install GUI
-sudo cp ./buildQt/airspaceconverter-gui /usr/bin
-sudo chmod 0755 /usr/bin/airspaceconverter-gui
-
-echo Done.
-
+echo "Full installation done."

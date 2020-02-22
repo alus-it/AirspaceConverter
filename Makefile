@@ -29,11 +29,15 @@ ifeq ($(PLATFORM),Linux)
 	LFLAGS += -lboost_locale
 	DYNLIBFLAGS = $(LFLAGS) -Wl,-soname,$(LIBFILE)
 	STRIP += --strip-unneeded
-else
+	DEST = /usr/
+else ifeq ($(PLATFORM),Darwin)
 	LIB = /usr/local/lib
 	LIBFILE = lib$(APPNAME).dylib
 	LFLAGS += -lboost_locale-mt
-	DYNLIBFLAGS = $(LFLAGS) -Wl,-install_name,$(LIBFILE)
+	DEST = /usr/local/
+	DYNLIBFLAGS = $(LFLAGS) -Wl,-install_name,$(DEST)lib/$(LIBFILE)
+else
+	#ERROR: Unknown platform!
 endif
 
 # Source path
@@ -116,21 +120,21 @@ clean:
 # Install
 .PHONY: install
 install: $(BIN)airspaceconverter
-	@echo Installing AirspaceConverter...
-	@cp $< /usr/bin
-	@cp $(BIN)libairspaceconverter.so /usr/lib
-	@mkdir -p /usr/share/airspaceconverter/icons
-	@cp icons/* /usr/share/airspaceconverter/icons
+	@echo Installing AirspaceConverter CLI ...
+	@cp $< $(DEST)bin
+	@cp $(BIN)$(LIBFILE) $(DEST)lib
+	@mkdir -p $(DEST)share/airspaceconverter/icons
+	@cp icons/* $(DEST)share/airspaceconverter/icons
 	@gzip -9 < airspaceconverter.1 > airspaceconverter.1.gz
-	@mv airspaceconverter.1.gz /usr/share/man/man1/
+	@mv airspaceconverter.1.gz $(DEST)share/man/man1/
 	@echo Done.
 
 # Uninstall
 .PHONY: uninstall
 uninstall:
-	@echo Uninstalling AirspaceConverter...
-	@rm -f /usr/bin/airspaceconverter
-	@rm -f /usr/lib/libairspaceconverter.so
-	@rm -rf /usr/share/airspaceconverter
-	@rm -rf /usr/share/man/man1/airspaceconverter.1.gz
+	@echo Uninstalling AirspaceConverter CLI ...
+	@rm -f $(DEST)bin/airspaceconverter
+	@rm -f $(DEST)lib/$(LIBFILE)
+	@rm -rf $(DEST)share/airspaceconverter
+	@rm -rf $(DEST)share/man/man1/airspaceconverter.1.gz
 	@echo Done.

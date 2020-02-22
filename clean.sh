@@ -19,7 +19,12 @@ rm -R -f buildQt
 # Clean shared library and command line version
 make clean
 
-echo Done.
+# Clean macOS stuff
+cd macOS
+./clean.sh
+cd ..
+
+echo "Full clean done."
 
 exit 0
 

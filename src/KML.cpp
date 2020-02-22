@@ -89,7 +89,12 @@ const std::string KML::iconsPath(DetectIconsPath());
 const std::string KML::DetectIconsPath() {
 	std::string 
 #ifdef __APPLE__
-	path(boost::filesystem::path(boost::filesystem::path(AirspaceConverter::basePath) / boost::filesystem::path("../Resources/icons/")).string());
+	// Default installed CLI macOS location
+	path("/usr/local/share/airspaceconverter/icons/");
+	if (boost::filesystem::exists(path)) return path;
+
+	// Default installed GUI macOS location
+	path = boost::filesystem::path(boost::filesystem::path(AirspaceConverter::basePath) / boost::filesystem::path("../Resources/icons/")).string();
 	if (boost::filesystem::exists(path)) return path;
 #elif __linux__
 	path("/usr/share/airspaceconverter/icons/"); // Default installed Linux location
