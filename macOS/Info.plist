@@ -29,7 +29,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>LSMinimumSystemVersion</key>
-	<string>10.12</string>
+	<string>10.15</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>NSSupportsAutomaticGraphicsSwitching</key>
