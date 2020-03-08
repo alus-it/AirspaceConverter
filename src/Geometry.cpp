@@ -338,7 +338,7 @@ double Geometry::RoundDistanceInNM(const double radiusRad) {
 	const double radius10(radius * 10); // [NM * 10]
 	const double nearestInt(std::round(radius10)); // [NM * 10]
 	const double diff(nearestInt - radius10); // [NM * 10] Radius expected smaller than nearet integer, so positive diff
-	if (nearestInt != 0 && diff > 0 && diff < 0.05) radius = nearestInt / 10; //0.005 NM = 9.26 m
+	if (nearestInt != 0 && diff > 0 && diff < 0.8) radius = nearestInt / 10; //0.08 NM = 148.16 m
 	return radius;
 }
 
