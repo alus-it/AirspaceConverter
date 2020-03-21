@@ -327,18 +327,18 @@ double Geometry::AverageRadius(const Geometry::LatLon& center, const std::vector
 	double lonc = center.LonRad();
 	double radius = 0;
 	for (const Geometry::LatLon* p : circlePoints) radius += CalcAngularDist(latc, lonc, p->LatRad(), p->LonRad());
-	return radius / circlePoints.size();
+	return (radius / circlePoints.size()) * 1.000675456; // corrected average
 }
 
-// Convert a distance from rad to NM rounding it: if it is 4.99663 NM make it 5 NM
+// Convert a distance from rad to NM rounding it: (if it is 4.99663 NM make it 5 NM)
 double Geometry::RoundDistanceInNM(const double radiusRad) {
 	assert(!std::isnan(radiusRad));
 	assert(radiusRad > 0);
 	double radius(radiusRad * RAD2NM); // [NM]
-	const double radius10(radius * 10); // [NM * 10]
-	const double nearestInt(std::round(radius10)); // [NM * 10]
-	const double diff(nearestInt - radius10); // [NM * 10] Radius expected smaller than nearet integer, so positive diff
-	if (nearestInt != 0 && diff > 0 && diff < 0.8) radius = nearestInt / 10; //0.08 NM = 148.16 m
+	const double radius100(radius * 100); // [NM * 100] approximate on cents of NM
+	const double nearestInt(std::round(radius100)); // [NM * 100]
+	const double diff(fabs(nearestInt - radius100)); // [NM * 100]
+	if (nearestInt != 0 && diff > 0 && diff < 0.25) radius = nearestInt / 100; //0.0025 NM = 4.63 m
 	return radius;
 }
 
