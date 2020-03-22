@@ -74,8 +74,6 @@ const std::string AirspaceConverter::cGPSmapperCommand = Detect_cGPSmapperPath()
 
 AirspaceConverter::AirspaceConverter() :
 	conversionDone(false),
-	doNotCalculateArcs(false),
-	writeCoordinatesAsDDMMSS(false),
 	processLineStrings(false) {
 }
 
@@ -321,7 +319,8 @@ bool AirspaceConverter::Convert() {
 		}
 		break;
 	case OutputType::OpenAir_Format:
-		conversionDone = OpenAir(airspaces, doNotCalculateArcs, writeCoordinatesAsDDMMSS).Write(outputFile);
+
+		conversionDone = OpenAir(airspaces).Write(outputFile);
 		break;
 	case OutputType::SeeYou_Format:
 		conversionDone = SeeYou(waypoints).Write(outputFile);
@@ -636,3 +635,18 @@ bool AirspaceConverter::FilterOnLatLonLimits(const double& topLat, const double&
 	return true;
 }
 
+void AirspaceConverter::DoNotCalculateArcsAndCirconferences(const bool doNotCalcArcs /*= true*/) {
+	OpenAir::CalculateArcsAndCirconferences(!doNotCalcArcs);
+}
+
+void AirspaceConverter::SetOpenAirCoodinatesAutomatic() {
+	OpenAir::SetCoordinateType(OpenAir::CoordinateType::AUTO);
+}
+
+void AirspaceConverter::SetOpenAirCoodinatesInDecimalMinutes() {
+	OpenAir::SetCoordinateType(OpenAir::CoordinateType::DEG_DECIMAL_MIN);
+}
+
+void AirspaceConverter::SetOpenAirCoodinatesInSeconds() {
+	OpenAir::SetCoordinateType(OpenAir::CoordinateType::DEG_MIN_SEC);
+}

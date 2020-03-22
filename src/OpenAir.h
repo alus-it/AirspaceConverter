@@ -24,10 +24,18 @@ friend class Circle;
 friend class Sector;
 
 public:
-	OpenAir(std::multimap<int, Airspace>& airspacesMap, const bool doNotCalcArcs = false, const bool writeCoordinatesAsDDMMSS = false);
+	enum CoordinateType {
+		DEG_DECIMAL_MIN = 0,
+		DEG_MIN_SEC,
+		AUTO
+	};
+
+	OpenAir(std::multimap<int, Airspace>& airspacesMap);
 	~OpenAir() {}
 	bool Read(const std::string& fileName);
 	bool Write(const std::string& fileName);
+	inline static void CalculateArcsAndCirconferences(const bool calcArcs = true) { calculateArcs = calcArcs; }
+	inline static void SetCoordinateType(CoordinateType type) { coordinateType = type; }
 
 private:
 	static std::string& RemoveComments(std::string &s);
@@ -55,15 +63,13 @@ private:
 	void WritePoint(const Point& point);
 	void WriteCircle(const Circle& circle);
 	void WriteSector(const Sector& sector);
-	inline void DoNotCalculateArcsAndCirconferences(const bool doNotCalcArcs = true) { calculateArcs = !doNotCalcArcs; }
-	inline void WriteCoordinatesAsDDMMSS(const bool DDMMSS = true) { writeDecimalMinutes = !DDMMSS; }
 
+	static bool calculateArcs;
+	static CoordinateType coordinateType;
 	std::multimap<int, Airspace>& airspaces;
 	bool varRotationClockwise;
 	Geometry::LatLon varPoint;
 	//double varWidth;
 	std::ofstream file;
 	int lastACline;
-	bool calculateArcs;
-	bool writeDecimalMinutes;
 };

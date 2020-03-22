@@ -20,12 +20,13 @@
 #include <boost/format.hpp>
 #include <boost/locale/encoding.hpp>
 
-OpenAir::OpenAir(std::multimap<int, Airspace>& airspacesMap, const bool doNotCalcArcs /*= false*/, const bool writeCoordinatesAsDDMMSS /*= false*/):
+bool OpenAir::calculateArcs = true;
+OpenAir::CoordinateType OpenAir::coordinateType = OpenAir::CoordinateType::AUTO;
+
+OpenAir::OpenAir(std::multimap<int, Airspace>& airspacesMap):
 	airspaces(airspacesMap),
 	varRotationClockwise(true),
-	lastACline(-1),
-	calculateArcs(!doNotCalcArcs),
-	writeDecimalMinutes(!writeCoordinatesAsDDMMSS) {
+	lastACline(-1) {
 }
 
 std::string& OpenAir::RemoveComments(std::string &s) {
@@ -631,18 +632,36 @@ bool OpenAir::WriteCategory(const Airspace& airspace) {
 
 void OpenAir::WriteLatLon(const Geometry::LatLon& point) {
 	int deg;
-	if (writeDecimalMinutes) {
-		double min;
-		point.GetLatDegMin(deg, min);
-		file << deg << ":" << min << " " << point.GetNorS() << " ";
-		point.GetLonDegMin(deg, min);
-		file << deg << ":" << min << " " << point.GetEorW();
-	} else {
-		int min, sec;
-		point.GetLatDegMinSec(deg, min, sec);
-		file << std::setw(2) << deg << ":" << std::setw(2) << min << ":" << std::setw(2) << sec << " " << point.GetNorS() << " ";
-		point.GetLonDegMinSec(deg, min, sec);
-		file << std::setw(3) << deg << ":" << std::setw(2) << min << ":" << std::setw(2) << sec <<" " << point.GetEorW();
+	switch (coordinateType) {
+		case CoordinateType::DEG_DECIMAL_MIN: {
+			double decimalMin;
+			point.GetLatDegMin(deg, decimalMin);
+			file << deg << ":" << decimalMin << " " << point.GetNorS() << " ";
+			point.GetLonDegMin(deg, decimalMin);
+			file << deg << ":" << decimalMin << " " << point.GetEorW();
+		}
+		break;
+		case CoordinateType::DEG_MIN_SEC: {
+			int min, sec;
+			point.GetLatDegMinSec(deg, min, sec);
+			file << std::setw(2) << deg << ":" << std::setw(2) << min << ":" << std::setw(2) << sec << " " << point.GetNorS() << " ";
+			point.GetLonDegMinSec(deg, min, sec);
+			file << std::setw(3) << deg << ":" << std::setw(2) << min << ":" << std::setw(2) << sec <<" " << point.GetEorW();
+		}
+		break;
+		case CoordinateType::AUTO:
+		default: {
+			int min, sec;
+				double decimalMin;
+			if (point.GetAutoLatDegMinSec(deg, decimalMin, min, sec))
+				file << std::setw(2) << deg << ":" << std::setw(2) << min << ":" << std::setw(2) << sec << " " << point.GetNorS() << " ";
+			else
+				file << deg << ":" << decimalMin << " " << point.GetNorS() << " ";
+			if (point.GetAutoLonDegMinSec(deg, decimalMin, min, sec))
+				file << std::setw(3) << deg << ":" << std::setw(2) << min << ":" << std::setw(2) << sec <<" " << point.GetEorW();
+			else
+				file << deg << ":" << decimalMin << " " << point.GetEorW();
+		}
 	}
 }
 

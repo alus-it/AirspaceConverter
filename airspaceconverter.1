@@ -99,7 +99,7 @@ If not specified will be used the name of first input file as KMZ.
 Output OpenAir files will be always encoded in ANSI.
 WARNING: any already existing output file will be automatically overwritten.
 .TP
-.BR \-d " " \fIopenAIPinputDir\fR
+.BR \-D " " \fIopenAIPinputDir\fR
 It will convert all openAIP files in the specified directory. If used the options: -i, -w and -o are no longer valid.
 All airspace files (*_asp.aip) will be converted to OpenAir, while all waypoint files (*_wpt.aip and *_nav.aip) will be converted to SeeYou.
 .TP
@@ -109,8 +109,12 @@ So the perimeter of each airspace will be defined using only points (DP).
 By default, without this option, arcs and circles are used even attepmting to recalculate them from points.
 .TP
 .BR \-s
-When writing to OpenAir this option will make coordinates expressed in degrees minutes and seconds (DD:MM:SS).
-By default, without this option, the coordinates are expressed in degrees and decimal minutes (DD:MM.MMM).
+When writing to OpenAir this option will force coordinates expressed always in degrees minutes and seconds (DD:MM:SS).
+By default, without this option, the coordinates are automatically expressed in the most compact or accurate format.
+.TP
+.BR \-d
+When writing to OpenAir this option will force coordinates expressed always in degrees and decimal minutes (DD:MM.MMM).
+As the previous option -s, by default, the coordinates are automatically expressed in the most convenient format.
 .TP
 .BR \-t
 When reading from KML/KMZ this option will make also the "LineString" tracks to be imported as airspaces.

@@ -30,7 +30,8 @@ void printHelp() {
 	if (AirspaceConverter::Is_cGPSmapperAvailable()) std::cout << ", .img (Garmin)";
 	std::cout << " or .mp (Polish). If not specified will be used the name of first input file as KMZ" << std::endl;
 	std::cout << "-p: optional, when writing in OpenAir avoid to use arcs and circles but only points (DP)" << std::endl;
-	std::cout << "-s: optional, when writing in OpenAir use coordinates with seconds (DD:MM:SS) instead of decimal minutes (DD:MM.MMM)" << std::endl;
+	std::cout << "-s: optional, when writing in OpenAir use coordinates always with seconds (DD:MM:SS)" << std::endl;
+	std::cout << "-d: optional, when writing in OpenAir use coordinates always with decimal minutes (DD:MM.MMM)" << std::endl;
 	std::cout << "-t: optional, when reading KML/KMZ files treat also tracks as airspaces" << std::endl;
 	std::cout << "-v: print version number" << std::endl;
 	std::cout << "-h: print this guide" << std::endl << std::endl;
@@ -129,7 +130,10 @@ int main(int argc, char *argv[]) {
 			ac.DoNotCalculateArcsAndCirconferences();
 			break;
 		case 's':
-			ac.WriteCoordinatesAsDDMMSS();
+			ac.SetOpenAirCoodinatesInSeconds();
+			break;
+		case 'd':
+			ac.SetOpenAirCoodinatesInDecimalMinutes();
 			break;
 		case 'h':
 			printHelp();
@@ -145,7 +149,7 @@ int main(int argc, char *argv[]) {
 			std::cout << "https://www.alus.it/AirspaceConverter" << std::endl << std::endl;
 			if (argc == 2) return EXIT_SUCCESS;
 			break;
-		case 'd':
+		case 'D':
 			if(hasValueAfter) openAIPdir = argv[++i];
 			else std::cerr << "ERROR: input openAIP airspace directory path not found."<< std::endl;
 			break;

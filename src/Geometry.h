@@ -41,6 +41,8 @@ public:
 		inline void GetLonDegMin(int& deg, double& min) const { return convertDec2DegMin(lon, deg, min); }
 		inline void GetLatDegMinSec(int& deg, int& min, int& sec) const { return convertDec2DegMinSec(lat, deg, min, sec); }
 		inline void GetLonDegMinSec(int& deg, int& min, int& sec) const { return convertDec2DegMinSec(lon, deg, min, sec); }
+		inline bool GetAutoLatDegMinSec(int& deg, double& decimalMin, int& min, int& sec) const { return autoConvertDec2DegMinSec(lat, deg, decimalMin, min, sec); }
+		inline bool GetAutoLonDegMinSec(int& deg, double& decimalMin, int& min, int& sec) const { return autoConvertDec2DegMinSec(lon, deg, decimalMin, min, sec); }
 		inline char GetNorS() const { return lat > 0 ? 'N' : 'S'; }
 		inline char GetEorW() const { return lon > 0 ? 'E' : 'W'; }
 		inline bool IsValid() const { return IsValidLat(lat) &&  IsValidLon(lon); }
@@ -53,7 +55,8 @@ public:
 		double lat, lon;
 		static void convertDec2DegMin(const double& dec, int& deg, double& min);
 		static void convertDec2DegMinSec(const double& dec, int& deg, int& min, int& sec);
-		static const double SIXTYTH;
+		static bool autoConvertDec2DegMinSec(const double& dec, int& deg, double& decimalMin, int& min, int& sec);
+		static const double SIXTY;
 	};
 
 	class Limits {

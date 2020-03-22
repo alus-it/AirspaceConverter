@@ -86,9 +86,11 @@ public:
 	inline unsigned long GetNumOfWaypoints() const { return (unsigned long)waypoints.size(); }
 	int GetNumOfTerrainMaps() const;
 	bool FilterOnLatLonLimits(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon);
-	inline void DoNotCalculateArcsAndCirconferences(const bool doNotCalcArcs = true) { doNotCalculateArcs = doNotCalcArcs; }
-	inline void WriteCoordinatesAsDDMMSS(const bool DDMMSS = true) { writeCoordinatesAsDDMMSS = DDMMSS; }
 	inline void ProcessTracksAsAirspaces(const bool treatTracksAsAirspaces = true) { processLineStrings = treatTracksAsAirspaces; }
+	static void DoNotCalculateArcsAndCirconferences(const bool doNotCalcArcs = true);
+	static void SetOpenAirCoodinatesAutomatic();
+	static void SetOpenAirCoodinatesInDecimalMinutes();
+	static void SetOpenAirCoodinatesInSeconds();
 
 	static const std::vector<std::string> disclaimer;
 	static const std::string basePath;
@@ -107,6 +109,5 @@ private:
 	std::vector<std::string> airspaceFiles, terrainRasterMapFiles, waypointFiles;
 	bool conversionDone;
 	bool doNotCalculateArcs;
-	bool writeCoordinatesAsDDMMSS;
 	bool processLineStrings;
 };

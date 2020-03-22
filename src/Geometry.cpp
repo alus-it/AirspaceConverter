@@ -18,7 +18,7 @@
 
 const int Geometry::LatLon::UNDEF_LAT = -91;
 const int Geometry::LatLon::UNDEF_LON = -181;
-const double Geometry::LatLon::SIXTYTH = 1.0 / 60;
+const double Geometry::LatLon::SIXTY = 60;
 
 const double Geometry::PI = 3.1415926535897932384626433832795;
 const double Geometry::TWO_PI = PI * 2;
@@ -26,7 +26,7 @@ const double Geometry::PI_2 = PI / 2;
 const double Geometry::DEG2RAD = PI / 180;
 const double Geometry::RAD2DEG = 180.0 / PI;
 const double Geometry::NM2RAD = PI / (180 * 60);
-const double Geometry::RAD2NM = (180.0 * 60.0) / PI;
+const double Geometry::RAD2NM = (180.0 * 60) / PI;
 const double Geometry::NM2M = 1852.0;
 const double Geometry::MI2M = 1609.344;
 const double Geometry::M2RAD = NM2RAD / NM2M;
@@ -38,20 +38,16 @@ double Geometry::resolution = 0.3 * NM2RAD; // 0.3 NM = 555.6 m
 void Geometry::LatLon::convertDec2DegMin(const double& dec, int& deg, double& min) {
 	const double decimal = std::fabs(dec);
 	deg = (int)std::floor(decimal);
-	min = (decimal-deg)/SIXTYTH;
+	min = (decimal-deg)*SIXTY;
 	if (std::fabs(min) <= TOL) min = 0;
 }
 
 void Geometry::LatLon::convertDec2DegMinSec(const double& dec, int& deg, int& min, int& sec) {
 	double decimal = std::fabs(dec);
 	deg = (int)std::floor(decimal);
-	decimal = (decimal-deg)/SIXTYTH;
+	decimal = (decimal-deg)*SIXTY;
 	min = (int)std::floor(decimal);
-	if (min == 60) {
-		deg++;
-		min = 0;
-	}
-	sec = (int)std::round((decimal-min)/SIXTYTH);
+	sec = (int)std::round((decimal-min)*SIXTY);
 	if (sec == 60) {
 		min++;
 		sec = 0;
@@ -60,6 +56,28 @@ void Geometry::LatLon::convertDec2DegMinSec(const double& dec, int& deg, int& mi
 		deg++;
 		min = 0;
 	}
+}
+
+bool Geometry::LatLon::autoConvertDec2DegMinSec(const double& dec, int& deg, double& decimalMin, int& min, int& sec) {
+	double decimal = std::fabs(dec);
+	deg = (int)std::floor(decimal);
+	decimalMin = (decimal-deg)*SIXTY;
+	min = (int)std::floor(decimalMin);
+	decimal = (decimalMin-min)*SIXTY;
+	sec = (int)std::round(decimal);
+	if (decimal - sec <= 0.05) { // 0.05 sec = 1.643 m
+		if (sec == 60) {
+			min++;
+			sec = 0;
+		}
+		if (min == 60) {
+			deg++;
+			min = 0;
+		}
+		return true;
+	}
+	if (std::fabs(decimalMin) <= TOL) decimalMin = 0;
+	return false;
 }
 
 bool Geometry::Limits::Set(const LatLon& topLeftLimit, const LatLon& bottomRightLimit) {
@@ -337,7 +355,7 @@ double Geometry::RoundDistanceInNM(const double radiusRad) {
 	double radius(radiusRad * RAD2NM); // [NM]
 	const double radius100(radius * 100); // [NM * 100] approximate on cents of NM
 	const double nearestInt(std::round(radius100)); // [NM * 100]
-	const double diff(fabs(nearestInt - radius100)); // [NM * 100]
+	const double diff(std::fabs(nearestInt - radius100)); // [NM * 100]
 	if (nearestInt != 0 && diff > 0 && diff < 0.25) radius = nearestInt / 100; //0.0025 NM = 4.63 m
 	return radius;
 }
