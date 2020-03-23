@@ -139,7 +139,7 @@ void MainWindow::startBusy() {
     ui->defaultAltSpinBox->setEnabled(false);
     ui->QNHspinBox->setEnabled(false);
     ui->onlyPointsCheckBox->setEnabled(false);
-    ui->secondsCheckBox->setEnabled(false);
+    ui->openAirCoordinateTypeComboBox->setEnabled(false);
     ui->convertButton->setEnabled(false);
     ui->openOutputFileButton->setEnabled(false);
     ui->openOutputFolderButton->setEnabled(false);
@@ -170,9 +170,12 @@ void MainWindow::refreshUI() {
     ui->unloadTerrainMapsButton->setEnabled(converter->GetNumOfTerrainMaps()>0);
     ui->filterButton->setEnabled(converter->GetNumOfAirspaces()>0 || converter->GetNumOfWaypoints()>0);
     ui->defaultAltSpinBox->setEnabled(isKMZ);
+    ui->defaultTerrainLabel->setEnabled(isKMZ);
+    ui->meterLabel->setEnabled(isKMZ);
     ui->QNHspinBox->setEnabled(converter->GetNumOfAirspaces()==0);
     ui->onlyPointsCheckBox->setEnabled(isOpenAir);
-    ui->secondsCheckBox->setEnabled(isOpenAir);
+    ui->openAirCoordinateTypeComboBox->setEnabled(isOpenAir);
+    ui->openAirCoordonateFormatLabel->setEnabled(isOpenAir);
     ui->convertButton->setEnabled(!converter->GetOutputFile().empty() && ((airspaceOutput && converter->GetNumOfAirspaces()>0) || (waypointsOutput && converter->GetNumOfWaypoints()>0)));
     ui->openOutputFileButton->setEnabled(converter->IsConversionDone());
     ui->openOutputFolderButton->setEnabled(converter->IsConversionDone());
@@ -408,14 +411,14 @@ void MainWindow::on_convertButton_clicked() {
 
     // Ask confirmation to overwrite any other file that will be created during the conversion process
     switch(converter->GetOutputType()) {
-    case AirspaceConverter::OutputType::KMZ_Format:
-        if(boost::filesystem::exists(boost::filesystem::path(path.parent_path() / boost::filesystem::path("doc.kml"))) && QMessageBox::warning(this, "Overwrite?", tr("The already existing doc.kml file will be deleted, continue?"), QMessageBox::Yes | QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) return;
-        break;
-    case AirspaceConverter::OutputType::Garmin_Format:
-        if(boost::filesystem::exists(path.replace_extension(".mp")) && QMessageBox::warning(this, "Overwrite?", tr("The already existing .MP file will be deleted, continue?"), QMessageBox::Yes | QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) return;
-        break;
-    default:
-        break;
+        case AirspaceConverter::OutputType::KMZ_Format:
+            if(boost::filesystem::exists(boost::filesystem::path(path.parent_path() / boost::filesystem::path("doc.kml"))) && QMessageBox::warning(this, "Overwrite?", tr("The already existing doc.kml file will be deleted, continue?"), QMessageBox::Yes | QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) return;
+            break;
+        case AirspaceConverter::OutputType::Garmin_Format:
+            if(boost::filesystem::exists(path.replace_extension(".mp")) && QMessageBox::warning(this, "Overwrite?", tr("The already existing .MP file will be deleted, continue?"), QMessageBox::Yes | QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) return;
+            break;
+        default:
+            break;
     }
 
     // Start work...
@@ -426,7 +429,18 @@ void MainWindow::on_convertButton_clicked() {
 
     // Set OpenAir settings
     converter->DoNotCalculateArcsAndCirconferences(ui->onlyPointsCheckBox->isChecked());
-    converter->WriteCoordinatesAsDDMMSS(ui->secondsCheckBox->isChecked());
+    switch(ui->openAirCoordinateTypeComboBox->currentIndex()) {
+        case 0: //OpenAir::CoordinateType::DEG_DECIMAL_MIN
+            converter->SetOpenAirCoodinatesInDecimalMinutes();
+            break;
+        case 1: //OpenAir::CoordinateType::DEG_MIN_SEC
+            converter->SetOpenAirCoodinatesInSeconds();
+            break;
+        default:
+            assert(false);
+        case 2: //OpenAir::CoordinateType::AUTO
+            converter->SetOpenAirCoodinatesAutomatic();
+    }
 
     // Let the libAirspaceConverter to do the work in a separate thread...
     watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::Convert));

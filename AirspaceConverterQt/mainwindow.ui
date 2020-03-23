@@ -483,7 +483,7 @@
      <rect>
       <x>20</x>
       <y>210</y>
-      <width>151</width>
+      <width>141</width>
       <height>16</height>
      </rect>
     </property>
@@ -497,9 +497,9 @@
    <widget class="QDoubleSpinBox" name="QNHspinBox">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>170</x>
       <y>200</y>
-      <width>131</width>
+      <width>111</width>
       <height>31</height>
      </rect>
     </property>
@@ -519,9 +519,9 @@
    <widget class="QLabel" name="label_7">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>290</x>
       <y>210</y>
-      <width>591</width>
+      <width>461</width>
       <height>20</height>
      </rect>
     </property>
@@ -532,12 +532,12 @@
      <string>hPa   (used to calculate altitude of flight levels, only during input)</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_8">
+   <widget class="QLabel" name="defaultTerrainLabel">
     <property name="geometry">
      <rect>
       <x>20</x>
       <y>250</y>
-      <width>151</width>
+      <width>141</width>
       <height>16</height>
      </rect>
     </property>
@@ -548,12 +548,12 @@
      <string>Default terrain alt:</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_9">
+   <widget class="QLabel" name="meterLabel">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>290</x>
       <y>250</y>
-      <width>251</width>
+      <width>31</width>
       <height>20</height>
      </rect>
     </property>
@@ -561,15 +561,15 @@
      <locale language="English" country="UnitedStates"/>
     </property>
     <property name="text">
-     <string>m      (if not covered by terrain maps)</string>
+     <string>m</string>
     </property>
    </widget>
    <widget class="QSpinBox" name="defaultAltSpinBox">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>170</x>
       <y>240</y>
-      <width>131</width>
+      <width>111</width>
       <height>31</height>
      </rect>
     </property>
@@ -709,9 +709,9 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>580</x>
+      <x>330</x>
       <y>250</y>
-      <width>131</width>
+      <width>221</width>
       <height>21</height>
      </rect>
     </property>
@@ -719,26 +719,57 @@
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Only when writing to OpenAir this option forces the converter to don't use OpenAir arc (DA) and circle (DC) definititions but only points (DP). This option can be useful when comparing to other OpenAir files made with only points, otherwise it is better to keep it disabled and take advantage of the use of arcs and circles, resulting in smaller OpenAir files.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="text">
-     <string>Use only points</string>
+     <string>Use only OpenAir DP points</string>
     </property>
    </widget>
-   <widget class="QCheckBox" name="secondsCheckBox">
+   <widget class="QComboBox" name="openAirCoordinateTypeComboBox">
     <property name="enabled">
      <bool>false</bool>
     </property>
     <property name="geometry">
      <rect>
-      <x>720</x>
-      <y>250</y>
-      <width>211</width>
-      <height>21</height>
+      <x>770</x>
+      <y>240</y>
+      <width>151</width>
+      <height>31</height>
      </rect>
     </property>
-    <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Only when writing to OpenAir this option forces the converter to express the coordinates using degrees minutes and seconds (DD:MM:SS). This option can be useful when comparing to other OpenAir files with coordinates expressed in the traditional way. Otherwise the coordinates are expressed in degrees and decimal minutes (DD:MM.MMM) which is more precise.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <property name="currentIndex">
+     <number>2</number>
+    </property>
+    <item>
+     <property name="text">
+      <string>DD:MM.MMM</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>DD:MM:SS</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Auto</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="openAirCoordonateFormatLabel">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>250</y>
+      <width>201</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="locale">
+     <locale language="English" country="UnitedStates"/>
     </property>
     <property name="text">
-     <string>Use DD:MM:SS coordinates</string>
+     <string>OpenAir coordiante format:</string>
     </property>
    </widget>
   </widget>
