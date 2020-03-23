@@ -85,7 +85,7 @@ private:
 	CEdit editQNHtextField;
 	CEdit editDefualtAltTextField;
 	CButton pointsCheckBox;
-	CButton secondsCheckBox;
+	CComboBox OpenAirCoordinateFormatCombo;
 	CRichEditCtrl LoggingBox;
 	CProgressCtrl progressBar;
 

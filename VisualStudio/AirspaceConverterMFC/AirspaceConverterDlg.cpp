@@ -128,7 +128,7 @@ void CAirspaceConverterDlg::DoDataExchange(CDataExchange* pDX) {
 	DDX_Control(pDX, IDC_LOG, LoggingBox);
 	DDX_Control(pDX, IDC_COMBO_OUTPUT_TYPE, OutputTypeCombo);
 	DDX_Control(pDX, IDC_CHECK_POINTS, pointsCheckBox);
-	DDX_Control(pDX, IDC_CHECK_SECONDS, secondsCheckBox);
+	DDX_Control(pDX, IDC_COMBO_OPENAIR_COORD_FORMAT, OpenAirCoordinateFormatCombo);
 }
 
 BEGIN_MESSAGE_MAP(CAirspaceConverterDlg, CDialog)
@@ -204,6 +204,12 @@ BOOL CAirspaceConverterDlg::OnInitDialog() {
 		OpenOutputFolderBt.EnableWindow(FALSE);
 	}
 #endif
+
+	// Initialize OpenAir coordinate format combo box
+	OpenAirCoordinateFormatCombo.InsertString(-1, _T("DD:MM.MMM"));
+	OpenAirCoordinateFormatCombo.InsertString(-1, _T("DD:MM:SS"));
+	OpenAirCoordinateFormatCombo.InsertString(-1, _T("Auto"));
+	OpenAirCoordinateFormatCombo.SetCurSel(2);
 
 	// Initialize progress bar, necessary to do that that here to make it work properly also on WindowsXP
 	progressBar.SetPos(0);
@@ -332,7 +338,7 @@ void CAirspaceConverterDlg::StartBusy() {
 	editQNHtextField.EnableWindow(FALSE);
 	editDefualtAltTextField.EnableWindow(FALSE);
 	pointsCheckBox.EnableWindow(FALSE);
-	secondsCheckBox.EnableWindow(FALSE);
+	OpenAirCoordinateFormatCombo.EnableWindow(FALSE);
 	ClearLogBt.EnableWindow(FALSE);
 	CloseButton.EnableWindow(FALSE);
 
@@ -435,7 +441,7 @@ void CAirspaceConverterDlg::EndBusy(const bool takeTime /* = false */) {
 	editQNHtextField.EnableWindow(isKmzFile ? numAirspacesLoaded == 0 : FALSE);
 	editDefualtAltTextField.EnableWindow(isKmzFile);
 	pointsCheckBox.EnableWindow(isOpenAirFile);
-	secondsCheckBox.EnableWindow(isOpenAirFile);
+	OpenAirCoordinateFormatCombo.EnableWindow(isOpenAirFile);
 	ClearLogBt.EnableWindow(TRUE);
 	CloseButton.EnableWindow(TRUE);
 	progressBar.SetMarquee(FALSE, 1);
@@ -653,7 +659,7 @@ void CAirspaceConverterDlg::OnBnClickedOutputTypeCombo() {
 	editQNHtextField.EnableWindow(isKmzFile ? numAirspacesLoaded == 0 : FALSE);
 	editDefualtAltTextField.EnableWindow(isKmzFile);
 	pointsCheckBox.EnableWindow(isOpenAirFile);
-	secondsCheckBox.EnableWindow(isOpenAirFile);
+	OpenAirCoordinateFormatCombo.EnableWindow(isOpenAirFile);
 	ConvertBt.EnableWindow((numAirspacesLoaded > 0 || ((isKmzFile || isSeeYouFile) && numWaypointsLoaded > 0)) && !outputFile.empty() ? TRUE : FALSE);
 	UpdateData(FALSE);
 }
@@ -710,7 +716,18 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 		break;
 	case AirspaceConverter::OpenAir_Format:
 		converter->DoNotCalculateArcsAndCirconferences(pointsCheckBox.GetCheck() == BST_CHECKED);
-		converter->WriteCoordinatesAsDDMMSS(secondsCheckBox.GetCheck() == BST_CHECKED);
+		switch (OpenAirCoordinateFormatCombo.GetCurSel()) {
+			case 0: //OpenAir::CoordinateType::DEG_DECIMAL_MIN
+				converter->SetOpenAirCoodinatesInDecimalMinutes();
+				break;
+			case 1: //OpenAir::CoordinateType::DEG_MIN_SEC
+				converter->SetOpenAirCoodinatesInSeconds();
+				break;
+			case 2: //OpenAir::CoordinateType::AUTO
+			default:
+				converter->SetOpenAirCoodinatesAutomatic();
+				break;
+		}
 		if (processor != nullptr && processor->Convert()) StartBusy();
 		else MessageBox(_T("Error while starting Polish output thread."), _T("Error"), MB_ICONERROR);
 		break;
