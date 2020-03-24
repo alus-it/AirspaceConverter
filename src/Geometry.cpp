@@ -360,6 +360,11 @@ double Geometry::RoundDistanceInNM(const double radiusRad) {
 	return radius;
 }
 
+bool Geometry::IsInt(const double& number, int& intVal) {
+	intVal = (int)std::round(number);
+	return std::fabs(number-intVal) < TOL;
+}
+
 bool Geometry::CalcAirfieldPolygon(const double lat, const double lon, const int length, const int dir, std::vector<LatLon>& polygon) {
 	static const double thrtyMeters = 30.0 * M2RAD;
 	assert(polygon.empty());

@@ -688,9 +688,14 @@ void OpenAir::WriteSector(const Sector& sector) {
 	}
 	file << "V X=";
 	WriteLatLon(sector.GetCenterPoint());
-	file << "\r\nDB ";
-	WriteLatLon(sector.GetStartPoint());
-	file << ",";
-	WriteLatLon(sector.GetEndPoint());
+	int dir1, dir2;
+	if (Geometry::IsInt(sector.GetAngleStart(),dir1) && Geometry::IsInt(sector.GetAngleEnd(),dir2))
+		file << "\r\nDA " << sector.GetRadiusNM() << "," << dir1 << "," << dir2;
+	else {
+		file << "\r\nDB ";
+		WriteLatLon(sector.GetStartPoint());
+		file << ",";
+		WriteLatLon(sector.GetEndPoint());
+	}
 	file << "\r\n";
 }

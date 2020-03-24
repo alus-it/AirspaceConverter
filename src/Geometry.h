@@ -48,7 +48,6 @@ public:
 		inline bool IsValid() const { return IsValidLat(lat) &&  IsValidLon(lon); }
 		inline static bool IsValidLat(const double& la) { return la >= -90 && la <= 90; }
 		inline static bool IsValidLon(const double& lo) { return lo >= -180 && lo <= 180; }
-
 		static const int UNDEF_LAT, UNDEF_LON;
 
 	private:
@@ -121,7 +120,7 @@ protected:
 	static LatLon AveragePoints(const std::vector<std::pair<const double, const double>>& centerPoints);
 	static double AverageRadius(const Geometry::LatLon& center, const std::vector<LatLon*>& circlePoints);
 	static double RoundDistanceInNM(const double radiusRad);
-
+	static bool IsInt(const double& number, int& intVal);
 
 private:
 	static const double PI;
@@ -154,6 +153,8 @@ public:
 	inline bool IsClockwise() const { return clockwise; }
 	inline const LatLon& GetStartPoint() const { return A; }
 	inline const LatLon& GetEndPoint() const { return B; }
+	inline double GetAngleStart() const { return RAD2DEG * angleStart; }
+	inline double GetAngleEnd() const { return RAD2DEG * angleEnd; }
 
 private:
 	void WriteOpenAirGeometry(OpenAir& openAir) const;
