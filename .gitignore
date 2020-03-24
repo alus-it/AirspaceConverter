@@ -86,6 +86,9 @@ build-*
 *.tmp
 *.cache
 
+# Generated readme
+/VisualStudio/Readme.rtf
+
 # QT stuff
 *.user
 *.pro.user.*
