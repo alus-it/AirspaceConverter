@@ -734,6 +734,9 @@
       <height>31</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose here the output format for coordinates in OpenAir. Coordinates expressed as DD:MM:SS (with seconds) are more compact and readable while DD:MM.MMM (with decimal minutes) are more accurate. &amp;quot;Auto&amp;quot; will automatically use the more convenient format every time: with seconds when the coordinate matches a specific second value or in decimal minutes in the other cases to remain accurate.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
     <property name="currentIndex">
      <number>2</number>
     </property>
