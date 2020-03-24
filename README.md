@@ -72,7 +72,7 @@ Possible options:
   - **-o**: optional, output file **.kmz**, **.txt** (_OpenAir_), **.cup** (_SeeYou_), **.img** (_Garmin_) or **.mp** (_Polish_). If not specified will be used the name of first input file as **KMZ**  
   - **-p**: optional, when writing in _OpenAir_ avoid to use arcs and circles but only points (DP)  
   - **-s**: optional, when writing in _OpenAir_ use coordinates always with minutes and seconds (DD:MM:SS)  
-  - **-d**: optional, when writing in _OpenAir_ use coordinates always with decimal minutes (DD:MM.MMM)"  
+  - **-d**: optional, when writing in _OpenAir_ use coordinates always with decimal minutes (DD:MM.MMM)  
   - **-t**: optional, when reading **KML**/**KMZ** files treat also "LineString" tracks as airspaces  
   - **-v**: print version number  
   - **-h**: print short guide  

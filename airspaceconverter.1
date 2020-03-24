@@ -110,11 +110,14 @@ By default, without this option, arcs and circles are used even attepmting to re
 .TP
 .BR \-s
 When writing to OpenAir this option will force coordinates expressed always in degrees minutes and seconds (DD:MM:SS).
-By default, without this option, the coordinates are automatically expressed in the most compact or accurate format.
+Coordinates expressed as DD:MM:SS (with seconds) are more compact and readable but less accurate since one second can be more than 30 meters.
+By default, without this option, the coordinates are automatically expressed in the most compact or accurate format every time:
+with seconds when the coordinate matches a specific second value (whitin 1/20 of second, 1.64 m) or in decimal minutes in the other cases to remain accurate.
 .TP
 .BR \-d
 When writing to OpenAir this option will force coordinates expressed always in degrees and decimal minutes (DD:MM.MMM).
-As the previous option -s, by default, the coordinates are automatically expressed in the most convenient format.
+Coordinates expressed as DD:MM.MMM (with decimal minutes) are usually more accurate but less compact and readable.
+Without this option, by default, as described above, the coordinates are automatically expressed in the most convenient format.
 .TP
 .BR \-t
 When reading from KML/KMZ this option will make also the "LineString" tracks to be imported as airspaces.
