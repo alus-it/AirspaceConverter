@@ -80,6 +80,12 @@ bool Geometry::LatLon::autoConvertDec2DegMinSec(const double& dec, int& deg, dou
 	return false;
 }
 
+bool Geometry::LatLon::IsAlmostEqual(const LatLon& other) const {
+	if (*this == other) return true;
+	//TODO: find a proper tolerance, TOL seems way too small here lat lon are in degrees....
+	return std::fabs(lat-other.lat) <= TOL && std::fabs(lon-other.lon) < TOL;
+}
+
 bool Geometry::Limits::Set(const LatLon& topLeftLimit, const LatLon& bottomRightLimit) {
 	assert(topLeftLimit.IsValid());
 	assert(bottomRightLimit.IsValid());

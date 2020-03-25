@@ -571,7 +571,19 @@ bool OpenAir::Write(const std::string& fileName) {
 		}
 		
 		// Otherwise write every single point (except the last one which is the same)
-		else for (size_t i = 0; i < a.GetNumberOfPoints() - 1; i++) WritePoint(a.GetPointAt(i));
+		else {
+			Geometry::LatLon prevPoint = a.GetPointAt(0);
+			WritePoint(prevPoint);
+			for (size_t i = 1; i < a.GetNumberOfPoints() - 1; i++) {
+				const Geometry::LatLon& thisPoint = a.GetPointAt(i);
+
+				// Write each point avoiding repeated points
+				if (!thisPoint.IsAlmostEqual(prevPoint)) {
+					WritePoint(thisPoint);
+					prevPoint = thisPoint;
+				}
+			}
+		}
 
 		// Add an empty line at the end of the airspace
 		file << "\r\n";

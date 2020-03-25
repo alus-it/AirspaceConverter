@@ -48,6 +48,7 @@ public:
 		inline bool IsValid() const { return IsValidLat(lat) &&  IsValidLon(lon); }
 		inline static bool IsValidLat(const double& la) { return la >= -90 && la <= 90; }
 		inline static bool IsValidLon(const double& lo) { return lo >= -180 && lo <= 180; }
+		bool IsAlmostEqual(const LatLon& other) const;
 		static const int UNDEF_LAT, UNDEF_LON;
 
 	private:
