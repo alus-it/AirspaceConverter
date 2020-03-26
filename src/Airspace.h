@@ -116,6 +116,7 @@ public:
 	void AddGeometry(const Geometry* geometry);
 	bool ClosePoints();
 	bool ArePointsValid() const;
+	void RemoveTooCloseConsecutivePoints();
 	bool Undiscretize();
 	bool IsWithinLimits(const Geometry::Limits& limits) const;
 	inline void CutPointsFrom(Airspace& orig) { points = std::move(orig.points); }

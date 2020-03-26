@@ -356,8 +356,8 @@ bool Airspace::AddPoint(const Geometry::LatLon& point) {
 bool Airspace::AddPointLatLonOnly(const double& lat, const double& lon) {
 	const Geometry::LatLon point(lat, lon);
 
-	// Make sure the point is not a duplicate of the last, not necessary to add it
-	if (!points.empty() && points.back() == point) return false;
+	// Make sure the point is not a duplicate or very similar to the last, not necessary to add it
+	if (!points.empty() && point.IsAlmostEqual(points.back())) return false;
 
 	// Add the point
 	points.push_back(point);
@@ -392,6 +392,19 @@ bool Airspace::ArePointsValid() const {
 	
 	// If we arrived here it is all OK
 	return true;
+}
+
+void Airspace::RemoveTooCloseConsecutivePoints() {
+	if (points.size() < 2) return;
+	auto prevPoint = points.begin();
+	auto it = prevPoint + 1; // second element
+	while (it != points.end()) {
+		if ((*it).IsAlmostEqual(*prevPoint)) it = points.erase(it);
+		else {
+			prevPoint = it;
+			it++;
+		}
+	}
 }
 
 bool Airspace::ClosePoints() {

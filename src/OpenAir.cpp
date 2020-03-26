@@ -476,6 +476,9 @@ bool OpenAir::InsertAirspace(Airspace& airspace) {
 		validAirspace = false;
 	}
 
+	// Remove repeated or very similar consecutive points
+	airspace.RemoveTooCloseConsecutivePoints();
+
 	// Ensure that the points are closed
 	if (validAirspace && !airspace.ClosePoints()) {
 		AirspaceConverter::LogError(boost::str(boost::format("at line %1d: skip airspace %2s with less than 3 points.") % lastACline % airspace.GetName()));
@@ -569,21 +572,9 @@ bool OpenAir::Write(const std::string& fileName) {
 			// Write each geometry
 			for (size_t i = 0; i < numOfGeometries; i++) a.GetGeometryAt(i)->WriteOpenAirGeometry(*this);
 		}
-		
-		// Otherwise write every single point (except the last one which is the same)
-		else {
-			Geometry::LatLon prevPoint = a.GetPointAt(0);
-			WritePoint(prevPoint);
-			for (size_t i = 1; i < a.GetNumberOfPoints() - 1; i++) {
-				const Geometry::LatLon& thisPoint = a.GetPointAt(i);
 
-				// Write each point avoiding repeated points
-				if (!thisPoint.IsAlmostEqual(prevPoint)) {
-					WritePoint(thisPoint);
-					prevPoint = thisPoint;
-				}
-			}
-		}
+		// Otherwise write every single point (except the last one which is the same)
+		else for (size_t i = 0; i < a.GetNumberOfPoints() - 1; i++) WritePoint(a.GetPointAt(i));
 
 		// Add an empty line at the end of the airspace
 		file << "\r\n";

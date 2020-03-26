@@ -57,6 +57,7 @@ public:
 		static void convertDec2DegMinSec(const double& dec, int& deg, int& min, int& sec);
 		static bool autoConvertDec2DegMinSec(const double& dec, int& deg, double& decimalMin, int& min, int& sec);
 		static const double SIXTY;
+		static const double DEGTOL;
 	};
 
 	class Limits {

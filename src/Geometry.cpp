@@ -19,6 +19,8 @@
 const int Geometry::LatLon::UNDEF_LAT = -91;
 const int Geometry::LatLon::UNDEF_LON = -181;
 const double Geometry::LatLon::SIXTY = 60;
+const double Geometry::LatLon::DEGTOL = 1.666666e-6; //0.0001 min
+//const double Geometry::LatLon::DEGTOL = 2.7778e-5; //0.1 sec
 
 const double Geometry::PI = 3.1415926535897932384626433832795;
 const double Geometry::TWO_PI = PI * 2;
@@ -65,7 +67,7 @@ bool Geometry::LatLon::autoConvertDec2DegMinSec(const double& dec, int& deg, dou
 	min = (int)std::floor(decimalMin);
 	decimal = (decimalMin-min)*SIXTY;
 	sec = (int)std::round(decimal);
-	if (decimal - sec <= 0.05) { // 0.05 sec = 1.643 m
+	if (decimal - sec <= 0.05) { // 0.05 sec = 1.5433 m
 		if (sec == 60) {
 			min++;
 			sec = 0;
@@ -82,8 +84,7 @@ bool Geometry::LatLon::autoConvertDec2DegMinSec(const double& dec, int& deg, dou
 
 bool Geometry::LatLon::IsAlmostEqual(const LatLon& other) const {
 	if (*this == other) return true;
-	//TODO: find a proper tolerance, TOL seems way too small here lat lon are in degrees....
-	return std::fabs(lat-other.lat) <= TOL && std::fabs(lon-other.lon) < TOL;
+	return std::fabs(lat-other.lat) < DEGTOL && std::fabs(lon-other.lon) < DEGTOL;
 }
 
 bool Geometry::Limits::Set(const LatLon& topLeftLimit, const LatLon& bottomRightLimit) {
