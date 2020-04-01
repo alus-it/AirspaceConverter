@@ -19,9 +19,7 @@
 const int Geometry::LatLon::UNDEF_LAT = -91;
 const int Geometry::LatLon::UNDEF_LON = -181;
 const double Geometry::LatLon::SIXTY = 60;
-const double Geometry::LatLon::DEGTOL = 1.666666e-6; //0.0001 min
-//const double Geometry::LatLon::DEGTOL = 2.7778e-5; //0.1 sec
-
+const double Geometry::LatLon::DEGTOL = 0.00005 * (1.0 / 60); //0.00005 min = 0.0926 m
 const double Geometry::PI = 3.1415926535897932384626433832795;
 const double Geometry::TWO_PI = PI * 2;
 const double Geometry::PI_2 = PI / 2;
