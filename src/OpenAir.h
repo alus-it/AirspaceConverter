@@ -58,8 +58,7 @@ private:
 	bool InsertAirspace(Airspace& airspace);
 	void WriteHeader();
 	bool WriteCategory(const Airspace& airsapce);
-	void WriteLatLon(const Geometry::LatLon& point);
-	void WritePoint(const Geometry::LatLon& point);
+	void WritePoint(const Geometry::LatLon& point, bool isCenterPoint = false, bool addPrefix = true);
 	void WritePoint(const Point& point);
 	void WriteCircle(const Circle& circle);
 	void WriteSector(const Sector& sector);
@@ -72,4 +71,6 @@ private:
 	//double varWidth;
 	std::ofstream file;
 	int lastACline;
+	bool lastPointWasDDMMSS;
+	int lastLatD, lastLatM, lastLatS, lastLonD, lastLonM, lastLonS;
 };

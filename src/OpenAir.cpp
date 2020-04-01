@@ -26,7 +26,14 @@ OpenAir::CoordinateType OpenAir::coordinateType = OpenAir::CoordinateType::AUTO;
 OpenAir::OpenAir(std::multimap<int, Airspace>& airspacesMap):
 	airspaces(airspacesMap),
 	varRotationClockwise(true),
-	lastACline(-1) {
+	lastACline(-1),
+	lastPointWasDDMMSS(false),
+	lastLatD(Geometry::LatLon::UNDEF_LAT),
+	lastLatM(0),
+	lastLatS(0),
+	lastLonD(Geometry::LatLon::UNDEF_LON),
+	lastLonM(0),
+	lastLonS(0) {
 }
 
 std::string& OpenAir::RemoveComments(std::string &s) {
@@ -630,13 +637,16 @@ bool OpenAir::WriteCategory(const Airspace& airspace) {
 			return false;
 	}
 	file << "AC " << openAirCategory << "\r\n";
+	lastPointWasDDMMSS = false;
 	return true;
 }
 
-void OpenAir::WriteLatLon(const Geometry::LatLon& point) {
-	int deg;
+void OpenAir::WritePoint(const Geometry::LatLon& point, bool isCenterPoint /* = false */, bool addPrefix /*= true*/) {
+	if (isCenterPoint && addPrefix) file << "V X=";
 	switch (coordinateType) {
 		case CoordinateType::DEG_DECIMAL_MIN: {
+			if (!isCenterPoint && addPrefix) file << "DP ";
+			int deg;
 			double decimalMin;
 			point.GetLatDegMin(deg, decimalMin);
 			file << deg << ":" << decimalMin << " " << point.GetNorS() << " ";
@@ -645,33 +655,50 @@ void OpenAir::WriteLatLon(const Geometry::LatLon& point) {
 		}
 		break;
 		case CoordinateType::DEG_MIN_SEC: {
-			int min, sec;
-			point.GetLatDegMinSec(deg, min, sec);
-			file << std::setw(2) << deg << ":" << std::setw(2) << min << ":" << std::setw(2) << sec << " " << point.GetNorS() << " ";
-			point.GetLonDegMinSec(deg, min, sec);
-			file << std::setw(3) << deg << ":" << std::setw(2) << min << ":" << std::setw(2) << sec <<" " << point.GetEorW();
+			int latD, latM, latS, lonD, lonM, lonS;
+			point.GetLatDegMinSec(latD, latM, latS);
+			point.GetLonDegMinSec(lonD, lonM, lonS);
+			if (!isCenterPoint) {
+				if (lastPointWasDDMMSS && latD == lastLatD && latM == lastLatM && latS == lastLatS && lonD == lastLonD && lonM == lastLonM && lonS == lastLonS) return;
+				lastPointWasDDMMSS = true;
+				lastLatD = latD;
+				lastLatM = latM;
+				lastLatS = latS;
+				lastLonD = lonD;
+				lastLonM = lonM;
+				lastLonS = lonS;
+			}
+			if (!isCenterPoint && addPrefix) file << "DP ";
+			file << std::setw(2) << latD << ":" << std::setw(2) << latM << ":" << std::setw(2) << latS << " " << point.GetNorS() << " ";
+			file << std::setw(3) << lonD << ":" << std::setw(2) << lonM << ":" << std::setw(2) << lonS << " " << point.GetEorW();
 		}
 		break;
 		case CoordinateType::AUTO:
 		default: {
-			int min, sec;
-				double decimalMin;
-			if (point.GetAutoLatDegMinSec(deg, decimalMin, min, sec))
-				file << std::setw(2) << deg << ":" << std::setw(2) << min << ":" << std::setw(2) << sec << " " << point.GetNorS() << " ";
-			else
-				file << deg << ":" << decimalMin << " " << point.GetNorS() << " ";
-			if (point.GetAutoLonDegMinSec(deg, decimalMin, min, sec))
-				file << std::setw(3) << deg << ":" << std::setw(2) << min << ":" << std::setw(2) << sec <<" " << point.GetEorW();
-			else
-				file << deg << ":" << decimalMin << " " << point.GetEorW();
+			int latD, latM, latS, lonD, lonM, lonS;
+			double decimalLatM, decimalLonM;
+			const bool latDDMMSS = point.GetAutoLatDegMinSec(latD, decimalLatM, latM, latS);
+			const bool lonDDMMSS = point.GetAutoLonDegMinSec(lonD, decimalLonM, lonM, lonS);
+			if (!isCenterPoint) {
+				if (latDDMMSS && lonDDMMSS) {
+					if (lastPointWasDDMMSS && latD == lastLatD && latM == lastLatM && latS == lastLatS && lonD == lastLonD && lonM == lastLonM && lonS == lastLonS) return;
+					lastPointWasDDMMSS = true;
+					lastLatD = latD;
+					lastLatM = latM;
+					lastLatS = latS;
+					lastLonD = lonD;
+					lastLonM = lonM;
+					lastLonS = lonS;
+				} else lastPointWasDDMMSS = false;
+			}
+			if (!isCenterPoint && addPrefix) file << "DP ";
+			if (latDDMMSS) file << std::setw(2) << latD << ":" << std::setw(2) << latM << ":" << std::setw(2) << latS << " " << point.GetNorS() << " ";
+			else file << latD << ":" << decimalLatM << " " << point.GetNorS() << " ";
+			if (lonDDMMSS) file << std::setw(3) << lonD << ":" << std::setw(2) << lonM << ":" << std::setw(2) << lonS <<" " << point.GetEorW();
+			else file << lonD << ":" << decimalLonM << " " << point.GetEorW();
 		}
 	}
-}
-
-void OpenAir::WritePoint(const Geometry::LatLon& point) {
-	file << "DP ";
-	WriteLatLon(point);
-	file << "\r\n";
+	if (addPrefix) file << "\r\n";
 }
 
 void OpenAir::WritePoint(const Point& point) {
@@ -679,9 +706,8 @@ void OpenAir::WritePoint(const Point& point) {
 }
 
 void OpenAir::WriteCircle(const Circle& circle) {
-	file << "V X=";
-	WriteLatLon(circle.GetCenterPoint());
-	file << "\r\nDC " << circle.GetRadiusNM() << "\r\n";
+	WritePoint(circle.GetCenterPoint(),true);
+	file << "DC " << circle.GetRadiusNM() << "\r\n";
 }
 
 void OpenAir::WriteSector(const Sector& sector) {
@@ -689,16 +715,15 @@ void OpenAir::WriteSector(const Sector& sector) {
 		varRotationClockwise = !varRotationClockwise;
 		file << "V D=" << (varRotationClockwise ? "+" : "-") << "\r\n";
 	}
-	file << "V X=";
-	WriteLatLon(sector.GetCenterPoint());
+	WritePoint(sector.GetCenterPoint(),true);
 	int dir1, dir2;
 	if (Geometry::IsInt(sector.GetAngleStart(),dir1) && Geometry::IsInt(sector.GetAngleEnd(),dir2))
-		file << "\r\nDA " << sector.GetRadiusNM() << "," << dir1 << "," << dir2;
+		file << "DA " << sector.GetRadiusNM() << "," << dir1 << "," << dir2;
 	else {
-		file << "\r\nDB ";
-		WriteLatLon(sector.GetStartPoint());
+		file << "DB ";
+		WritePoint(sector.GetStartPoint(),true,false);
 		file << ",";
-		WriteLatLon(sector.GetEndPoint());
+		WritePoint(sector.GetEndPoint(),true,false);
 	}
 	file << "\r\n";
 }
