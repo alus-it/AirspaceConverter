@@ -69,7 +69,7 @@ void Altitude::SetFlightLevel(const int FL) {
 
 const std::string Altitude::ToString() const {
 	if (isUnlimited) return "UNLIMITED";
-	if (fl > 0) return "FL " + std::to_string(fl);
+	if (fl > 0) return "FL" + std::to_string(fl);
 	if (refIsMsl) {
 		if(altFt!=0) return std::to_string(altFt) + " FT AMSL";
 		else return "MSL";
