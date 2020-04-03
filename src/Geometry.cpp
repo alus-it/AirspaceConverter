@@ -217,11 +217,11 @@ Geometry::LatLon Geometry::CalcRadialPoint(const double& lat1, const double& lon
 double Geometry::FindStep(const double& radius, const double& angle) {
 	assert(angle >= 0 && angle <= TWO_PI);
 	assert(radius >= 0 && radius <= PI_2);
-	static const double smallRadius = 3 * NM2RAD; // 3 NM, radius under it the number of points will be decreased
-	static const double m = 300 / smallRadius; // coeffcient to decrease points for small circles, 300 is default number of points for circles bigger than 3 NM
-	const int steps((int)(radius < smallRadius ?
-			(angle * (m * radius + 8)) / TWO_PI: // 8 is the minimum number of points for circles with radius -> 0
-			(angle * radius) / resolution));
+	static const double smallRadius = NM2RAD * 3; // 3 NM, radius under it the number of points will be decreased
+	static const double m = 300.0 / smallRadius; // constant to decrease the number of points for small circles, 300 is default number of points for circles bigger than 3 NM
+	const int steps = (int)std::round(radius > smallRadius ?
+			(angle * radius) / resolution :
+			(angle * (m * radius + 8)) / TWO_PI); // 8 is the minimum number of points for smaller circles
 	return angle / steps;
 }
 
@@ -474,8 +474,14 @@ Circle::Circle(const LatLon& center, const double& radiusNM)
 }
 
 bool Circle::Discretize(std::vector<LatLon>& output) const {
-	const double step = FindStep(radius, TWO_PI);
-	for (double a = 0; a < TWO_PI; a += step) output.push_back(CalcRadialPoint(latc, lonc, a, radius));
+	static const double minimumRadius = NM2RAD * 0.012; // 0.012 NM = 22.224 m
+	if (radius > minimumRadius) {
+		const double step = FindStep(radius, TWO_PI);
+		for (double a = 0; a < TWO_PI; a += step) output.push_back(CalcRadialPoint(latc, lonc, a, radius));
+	} else {
+		const double step = PI_2;
+		for (double a = 0; a < TWO_PI; a += step) output.push_back(CalcRadialPoint(latc, lonc, a, minimumRadius));
+	}
 	return true;
 }
 
