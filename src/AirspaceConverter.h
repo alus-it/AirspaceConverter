@@ -108,6 +108,5 @@ private:
 	std::string outputFile;
 	std::vector<std::string> airspaceFiles, terrainRasterMapFiles, waypointFiles;
 	bool conversionDone;
-	bool doNotCalculateArcs;
 	bool processLineStrings;
 };
