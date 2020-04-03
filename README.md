@@ -88,12 +88,13 @@ This is the default way to use the graphical user interface:
 1. Choose the desired output format.
 2. If needed, specify the QNH to be used for calculating the height of flight levels, this must be done before reading airspace files.
 3. Specify a default terrain altitude to be used for the points not under terrain raster map coverage.
-4. Select as input multiple _openAIP_ (**.aip**) _OpenAir_ (**.txt**) and/or _openAIP_ (**.aip**) files or the folder containing them.
+4. Select as input multiple _openAIP_ (**.aip**) _OpenAir_ (**.txt**) and/or _GoogleEarth_ (**.kmz**) files or the folder containing them.
 5. And/or select one or multiple waypoints files (**.cup**) or the folder containing them.
-6. Optionally it is possible to load multiple raster map files (**.dem**) with the terrain altitude.
+6. If converting to _GoogleEarth_ it is possible to load multiple raster map files (**.dem**) with the terrain altitude.
 7. Optionally configure the latitude and longitude ranges for filtering the output.
+8. If converting to _OpenAir_ choose if to output only points and the desired coordinates format.
 8. Press the "Convert" button.
-9. Choose the output file and then the conversion process will start.
+9. The converter will ask where to save the converted file and then the conversion process will start.
 10. Verify if the output is correct and report any problem found.
 
 Disclaimer
