@@ -93,9 +93,9 @@ This is the default way to use the graphical user interface:
 6. If converting to _GoogleEarth_ it is possible to load multiple raster map files (**.dem**) with the terrain altitude.
 7. Optionally configure the latitude and longitude ranges for filtering the output.
 8. If converting to _OpenAir_ choose if to output only points and the desired coordinates format.
-8. Press the "Convert" button.
-9. The converter will ask where to save the converted file and then the conversion process will start.
-10. Verify if the output is correct and report any problem found.
+9. Press the "Convert" button.
+10. The converter will ask where to save the converted file and then the conversion process will start.
+11. Verify if the output is correct and report any problem found.
 
 Disclaimer
 ----------

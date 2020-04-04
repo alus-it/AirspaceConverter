@@ -27,12 +27,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_0F8526FAD43B47EB9B6EE21A4B0A758F"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_10D950CB76274A59941F3B11CC5037F5"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -304,26 +298,6 @@
             "TargetName" = "8:mounttop.png"
             "Tag" = "8:"
             "Folder" = "8:_6AF7675042C24C8BB07BA2489E831A52"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_0F8526FAD43B47EB9B6EE21A4B0A758F"
-            {
-            "SourcePath" = "8:..\\..\\README.md"
-            "TargetName" = "8:README.txt"
-            "Tag" = "8:"
-            "Folder" = "8:_DAC0292CD03D4BCEA4D5C690940A22F5"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -1238,7 +1212,7 @@
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_0F8526FAD43B47EB9B6EE21A4B0A758F"
+            "Target" = "8:_DD1F4878F95941539E16EF3A1861DBE5"
             "Folder" = "8:_1E84454B749741ED850615C73FF405B2"
             "WorkingFolder" = "8:_DAC0292CD03D4BCEA4D5C690940A22F5"
             "Icon" = "8:"
