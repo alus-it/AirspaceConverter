@@ -82,14 +82,14 @@ cp /Users/arealis/Qt/5.12.5/clang_64/lib/QtGui.framework/Versions/5/QtGui ./
 cp /Users/arealis/Qt/5.12.5/clang_64/lib/QtCore.framework/Versions/5/QtCore ./
 
 # Tell the CLI executable to use the libraries in the same folder
-install_name_tool -change libairspaceconverter.dylib @executable_path/libairspaceconverter.dylib ./airspaceconverter
+install_name_tool -change /usr/local/lib/libairspaceconverter.dylib @executable_path/libairspaceconverter.dylib ./airspaceconverter
 install_name_tool -change /usr/local/opt/libzip/lib/libzip.5.dylib @executable_path/libzip.5.dylib ./airspaceconverter
 install_name_tool -change /usr/local/opt/boost/lib/libboost_system.dylib @executable_path/libboost_system.dylib ./airspaceconverter
 install_name_tool -change /usr/local/opt/boost/lib/libboost_filesystem.dylib @executable_path/libboost_filesystem.dylib ./airspaceconverter
 install_name_tool -change /usr/local/opt/boost/lib/libboost_locale-mt.dylib @executable_path/libboost_locale-mt.dylib ./airspaceconverter
 
 # Tell the GUI executable to use the libraries in the same folder
-install_name_tool -change libairspaceconverter.dylib @executable_path/libairspaceconverter.dylib ./airspaceconverter-gui
+install_name_tool -change /usr/local/lib/libairspaceconverter.dylib @executable_path/libairspaceconverter.dylib ./airspaceconverter-gui
 install_name_tool -change /usr/local/opt/libzip/lib/libzip.5.dylib @executable_path/libzip.5.dylib ./airspaceconverter-gui
 install_name_tool -change /usr/local/opt/boost/lib/libboost_system.dylib @executable_path/libboost_system.dylib ./airspaceconverter-gui
 install_name_tool -change /usr/local/opt/boost/lib/libboost_filesystem.dylib @executable_path/libboost_filesystem.dylib ./airspaceconverter-gui
@@ -114,7 +114,6 @@ install_name_tool -change /usr/local/opt/icu4c/lib/libicuuc.64.dylib @loader_pat
 install_name_tool -change @rpath/QtCore.framework/Versions/5/QtCore @loader_path/QtCore ./QtGui
 install_name_tool -change @rpath/QtCore.framework/Versions/5/QtCore @loader_path/QtCore ./QtWidgets
 install_name_tool -change @rpath/QtGui.framework/Versions/5/QtGui @loader_path/QtGui ./QtWidgets
-
 
 # Set executables and libraries permissions
 chmod a-w *
