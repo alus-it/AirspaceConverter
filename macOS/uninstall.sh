@@ -13,8 +13,8 @@
 # Remove older version of GUI application if present
 if [[ -d /Applications/AirspaceConverter.app ]]
 then
-	echo "Removing alredy installed AirspaceConverter GUI application"
+	echo "Removing already installed AirspaceConverter GUI application"
 	rm -rf /Applications/AirspaceConverter.app/
 fi
 
-echo "MacOS application uninstallation done."
+echo "MacOS GUI application uninstallation done."

@@ -22,7 +22,7 @@ fi
 # Build macOS application bundle if not yet done
 if [[ ! -d ./AirspaceConverter.app ]]
 then
-	echo "Building macOS application bundle which was not yed done..."
+	echo "Building macOS application bundle which was not yet done..."
 	./makeApp.sh
 fi
 
