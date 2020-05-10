@@ -161,6 +161,17 @@ case $OSVER in
 		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER}), libgl1-mesa-glx (>= 10.3.2)"
 		MANT="Valerio Messina <efa@iol.it>"
 		;;
+	20.04)
+		echo "Packaging for Ubuntu Focal..."
+		DISTR=ubn
+		LIBCVER=2.31
+		ZIPLIB=libzip5
+		ZIPVER=1.5.1
+		BOOSTVER=1.71.0
+		QTVER=5.12.8
+		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER})"
+		MANT="Alberto Realis-Luc <admin@alus.it>"
+		;;
 	*)
 	echo "ERROR: This version of Debian or Ubuntu: ${OSVER} is not known by this script, please add it!"
 	exit 1
