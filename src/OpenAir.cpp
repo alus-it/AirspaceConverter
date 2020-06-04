@@ -188,11 +188,10 @@ bool OpenAir::Read(const std::string& fileName) {
 		// Remove back spaces
 		boost::algorithm::trim_right(sLine);
 
-		// Skip too short lines
-		if (sLine.size() <= 2) continue;
+		// Check for too short lines
+		bool lineParsedOK = sLine.size() > 2;
 
-		bool lineParsedOK = true;
-		switch (sLine.at(0)) {
+		if (lineParsedOK) switch (sLine.at(0)) {
 		case 'A':
 			switch(sLine.at(1)) {
 			case 'C': //AC
@@ -260,7 +259,7 @@ bool OpenAir::Read(const std::string& fileName) {
 			break;
 		default:
 			lineParsedOK = false;
-			continue;
+			break;
 		}
 		if (!lineParsedOK) {
 			AirspaceConverter::LogError(boost::str(boost::format("unable to parse OpenAir line %1d: %2s") %linecount %sLine));
