@@ -26,7 +26,7 @@ void printHelp() {
 	std::cout << "-m: optional, multiple, terrain map file(s) (.dem) used to lookup terrain heights" << std::endl;
 	std::cout << "-l: optional, set filter limits in latitude and longitude for the output, followed by the 4 limit values: northLat,southLat,westLon,eastLon" << std::endl;
 	std::cout << "    where the limits are comma separated, expressed in degrees, without spaces, negative for west longitudes and south latitudes" << std::endl;
-	std::cout << "-o: optional, output file .kmz, .txt (OpenAir), .cup (SeeYou)";
+	std::cout << "-o: optional, output file .kmz, .txt (OpenAir), .cup (SeeYou), .csv (LittleNavMap)";
 	if (AirspaceConverter::Is_cGPSmapperAvailable()) std::cout << ", .img (Garmin)";
 	std::cout << " or .mp (Polish). If not specified will be used the name of first input file as KMZ" << std::endl;
 	std::cout << "-p: optional, when writing in OpenAir avoid to use arcs and circles but only points (DP)" << std::endl;

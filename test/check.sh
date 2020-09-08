@@ -1,14 +1,15 @@
 #!/bin/bash
 #============================================================================
 # AirspaceConverter
-# Since       : 8/12/2017
+# Since       : 08/12/2017
 # Author      : Valerio Messina <efa@iol.it>
 # Web         : https://www.alus.it/AirspaceConverter
-# Copyright   : (C) 2016-2020 Valerio Messina
+# Copyright   : Copyright 2016-2020 Valerio Messina
 # License     : GNU GPL v3
 #
 # This script is part of AirspaceConverter project
 #============================================================================
+# 'check' sort Openair test files and compare. Depend on 'openairSort'
 
 fileIn=openair_airspace_ts.txt
 fileIn=openair_airspace_sixty.txt
@@ -40,4 +41,3 @@ openairSort $comp opentxt_php_sorted.txt
 
 diff opentxt_php_sorted.txt openair_0.2.6_sorted.txt > diff.txt
 ne opentxt_php_sorted.txt openair_0.2.6_sorted.txt diff.txt
-

@@ -1,16 +1,16 @@
 #!/bin/bash
 #============================================================================
 # AirspaceConverter
-# Since       : 8/12/2017
+# Since       : 08/12/2017
 # Author      : Valerio Messina <efa@iol.it>
 # Web         : https://www.alus.it/AirspaceConverter
-# Copyright   : (C) 2016-2020 Valerio Messina
+# Copyright   : Copyright 2016-2020 Valerio Messina
 # License     : GNU GPL v3
 #
 # This script is part of AirspaceConverter project
 #============================================================================
-
 # 'openairSort' sort openair airspaces, keep duplicates, v1.00
+
 fileIn1=$1
 fileOut=$2
 

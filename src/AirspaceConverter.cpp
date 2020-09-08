@@ -18,6 +18,7 @@
 #include "SeeYou.h"
 #include "OpenAIP.h"
 #include "Polish.h"
+#include "CSV.h"
 #include <iostream>
 #include <locale>
 #include <sstream>
@@ -163,6 +164,7 @@ AirspaceConverter::OutputType AirspaceConverter::DetermineType(const std::string
 		else if (boost::iequals(outputExt, ".cup")) outputType = OutputType::SeeYou_Format;
 		else if (boost::iequals(outputExt, ".mp")) outputType = OutputType::Polish_Format;
 		else if (boost::iequals(outputExt, ".img")) outputType = OutputType::Garmin_Format;
+		else if (boost::iequals(outputExt, ".csv")) outputType = OutputType::CSV_Format;
 		else outputType = OutputType::Unknown_Format;
 	}
 	return outputType;
@@ -186,6 +188,9 @@ bool AirspaceConverter::PutTypeExtension(const OutputType type, std::string& fil
 		break;
 	case OutputType::Garmin_Format:
 		outputPath.replace_extension(".img");
+		break;
+	case OutputType::CSV_Format:
+		outputPath.replace_extension(".csv");
 		break;
 	default:
 		assert(false);
@@ -338,6 +343,9 @@ bool AirspaceConverter::Convert() {
 			// Then call cGPSmapper
 			conversionDone = cGPSmapper(polishFile, outputFile);
 		}
+		break;
+	case OutputType::CSV_Format:
+		conversionDone = CSV(waypoints).Write(outputFile);
 		break;
 	default:
 		LogError("Output file extension/type unknown.");
