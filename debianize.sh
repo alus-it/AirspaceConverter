@@ -28,6 +28,7 @@ if [[ "$ACTION" == "C" || "$ACTION" == "c" || "$ACTION" == "" ]]; then
 		. /etc/os-release
 		OS=$NAME
 		OSVER=$VERSION_ID
+		CODENAME=$DEBIAN_CODENAME
 	elif type lsb_release >/dev/null 2>&1; then
 		# linuxbase.org
 		OS=$(lsb_release -si)
@@ -51,9 +52,10 @@ if [[ "$ACTION" == "C" || "$ACTION" == "c" || "$ACTION" == "" ]]; then
 		OSVER=$(uname -r)
 	fi
 
-	# Check if it is Debian or Ubuntu
-	if [ "$OS" != "Debian GNU/Linux" ] && [ "$OS" != "Ubuntu" ]; then
-		echo "ERROR: this script can actually work only for Debian or Ubuntu. You may consider to update it!"
+	# Check if it is Debian, Ubuntu or MintDebianEdition
+	if [ "$OS" != "Debian GNU/Linux" ] && [ "$OS" != "Ubuntu" ] && [ "$OS" != "LMDE" ]; then
+		echo "ERROR: this script can actually work only for Debian, Ubuntu or LMDE."
+		echo "You may consider to update it!"
 		exit 1
 	fi
 
@@ -108,9 +110,9 @@ fi
 case $OSVER in
 	7)
 		echo "Packaging for Debian Wheezy..."
-		DISTR=deb		
+		DISTR=deb
 		LIBCVER=2.13
-		ZIPLIB=libzip2		
+		ZIPLIB=libzip2
 		ZIPVER=0.10.1
 		BOOSTVER=1.49.0
 		QTVER=4:4.8.2
@@ -120,8 +122,8 @@ case $OSVER in
 	8)
 		echo "Packaging for Debian Jessie..."
 		DISTR=deb
-		LIBCVER=2.19		
-		ZIPLIB=libzip2		
+		LIBCVER=2.19
+		ZIPLIB=libzip2
 		ZIPVER=0.11.2
 		BOOSTVER=1.55.0
 		QTVER=5.3.2
@@ -131,16 +133,27 @@ case $OSVER in
 	9)
 		echo "Packaging for Debian Stretch..."
 		DISTR=deb
-		LIBCVER=2.19	
-		ZIPLIB=libzip4		
+		LIBCVER=2.19
+		ZIPLIB=libzip4
 		ZIPVER=1.1.2
 		BOOSTVER=1.62.0
 		QTVER=5.7.1
 		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER}), libgl1-mesa-glx (>= 10.3.2)"
 		MANT="Alberto Realis-Luc <admin@alus.it>"
 		;;
+	4)
+		echo "Packaging for LMDE4 (Debian 10 Buster)..."
+		DISTR=lmde
+		LIBCVER=2.28
+		ZIPLIB=libzip4
+		ZIPVER=1.5.1
+		BOOSTVER=1.67.0
+		QTVER=5.11.3
+		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER}), libgl1-mesa-glx (>= 18.3.6)"
+		MANT="Valerio Messina <efa@iol.it>"
+		;;
 	16.04)
-		echo "Packaging for Ubuntu Xenial..."
+		echo "Packaging for Ubuntu 16.04 Xenial..."
 		DISTR=ubn
 		LIBCVER=2.23
 		ZIPLIB=libzip4
@@ -151,7 +164,7 @@ case $OSVER in
 		MANT="Valerio Messina <efa@iol.it>"
 		;;
 	18.04)
-		echo "Packaging for Ubuntu Bionic..."
+		echo "Packaging for Ubuntu 18.04 Bionic..."
 		DISTR=ubn
 		LIBCVER=2.27
 		ZIPLIB=libzip4
@@ -162,7 +175,7 @@ case $OSVER in
 		MANT="Valerio Messina <efa@iol.it>"
 		;;
 	20.04)
-		echo "Packaging for Ubuntu Focal..."
+		echo "Packaging for Ubuntu 20.04 Focal..."
 		DISTR=ubn
 		LIBCVER=2.31
 		ZIPLIB=libzip5
@@ -173,7 +186,7 @@ case $OSVER in
 		MANT="Alberto Realis-Luc <admin@alus.it>"
 		;;
 	*)
-	echo "ERROR: This version of Debian or Ubuntu: ${OSVER} is not known by this script, please add it!"
+	echo "ERROR: This version of Debian, Ubuntu or Mint: ${OSVER} is not known by this script, please add it!"
 	exit 1
 esac
 
