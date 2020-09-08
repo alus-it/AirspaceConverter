@@ -33,6 +33,7 @@ public:
 		SeeYou_Format,
 		Polish_Format,
 		Garmin_Format,
+		CSV_Format,
 		Unknown_Format
 	};
 
