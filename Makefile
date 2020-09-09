@@ -43,7 +43,7 @@ endif
 # Source path
 SRC = src/
 
-# Release or debug, binary dir and specific comppile options
+# Release or debug, binary dir and specific compile options
 DEBUG ?= 0
 ifeq ($(DEBUG),1)
 	CPPFLAGS += -O0 -g3 -DDEBUG

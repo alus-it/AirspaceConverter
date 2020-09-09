@@ -228,54 +228,54 @@ bool SeeYou::Read(const std::string& fileName) {
 
 		// Long name
 		boost::tokenizer<boost::escaped_list_separator<char> >::iterator token=tokens.begin();
-		const std::string name = *token;
+		const std::string name = boost::trim_copy(*token);
 		if (name.empty()) {
 			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: a name must be present: %2s") %linecount %sLine));
 			continue;
 		}
 
 		// Code (short name)
-		const std::string code = *(++token);
+		const std::string code = boost::trim_copy(*(++token));
 
 		// Country code
-		const std::string country = *(++token);
+		const std::string country = boost::trim_copy(*(++token));
 
 		// Latitude
-		if (!ParseLatitude(*(++token), latitude)) {
+		if (!ParseLatitude(boost::trim_copy(*(++token)), latitude)) {
 			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: invalid latitude: %2s") %linecount %(*token)));
 			continue;
 		}
 
 		// Longitude
-		if (!ParseLongitude(*(++token), longitude)) {
+		if (!ParseLongitude(boost::trim_copy(*(++token)), longitude)) {
 			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: invalid longitude: %2s") %linecount %(*token)));
 			continue;
 		}
 
 		// Elevation
-		if (!ParseAltitude(*(++token), altitude))
+		if (!ParseAltitude(boost::trim_copy(*(++token)), altitude))
 			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %(*token)));
 
 		// Waypoint style
-		if (!ParseStyle(*(++token),type))
+		if (!ParseStyle(boost::trim_copy(*(++token)),type))
 			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid waypoint style: %2s, assuming unknown") %linecount %(*token)));
 
 		// If it's an airfield...
 		if(Waypoint::IsTypeAirfield((Waypoint::WaypointType)type)) {
 			// Runway direction
-			if (!ParseRunwayDir(*(++token),runwayDir))
+			if (!ParseRunwayDir(boost::trim_copy(*(++token)),runwayDir))
 				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid runway direction: %2s") % linecount % (*token)));
 
 			// Runway length
-			if (!ParseRunwayLength(*(++token),runwayLength))
+			if (!ParseRunwayLength(boost::trim_copy(*(++token)),runwayLength))
 				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid runway length: %2s") %linecount %(*token)));
 
 			// Radio frequency
-			if (!ParseAirfieldFrequencies(*(++token),radioFreq,altRadioFreq))
+			if (!ParseAirfieldFrequencies(boost::trim_copy(*(++token)),radioFreq,altRadioFreq))
 				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid radio frequency for airfield: %2s") %linecount %(*token)));
 
 			// Description
-			std::string description = *(++token);
+			std::string description = boost::trim_copy(*(++token));
 			assert(token != tokens.end());
 
 			// Build the airfield
@@ -294,11 +294,11 @@ bool SeeYou::Read(const std::string& fileName) {
 			token++;
 
 			// Frequency may be used for VOR and NDB
-			if (!ParseOtherFrequency(*(++token), type, radioFreq))
+			if (!ParseOtherFrequency(boost::trim_copy(*(++token)), type, radioFreq))
 				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid frequency for non airfield waypoint: %2s") %linecount %(*token)));
 
 			// Description
-			std::string description = *(++token);
+			std::string description = boost::trim_copy(*(++token));
 			assert(token != tokens.end());
 
 			// Build the waypoint
