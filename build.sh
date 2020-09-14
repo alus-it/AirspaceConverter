@@ -10,7 +10,8 @@
 # This script is part of AirspaceConverter project
 #============================================================================
 
-# Find out where whe want to build and number of processors available
+# Find out where we want to build and number of processors available
+QMAKE=qmake
 if [ "$(uname)" == "Darwin" ]; then
 	SYSTEM="macOS"
 	PROCESSORS=2
@@ -19,6 +20,9 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
 	SYSTEM="Linux"
 	PROCESSORS="$(grep -c ^processor /proc/cpuinfo)"
 	echo "Building everything for Linux ..."
+	if (test `lsb_release -si` = "Fedora") then
+		QMAKE=qmake-qt4
+	fi
 else
 	echo "ERROR: Unknown operating system."
 	exit 1
@@ -37,9 +41,9 @@ echo "Building AirspaceConverter Qt GUI ..."
 mkdir -p buildQt
 cd buildQt
 if [ ${SYSTEM} == "Linux" ]; then
-	qmake ../AirspaceConverterQt/AirspaceConverterQt.pro -r -spec linux-g++-64
+	$QMAKE ../AirspaceConverterQt/AirspaceConverterQt.pro -r -spec linux-g++-64
 else
-	qmake ../AirspaceConverterQt/AirspaceConverterQt.pro -r -spec macx-clang CONFIG+=x86_64
+	$QMAKE ../AirspaceConverterQt/AirspaceConverterQt.pro -r -spec macx-clang CONFIG+=x86_64
 fi
 if [ "$?" -ne 0 ]; then
 	echo "ERROR: Failed to run qmake."
