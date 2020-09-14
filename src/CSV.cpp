@@ -14,10 +14,11 @@
 // Are comma separated files, with lines like the following template:
 //  Type,Name,Ident,Lat,Lon,Elev,Decl,Label,Desc,Country,Range,ModificationTime,SourceFile
 // Note: Type can be: Airport, Airstrip, Bookmark, DME, Helipad, NDB, TACAN, VOR, VORDME, VORTAC, VRP, Waypoint
-//       mapping for SeeYouStyle=Type: 2=Airstrip, 4-5=Airport, 9=VOR, 10=NDB, 16=Waypoint/IRP, 17=VRP
-// Note: Lat/Lon must be in DDD.MMMMMM format, Elev is in meters and unit can be omitted
+//       mapping for CUP Style=Type: 2=Airstrip, 4-5=Airport, 9=VOR, 10=NDB, 16=Waypoint/IRP, 17=VRP
+// Note: Lat/Lon must be in DDD.MMMMMM format, Elev is in feet and unit must be omitted
+// Note: Elevation is always feet and distances are always nautical miles
 // Note: LNM fill the Declination field on export, not used when importing
-// Note: LNM fill the SourceFile field on export, ignore it when importing and take note internally of real source file
+// Note: LNM fill the SourceFile field on export, ignore it when importing and take note internally of source file
 
 #include "CSV.h"
 #include "AirspaceConverter.h"
@@ -420,60 +421,56 @@ bool CSV::Write(const std::string& fileName) {
 		//printf("Lon:%f E=%c S=%d Deg=%d Min=%f ld:%d\n", degDec, e, s, deg, min, ld);
 		file << degDec << ',';
 
-		// Altitude, 'Elev' in CSV spec
-		//if (w.GetAltitude() != 0) file << std::setprecision(1) << std::round(w.GetAltitude()*10)/10 << "m,"; // round altitude in meters on one decimal
-		//else file << "0m,";
-		file << std::setprecision(0) << std::round(w.GetAltitude()) << "m,";
+		// Altitude, 'Elev' in CSV spec, must be feet without unit to be read by LNM
+		double meters=w.GetAltitude();
+		file << std::setprecision(0) << std::round(meters/0.3048) << ",";
 
-		// Declination is ignored by CSV importers
+		// Declination is ignored by CSV importers, leave empty
 		file << ',';
 
-		// Label is ???
+		// Label/Tag is composed by Dir:N Len:N Freq:N to avoid lost of information
+		if (w.IsAirfield()) {
+			const Airfield& a((const Airfield&)w);
+
+			// Runway direction, miss in CSV spec
+			if (a.HasRunwayDir()) file << "Dir:" << std::setfill('0') << std::setw(3) << a.GetRunwayDir() << " ";
+
+			// Runway length, miss in CSV spec
+			if (a.HasRunwayLength()) file << "Len:" << a.GetRunwayLength() << "m ";
+
+			// Radio frequency, miss in CSV spec
+			if (a.HasRadioFrequency()) {
+				file << "Freq:" << std::setprecision(3) << AirspaceConverter::FrequencyMHz(a.GetRadioFrequency()); // 3 decimals for Airports freq [MHz]
+				if (a.HasOtherFrequency()) file << '-' << AirspaceConverter::FrequencyMHz(a.GetOtherFrequency());
+			}
+		} else {
+			//file << ",,"; // Skip runway direction and length
+
+			// Other frequency
+			if (w.HasOtherFrequency()) {
+				if (w.GetType() == Waypoint::WaypointType::NDB) file << "Freq:" << std::setprecision(2) << AirspaceConverter::FrequencykHz(w.GetOtherFrequency()); // 2 decimals for NDB freq [kHz]
+				else if (w.GetType() == Waypoint::WaypointType::VOR) file << "Freq:" << std::setprecision(2) << AirspaceConverter::FrequencyMHz(w.GetOtherFrequency()); // 2 decimals for VOR freq [MHz]
+				else file << "Freq:" << std::setprecision(2) << AirspaceConverter::FrequencyMHz(w.GetOtherFrequency()); // assuming all other VHF freq [MHz]
+			}
+		}
 		file << ',';
 
-		// Description, 'Desc' in CSV spec
-		//if (!w.GetDescription().empty()) file << '"' << w.GetDescription() << '"';
+		// Description, 'Desc' in CSV spec, redundant for VRP and IRP
+		//if (!w.GetDescription().empty() && w.GetDescription().compare("VFR")!=0 && w.GetDescription().compare("IFR")!=0) file << '"' << w.GetDescription() << '"';
+		if (!w.GetDescription().empty() && w.GetDescription().compare("VFR")!=0 && w.GetDescription().compare("IFR")!=0) file << w.GetDescription();
 		file << ',';
 
 		// Country code
 		file << w.GetCountry() << ',';
 
-		// Range is missing in source
+		// Range is missing in source, leave empty
 		//file << ',';
 
-		// ModificationTime is ignored by CSV importers
+		// ModificationTime is ignored by CSV importers, leave empty
 		//file << ',';
 
-		// SourceFile is ignored by CSV importers
+		// SourceFile is ignored by CSV importers, leave empty
 		//file << ',';
-#if 0 // as now skip the following fields
-		if (w.IsAirfield()) {
-			const Airfield& a((const Airfield&)w);
-
-			// Runway direction, miss in CSV spec
-			if (a.HasRunwayDir()) file << std::setw(3) << a.GetRunwayDir();
-			file << ',';
-
-			// Runway length, miss in CSV spec
-			if (a.HasRunwayLength()) file << a.GetRunwayLength() << 'm';
-			file << ',';
-
-			// Radio frequency, miss in CSV spec
-			if (a.HasRadioFrequency()) {
-				file << std::setprecision(3) << AirspaceConverter::FrequencyMHz(a.GetRadioFrequency());
-				if (a.HasOtherFrequency()) file << '-' << AirspaceConverter::FrequencyMHz(a.GetOtherFrequency());
-			}
-		} else {
-			file << ",,"; // Skip runway length and direction
-
-			// Other frequency
-			if (w.HasOtherFrequency()) {
-				if (w.GetType() == Waypoint::WaypointType::NDB) file << std::setprecision(1) << AirspaceConverter::FrequencykHz(w.GetOtherFrequency()); // 1 decimal for NDB freq [kHz]
-				else if (w.GetType() == Waypoint::WaypointType::VOR) file << std::setprecision(2) << AirspaceConverter::FrequencyMHz(w.GetOtherFrequency()); // 2 decimals for VOR freq [MHz]
-				else file << std::setprecision(3) << AirspaceConverter::FrequencyMHz(w.GetOtherFrequency()); // assuming all other VHF freq [MHz]
-			}
-		}
-#endif
 		file << "\r\n";
 	}
 
