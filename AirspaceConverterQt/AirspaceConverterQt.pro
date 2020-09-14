@@ -42,7 +42,7 @@ INCLUDEPATH += $$PWD/../src/
 DEPENDPATH += $$PWD/../src/
 
 # libAirspaceConverter libary for Linux and Mac
-unix: LIBS += -L$$PWD/../Release/ -lairspaceconverter
+unix: LIBS += -L$$PWD/../Release/ -lairspaceconverter \'-Wl,-rpath=\$$ORIGIN\'
 
 
 ## Linux libraries
