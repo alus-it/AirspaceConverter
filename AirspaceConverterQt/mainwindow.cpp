@@ -172,7 +172,9 @@ void MainWindow::refreshUI() {
     ui->defaultAltSpinBox->setEnabled(isKMZ);
     ui->defaultTerrainLabel->setEnabled(isKMZ);
     ui->meterLabel->setEnabled(isKMZ);
-    ui->QNHspinBox->setEnabled(converter->GetNumOfAirspaces()==0);
+    ui->qnhLabel->setEnabled(airspaceOutput);
+    ui->QNHspinBox->setEnabled(airspaceOutput && converter->GetNumOfAirspaces()==0);
+    ui->hPaLabel->setEnabled(airspaceOutput);
     ui->onlyPointsCheckBox->setEnabled(isOpenAir);
     ui->openAirCoordinateTypeComboBox->setEnabled(isOpenAir);
     ui->openAirCoordonateFormatLabel->setEnabled(isOpenAir);

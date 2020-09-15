@@ -483,7 +483,7 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QLabel" name="label_6">
+   <widget class="QLabel" name="qnhLabel">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -521,7 +521,7 @@
      <double>1013.250000000000000</double>
     </property>
    </widget>
-   <widget class="QLabel" name="label_7">
+   <widget class="QLabel" name="hPaLabel">
     <property name="geometry">
      <rect>
       <x>290</x>
