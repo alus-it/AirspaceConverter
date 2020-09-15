@@ -167,6 +167,34 @@ bool KML::GetTerrainAltitudeMt(const double& lat, const double& lon, double& alt
 	return false;
 }
 
+std::string KML::PrepareTagText(const std::string& text) {
+	std::string preparedText;
+	preparedText.reserve((size_t)(text.size() * 1.1));
+	for (size_t pos = 0; pos != text.size(); ++pos) {
+		switch (text[pos]) {
+		case '&':
+			preparedText.append("&amp;");
+			break;
+		case '\"':
+			preparedText.append("&quot;");
+			break;
+		case '\'':
+			preparedText.append("&apos;");
+			break;
+		case '<':
+			preparedText.append("&lt;");
+			break;
+		case '>':
+			preparedText.append("&gt;");
+			break;
+		default:
+			preparedText.append(&text[pos], 1);
+			break;
+		}
+	}
+	return preparedText;
+}
+
 void KML::WriteHeader(const bool airspacePresent, const bool waypointsPresent) {
 	assert(airspacePresent || waypointsPresent);
 	outputFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -275,17 +303,18 @@ void KML::WriteHeader(const bool airspacePresent, const bool waypointsPresent) {
 }
 
 void KML::OpenPlacemark(const Airspace& airspace) {
-	std::string name(airspace.GetName());
-	if (airspace.GetClass() != Airspace::UNDEFINED && (airspace.GetType() == Airspace::CTR || airspace.GetType() == Airspace::TMA)) name.append(" - Class " + Airspace::CategoryName(airspace.GetClass()));
+	const std::string name(PrepareTagText(airspace.GetName()));
+	std::string longName(name);
+	if (airspace.GetClass() != Airspace::UNDEFINED && (airspace.GetType() == Airspace::CTR || airspace.GetType() == Airspace::TMA)) longName.append(" - Class " + Airspace::CategoryName(airspace.GetClass()));
 	double area(0), perimeter(0);
 	airspace.CalculateSurface(area, perimeter);
 	outputFile << "<Placemark>\n"
-		<< "<name>" << airspace.GetName() << "</name>\n"
+		<< "<name>" << name << "</name>\n"
 		<< "<styleUrl>#Style" << airspace.GetCategoryName() << "</styleUrl>\n"
 		<< "<visibility>" << (airspace.IsVisibleByDefault() ? 1 : 0) << "</visibility>\n"
 		<< "<ExtendedData>\n"
 		<< "<SchemaData schemaUrl=\"#AirspaceId\">\n"
-		<< "<SimpleData name=\"Name\">" << name << "</SimpleData>\n"
+		<< "<SimpleData name=\"Name\">" << longName << "</SimpleData>\n"
 		<< "<SimpleData name=\"Category\">" << (airspace.GetType() <= Airspace::CLASSG ? ("Class " + airspace.GetCategoryName()) : airspace.GetCategoryName() ) << "</SimpleData>\n"
 		<< "<SimpleData name=\"Top\">" << airspace.GetTopAltitude().ToString() << "</SimpleData>\n"
 		<< "<SimpleData name=\"Base\">" << airspace.GetBaseAltitude().ToString() << "</SimpleData>\n";
@@ -309,21 +338,20 @@ void KML::OpenPlacemark(const Waypoint* waypoint) {
 	const int altMt = (int)std::round(waypoint->GetAltitude());
 	const int altFt = (int)std::round(altMt / Altitude::FEET2METER);
 	outputFile << "<Placemark>\n"
-		<< "<name>" << waypoint->GetName() << "</name>\n"
+		<< "<name>" << PrepareTagText(waypoint->GetName()) << "</name>\n"
 		<< "<styleUrl>#Style" << waypoint->GetTypeName() << "</styleUrl>\n";
 	outputFile << "<visibility>" << (isAirfield ? 1 : 0) << "</visibility>\n"
 		<< "<ExtendedData>\n"
 		<< "<SchemaData schemaUrl=\"#WaypointId\">\n"
-		<< "<SimpleData name=\"Name\">" << waypoint->GetName() << "</SimpleData>\n"
+		<< "<SimpleData name=\"Name\">" << PrepareTagText(waypoint->GetName()) << "</SimpleData>\n"
 		<< "<SimpleData name=\"Type\">" << waypoint->GetTypeName() << "</SimpleData>\n"
-		<< "<SimpleData name=\"Code\">" << waypoint->GetCode() << "</SimpleData>\n"
+		<< "<SimpleData name=\"Code\">" << PrepareTagText(waypoint->GetCode()) << "</SimpleData>\n"
 		<< "<SimpleData name=\"Country\">" << waypoint->GetCountry() << "</SimpleData>\n"
 		<< "<SimpleData name=\"AltMt\">" << altMt << "</SimpleData>\n"
 		<< "<SimpleData name=\"AltFt\">" << altFt << "</SimpleData>\n";
 	outputFile << std::fixed << std::setprecision(3);
 	if(isAirfield) {
 		const Airfield* airfield = (const Airfield*)waypoint;
-
 		if (airfield->HasRunwayDir()) outputFile << "<SimpleData name=\"RwyDir\">" << airfield->GetRunwayDir() << "</SimpleData>\n";
 		if (airfield->HasRunwayLength()) outputFile << "<SimpleData name=\"RwyLen\">" << airfield->GetRunwayLength() << "</SimpleData>\n";
 		if (airfield->HasRadioFrequency()) outputFile << "<SimpleData name=\"Radio\">" << AirspaceConverter::FrequencyMHz(airfield->GetRadioFrequency()) << "</SimpleData>\n";
@@ -336,7 +364,7 @@ void KML::OpenPlacemark(const Waypoint* waypoint) {
 			outputFile << "<SimpleData name=\"NDB\">" << std::setprecision(1) << AirspaceConverter::FrequencykHz(waypoint->GetOtherFrequency()) << "</SimpleData>\n";
 	}
 	outputFile.unsetf(std::ios_base::floatfield); //outputFile << std::defaultfloat; not supported by older GCC 4.9.0
-	outputFile << "<SimpleData name=\"Desc\">" << waypoint->GetDescription() << "</SimpleData>\n"
+	outputFile << "<SimpleData name=\"Desc\">" << PrepareTagText(waypoint->GetDescription()) << "</SimpleData>\n"
 		<< "</SchemaData>\n"
 		<< "</ExtendedData>\n";
 }

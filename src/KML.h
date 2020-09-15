@@ -38,6 +38,7 @@ public:
 	bool ReadKML(const std::string& filename);
 
 private:
+	static std::string PrepareTagText(const std::string& text);
 	static bool GetTerrainAltitudeMt(const double& lat, const double& lon, double&alt);
 	void WriteHeader(const bool airspacePresent, const bool waypointsPresent);
 	void OpenPlacemark(const Airspace& airspace);
