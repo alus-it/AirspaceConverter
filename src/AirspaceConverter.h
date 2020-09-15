@@ -31,9 +31,9 @@ public:
 		KMZ_Format = 0,
 		OpenAir_Format,
 		SeeYou_Format,
+		CSV_Format,
 		Polish_Format,
 		Garmin_Format,
-		CSV_Format,
 		Unknown_Format
 	};
 

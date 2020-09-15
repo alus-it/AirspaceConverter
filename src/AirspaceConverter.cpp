@@ -183,14 +183,14 @@ bool AirspaceConverter::PutTypeExtension(const OutputType type, std::string& fil
 	case OutputType::SeeYou_Format:
 		outputPath.replace_extension(".cup");
 		break;
+	case OutputType::CSV_Format:
+		outputPath.replace_extension(".csv");
+		break;
 	case OutputType::Polish_Format:
 		outputPath.replace_extension(".mp");
 		break;
 	case OutputType::Garmin_Format:
 		outputPath.replace_extension(".img");
-		break;
-	case OutputType::CSV_Format:
-		outputPath.replace_extension(".csv");
 		break;
 	default:
 		assert(false);

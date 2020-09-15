@@ -183,6 +183,7 @@ BOOL CAirspaceConverterDlg::OnInitDialog() {
 	OutputTypeCombo.InsertString(-1, _T("KMZ Google Earth"));
 	OutputTypeCombo.InsertString(-1, _T("OpenAir (airspace only)"));
 	OutputTypeCombo.InsertString(-1, _T("CUP SeeYou (waypoints only)"));
+	OutputTypeCombo.InsertString(-1, _T("CSV LittleNavMap (waypoints only)"));
 	OutputTypeCombo.InsertString(-1, _T("Polish format for cGPSmapper"));
 
 	// Add option to conver to Garmin IMG only if cGPSmapper was found 
@@ -417,12 +418,12 @@ void CAirspaceConverterDlg::EndBusy(const bool takeTime /* = false */) {
 	}
 	const BOOL isKmzFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::KMZ_Format);
 	const BOOL isOpenAirFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::OpenAir_Format);
-	const BOOL isSeeYouFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::SeeYou_Format);
-	loadInputFileBt.EnableWindow(!isSeeYouFile);
-	loadWaypointsBt.EnableWindow(isKmzFile || isSeeYouFile);
+	const BOOL isWaypointFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::SeeYou_Format || OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::CSV_Format);
+	loadInputFileBt.EnableWindow(!isWaypointFile);
+	loadWaypointsBt.EnableWindow(isKmzFile || isWaypointFile);
 	loadDEMfileBt.EnableWindow(isKmzFile);
-	LoadAirspacesFolderBt.EnableWindow(!isSeeYouFile);
-	loadWaypointsFolderBt.EnableWindow(isKmzFile || isSeeYouFile);
+	LoadAirspacesFolderBt.EnableWindow(!isWaypointFile);
+	loadWaypointsFolderBt.EnableWindow(isKmzFile || isWaypointFile);
 	LoadRasterMapsFolderBt.EnableWindow(isKmzFile);
 #ifndef _WIN64
 	if (!isWinXPorOlder) {
@@ -436,7 +437,7 @@ void CAirspaceConverterDlg::EndBusy(const bool takeTime /* = false */) {
 	unloadWaypointsBt.EnableWindow(numWaypointsLoaded > 0 ? TRUE : FALSE);
 	unloadRasterMapsBt.EnableWindow(numRasterMapLoaded > 0 ? TRUE : FALSE);
 	filterBt.EnableWindow(numAirspacesLoaded > 0 ? TRUE : FALSE);
-	ConvertBt.EnableWindow((numAirspacesLoaded > 0 || ((isKmzFile || isSeeYouFile) && numWaypointsLoaded > 0)) ? TRUE : FALSE);
+	ConvertBt.EnableWindow((numAirspacesLoaded > 0 || ((isKmzFile || isWaypointFile) && numWaypointsLoaded > 0)) ? TRUE : FALSE);
 	OutputTypeCombo.EnableWindow(TRUE);
 	editQNHtextField.EnableWindow(isKmzFile ? numAirspacesLoaded == 0 : FALSE);
 	editDefualtAltTextField.EnableWindow(isKmzFile);
@@ -649,18 +650,18 @@ void CAirspaceConverterDlg::OnBnClickedOutputTypeCombo() {
 	UpdateOutputFilename();
 	const BOOL isKmzFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::KMZ_Format);
 	const BOOL isOpenAirFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::OpenAir_Format);
-	const BOOL isSeeYouFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::SeeYou_Format);
-	loadInputFileBt.EnableWindow(!isSeeYouFile);
-	loadWaypointsBt.EnableWindow(isKmzFile || isSeeYouFile);
+	const BOOL isWaypointFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::SeeYou_Format || OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::CSV_Format);
+	loadInputFileBt.EnableWindow(!isWaypointFile);
+	loadWaypointsBt.EnableWindow(isKmzFile || isWaypointFile);
 	loadDEMfileBt.EnableWindow(isKmzFile);
-	LoadAirspacesFolderBt.EnableWindow(!isSeeYouFile);
-	loadWaypointsFolderBt.EnableWindow(isKmzFile || isSeeYouFile);
+	LoadAirspacesFolderBt.EnableWindow(!isWaypointFile);
+	loadWaypointsFolderBt.EnableWindow(isKmzFile || isWaypointFile);
 	LoadRasterMapsFolderBt.EnableWindow(isKmzFile);
 	editQNHtextField.EnableWindow(isKmzFile ? numAirspacesLoaded == 0 : FALSE);
 	editDefualtAltTextField.EnableWindow(isKmzFile);
 	pointsCheckBox.EnableWindow(isOpenAirFile);
 	OpenAirCoordinateFormatCombo.EnableWindow(isOpenAirFile);
-	ConvertBt.EnableWindow((numAirspacesLoaded > 0 || ((isKmzFile || isSeeYouFile) && numWaypointsLoaded > 0)) && !outputFile.empty() ? TRUE : FALSE);
+	ConvertBt.EnableWindow((numAirspacesLoaded > 0 || ((isKmzFile || isWaypointFile) && numWaypointsLoaded > 0)) && !outputFile.empty() ? TRUE : FALSE);
 	UpdateData(FALSE);
 }
 
@@ -670,7 +671,10 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 	
 	// Prepare and show the open file dialog asking where the user wants to save the converted file
 	boost::filesystem::path outputPath(outputFile);
-	CFileDialog dlg(FALSE, NULL, CString(outputPath.stem().c_str()) , OFN_HIDEREADONLY, _T("KMZ|*.kmz|OpenAir|*.txt|SeeYou|*.cup|Polish|*.mp|Garmin|*.img||"), (CWnd*)this, 0, TRUE);
+	CFileDialog dlg(FALSE, NULL, CString(outputPath.stem().c_str()) , OFN_HIDEREADONLY, AirspaceConverter::Is_cGPSmapperAvailable() ?
+			_T("KMZ|*.kmz|OpenAir|*.txt|SeeYou|*.cup|LittleNavMap|*.csv|Polish|*.mp|Garmin|*.img||") :
+			_T("KMZ|*.kmz|OpenAir|*.txt|SeeYou|*.cup|LittleNavMap|*.csv|Polish|*.mp||"),
+		(CWnd*)this, 0, TRUE);
 	dlg.GetOFN().lpstrTitle = L"Convert to ...";
 	dlg.GetOFN().lpstrInitialDir = CString(outputPath.parent_path().c_str());
 	dlg.GetOFN().nFilterIndex = OutputTypeCombo.GetCurSel() + 1; // Preselect the same type selected in the combo box
@@ -732,6 +736,7 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 		else MessageBox(_T("Error while starting Polish output thread."), _T("Error"), MB_ICONERROR);
 		break;
 	case AirspaceConverter::OutputType::SeeYou_Format:
+	case AirspaceConverter::OutputType::CSV_Format:
 		if (processor != nullptr && processor->Convert()) StartBusy();
 		break;
 	case AirspaceConverter::OutputType::Garmin_Format:
