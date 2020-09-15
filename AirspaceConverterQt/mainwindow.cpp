@@ -152,8 +152,8 @@ void MainWindow::startBusy() {
 
 void MainWindow::refreshUI() {
     // Find out pre-conditions
-    const bool airspaceOutput(ui->outputFormatComboBox->currentIndex() != AirspaceConverter::SeeYou_Format);
-    const bool waypointsOutput(ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ_Format || ui->outputFormatComboBox->currentIndex() == AirspaceConverter::SeeYou_Format);
+    const bool airspaceOutput(ui->outputFormatComboBox->currentIndex() != AirspaceConverter::SeeYou_Format && ui->outputFormatComboBox->currentIndex() != AirspaceConverter::CSV_Format);
+    const bool waypointsOutput(ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ_Format || ui->outputFormatComboBox->currentIndex() == AirspaceConverter::SeeYou_Format || ui->outputFormatComboBox->currentIndex() == AirspaceConverter::CSV_Format);
     const bool isKMZ(ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ_Format);
     const bool isOpenAir(ui->outputFormatComboBox->currentIndex() == AirspaceConverter::OpenAir_Format);
 
@@ -354,6 +354,7 @@ void MainWindow::on_convertButton_clicked() {
         case AirspaceConverter::OutputType::KMZ_Format:     selectedFilter = tr("Google Earth(*.kmz)"); break;
         case AirspaceConverter::OutputType::OpenAir_Format: selectedFilter = tr("OpenAir(*.txt)"); break;
         case AirspaceConverter::OutputType::SeeYou_Format:  selectedFilter = tr("SeeYou(*.cup)"); break;
+        case AirspaceConverter::OutputType::CSV_Format:     selectedFilter = tr("LittleNavMap(*.csv)"); break;
         case AirspaceConverter::OutputType::Polish_Format:  selectedFilter = tr("Polish(*.mp)"); break;
         case AirspaceConverter::OutputType::Garmin_Format:  selectedFilter = tr("Garmin img(*.img)"); break;
         default: assert(false);
@@ -362,7 +363,10 @@ void MainWindow::on_convertButton_clicked() {
     // Prepare dialog to ask for output file, will be without extension if not manually typed by the user
     std::string desiredOutputFile = QFileDialog::getSaveFileName(this, tr("Convert to..."),
                                                                  QString::fromStdString(boost::filesystem::change_extension(converter->GetOutputFile(), "").string()),
-                                                                 tr("Google Earth(*.kmz);;OpenAir(*.txt);;SeeYou(*.cup);;Polish(*.mp);;Garmin img(*.img)"), &selectedFilter).toStdString();
+                                                                 AirspaceConverter::Is_cGPSmapperAvailable() ?
+                                                                     tr("Google Earth(*.kmz);;OpenAir(*.txt);;SeeYou(*.cup);;LittleNavMap(*.csv);;Polish(*.mp);;Garmin img(*.img)") :
+                                                                     tr("Google Earth(*.kmz);;OpenAir(*.txt);;SeeYou(*.cup);;LittleNavMap(*.csv);;Polish(*.mp)"),
+                                                                 &selectedFilter).toStdString();
 
     // If no file selected or entered: do nothing
     if(desiredOutputFile.empty()) return;
@@ -378,6 +382,7 @@ void MainWindow::on_convertButton_clicked() {
         if (selectedFilter != "Google Earth(*.kmz)") {
             if (selectedFilter == "OpenAir(*.txt)") desiredFormat = AirspaceConverter::OpenAir_Format;
             else if (selectedFilter == "SeeYou(*.cup)") desiredFormat = AirspaceConverter::SeeYou_Format;
+            else if (selectedFilter == "LittleNavMap(*.csv)") desiredFormat = AirspaceConverter::CSV_Format;
             else if (selectedFilter == "Polish(*.mp)") desiredFormat = AirspaceConverter::Polish_Format;
             else if (selectedFilter == "Garmin img(*.img)") desiredFormat = AirspaceConverter::Garmin_Format;
             else assert(false);
@@ -399,8 +404,8 @@ void MainWindow::on_convertButton_clicked() {
 
     // Proceed with conversion
     const bool conversionPossible (!converter->GetOutputFile().empty() &&
-        ((ui->outputFormatComboBox->currentIndex() != AirspaceConverter::SeeYou_Format && converter->GetNumOfAirspaces()>0) ||
-        ((ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ_Format || ui->outputFormatComboBox->currentIndex() == AirspaceConverter::SeeYou_Format) && converter->GetNumOfWaypoints()>0)));
+        ((ui->outputFormatComboBox->currentIndex() != AirspaceConverter::SeeYou_Format && ui->outputFormatComboBox->currentIndex() != AirspaceConverter::CSV_Format && converter->GetNumOfAirspaces()>0) ||
+        ((ui->outputFormatComboBox->currentIndex() == AirspaceConverter::KMZ_Format || ui->outputFormatComboBox->currentIndex() == AirspaceConverter::SeeYou_Format || ui->outputFormatComboBox->currentIndex() == AirspaceConverter::CSV_Format) && converter->GetNumOfWaypoints()>0)));
     assert(conversionPossible);
     if(!conversionPossible) return;
 

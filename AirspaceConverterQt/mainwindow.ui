@@ -131,6 +131,11 @@
     </item>
     <item>
      <property name="text">
+      <string>CSV LittleNavMap (only waypoints)</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
       <string>Polish format for cGPSmapper</string>
      </property>
     </item>
