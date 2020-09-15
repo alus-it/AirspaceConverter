@@ -43,7 +43,7 @@ public:
 
 	virtual ~Waypoint() {}
 
-	inline static bool IsTypeAirfield(const WaypointType& kind) { return kind >= airfieldGrass && kind <= airfieldSolid; }
+	inline static bool IsTypeAirfield(const Waypoint::WaypointType& kind) { return kind >= airfieldGrass && kind <= airfieldSolid; }
 
 	inline const std::string& GetName() const { return name; }
 	inline const std::string& GetCode() const { return code; }

@@ -181,6 +181,7 @@
     <ClInclude Include="..\..\src\Airfield.h" />
     <ClInclude Include="..\..\src\Airspace.h" />
     <ClInclude Include="..\..\src\AirspaceConverter.h" />
+    <ClInclude Include="..\..\src\CSV.h" />
     <ClInclude Include="..\..\src\Geometry.h" />
     <ClInclude Include="..\..\src\KML.h" />
     <ClInclude Include="..\..\src\OpenAIP.h" />
@@ -194,6 +195,7 @@
     <ClCompile Include="..\..\src\Airfield.cpp" />
     <ClCompile Include="..\..\src\Airspace.cpp" />
     <ClCompile Include="..\..\src\AirspaceConverter.cpp" />
+    <ClCompile Include="..\..\src\CSV.cpp" />
     <ClCompile Include="..\..\src\Geometry.cpp" />
     <ClCompile Include="..\..\src\KML.cpp" />
     <ClCompile Include="..\..\src\OpenAIP.cpp" />

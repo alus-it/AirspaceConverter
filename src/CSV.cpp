@@ -1,11 +1,11 @@
 //============================================================================
 // AirspaceConverter
 // Since       : 14/6/2016
-// Author      : Alberto Realis-Luc <alberto.realisluc@gmail.com>
-//             : Valerio Messina <efa@iol.it>
+// Authors     : Valerio Messina <efa@iol.it>
+//               Alberto Realis-Luc <alberto.realisluc@gmail.com>
 // Web         : https://www.alus.it/AirspaceConverter
 // Repository  : https://github.com/alus-it/AirspaceConverter.git
-// Copyright   : (C) 2016-2020 Alberto Realis-Luc
+// Copyright   : (C) 2016-2020 Valerio Messina, Alberto Realis-Luc
 // License     : GNU GPL v3
 //
 // This source file is part of AirspaceConverter project
@@ -39,7 +39,7 @@ CSV::CSV(std::multimap<int,Waypoint*>& waypointsMap):
 }
 
 bool CSV::ParseLatitude(const std::string& text, double& lat) {
-	const int len = (int)text.length();
+	const size_t len = text.length();
 	if(len < 5) return false;
 	try {
 		lat = std::stoi(text.substr(0,2));
@@ -54,7 +54,7 @@ bool CSV::ParseLatitude(const std::string& text, double& lat) {
 }
 
 bool CSV::ParseLongitude(const std::string& text, double& lon) {
-	const int len = (int)text.length();
+	const size_t len = text.length();
 	if(len < 6) return false;
 	try {
 		lon = std::stoi(text.substr(0,3));
@@ -70,7 +70,7 @@ bool CSV::ParseLongitude(const std::string& text, double& lon) {
 
 bool CSV::ParseAltitude(const std::string& text, float& alt) {
 	alt = 0;
-	int pos = (int)text.length() - 1;
+	size_t pos = text.length() - 1;
 	if(pos == 0 && text.front()=='0') return true;
 	if(pos<1) return false;
 	bool feet = false;
@@ -170,7 +170,7 @@ bool CSV::ParseOtherFrequency(const std::string& text, const int type, int& freq
 	return false;
 }
 
-#if 0 // as now do not support inport of CSV files
+#if 0 // as now do not support import of CSV files
 bool CSV::Read(const std::string& fileName) {
 	std::ifstream input(fileName, std::ios::binary);
 	if (!input.is_open() || input.bad()) {
@@ -355,30 +355,30 @@ bool CSV::Write(const std::string& fileName) {
 		}
 
 		// Waypoint style, 'Type' in CSV spec
-		char type[10];
+		std::string type;
 		int style=w.GetType();
 		bool fix=1;
 		switch(style) {
 			case 2:
-				strcpy(type, "Airstrip");
+				type = "Airstrip";
 				fix=0;
 				break;
 			case 4:
 			case 5:
-				strcpy(type, "Airport");
+				type = "Airport";
 				fix=0;
 				break;
 			case 9:
-				strcpy(type, "VOR");
+				type = "VOR";
 				break;
 			case 10:
-				strcpy(type, "NDB");
+				type = "NDB";
 				break;
 			case 16:
-				strcpy(type, "Waypoint");
+				type = "Waypoint";
 				break;
 			case 17:
-				strcpy(type, "VRP");
+				type = "VRP";
 				break;
 			default:
 				AirspaceConverter::LogWarning("skipping point with unknown type: " + style);
@@ -401,7 +401,7 @@ bool CSV::Write(const std::string& fileName) {
 		char e=pos.GetNorS();
 		if (e == 'N') s=1;
 		if (e == 'S') s=-1;
-		int ld=round((min-floor(min*100)/100)*1000); // last digit of MM.MMM
+		int ld = (int)round((min-floor(min*100)/100)*1000); // last digit of MM.MMM
 		if (ld==3 && fix==1) min=min+1./3000; // when MM.MM3 AND not an ARF
 		if (ld==7 && fix==1) min=min-1./3000; // when MM.MM7 AND not an ARF
 		double degDec=s*(deg+min/60);
@@ -414,7 +414,7 @@ bool CSV::Write(const std::string& fileName) {
 		e=pos.GetEorW();
 		if (e == 'E') s=1;
 		if (e == 'W') s=-1;
-		ld=round((min-floor(min*100)/100)*1000); // last digit of MM.MMM
+		ld = (int)round((min-floor(min*100)/100)*1000); // last digit of MM.MMM
 		if (ld==3 && fix==1) min=min+1./3000; // when MM.MM3 AND not an ARF
 		if (ld==7 && fix==1) min=min-1./3000; // when MM.MM7 AND not an ARF
 		degDec=s*(deg+min/60);

@@ -1,10 +1,11 @@
 //============================================================================
 // AirspaceConverter
 // Since       : 14/6/2016
-// Author      : Alberto Realis-Luc <alberto.realisluc@gmail.com>
+// Authors     : Valerio Messina <efa@iol.it>
+//               Alberto Realis-Luc <alberto.realisluc@gmail.com>
 // Web         : https://www.alus.it/AirspaceConverter
 // Repository  : https://github.com/alus-it/AirspaceConverter.git
-// Copyright   : (C) 2016-2020 Alberto Realis-Luc
+// Copyright   : (C) 2016-2020 Valerio Messina, Alberto Realis-Luc
 // License     : GNU GPL v3
 //
 // This source file is part of AirspaceConverter project
@@ -21,7 +22,7 @@ class CSV {
 public:
 	CSV(std::multimap<int,Waypoint*>& waypointsMap);
 	~CSV() {}
-	bool Read(const std::string& fileName);
+	//TODO: bool Read(const std::string& fileName);
 	bool Write(const std::string& fileName);
 
 private:
