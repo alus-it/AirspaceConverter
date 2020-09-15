@@ -115,7 +115,7 @@ bool SeeYou::ParseRunwayLength(const std::string& text, int& length) {
 	if (text.empty()) return true; // empty field: declared as unknown
 	int pos = (int)text.length() - 1;
 	if(pos<2) return false; // at least 3 chars: 2 digit and a letter for the unit: a runway of "9m" (2 char) would be not possible...
-	bool nauticalMiles = false, statuteMiles = false;
+	bool feet = false, nauticalMiles = false, statuteMiles = false;
 	if(text.back() == 'm' || text.back() == 'M') {
 		if(text.at(pos) == 'n' || text.at(pos) == 'N') {
 			pos--;
@@ -124,12 +124,18 @@ bool SeeYou::ParseRunwayLength(const std::string& text, int& length) {
 	} else if((text.at(pos-1) == 'm' || text.at(pos-1) == 'M') && (text.back() == 'l' || text.back() == 'L' || text.back() == 'i' || text.back() == 'I')) {
 		pos--;
 		statuteMiles = true;
+	} else if (text.back() == 't' || text.back() == 'T') {
+		if (text.at(pos) == 'f' || text.at(pos) == 'F') {
+			pos--;
+			feet = true;
+		}
 	} else return false; // Unable to parse unit
 	try {
 		double len = std::stod(text.substr(0,pos));
 		if (len < 0) return false;
 		if (nauticalMiles) len *= Geometry::NM2M;
 		else if (statuteMiles) len *= Geometry::MI2M;
+		else if (feet) len *= Altitude::FEET2METER;
 		length = (int)std::round(len);
 		return true;
 	} catch (...) {}
