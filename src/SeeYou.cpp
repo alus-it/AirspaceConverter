@@ -114,21 +114,19 @@ bool SeeYou::ParseRunwayLength(const std::string& text, int& length) {
 	length = 0; // zero means invalid/unknown length
 	if (text.empty()) return true; // empty field: declared as unknown
 	int pos = (int)text.length() - 1;
-	if(pos<2) return false; // at least 3 chars: 2 digit and a letter for the unit: a runway of "9m" (2 char) would be not possible...
+	if (pos < 2) return false; // at least 3 chars: 2 digit and a letter for the unit: a runway of "9m" (2 char) would be not possible...
 	bool feet = false, nauticalMiles = false, statuteMiles = false;
-	if(text.back() == 'm' || text.back() == 'M') {
-		if(text.at(pos) == 'n' || text.at(pos) == 'N') {
+	if (text.back() == 'm' || text.back() == 'M') {
+		if (text.at(pos-1) == 'n' || text.at(pos-1) == 'N') {
 			pos--;
 			nauticalMiles = true;
 		}
-	} else if((text.at(pos-1) == 'm' || text.at(pos-1) == 'M') && (text.back() == 'l' || text.back() == 'L' || text.back() == 'i' || text.back() == 'I')) {
+	} else if ((text.at(pos-1) == 'm' || text.at(pos-1) == 'M') && (text.back() == 'l' || text.back() == 'L' || text.back() == 'i' || text.back() == 'I')) {
 		pos--;
 		statuteMiles = true;
-	} else if (text.back() == 't' || text.back() == 'T') {
-		if (text.at(pos) == 'f' || text.at(pos) == 'F') {
-			pos--;
-			feet = true;
-		}
+	} else if ((text.at(pos-1) == 'f' || text.at(pos-1) == 'F') && (text.back() == 't' || text.back() == 'T')) {
+		pos--;
+		feet = true;
 	} else return false; // Unable to parse unit
 	try {
 		double len = std::stod(text.substr(0,pos));
