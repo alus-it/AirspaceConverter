@@ -165,8 +165,8 @@ void MainWindow::refreshUI() {
     ui->loadWaypointFileButton->setEnabled(waypointsOutput);
     ui->loadWaypointsFolderButton->setEnabled(waypointsOutput);
     ui->unloadWaypointsButton->setEnabled(converter->GetNumOfWaypoints()>0);
-    ui->loadRasterMapFileButton->setEnabled(isKMZ);
-    ui->loadRasterMapFolderButton->setEnabled(isKMZ);
+    ui->loadRasterMapFileButton->setEnabled(waypointsOutput);
+    ui->loadRasterMapFolderButton->setEnabled(waypointsOutput);
     ui->unloadTerrainMapsButton->setEnabled(converter->GetNumOfTerrainMaps()>0);
     ui->filterButton->setEnabled(converter->GetNumOfAirspaces()>0 || converter->GetNumOfWaypoints()>0);
     ui->defaultAltSpinBox->setEnabled(isKMZ);
@@ -432,7 +432,7 @@ void MainWindow::on_convertButton_clicked() {
     startBusy();
 
     // Set default terrain altitude
-    converter->SetDefaultTearrainAlt(ui->defaultAltSpinBox->value());
+    AirspaceConverter::SetDefaultTerrainAlt(ui->defaultAltSpinBox->value());
 
     // Set OpenAir settings
     converter->DoNotCalculateArcsAndCirconferences(ui->onlyPointsCheckBox->isChecked());
