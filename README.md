@@ -12,6 +12,7 @@ Can write in the following formats:
   - KMZ  
   - _OpenAir_  
   - _SeeYou_  
+  - _LittleNavMap_  
   - _Polish_  
   - _Garmin_ IMG  
 
@@ -46,6 +47,7 @@ So please, be advised that, what you will see in _Google Earth_ will not exactly
 LK8000 terrain raster map files
 -------------------------------
 This program uses the same terrain raster maps (**.dem**) of _LK8000_ to convert altitudes from AGL to AMSL.  
+Also while importing _SeeYou_ waypoints with null altitude (except unknown and normal types) the ground elevation will be used as altitude of that point. For doing this the terrain raster maps must be loaded before the waypoints. Ground heights between -5 and 5 meters will be anyway considered AMSL.
 In case the loaded terrain maps are overlapping, the one with the best resolution will be automatically used.  
 On the _LK8000_ website there is a [wide terrain raster map collection](https://www.lk8000.it/download/maps.html).  
 The part of this program reading and using the terrain maps has been derived and adapted from _LK8000_ project.  
@@ -69,7 +71,7 @@ Possible options:
   - **-w**: multiple, input waypoint file(s) can be _SeeYou_ (**.cup**) or _openAIP_ (**.aip**)  
   - **-m**: optional, multiple, terrain map file(s) (**.dem**) used to lookup terrain heights  
   - **-l**: optional, set filter limits in latitude and longitude for the output, followed by the 4 limit values: northLat,southLat,westLon,eastLon where the limits are comma separated, expressed in degrees, without spaces, negative for west longitudes and south latitudes  
-  - **-o**: optional, output file **.kmz**, **.txt** (_OpenAir_), **.cup** (_SeeYou_), **.img** (_Garmin_) or **.mp** (_Polish_). If not specified will be used the name of first input file as **KMZ**  
+  - **-o**: optional, output file **.kmz** (_Google Earth_), **.txt** (_OpenAir_), **.cup** (_SeeYou_), **.csv** (_LittleNavMap_), **.img** (_Garmin_) or **.mp** (_Polish_). If not specified will be used the name of first input file as **KMZ**  
   - **-p**: optional, when writing in _OpenAir_ avoid to use arcs and circles but only points (DP)  
   - **-s**: optional, when writing in _OpenAir_ use coordinates always with minutes and seconds (DD:MM:SS)  
   - **-d**: optional, when writing in _OpenAir_ use coordinates always with decimal minutes (DD:MM.MMM)  
@@ -87,10 +89,10 @@ For Windows only is also available a _Windows MFC_ user interface; if, while sta
 This is the default way to use the graphical user interface:  
 1. Choose the desired output format.
 2. If needed, specify the QNH to be used for calculating the height of flight levels, this must be done before reading airspace files.
-3. Specify a default terrain altitude to be used for the points not under terrain raster map coverage.
+3. If converting to _GoogleEarth_ specify a default terrain altitude to be used for the points not under terrain raster map coverage.
 4. Select as input multiple _openAIP_ (**.aip**) _OpenAir_ (**.txt**) and/or _GoogleEarth_ (**.kmz**) files or the folder containing them.
-5. And/or select one or multiple waypoints files (**.cup**) or the folder containing them.
-6. If converting to _GoogleEarth_ it is possible to load multiple raster map files (**.dem**) with the terrain altitude.
+5. If converting to _GoogleEarth_ or to find missing altitudes of _SeeYou_ waypoints it is possible to load multiple raster map files (**.dem**) with the terrain altitude.
+6. And/or select one or multiple waypoints files (**.cup**) or the folder containing them.
 7. Optionally configure the latitude and longitude ranges for filtering the output.
 8. If converting to _OpenAir_ choose if to output only points and the desired coordinates format.
 9. Press the "Convert" button.
@@ -99,7 +101,7 @@ This is the default way to use the graphical user interface:
 
 Disclaimer
 ----------
-**WARNING**: this program is experimental. The generated output files may contains errors.  
+**WARNING**: this software is experimental. The generated output files may contains errors.  
 So please always verify the generated files before using in flight and report any error found.  
 By using this program you understand and completely agree that the generated output files (maybe wrong) are just for demonstration purposes and they do not absolutely substitute the official AIP publications.  
 Please always refer to official AIP publications for valid and updated airspace definitions.  

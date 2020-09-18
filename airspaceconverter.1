@@ -30,6 +30,7 @@ And the output can be done in the following formats:
     - KMZ
     - OpenAir
     - SeeYou
+    - LittleNavMap
     - Polish
     - Garmin IMG
 .PP
@@ -86,7 +87,7 @@ Hotspots files from openAIP are not supported while nav aids and airports yes.
 .BR \-m " " \fIterrainMapFile\fR
 Multiple, terrain map file(s) (.dem) used to lookup terrain heights.
 Additional input terrain map files must be specified repeating the option \-m in front of each of them.
-The terrain maps will be used only if converting to KMZ.
+The terrain maps will be used when converting to KMZ. And when importing SeeYou waypoints with null altitude the corresponding ground elevation will be used.
 .TP
 .BR \-l " " \fInorthLatitude,southLatitude,westLongitude,eastLongitude\fR
 Output filter limits in latitude and longitude, it must be followed by the 4 limit values.
@@ -94,7 +95,7 @@ The limits are comma separated, expressed in degrees, without spaces.
 Negative values represent south latitudes or west longitudes.
 .TP
 .BR \-o " " \fIoutputFile\fR
-Output file, can be: .kmz (Google Earth), .txt (OpenAir), .cup (SeeYou), .img (Garmin) or .mp (Polish).
+Output file, can be: .kmz (Google Earth), .txt (OpenAir), .cup (SeeYou), .csv (LittleNavMap), .img (Garmin) or .mp (Polish).
 If not specified will be used the name of first input file as KMZ.
 Output OpenAir files will be always encoded in ANSI.
 WARNING: any already existing output file will be automatically overwritten.
