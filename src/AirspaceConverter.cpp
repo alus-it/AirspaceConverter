@@ -13,6 +13,7 @@
 #include "AirspaceConverter.h"
 #include "Airspace.h"
 #include "Waypoint.h"
+#include "RasterMap.h"
 #include "KML.h"
 #include "OpenAir.h"
 #include "SeeYou.h"
@@ -70,6 +71,9 @@ const std::vector<std::string> AirspaceConverter::disclaimer = {
 	"Error reports, complaints and suggestions please email to: info@alus.it",
 };
 
+std::vector<RasterMap*> AirspaceConverter::terrainMaps;
+double AirspaceConverter::defaultTerrainAltitudeMt = 20;
+
 const std::string AirspaceConverter::cGPSmapperCommand = Detect_cGPSmapperPath();
 
 
@@ -79,7 +83,7 @@ AirspaceConverter::AirspaceConverter() :
 }
 
 AirspaceConverter::~AirspaceConverter() {
-	KML::ClearTerrainMaps();
+	ClearTerrainMaps();
 	UnloadWaypoints();
 }
 
@@ -253,14 +257,14 @@ void AirspaceConverter::LoadTerrainRasterMaps() {
 	if (terrainRasterMapFiles.empty()) return;
 	conversionDone = false;
 	int counter = 0;
-	for (const std::string& demFile : terrainRasterMapFiles) if (KML::AddTerrainMap(demFile)) counter++;
+	for (const std::string& demFile : terrainRasterMapFiles) if (AddTerrainMap(demFile)) counter++;
 	terrainRasterMapFiles.clear();
 	if (counter > 0) LogMessage(boost::str(boost::format("Read successfully %1d terrain raster map file(s).") % counter));
 }
 
 void AirspaceConverter::UnloadRasterMaps() {
 	conversionDone = false;
-	KML::ClearTerrainMaps();
+	ClearTerrainMaps();
 }
 
 void AirspaceConverter::LoadWaypoints() {
@@ -301,12 +305,58 @@ double AirspaceConverter::GetQNH() const {
 	return Altitude::GetQNH();
 }
 
-void AirspaceConverter::SetDefaultTearrainAlt(const double altMt) {
-	KML::SetDefaultTerrainAltitude(altMt);
+bool AirspaceConverter::AddTerrainMap(const std::string& filename) {
+	RasterMap* pTerrainMap = new RasterMap();
+	if (pTerrainMap == nullptr) return false;
+	if (!pTerrainMap->Open(filename)) {
+		delete pTerrainMap;
+		return false;
+	}
+	terrainMaps.push_back(pTerrainMap);
+	return true;
 }
 
-double AirspaceConverter::GetDefaultTearrainAlt() const {
-	return KML::GetDefaultTerrainAltitude();
+void AirspaceConverter::ClearTerrainMaps() {
+	for (RasterMap* pTerreinMap : terrainMaps) if (pTerreinMap != nullptr) delete pTerreinMap;
+	terrainMaps.clear();
+}
+
+bool AirspaceConverter::GetTerrainAltitudeMt(const double& lat, const double& lon, double& alt) {
+	if (terrainMaps.empty()) return false; // no maps no party...
+	const RasterMap* bestMap = terrainMaps.front();
+	if (terrainMaps.size() > 1)
+	{
+		std::multimap<double, const RasterMap*> results; // preselected maps, minStepSize (kind of resolution) used as key
+		double minStepSize = 8000; // 8000 it's just a quite big number which I like
+		for (const RasterMap* pTerreinMap : terrainMaps) {
+			if (pTerreinMap->PointIsInTerrainRange(lat, lon)) { // of course we want only maps covering our desired point!
+				double stepSize = pTerreinMap->GetStepSize();
+				if (stepSize < minStepSize) minStepSize = stepSize; // remember the best resolution
+				results.insert(std::pair<double, const RasterMap*>(stepSize, pTerreinMap)); // maps indexed on resolution
+			}
+		}
+		if (results.empty()) return false; // no results, the party is over ...
+		if (results.size() == 1) bestMap = results.begin()->second; // only one, so that's easy
+		else {
+			double minLatDiff = 90; // to find a latitude difference more than 90 degrees should be quite challenging...
+			const auto filtered = results.equal_range(minStepSize); // so now we have maps indexed on resolution and we even know the best resolution ...
+			for (auto it = filtered.first; it != filtered.second; ++it) { // look for the map with our point at higer absolute latitudes (samples more dense on earth surface)
+				double latDiff = lat >= 0 ? it->second->GetTop() - lat : lat - it->second->GetBottom();
+				assert(latDiff >= 0);
+				if (latDiff < minLatDiff) { // look for the minimum latitude difference with the proper N or S edge of the map
+					minLatDiff = latDiff;
+					bestMap = it->second;
+				}
+			}
+		}
+		assert(bestMap->PointIsInTerrainRange(lat, lon));
+	}
+	short altMt;
+	if (bestMap->GetTerrainHeight(lat, lon, altMt)) {
+		alt = altMt;
+		return true;
+	}
+	return false;
 }
 
 bool AirspaceConverter::Convert() {
@@ -318,7 +368,7 @@ bool AirspaceConverter::Convert() {
 			KML writer(airspaces, waypoints);
 			if (writer.Write(outputFile)) {
 				conversionDone = true;
-				if(KML::GetNumOfRasterMaps() == 0) LogWarning("no raster terrain map loaded, used default terrain height for all applicable AGL points.");
+				if(terrainMaps.empty()) LogWarning("no raster terrain map loaded, used default terrain height for all applicable AGL points.");
 				else if(!writer.WereAllAGLaltitudesCovered()) LogWarning("not all AGL altitudes were under coverage of the loaded terrain map(s).");
 			}
 		}
@@ -455,10 +505,6 @@ bool AirspaceConverter::ConvertOpenAIPdir(const std::string openAIPdir) {
 		UnloadWaypoints();
 	}
 	return true;
-}
-
-int AirspaceConverter::GetNumOfTerrainMaps() const {
-	return KML::GetNumOfRasterMaps();
 }
 
 bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop, Airspace& airspace) {

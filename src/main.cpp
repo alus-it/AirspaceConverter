@@ -71,11 +71,11 @@ int main(int argc, char *argv[]) {
 			}
 			break;
 		case 'a':
-			if(!hasValueAfter) std::cerr << "ERROR: default altitude value not found, using default value: " << ac.GetDefaultTearrainAlt() << " m."<< std::endl;
+			if(!hasValueAfter) std::cerr << "ERROR: default altitude value not found, using default value: " << AirspaceConverter::GetDefaultTerrainAlt() << " m."<< std::endl;
 			else try {
-				ac.SetDefaultTearrainAlt(std::stod(argv[++i]));
+				AirspaceConverter::SetDefaultTerrainAlt(std::stod(argv[++i]));
 			} catch (...) {
-				std::cerr << "ERROR: default altitude value not valid, using default value: " << ac.GetDefaultTearrainAlt() << " m." << std::endl;
+				std::cerr << "ERROR: default altitude value not valid, using default value: " << AirspaceConverter::GetDefaultTerrainAlt() << " m." << std::endl;
 			}
 			break;
 		case 'i':
@@ -167,7 +167,7 @@ int main(int argc, char *argv[]) {
 	// Start the timer
 	const auto startTime = std::chrono::high_resolution_clock::now();
 
-	// Load raster maps
+	// Load raster maps (terrain maps must be loaded before waypoints if we want to use them to correct altitudes)
 	ac.LoadTerrainRasterMaps();
 
 	bool result(false);

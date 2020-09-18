@@ -421,10 +421,10 @@ void CAirspaceConverterDlg::EndBusy(const bool takeTime /* = false */) {
 	const BOOL isWaypointFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::SeeYou_Format || OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::CSV_Format);
 	loadInputFileBt.EnableWindow(!isWaypointFile);
 	loadWaypointsBt.EnableWindow(isKmzFile || isWaypointFile);
-	loadDEMfileBt.EnableWindow(isKmzFile);
+	loadDEMfileBt.EnableWindow(isKmzFile || isWaypointFile);
 	LoadAirspacesFolderBt.EnableWindow(!isWaypointFile);
 	loadWaypointsFolderBt.EnableWindow(isKmzFile || isWaypointFile);
-	LoadRasterMapsFolderBt.EnableWindow(isKmzFile);
+	LoadRasterMapsFolderBt.EnableWindow(isKmzFile || isWaypointFile);
 #ifndef _WIN64
 	if (!isWinXPorOlder) {
 #endif
@@ -653,10 +653,10 @@ void CAirspaceConverterDlg::OnBnClickedOutputTypeCombo() {
 	const BOOL isWaypointFile(OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::SeeYou_Format || OutputTypeCombo.GetCurSel() == AirspaceConverter::OutputType::CSV_Format);
 	loadInputFileBt.EnableWindow(!isWaypointFile);
 	loadWaypointsBt.EnableWindow(isKmzFile || isWaypointFile);
-	loadDEMfileBt.EnableWindow(isKmzFile);
+	loadDEMfileBt.EnableWindow(isKmzFile || isWaypointFile);
 	LoadAirspacesFolderBt.EnableWindow(!isWaypointFile);
 	loadWaypointsFolderBt.EnableWindow(isKmzFile || isWaypointFile);
-	LoadRasterMapsFolderBt.EnableWindow(isKmzFile);
+	LoadRasterMapsFolderBt.EnableWindow(isKmzFile || isWaypointFile);
 	editQNHtextField.EnableWindow(isKmzFile ? numAirspacesLoaded == 0 : FALSE);
 	editDefualtAltTextField.EnableWindow(isKmzFile);
 	pointsCheckBox.EnableWindow(isOpenAirFile);
@@ -714,7 +714,7 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 				else return;
 			}
 		}
-		converter->SetDefaultTearrainAlt(defaultTerrainAlt);
+		AirspaceConverter::SetDefaultTerrainAlt(defaultTerrainAlt);
 		if (processor != nullptr && processor->Convert()) StartBusy();
 		else MessageBox(_T("Error while starting KML output thread."), _T("Error"), MB_ICONERROR);
 		break;

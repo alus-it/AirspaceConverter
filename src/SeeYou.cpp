@@ -178,6 +178,7 @@ bool SeeYou::Read(const std::string& fileName) {
 	double latitude, longitude;
 	int type, runwayDir, runwayLength, radioFreq, altRadioFreq;
 	float altitude;
+	const bool terrainMapsPresent(AirspaceConverter::GetNumOfTerrainMaps() > 0);
 
 	while (!input.eof() && input.good()) {
 
@@ -263,6 +264,17 @@ bool SeeYou::Read(const std::string& fileName) {
 		// Waypoint style
 		if (!ParseStyle(boost::trim_copy(*(++token)),type))
 			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid waypoint style: %2s, assuming unknown") %linecount %(*token)));
+
+		// Altitude verification aganist terrain raster map for only waypoints with null (or empty) altitude
+		if (terrainMapsPresent && altitude == 0 && type > Waypoint::WaypointType::normal) { // Unknown and normal waypoints skipped
+			double terrainAlt;
+			if (AirspaceConverter::GetTerrainAltitudeMt(latitude, longitude, terrainAlt)) {
+				if (fabs(terrainAlt - altitude) > 5) { // Consider new altitude only if delta > 5 m (maybe it was really intended AMSL)
+					AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: waypoint with null altitude, using terrain altitude: %2g m") % linecount % terrainAlt));
+					altitude = (float)terrainAlt;
+				}
+			}
+		}
 
 		// If it's an airfield...
 		if(Waypoint::IsTypeAirfield((Waypoint::WaypointType)type)) {

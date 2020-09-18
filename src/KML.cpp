@@ -12,7 +12,6 @@
 
 #include "KML.h"
 #include "Airspace.h"
-#include "RasterMap.h"
 #include "AirspaceConverter.h"
 #include "Waypoint.h"
 #include "Airfield.h"
@@ -82,8 +81,6 @@ const std::string KML::waypointIcons[] = {
 	"intersection.png" // Intersection
 };
 
-std::vector<RasterMap*> KML::terrainMaps;
-double KML::defaultTerrainAltitudeMt = 20;
 const std::string KML::iconsPath(DetectIconsPath());
 
 const std::string KML::DetectIconsPath() {
@@ -111,60 +108,6 @@ KML::KML(std::multimap<int, Airspace>& airspacesMap, std::multimap<int, Waypoint
 		allAGLaltitudesCovered(true),
 		processLineString(false),
 		folderCategory(Airspace::Type::UNDEFINED) {
-}
-
-bool KML::AddTerrainMap(const std::string& filename) {
-	RasterMap* pTerrainMap = new RasterMap();
-	if (pTerrainMap == nullptr) return false;
-	if (!pTerrainMap->Open(filename)) {
-		delete pTerrainMap;
-		return false;
-	}
-	terrainMaps.push_back(pTerrainMap);
-	return true;
-}
-
-void KML::ClearTerrainMaps() {
-	for (RasterMap* pTerreinMap : terrainMaps) if (pTerreinMap != nullptr) delete pTerreinMap;
-	terrainMaps.clear();
-}
-
-bool KML::GetTerrainAltitudeMt(const double& lat, const double& lon, double& alt) {
-	if (terrainMaps.empty()) return false; // no maps no party...
-	const RasterMap* bestMap = terrainMaps.front();
-	if (terrainMaps.size() > 1)
-	{
-		std::multimap<double, const RasterMap*> results; // preselected maps, minStepSize (kind of resolution) used as key
-		double minStepSize = 8000; // 8000 it's just a quite big number which I like
-		for (const RasterMap* pTerreinMap : terrainMaps) {
-			if (pTerreinMap->PointIsInTerrainRange(lat, lon)) { // of course we want only maps covering our desired point!
-				double stepSize = pTerreinMap->GetStepSize();
-				if (stepSize < minStepSize) minStepSize = stepSize; // remember the best resolution
-				results.insert(std::pair<double, const RasterMap*>(stepSize, pTerreinMap)); // maps indexed on resolution
-			}
-		}
-		if (results.empty()) return false; // no results, the party is over ...
-		if (results.size() == 1) bestMap = results.begin()->second; // only one, so that's easy
-		else {
-			double minLatDiff = 90; // to find a latitude difference more than 90 degrees should be quite challenging...
-			const auto filtered = results.equal_range(minStepSize); // so now we have maps indexed on resolution and we even know the best resolution ...
-			for (auto it = filtered.first; it != filtered.second; ++it) { // look for the map with our point at higer absolute latitudes (samples more dense on earth surface)
-				double latDiff = lat >= 0 ? it->second->GetTop() - lat : lat - it->second->GetBottom();
-				assert(latDiff >= 0);
-				if (latDiff < minLatDiff) { // look for the minimum latitude difference with the proper N or S edge of the map
-					minLatDiff = latDiff;
-					bestMap = it->second;
-				}
-			}
-		}
-		assert(bestMap->PointIsInTerrainRange(lat, lon));
-	}
-	short altMt;
-	if (bestMap->GetTerrainHeight(lat, lon, altMt)) {
-		alt = altMt;
-		return true;
-	}
-	return false;
 }
 
 std::string KML::PrepareTagText(const std::string& text) {
@@ -632,8 +575,8 @@ bool KML::Write(const std::string& filename) {
 					// Try to get terrein altitude then add the AGL altitude to get AMSL altitude
 					std::vector<double> amslAltitudesMt;
 					for (const Geometry::LatLon& p : a.GetPoints()) {
-						double terrainHeightMt = defaultTerrainAltitudeMt;
-						allAGLaltitudesCovered = GetTerrainAltitudeMt(p.Lat(), p.Lon(), terrainHeightMt) && allAGLaltitudesCovered;
+						double terrainHeightMt = AirspaceConverter::GetDefaultTerrainAlt();
+						allAGLaltitudesCovered = AirspaceConverter::GetTerrainAltitudeMt(p.Lat(), p.Lon(), terrainHeightMt) && allAGLaltitudesCovered;
 						amslAltitudesMt.push_back(terrainHeightMt + altitudeAGLmt);
 					}
 
@@ -660,8 +603,8 @@ bool KML::Write(const std::string& filename) {
 						// Try to get terrein altitude then add the AGL altitude to get AMSL altitude
 						std::vector<double> amslAltitudesMt;
 						for (const Geometry::LatLon& p : a.GetPoints()) {
-							double terrainHeightMt = defaultTerrainAltitudeMt;
-							allAGLaltitudesCovered = GetTerrainAltitudeMt(p.Lat(), p.Lon(), terrainHeightMt) && allAGLaltitudesCovered;
+							double terrainHeightMt = AirspaceConverter::GetDefaultTerrainAlt();
+							allAGLaltitudesCovered = AirspaceConverter::GetTerrainAltitudeMt(p.Lat(), p.Lon(), terrainHeightMt) && allAGLaltitudesCovered;
 							amslAltitudesMt.push_back(terrainHeightMt + altitudeAGLmt);
 						}
 

@@ -24,6 +24,7 @@
 
 class Airspace;
 class Waypoint;
+class RasterMap;
 
 class AirspaceConverter {
 public:
@@ -74,8 +75,12 @@ public:
 	void UnloadWaypoints();
 	void SetQNH(const double newQNHhPa);
 	double GetQNH() const;
-	void SetDefaultTearrainAlt(const double altMt);
-	double GetDefaultTearrainAlt() const;
+	static bool AddTerrainMap(const std::string& filename);
+	inline static int GetNumOfTerrainMaps() { return (int)terrainMaps.size(); }
+	static bool GetTerrainAltitudeMt(const double& lat, const double& lon, double& alt);
+	static void ClearTerrainMaps();
+	inline static void SetDefaultTerrainAlt(const double& defaultAltMt) { defaultTerrainAltitudeMt = defaultAltMt; }
+	inline static double GetDefaultTerrainAlt() { return defaultTerrainAltitudeMt; }
 	bool Convert();
 	bool ConvertOpenAIPdir(const std::string openAIPdir);
 	inline bool IsConversionDone() const { return conversionDone; }
@@ -85,7 +90,6 @@ public:
 	inline std::string GetOutputFile() const { return outputFile; }
 	inline unsigned long GetNumOfAirspaces() const { return (unsigned long)airspaces.size(); }
 	inline unsigned long GetNumOfWaypoints() const { return (unsigned long)waypoints.size(); }
-	int GetNumOfTerrainMaps() const;
 	bool FilterOnLatLonLimits(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon);
 	inline void ProcessTracksAsAirspaces(const bool treatTracksAsAirspaces = true) { processLineStrings = treatTracksAsAirspaces; }
 	static void DoNotCalculateArcsAndCirconferences(const bool doNotCalcArcs = true);
@@ -106,6 +110,8 @@ private:
 
 	std::multimap<int, Airspace> airspaces;
 	std::multimap<int, Waypoint*> waypoints;
+	static std::vector<RasterMap*> terrainMaps;
+	static double defaultTerrainAltitudeMt;
 	std::string outputFile;
 	std::vector<std::string> airspaceFiles, terrainRasterMapFiles, waypointFiles;
 	bool conversionDone;

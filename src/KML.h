@@ -19,7 +19,6 @@
 
 class Altitude;
 class Airspace;
-class RasterMap;
 class Waypoint;
 class Airfield;
 
@@ -27,11 +26,6 @@ class KML {
 public:
 	KML(std::multimap<int, Airspace>& airspacesMap, std::multimap<int, Waypoint*>& waypointsMap);
 	bool Write(const std::string& filename);
-	static bool AddTerrainMap(const std::string& filename);
-	inline static int GetNumOfRasterMaps() { return (int)terrainMaps.size(); }
-	static void ClearTerrainMaps();
-	inline static void SetDefaultTerrainAltitude(const double& defaultAltMt) { defaultTerrainAltitudeMt = defaultAltMt; }
-	inline static double GetDefaultTerrainAltitude() { return defaultTerrainAltitudeMt; }
 	inline bool WereAllAGLaltitudesCovered() const { return allAGLaltitudesCovered; }
 	inline void ProcessLineStrings(bool LineStringAsAirspaces = true) { processLineString = LineStringAsAirspaces; }
 	bool ReadKMZ(const std::string& filename);
@@ -39,7 +33,6 @@ public:
 
 private:
 	static std::string PrepareTagText(const std::string& text);
-	static bool GetTerrainAltitudeMt(const double& lat, const double& lon, double&alt);
 	void WriteHeader(const bool airspacePresent, const bool waypointsPresent);
 	void OpenPlacemark(const Airspace& airspace);
 	void OpenPlacemark(const Waypoint* waypoint);
@@ -59,8 +52,6 @@ private:
 	static const std::string colors[][2];
 	static const std::string airfieldColors[][2];
 	static const std::string waypointIcons[];
-	static std::vector<RasterMap*> terrainMaps;
-	static double defaultTerrainAltitudeMt;
 	static const std::string iconsPath;
 	std::multimap<int, Airspace>& airspaces;
 	std::multimap<int, Waypoint*>& waypoints;
