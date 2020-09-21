@@ -258,7 +258,8 @@ bool SeeYou::Read(const std::string& fileName) {
 		}
 
 		// Elevation
-		if (!ParseAltitude(boost::trim_copy(*(++token)), altitude))
+		const bool altitudePresent = ParseAltitude(boost::trim_copy(*(++token)), altitude);
+		if (!altitudePresent && !terrainMapsPresent)
 			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %(*token)));
 
 		// Waypoint style
@@ -266,15 +267,25 @@ bool SeeYou::Read(const std::string& fileName) {
 			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid waypoint style: %2s, assuming unknown") %linecount %(*token)));
 
 		// Altitude verification aganist terrain raster map for only waypoints with null (or empty) altitude
-		if (terrainMapsPresent && altitude == 0 && type > Waypoint::WaypointType::normal) { // Unknown and normal waypoints skipped
+		if (terrainMapsPresent && ((altitudePresent && altitude == 0) || !altitudePresent) && type > Waypoint::WaypointType::normal) { // Unknown and normal waypoints skipped
 			double terrainAlt;
 			if (AirspaceConverter::GetTerrainAltitudeMt(latitude, longitude, terrainAlt)) {
-				if (fabs(terrainAlt - altitude) > 5) { // Consider new altitude only if delta > 5 m (maybe it was really intended AMSL)
-					AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: waypoint with null altitude, using terrain altitude: %2g m") % linecount % terrainAlt));
+				if (altitudePresent) {
+					if (fabs(terrainAlt - altitude) >= 5) { // Consider new altitude only if delta > 5 m (maybe it was really intended AMSL)
+						AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: waypoint with null altitude, using terrain altitude: %2g m") % linecount % terrainAlt));
+						altitude = (float)terrainAlt;
+					}
+				} else {
+					AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: waypoint without altitude, using terrain altitude: %2g m") % linecount % terrainAlt));
 					altitude = (float)terrainAlt;
 				}
-			}
+			} else if (!altitudePresent)
+				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %(*token)));
 		}
+
+		if (!altitudePresent)
+					AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %(*token)));
+
 
 		// If it's an airfield...
 		if(Waypoint::IsTypeAirfield((Waypoint::WaypointType)type)) {
