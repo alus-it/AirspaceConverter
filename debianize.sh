@@ -109,7 +109,7 @@ fi
 # Check what Debian or Ubuntu release we are talking about
 case $OSVER in
 	7)
-		echo "Packaging for Debian Wheezy..."
+		echo "Packaging for Debian 7 Wheezy..."
 		DISTR=deb
 		LIBCVER=2.13
 		ZIPLIB=libzip2
@@ -120,7 +120,7 @@ case $OSVER in
 		MANT="Alberto Realis-Luc <admin@alus.it>"
 		;;
 	8)
-		echo "Packaging for Debian Jessie..."
+		echo "Packaging for Debian 8 Jessie..."
 		DISTR=deb
 		LIBCVER=2.19
 		ZIPLIB=libzip2
@@ -131,7 +131,7 @@ case $OSVER in
 		MANT="Alberto Realis-Luc <admin@alus.it>"
 		;;
 	9)
-		echo "Packaging for Debian Stretch..."
+		echo "Packaging for Debian 9 Stretch..."
 		DISTR=deb
 		LIBCVER=2.19
 		ZIPLIB=libzip4
@@ -140,6 +140,17 @@ case $OSVER in
 		QTVER=5.7.1
 		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER}), libgl1-mesa-glx (>= 10.3.2)"
 		MANT="Alberto Realis-Luc <admin@alus.it>"
+		;;
+	10)
+		echo "Packaging for Debian 10 Buster..."
+		DISTR=deb
+		LIBCVER=2.28
+		ZIPLIB=libzip4
+		ZIPVER=1.5.1
+		BOOSTVER=1.67.0
+		QTVER=5.11.3
+		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER}), libgl1-mesa-glx (>= 18.3.6)"
+		MANT="Valerio Messina <efa@iol.it>"
 		;;
 	4)
 		echo "Packaging for LMDE4 (Debian 10 Buster)..."
