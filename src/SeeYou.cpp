@@ -283,10 +283,6 @@ bool SeeYou::Read(const std::string& fileName) {
 				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %(*token)));
 		}
 
-		if (!altitudePresent)
-					AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %(*token)));
-
-
 		// If it's an airfield...
 		if(Waypoint::IsTypeAirfield((Waypoint::WaypointType)type)) {
 			// Runway direction
