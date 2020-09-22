@@ -415,8 +415,8 @@ bool SeeYou::Write(const std::string& fileName) {
 
 			// Other frequency
 			if (w.HasOtherFrequency()) {
-				if (w.GetType() == Waypoint::WaypointType::NDB) file << std::setprecision(1) << AirspaceConverter::FrequencykHz(w.GetOtherFrequency()); // 1 decimal for NDB freq [kHz]
-				else if (w.GetType() == Waypoint::WaypointType::VOR) file << std::setprecision(2) << AirspaceConverter::FrequencyMHz(w.GetOtherFrequency()); // 2 decimals for VOR freq [MHz]
+				if (w.GetType() == Waypoint::WaypointType::NDB) file << std::setprecision(3) << AirspaceConverter::FrequencykHz(w.GetOtherFrequency()); // 3 decimals for NDB freq [kHz]
+				else if (w.GetType() == Waypoint::WaypointType::VOR) file << std::setprecision(3) << AirspaceConverter::FrequencyMHz(w.GetOtherFrequency()); // 3 decimals for VOR freq [MHz]
 				else file << std::setprecision(3) << AirspaceConverter::FrequencyMHz(w.GetOtherFrequency()); // assuming all other VHF freq [MHz]
 			}
 		}
