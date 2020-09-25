@@ -177,7 +177,7 @@ bool SeeYou::Read(const std::string& fileName) {
 
 	double latitude, longitude;
 	int type, runwayDir, runwayLength, radioFreq, altRadioFreq;
-	float altitude;
+	float altitude = 0;
 	const bool terrainMapsPresent(AirspaceConverter::GetNumOfTerrainMaps() > 0);
 
 	while (!input.eof() && input.good()) {
