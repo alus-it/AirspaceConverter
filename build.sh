@@ -9,8 +9,9 @@
 #
 # This script is part of AirspaceConverter project
 #============================================================================
+# On Linux: to run this script it is necessary to have lsb-release installed
 
-# Find out where we want to build and number of processors available
+# First find out where we want to build and number of processors available
 QMAKE=qmake
 if [ "$(uname)" == "Darwin" ]; then
 	SYSTEM="macOS"
