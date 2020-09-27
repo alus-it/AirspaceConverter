@@ -348,7 +348,6 @@ bool SeeYou::Read(const std::string& fileName) {
 	return true;
 }
 
-
 bool SeeYou::Write(const std::string& fileName) {
 	if (waypoints.empty()) {
 		AirspaceConverter::LogMessage("SeeYou output: no waypoints, nothing to write");
