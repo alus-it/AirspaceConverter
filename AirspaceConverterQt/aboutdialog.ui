@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>380</width>
-    <height>170</height>
+    <height>200</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>380</width>
-    <height>170</height>
+    <height>200</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>380</width>
-    <height>170</height>
+    <height>200</height>
    </size>
   </property>
   <property name="contextMenuPolicy">
@@ -45,7 +45,7 @@
    <property name="geometry">
     <rect>
      <x>270</x>
-     <y>120</y>
+     <y>150</y>
      <width>95</width>
      <height>31</height>
     </rect>
@@ -112,7 +112,7 @@
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;AirspaceConverter author&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="text">
-    <string>Written by:   Alberto Realis-Luc</string>
+    <string>Written by:    Alberto Realis-Luc</string>
    </property>
   </widget>
   <widget class="QLabel" name="versionLabel">
@@ -138,7 +138,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>120</y>
+     <y>150</y>
      <width>241</width>
      <height>16</height>
     </rect>
@@ -163,7 +163,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>140</y>
+     <y>170</y>
      <width>241</width>
      <height>16</height>
     </rect>
@@ -223,6 +223,22 @@
    </property>
    <property name="text">
     <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>120</y>
+     <width>181</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="whatsThis">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;AirspaceConverter author&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="text">
+    <string>Valerio Messina</string>
    </property>
   </widget>
  </widget>
