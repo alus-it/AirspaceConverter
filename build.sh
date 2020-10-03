@@ -59,6 +59,7 @@ if [ "$?" -ne 0 ]; then
 fi
 if [ ${SYSTEM} == "Linux" ]; then
 	strip -S --strip-unneeded ./airspaceconverter-gui
+	mv ./airspaceconverter-gui ../Release/airspaceconverter-gui
 else
 	strip -S ./airspaceconverter-gui.app/Contents/MacOS/airspaceconverter-gui
 fi

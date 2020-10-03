@@ -35,7 +35,7 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
 	sudo make install
 	
 	# Install GUI
-	sudo cp ./buildQt/airspaceconverter-gui /usr/bin
+	sudo cp ./Release/airspaceconverter-gui /usr/bin
 	sudo chmod 0755 /usr/bin/airspaceconverter-gui
 else
 	echo "ERROR: this script is only for Linux or macOS ..."

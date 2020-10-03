@@ -83,11 +83,10 @@ elif [[ "$ACTION" == "D" || "$ACTION" == "d" ]]; then
 	mkdir -p Release
 	mv airspaceconverter ./Release/airspaceconverter
 	mv libairspaceconverter.so ./Release/libairspaceconverter.so
-	mkdir -p buildQt
-	mv airspaceconverter-gui ./buildQt/airspaceconverter-gui
+	mv airspaceconverter-gui ./Release/airspaceconverter-gui
 
 	# Ask the user for which version of Debian we are building the packages	
-	printf "Enter target Debian [7,8,9] or Ubuntu [16.04,18.04] release number: "
+	printf "Enter target Debian [7,8,9,10] or Ubuntu [16.04,18.04,20.04] release number: "
 	read -r OSVER
 
 	# Ask the packager for which architecure are built the copied binaries
@@ -411,7 +410,7 @@ cd ..
 cp ../../airspaceconverter_${VERSION}-${DISTR}${OSVER}_${ARCH}/usr/share/doc/airspaceconverter/copyright ./share/doc/airspaceconverter-gui
 cp ../../airspaceconverter.xpm ./share/pixmaps
 chmod 0644 ./share/pixmaps/airspaceconverter.xpm
-cp ../../buildQt/airspaceconverter-gui ./bin
+cp ../../Release/airspaceconverter-gui ./bin
 chmod 0755 ./bin/airspaceconverter-gui
 
 cd ..
@@ -486,8 +485,6 @@ printf "Clean build directory [Y/N]: "
 read -r CLEAN
 if [[ "$CLEAN" == "Y" || "$CLEAN" == "y" ]]; then
 	echo Cleaning...
-	#rm -R buildQt
-	#make clean
 	./clean.sh
 fi
 
