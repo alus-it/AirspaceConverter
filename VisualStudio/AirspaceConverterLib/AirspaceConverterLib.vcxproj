@@ -71,8 +71,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\local\boost_1_73_0;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSdk_71A_IncludePath)</IncludePath>
-    <LibraryPath>C:\local\boost_1_73_0\lib32-msvc-14.2;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <IncludePath>C:\local\boost_1_74_0;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSdk_71A_IncludePath)</IncludePath>
+    <LibraryPath>C:\local\boost_1_74_0\lib32-msvc-14.2;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
     <IntDir>$(Configuration)\$(Platform)\</IntDir>
     <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
     <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
@@ -80,8 +80,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\local\boost_1_73_0;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>C:\local\boost_1_73_0\lib64-msvc-14.2;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>C:\local\boost_1_74_0;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>C:\local\boost_1_74_0\lib64-msvc-14.2;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
     <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(Configuration)\$(Platform)\</IntDir>
     <TargetExt>.lib</TargetExt>
@@ -89,8 +89,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\local\boost_1_73_0;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSdk_71A_IncludePath)</IncludePath>
-    <LibraryPath>C:\local\boost_1_73_0\lib32-msvc-14.2;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <IncludePath>C:\local\boost_1_74_0;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSdk_71A_IncludePath)</IncludePath>
+    <LibraryPath>C:\local\boost_1_74_0\lib32-msvc-14.2;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
     <IntDir>$(Configuration)\$(Platform)\</IntDir>
     <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
     <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
@@ -98,8 +98,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\local\boost_1_73_0;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>C:\local\boost_1_73_0\lib64-msvc-14.2;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>C:\local\boost_1_74_0;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>C:\local\boost_1_74_0\lib64-msvc-14.2;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
     <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(Configuration)\$(Platform)\</IntDir>
     <TargetExt>.lib</TargetExt>
