@@ -477,6 +477,10 @@ bool AirspaceConverter::ConvertOpenAIPdir(const std::string openAIPdir) {
 			// Make SeeYou airports file
 			outputFile = wptPath.replace_extension(".cup").string();
 			Convert();
+
+			// Make LittleNavMap airports file
+			outputFile = wptPath.replace_extension(".csv").string();
+			Convert();
 		}
 
 		if (nav) {
@@ -488,6 +492,10 @@ bool AirspaceConverter::ConvertOpenAIPdir(const std::string openAIPdir) {
 
 			// Make SeeYou navaids file
 			outputFile = navPath.replace_extension(".cup").string();
+			Convert();
+
+			// Make LittleNavMap navaids file
+			outputFile = navPath.replace_extension(".csv").string();
 			Convert();
 		}
 
