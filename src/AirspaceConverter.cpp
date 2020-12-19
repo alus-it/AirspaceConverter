@@ -468,6 +468,22 @@ bool AirspaceConverter::ConvertOpenAIPdir(const std::string openAIPdir) {
 			Convert();
 		}
 
+		/* TODO: if (hot) {
+			boost::filesystem::path navPath(openAIPpath / std::string(countryCode + "_hot.aip"));
+			AddWaypointFile(navPath.string());
+			LoadWaypoints(); // here load ONLY hotspots
+
+			// Make SeeYou hotspots file
+			outputFile = navPath.replace_extension(".cup").string();
+			Convert();
+
+			// Make LittleNavMap hotspots file
+			outputFile = navPath.replace_extension(".csv").string();
+			Convert();
+
+			UnloadWaypoints();
+		} */
+
 		if (wpt) {
 			boost::filesystem::path wptPath(openAIPpath / std::string(countryCode + "_wpt.aip"));
 			airfieldsFile = wptPath.string(); // remember the airfields file
