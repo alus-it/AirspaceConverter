@@ -205,9 +205,9 @@ bool CSV::Read(const std::string& fileName) {
 
 		// Skip eventual header
 		if (!firstWaypointFound && (
-				sLine.find("name, code, country, lat, lon, elev, style, rwydir, rwylen, freq, desc") != std::string::npos ||
+				sLine.find("name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc") != std::string::npos ||
 				sLine.find("name, code, country, lat, lon, elev, style, rwdir, rwlen, freq, desc") != std::string::npos ||
-				sLine.find("name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc") != std::string::npos)) continue;
+				sLine.find("name, code, country, lat, lon, elev, style, rwydir, rwylen, freq, desc") != std::string::npos)) continue;
 
 		// Remove front spaces
 		boost::algorithm::trim_left(sLine);

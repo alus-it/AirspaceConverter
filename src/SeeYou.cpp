@@ -199,9 +199,9 @@ bool SeeYou::Read(const std::string& fileName) {
 
 		// Skip eventual header
 		if (!firstWaypointFound && (
+				sLine.find("name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc") != std::string::npos ||
 				sLine.find("name, code, country, lat, lon, elev, style, rwydir, rwylen, freq, desc") != std::string::npos ||
-				sLine.find("name, code, country, lat, lon, elev, style, rwdir, rwlen, freq, desc") != std::string::npos ||
-				sLine.find("name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc") != std::string::npos)) continue;
+				sLine.find("name, code, country, lat, lon, elev, style, rwdir, rwlen, freq, desc") != std::string::npos)) continue;
 
 		// Remove front spaces
 		boost::algorithm::trim_left(sLine);
@@ -362,7 +362,7 @@ bool SeeYou::Write(const std::string& fileName) {
 	AirspaceConverter::LogMessage("Writing SeeYou output file: " + fileName);
 
 	// Write default CUP header on first line, and for compatibilty with "Strepla" do not write any disclaimer or comments 
-	file << "name, code, country, lat, lon, elev, style, rwydir, rwylen, freq, desc\r\n";
+	file << "name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc\r\n";
 
 	// Go trough all waypoints
 	for (const std::pair<int,Waypoint*>& pair : waypoints) {
