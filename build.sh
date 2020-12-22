@@ -4,7 +4,7 @@
 # Since       : 9/12/2017
 # Author      : Alberto Realis-Luc <alberto.realisluc@gmail.com>
 # Web         : https://www.alus.it/AirspaceConverter
-# Copyright   : (C) 2016-2020 Alberto Realis-Luc
+# Copyright   : (C) 2016-2021 Alberto Realis-Luc
 # License     : GNU GPL v3
 #
 # This script is part of AirspaceConverter project
