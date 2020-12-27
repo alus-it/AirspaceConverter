@@ -24,6 +24,8 @@
 #include <cmath>
 #include <cassert>
 
+const std::string SeeYou::defaultHeader = "name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc";
+
 SeeYou::SeeYou(std::multimap<int,Waypoint*>& waypointsMap):
 	waypoints(waypointsMap) {
 }
@@ -173,7 +175,7 @@ bool SeeYou::Read(const std::string& fileName) {
 	AirspaceConverter::LogMessage("Reading CUP file: " + fileName);
 	int linecount = 0;
 	std::string sLine;
-	bool isCRLF = false, CRLFwarningGiven = false, firstWaypointFound = false;
+	bool isCRLF = false, CRLFwarningGiven = false, firstLineCheck = false;
 
 	double latitude, longitude;
 	int type, runwayDir, runwayLength, radioFreq, altRadioFreq;
@@ -186,6 +188,19 @@ bool SeeYou::Read(const std::string& fileName) {
 		AirspaceConverter::SafeGetline(input, sLine, isCRLF);
 		linecount++;
 
+		// Header check
+		if (!firstLineCheck) {
+			firstLineCheck = true;
+			if (sLine.compare(defaultHeader) == 0) continue; // Default header found: fine!
+			if (sLine.find(defaultHeader) != std::string::npos ||
+				sLine.find("name, code, country, lat, lon, elev, style, rwydir, rwylen, freq, desc") != std::string::npos ||
+				sLine.find("name, code, country, lat, lon, elev, style, rwdir, rwlen, freq, desc") != std::string::npos) {
+					AirspaceConverter::LogWarning(boost::str(boost::format("on first line: expected default SeeYou header: %1s but found: %2s") %defaultHeader %sLine));
+					continue;
+				}
+			AirspaceConverter::LogWarning(boost::str(boost::format("first line not containing the default SeeYou header, it should be: %1s") %defaultHeader));
+		}
+
 		// Verify line ending
 		if (!CRLFwarningGiven && !isCRLF) {
 			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: not valid Windows style end of line (expected CR LF).") % linecount));
@@ -196,12 +211,6 @@ bool SeeYou::Read(const std::string& fileName) {
 
 		// Directly skip empty lines
 		if (sLine.empty()) continue;
-
-		// Skip eventual header
-		if (!firstWaypointFound && (
-				sLine.find("name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc") != std::string::npos ||
-				sLine.find("name, code, country, lat, lon, elev, style, rwydir, rwylen, freq, desc") != std::string::npos ||
-				sLine.find("name, code, country, lat, lon, elev, style, rwdir, rwlen, freq, desc") != std::string::npos)) continue;
 
 		// Remove front spaces
 		boost::algorithm::trim_left(sLine);
@@ -341,9 +350,6 @@ bool SeeYou::Read(const std::string& fileName) {
 			// Add it to the multimap
 			waypoints.insert(std::pair<int, Waypoint*>(type, waypoint));
 		}
-
-		// Make sure that at this point we already found a valid waypoint so the header is not anymore expected
-		if (!firstWaypointFound) firstWaypointFound = true;
 	}
 	return true;
 }
