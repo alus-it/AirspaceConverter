@@ -517,7 +517,7 @@ bool CSV::Write(const std::string& fileName) {
 				type = "VRP";
 				break;
 			default:
-				AirspaceConverter::LogWarning("skipping point with unknown type: " + style);
+				AirspaceConverter::LogWarning(boost::str(boost::format("skipping point with unknown type: %d") % style));
 				continue;
 		}
 		file << type << ',';
