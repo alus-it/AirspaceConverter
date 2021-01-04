@@ -22,7 +22,7 @@ class CSV {
 public:
 	CSV(std::multimap<int,Waypoint*>& waypointsMap);
 	~CSV() {}
-	//TODO: bool Read(const std::string& fileName);
+	bool Read(const std::string& fileName);
 	bool Write(const std::string& fileName);
 
 private:
