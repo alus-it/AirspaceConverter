@@ -5,7 +5,7 @@
 //               Alberto Realis-Luc <alberto.realisluc@gmail.com>
 // Web         : https://www.alus.it/AirspaceConverter
 // Repository  : https://github.com/alus-it/AirspaceConverter.git
-// Copyright   : (C) 2016-2020 Valerio Messina, Alberto Realis-Luc
+// Copyright   : (C) 2016-2021 Valerio Messina, Alberto Realis-Luc
 // License     : GNU GPL v3
 //
 // This source file is part of AirspaceConverter project
@@ -14,11 +14,14 @@
 // Are comma separated files, with lines like the following template:
 //  Type,Name,Ident,Lat,Lon,Elev,Decl,Label,Desc,Country,Range,ModificationTime,SourceFile
 // Note: Type can be: Airport, Airstrip, Bookmark, DME, Helipad, NDB, TACAN, VOR, VORDME, VORTAC, VRP, Waypoint
-//       mapping for CUP Style=Type: 2=Airstrip, 4-5=Airport, 9=VOR, 10=NDB, 16=Waypoint/IRP, 17=VRP
+//       LNM2.4.5:Airport,Airstrip,Bookmark,Cabin,Closed,DME,Error,Flag,Helipad,Lighthouse,Location,Logbook,Marker,Mountain,NDB,Obstacle,POI,Pin,Seaport,TACAN,Unknown,VOR,VORDME,VORTAC,VRP,Waypoint
+//       LNM2.6.x automatically detected comment line:
+//        "Type,Name,Ident,Latitude,Longitude,Elevation,Magnetic Declination,Tags,Description,Region,Visible From,Last Edit,Import Filename"
 // Note: Lat/Lon must be in DDD.MMMMMM format, Elev is in feet and unit must be omitted
 // Note: Elevation is always feet and distances are always nautical miles
-// Note: LNM fill the Declination field on export, not used when importing
-// Note: LNM fill the SourceFile field on export, ignore it when importing and take note internally of source file
+// Note: LNM fill the Declination field on export, not used when importing, leave empty
+// Note: LNM fill the SourceFile field on export, ignore it when importing and take note of source file, leave empty
+// https://www.littlenavmap.org/manuals/littlenavmap/release/2.4/en/USERPOINT.html#csv-data-format
 
 #include "CSV.h"
 #include "AirspaceConverter.h"
@@ -38,40 +41,163 @@ CSV::CSV(std::multimap<int,Waypoint*>& waypointsMap):
 	waypoints(waypointsMap) {
 }
 
+bool CSV::ParseStyle(const std::string& text, int& type) {
+	if (!text.empty()) try {
+		//Airport, Airstrip, Bookmark, DME, Helipad, NDB, TACAN, VOR, VORDME, VORTAC, VRP, Waypoint
+		//LNM2.4.5:Airport,Airstrip,Bookmark,Cabin,Closed,DME,Error,Flag,Helipad,Lighthouse,Location,Logbook,Marker,Mountain,NDB,Obstacle,POI,Pin,Seaport,TACAN,Unknown,VOR,VORDME,VORTAC,VRP,Waypoint
+		/* 0123456789
+			Airport,
+			Airstrip,
+			Bookmark,
+			Cabin,
+			Closed,
+			DME,
+			Error,
+			Flag,
+			Helipad,
+			Lighthouse,
+			Location,
+			Logbook,
+			Marker,
+			Mountain,
+			NDB,
+			Obstacle,
+			POI,
+			Pin,
+			Seaport,
+			TACAN,
+			Unknown,
+			VOR,
+			VORDME,
+			VORTAC,
+			VRP,
+			Waypoint*/
+		//Enum:        0,     1,             2,         3,          4,             5,         6,        7,      8,  9, 10,        11, 12,    13,    14,         15,    16,          17,                18
+		//Enum:UNDEFINED,Normal,Airfield grass,Outlanding,Glider site,Airfield solid,Mount pass,Mount top,Antenna,VOR,NDB,Cool tower,Dam,Tunnel,Bridge,Power plant,Castle,Intersection,
+		//Enum:unknown  ,normal,airfieldGrass ,outlanding,gliderSite ,airfieldSolid ,mtPass    ,mtTop    ,sender ,VOR,NDB,coolTower ,dam,tunnel,bridge,powerPlant ,castle,intersection,numOfWaypointTypes
+		switch(text[0]) {
+			case 'A': // Airport,Airstrip
+				switch(text[3]) {
+					case 'p': type=Waypoint::airfieldSolid; break;
+					case 's': type=Waypoint::airfieldGrass; break;
+					default:
+						AirspaceConverter::LogWarning("point with unknown type: " + text);
+						return false;
+				}
+				break;
+			case 'B': // Bookmark
+				type=Waypoint::unknown; break;
+			case 'C': // Cabin,Closed
+				switch(text[1]) {
+					case 'a': type=Waypoint::unknown; break;
+					case 'l': type=Waypoint::unknown; break;
+					default:
+						AirspaceConverter::LogWarning("point with unknown type: " + text);
+						return false;
+				}
+				break;
+			case 'D': // DME
+				type=Waypoint::unknown; break;
+			case 'E': // Error
+				type=Waypoint::unknown; break;
+			case 'F': // Flag
+				type=Waypoint::unknown; break;
+			case 'H': // Helipad
+				type=Waypoint::unknown; break;
+			case 'L': // Lighthouse,Location,Logbook
+				switch(text[3]) {
+					case 'h': type=Waypoint::unknown; break;
+					case 'a': type=Waypoint::unknown; break;
+					case 'b': type=Waypoint::unknown; break;
+					default:
+						AirspaceConverter::LogWarning("point with unknown type: " + text);
+						return false;
+				}
+				break;
+			case 'M': // Marker,Mountain
+				switch(text[1]) {
+					case 'a': type=Waypoint::unknown; break;
+					case 'o': type=Waypoint::unknown; break;
+					default:
+						AirspaceConverter::LogWarning("point with unknown type: " + text);
+						return false;
+				}
+				break;
+			case 'N': // NDB
+				type=Waypoint::NDB; break;
+			case 'O': // Obstacle
+				type=Waypoint::unknown; break;
+			case 'P': // POI,Pin
+				switch(text[1]) {
+					case 'O': type=Waypoint::unknown; break;
+					case 'i': type=Waypoint::unknown; break;
+					default:
+						AirspaceConverter::LogWarning("point with unknown type: " + text);
+						return false;
+				}
+				break;
+			case 'S': // Seaport
+				type=Waypoint::unknown; break;
+			case 'T': // TACAN
+				type=Waypoint::VOR; break;
+			case 'U': // Unknown
+				type=Waypoint::unknown; break;
+			case 'V': // VOR,VORDME,VORTAC,VRP
+				switch(text[1]) {
+					case 'O': 
+						switch(text[3]) {
+							case '\0': type=Waypoint::VOR; break;
+							case 'D': type=Waypoint::VOR; break;
+							case 'T': type=Waypoint::VOR; break;
+							default:
+								AirspaceConverter::LogWarning("point with unknown type: " + text);
+								return false;
+						}
+						break;
+					case 'R': type=Waypoint::intersection; break;
+					default:
+						AirspaceConverter::LogWarning("point with unknown type: " + text);
+						return false;
+				}
+				break;
+			case 'W': // Waypoint
+				type=Waypoint::castle; break;
+			default:
+				AirspaceConverter::LogWarning("point with unknown type: " + text);
+				return false;
+		} // switch
+		if (type >= Waypoint::unknown && type < Waypoint::numOfWaypointTypes) return true;
+	} catch(...) {}
+	type = Waypoint::unknown;
+	return false;
+}
+
 bool CSV::ParseLatitude(const std::string& text, double& lat) {
 	const size_t len = text.length();
-	if(len < 5) return false;
+	if(len < 1) return false;
 	try {
-		lat = std::stoi(text.substr(0,2));
-		lat += std::stod(text.substr(2,len-3))/60;
+		lat = std::stod(text);
 	} catch(...) {
 		return false;
 	}
-	const char sign = text.back();
-	if (sign == 'S' || sign == 's') lat = -lat;
-	else if (sign != 'N' && sign != 'n') return false;
 	return Geometry::LatLon::IsValidLat(lat);
 }
 
 bool CSV::ParseLongitude(const std::string& text, double& lon) {
 	const size_t len = text.length();
-	if(len < 6) return false;
+	if(len < 1) return false;
 	try {
-		lon = std::stoi(text.substr(0,3));
-		lon += std::stod(text.substr(3,len-4))/60;
+		lon = std::stod(text);
 	} catch (...) {
 		return false;
 	}
-	const char sign = text.back();
-	if (sign == 'W' || sign == 'w') lon = -lon;
-	else if (sign != 'E' && sign != 'e') return false;
 	return Geometry::LatLon::IsValidLon(lon);
 }
 
 bool CSV::ParseAltitude(const std::string& text, float& alt) {
 	alt = 0;
 	size_t pos = text.length() - 1;
-	if(pos == 0 && text.front()=='0') return true;
+	if(pos == 0 && text.front()=='0') return true; // empty ==> 0m
 	if(pos<1) return false;
 	bool feet = false;
 	if(text.back() == 't' || text.back() == 'T') pos--;
@@ -81,25 +207,14 @@ bool CSV::ParseAltitude(const std::string& text, float& alt) {
 			break;
 		case 'f':
 		case 'F':
-			feet = true;
-			break;
 		default:
-			return false;
+			feet = true;
 	}
 	try {
-		alt = std::stof(text.substr(0,pos));
+		alt = std::stof(text);
 		if(feet) alt *= (float)Altitude::FEET2METER;
 		return true;
 	} catch(...) {}
-	return false;
-}
-
-bool CSV::ParseStyle(const std::string& text, int& type) {
-	if (!text.empty()) try {
-		type = std::stoi(text);
-		if (type >= Waypoint::unknown && type < Waypoint::numOfWaypointTypes) return true;
-	} catch(...) {}
-	type = Waypoint::unknown;
 	return false;
 }
 
@@ -170,20 +285,22 @@ bool CSV::ParseOtherFrequency(const std::string& text, const int type, int& freq
 	return false;
 }
 
-#if 0 // as now do not support import of CSV files
+// Type,Name,Ident,Lat,Lon,Elev,Decl,Label,Desc,Country,Range,ModificationTime,SourceFile
 bool CSV::Read(const std::string& fileName) {
 	std::ifstream input(fileName, std::ios::binary);
 	if (!input.is_open() || input.bad()) {
-		AirspaceConverter::LogError("Unable to open CUP input file: " + fileName);
+		AirspaceConverter::LogError("Unable to open CSV input file: " + fileName);
 		return false;
 	}
-	AirspaceConverter::LogMessage("Reading CUP file: " + fileName);
+	AirspaceConverter::LogMessage("Reading CSV file: " + fileName);
 	int linecount = 0;
 	std::string sLine;
 	bool isCRLF = false, CRLFwarningGiven = false, firstWaypointFound = false;
 
+	//maybe in Label/Tag field: runwayDir,runwayLength,radioFreq
+	float runwayDir=0, runwayLength=0, radioFreq=0;
+	int type;
 	double latitude, longitude;
-	int type, runwayDir, runwayLength, radioFreq, altRadioFreq;
 	float altitude;
 
 	while (!input.eof() && input.good()) {
@@ -196,7 +313,7 @@ bool CSV::Read(const std::string& fileName) {
 		if (!CRLFwarningGiven && !isCRLF) {
 			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: not valid Windows style end of line (expected CR LF).") % linecount));
 
-			// CUP files may contain thousands of WPs we don't want to print this warning all the time
+			// CSV files may contain thousands of WPs we don't want to print this warning all the time
 			CRLFwarningGiven = true;
 		}
 
@@ -205,9 +322,8 @@ bool CSV::Read(const std::string& fileName) {
 
 		// Skip eventual header
 		if (!firstWaypointFound && (
-				sLine.find("name, code, country, lat, lon, elev, style, rwydir, rwylen, freq, desc") != std::string::npos ||
-				sLine.find("name, code, country, lat, lon, elev, style, rwdir, rwlen, freq, desc") != std::string::npos ||
-				sLine.find("name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc") != std::string::npos)) continue;
+				sLine.find("Type,Name,Ident,Latitude,Longitude,Elevation,Magnetic Declination,Tags,Description,Region,Visible From,Last Edit,Import Filename") != std::string::npos ||
+				sLine.find("Type,Name,Ident,Lat,Lon,Elev,Decl,Label,Desc,Country,Range,ModificationTime,SourceFile") != std::string::npos)) continue;
 
 		// Remove front spaces
 		boost::algorithm::trim_left(sLine);
@@ -216,105 +332,124 @@ bool CSV::Read(const std::string& fileName) {
 		if (sLine.empty()) continue;
 
 		// Then directly skip full comment line
-		if (sLine.front() == '*') continue;
+		//if (sLine.front() == '*') continue;
 
 		// Remove back spaces
 		boost::algorithm::trim_right(sLine);
 
 		// Skip too short lines
-		if (sLine.size() <= 10) { // At least ten commas should be there
+		if (sLine.size() <= 4) { // At least 4 commas should be there
 			AirspaceConverter::LogError(boost::str(boost::format("line %1d is too short to contain anything useful: %2s") %linecount %sLine));
 			continue;
 		}
 
-		// Check if we arrived to the task section, if yes we're done
-		if (sLine == "-----Related Tasks-----") break;
-
 		// Tokenize with quotes
 		boost::tokenizer<boost::escaped_list_separator<char> > tokens(sLine); // default separator:',', default quote:'"', default escape char:'\'
-		if (std::distance(tokens.begin(),tokens.end()) != 11) { // We expect only 11 fields
-			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: expected 11 fields: %2s") %linecount %sLine));
+		if (std::distance(tokens.begin(),tokens.end()) < 10) { // We expect at least 10 fields
+			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: expected 10 fields: %2s") %linecount %sLine));
 			continue;
 		}
 
-		// Long name
 		boost::tokenizer<boost::escaped_list_separator<char> >::iterator token=tokens.begin();
-		const std::string name = *token;
+
+		// Waypoint style
+		if (!ParseStyle(boost::trim_copy(*token),type)) // check & fix: ParseStyle()
+			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid waypoint style: %2s, assuming unknown") %linecount %(*token)));
+
+		// Long name
+		const std::string name = boost::trim_copy(*(++token));
 		if (name.empty()) {
 			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: a name must be present: %2s") %linecount %sLine));
 			continue;
 		}
 
 		// Code (short name)
-		const std::string code = *(++token);
-
-		// Country code
-		const std::string country = *(++token);
+		const std::string code = boost::trim_copy(*(++token));
 
 		// Latitude
-		if (!ParseLatitude(*(++token), latitude)) {
+		if (!ParseLatitude(boost::trim_copy(*(++token)), latitude)) { // check & fix: ParseLatitude()
 			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: invalid latitude: %2s") %linecount %(*token)));
 			continue;
 		}
 
 		// Longitude
-		if (!ParseLongitude(*(++token), longitude)) {
+		if (!ParseLongitude(boost::trim_copy(*(++token)), longitude)) { // check & fix: ParseLongitude()
 			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: invalid longitude: %2s") %linecount %(*token)));
 			continue;
 		}
 
 		// Elevation
-		if (!ParseAltitude(*(++token), altitude))
+		if (!ParseAltitude(boost::trim_copy(*(++token)), altitude)) // check & fix: ParseAltitude()
 			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %(*token)));
 
-		// Waypoint style
-		if (!ParseStyle(*(++token),type))
-			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid waypoint style: %2s, assuming unknown") %linecount %(*token)));
-
 		// If it's an airfield...
-		if(Waypoint::IsTypeAirfield((Waypoint::WaypointType)type)) {
+		if(Waypoint::IsTypeAirfield((Waypoint::WaypointType)type)) { // check & fix: Waypoint.h:IsTypeAirfield()
+
+			token++; // Skip Declination
+#if 0
 			// Runway direction
-			if (!ParseRunwayDir(*(++token),runwayDir))
+			if (!ParseRunwayDir(boost::trim_copy(*(++token)),runwayDir)) // check & fix: ParseRunwayDir()
 				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid runway direction: %2s") % linecount % (*token)));
 
 			// Runway length
-			if (!ParseRunwayLength(*(++token),runwayLength))
+			if (!ParseRunwayLength(boost::trim_copy(*(++token)),runwayLength)) // check & fix: ParseRunwayLength()
 				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid runway length: %2s") %linecount %(*token)));
 
 			// Radio frequency
-			if (!ParseAirfieldFrequencies(*(++token),radioFreq,altRadioFreq))
+			if (!ParseAirfieldFrequencies(boost::trim_copy(*(++token)),radioFreq,altRadioFreq)) // check & fix: ParseAirfieldFrequencies()
 				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid radio frequency for airfield: %2s") %linecount %(*token)));
+#endif
+			token++; // Skip as now Label/Tag(runway direction, length and radio freq)
 
 			// Description
-			std::string description = *(++token);
+			std::string description = boost::trim_copy(*(++token));
+
+			// Country code
+			const std::string country = boost::trim_copy(*(++token));
+
 			assert(token != tokens.end());
 
 			// Build the airfield
 			Airfield* airfield = new Airfield(name, code, country, latitude, longitude, altitude, type, runwayDir, runwayLength, radioFreq, description);
+#if 0
 			if (altRadioFreq > 0) {
 				assert(radioFreq > 0);
 				if (altRadioFreq == radioFreq) AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: skipping repeated secondary radio frequency for airfield.") %linecount));
 				else airfield->SetOtherFrequency(altRadioFreq);
 			}
+#endif
 
 			// Add it to the multimap
 			waypoints.insert(std::pair<int, Waypoint*>(type, (Waypoint*)airfield));
-		} else {
-			// Skip runway length and direction
-			token++;
-			token++;
 
+		} else { // If it's NOT an airfield...
+			token++; // Skip Declination
+			token++;// Skip as now Label/Tag (runway direction, length and radio freq)
+
+#if 0
 			// Frequency may be used for VOR and NDB
-			if (!ParseOtherFrequency(*(++token), type, radioFreq))
+			if (!ParseOtherFrequency(boost::trim_copy(*(++token)), type, radioFreq)) // check & fix: ParseOtherFrequency()
 				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid frequency for non airfield waypoint: %2s") %linecount %(*token)));
+#endif
 
 			// Description
-			std::string description = *(++token);
+			std::string description = boost::trim_copy(*(++token));
+			if (description.length()==0) {
+				if (type==Waypoint::castle) description.assign("IFR");
+				if (type==Waypoint::intersection) description.assign("VFR");
+			}
+
+			// Country code
+			const std::string country = boost::trim_copy(*(++token));
+
 			assert(token != tokens.end());
 
 			// Build the waypoint
 			Waypoint* waypoint = new Waypoint(name, code, country, latitude, longitude, altitude, type, description);
+
+#if 0
 			if (radioFreq > 0) waypoint->SetOtherFrequency(radioFreq);
+#endif
 
 			// Add it to the multimap
 			waypoints.insert(std::pair<int, Waypoint*>(type, waypoint));
@@ -322,11 +457,12 @@ bool CSV::Read(const std::string& fileName) {
 
 		// Make sure that at this point we already found a valid waypoint so the header is not anymore expected
 		if (!firstWaypointFound) firstWaypointFound = true;
-	}
+
+	} // while
 	return true;
 }
-#endif
 
+// Type,Name,Ident,Lat,Lon,Elev,Decl,Label,Desc,Country,Range,ModificationTime,SourceFile
 bool CSV::Write(const std::string& fileName) {
 	if (waypoints.empty()) {
 		AirspaceConverter::LogMessage("CSV output: no waypoints, nothing to write");
@@ -340,8 +476,8 @@ bool CSV::Write(const std::string& fileName) {
 	}
 	AirspaceConverter::LogMessage("Writing CSV output file: " + fileName);
 
-	// Do not write default CSV header on first line, and for compatibilty do not write any other comments
-	//file << "#Type,Name,Ident,Lat,Lon,Elev,Decl,Label,Desc,Country,Range,ModificationTime,SourceFile\r\n";
+	// LNMv2.4.6 Write default CSV header on first line, and for compatibilty do not write any other comments
+	//file << "Type,Name,Ident,Lat,Lon,Elev,Decl,Label,Desc,Country,Range,ModificationTime,SourceFile\r\n";
 
 	// Go trough all waypoints
 	for (const std::pair<int,Waypoint*>& pair : waypoints) {
@@ -422,8 +558,7 @@ bool CSV::Write(const std::string& fileName) {
 		file << degDec << ',';
 
 		// Altitude, 'Elev' in CSV spec, must be feet without unit to be read by LNM
-		double meters=w.GetAltitude();
-		file << std::setprecision(0) << std::round(meters/0.3048) << ",";
+		file << std::setprecision(0) << std::round(w.GetAltitude()/0.3048) << ",";
 
 		// Declination is ignored by CSV importers, leave empty
 		file << ',';
@@ -444,8 +579,6 @@ bool CSV::Write(const std::string& fileName) {
 				if (a.HasOtherFrequency()) file << '-' << AirspaceConverter::FrequencyMHz(a.GetOtherFrequency());
 			}
 		} else {
-			//file << ",,"; // Skip runway direction and length
-
 			// Other frequency
 			if (w.HasOtherFrequency()) {
 				if (w.GetType() == Waypoint::WaypointType::NDB) file << "Freq:" << std::setprecision(2) << AirspaceConverter::FrequencykHz(w.GetOtherFrequency()); // 2 decimals for NDB freq [kHz]

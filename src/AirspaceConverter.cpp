@@ -273,11 +273,13 @@ void AirspaceConverter::LoadWaypoints() {
 	int counter = 0;
 	const size_t wptCounter = waypoints.size();
 	SeeYou cu(waypoints);
+	CSV csv(waypoints);
 	OpenAIP openAIP(airspaces, waypoints);
 	for (const std::string& inputFile : waypointFiles) {
 		bool readOk(false);
 		const std::string ext(boost::filesystem::path(inputFile).extension().string());
 		if(boost::iequals(ext, ".cup")) readOk = cu.Read(inputFile);
+		else if (boost::iequals(ext, ".csv")) readOk = csv.Read(inputFile);
 		else if (boost::iequals(ext, ".aip")) readOk = openAIP.ReadWaypoints(inputFile);
 		else {
 			LogWarning("Unknown extension for waypoint file: " + inputFile);
