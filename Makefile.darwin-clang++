@@ -1,0 +1,156 @@
+#============================================================================
+# AirspaceConverter
+# Since       : 14/6/2016
+# Authors     : Alberto Realis-Luc <alberto.realisluc@gmail.com>
+#               Valerio Messina <efa@iol.it>
+# Web         : https://www.alus.it/AirspaceConverter
+# Copyright   : (C) 2016-2020 Alberto Realis-Luc
+# License     : GNU GPL v3
+#
+# This source file is part of AirspaceConverter project
+#============================================================================
+# Note: use this Makefile to cross-compile from Linux to macOS
+# Note: need to be defined env vars:
+#       $(OSX)   point to cross-compile env path
+#       $(CROSS) cross-compile tools prefix
+
+CROSS=x86_64-apple-darwin20-
+CC=$(CROSS)clang    # CC=o64-clang
+CXX=$(CROSS)clang++ # CXX=o64-clang++
+LD=$(CROSS)clang++
+AR=$(CROSS)ar
+PKG-CONFIG=$(CROSS)pkg-config
+STRIP=$(CROSS)strip
+CFLAGS = -I$(OSX)/target/macports/pkgs/opt/local/include
+
+# Compiler options
+CPPFLAGS = -std=c++0x -Wall -Werror -fmessage-length=0 $(CFLAGS)
+
+# Product name
+APPNAME = airspaceconverter
+
+# Platform
+PLATFORM=$(shell uname -s)
+
+# Linker and strip options
+LFLAGS = -lzip -lboost_system-mt -lboost_filesystem-mt '-Wl,-rpath,$$ORIGIN'
+STRIPFLAGS = -S
+
+ifeq ($(PLATFORM),Linux)
+	LIB = $(OSX)/target/macports/pkgs/opt/local/lib
+	LIBFILE = lib$(APPNAME).dylib
+	LFLAGS += -lboost_locale-mt
+	DYNLIBFLAGS = $(LFLAGS) -Wl,-install_name,$(LIBFILE)
+	DEST = /usr/
+	#STRIPFLAGS += --strip-unneeded
+else ifeq ($(PLATFORM),Darwin)
+	LIB = /usr/local/lib
+	LIBFILE = lib$(APPNAME).dylib
+	LFLAGS += -lboost_locale-mt
+	DYNLIBFLAGS = $(LFLAGS) -Wl,-install_name,$(DEST)lib/$(LIBFILE)
+	DEST = /usr/local/
+else
+	#ERROR: Unknown platform!
+endif
+LDFLAGS = -L$(LIB)
+
+
+# Source path
+SRC = src/
+
+# Release or debug, binary dir and specific compile options
+DEBUG ?= 0
+ifeq ($(DEBUG),1)
+	CPPFLAGS += -O0 -g3 -DDEBUG
+	BIN = Debug/
+else
+	CPPFLAGS += -O3 -DNDEBUG
+	BIN = Release/
+endif
+$(shell mkdir -p $(BIN) >/dev/null)
+
+# Dependencies dir
+DEPDIR = $(BIN).d/
+$(shell mkdir -p $(DEPDIR) >/dev/null)
+
+# Dependencies flags
+DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)$*.Td
+
+# List of C++ source files
+CPPFILES =                \
+	Airfield.cpp          \
+	Airspace.cpp          \
+	AirspaceConverter.cpp \
+	SeeYou.cpp            \
+	Geometry.cpp          \
+	KML.cpp               \
+	OpenAIP.cpp           \
+	OpenAir.cpp           \
+	Polish.cpp            \
+	RasterMap.cpp         \
+	Waypoint.cpp          \
+	CSV.cpp
+
+# List of object files
+OBJS = $(patsubst %.cpp, $(BIN)%.o, $(CPPFILES))
+
+# Build all
+all: $(BIN)$(APPNAME)
+
+# Build the command line program
+$(BIN)$(APPNAME): $(BIN)$(LIBFILE) $(SRC)main.cpp
+	@echo CrossBuilding executable: $@
+	@$(CXX) $(CPPFLAGS) -L$(BIN) $(SRC)main.cpp -l$(APPNAME) $(LFLAGS) -o $@
+ifeq ($(DEBUG),0)
+	@$(STRIP) $(STRIPFLAGS) $@
+endif
+
+# Build the shared library
+$(BIN)$(LIBFILE): $(OBJS)
+	@echo CrossBuilding shared library: $@
+	@$(CXX) $(LDFLAGS) $(DYNLIBFLAGS) -shared $(OBJS) -o $@
+ifeq ($(DEBUG),0)
+	@$(STRIP) $(STRIPFLAGS) $@
+endif
+	@chmod a-x $@
+
+# Compile the sources of common shared library
+$(BIN)%.o: $(SRC)%.cpp
+$(BIN)%.o: $(SRC)%.cpp $(DEPDIR)%.d
+	@echo 'CrossCompiling: $<'
+	@$(CXX) $(DEPFLAGS) $(CPPFLAGS) -fPIC -c $< -o $@
+	@mv -f $(DEPDIR)$*.Td $(DEPDIR)$*.d
+
+# Compile dependencies
+$(DEPDIR)%.d: ;
+.PRECIOUS: $(DEPDIR)%.d
+
+-include $(patsubst %,$(DEPDIR)%.d,$(basename $(CPPFILES)))
+
+# Clean
+.PHONY: clean
+clean:
+	@echo Cleaning all
+	@rm -rf $(BIN)
+
+# Install
+.PHONY: install
+install: $(BIN)airspaceconverter
+	@echo Installing AirspaceConverter CLI ...
+	@cp $< $(DEST)bin
+	@cp $(BIN)$(LIBFILE) $(DEST)lib
+	@mkdir -p $(DEST)share/airspaceconverter/icons
+	@cp icons/* $(DEST)share/airspaceconverter/icons
+	@gzip -9 < airspaceconverter.1 > airspaceconverter.1.gz
+	@mv airspaceconverter.1.gz $(DEST)share/man/man1/
+	@echo Done.
+
+# Uninstall
+.PHONY: uninstall
+uninstall:
+	@echo Uninstalling AirspaceConverter CLI ...
+	@rm -f $(DEST)bin/airspaceconverter
+	@rm -f $(DEST)lib/$(LIBFILE)
+	@rm -rf $(DEST)share/airspaceconverter
+	@rm -rf $(DEST)share/man/man1/airspaceconverter.1.gz
+	@echo Done.
