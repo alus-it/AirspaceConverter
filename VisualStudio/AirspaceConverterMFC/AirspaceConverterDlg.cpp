@@ -534,13 +534,13 @@ void CAirspaceConverterDlg::OnBnClickedInputFolderBt() {
 	boost::filesystem::path root(inputPath);
 	if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
 	for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
-		if (!boost::filesystem::is_regular_file(*it) || (
-				!boost::iequals(it->path().extension().string(), ".txt") &&
-				!boost::iequals(it->path().extension().string(), ".aip") &&
-				!boost::iequals(it->path().extension().string(), ".kmz") &&
-				!boost::iequals(it->path().extension().string(), ".kml"))) continue;
-		converter->AddAirspaceFile(it->path().string());
-		if (outputFile.empty()) outputFile = it->path().string();
+		if (boost::filesystem::is_regular_file(*it)) {
+			const std::string ext = it->path().extension().string();
+			if (boost::iequals(ext, ".txt") || boost::iequals(ext, ".aip") || boost::iequals(ext, ".kmz") || boost::iequals(ext, ".kml")) {
+				converter->AddAirspaceFile(it->path().string());
+				if (outputFile.empty()) outputFile = it->path().string();
+			}
+		}
 	}
 	UpdateOutputFilename();
 	if (processor != nullptr && processor->LoadAirspacesFiles(QNH)) StartBusy();	
@@ -569,9 +569,12 @@ void CAirspaceConverterDlg::OnBnClickedInputWaypointsFolderBt() {
 	boost::filesystem::path root(inputPath);
 	if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
 	for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
-		if (boost::filesystem::is_regular_file(*it) && (boost::iequals(it->path().extension().string(), ".cup") || boost::iequals(it->path().extension().string(), ".aip"))) {
-			converter->AddWaypointFile(it->path().string());
-			if (outputFile.empty()) outputFile = it->path().string();
+		if (boost::filesystem::is_regular_file(*it)) {
+			const std::string ext = it->path().extension().string();
+			if (boost::iequals(ext, ".cup") || boost::iequals(ext, ".aip") || boost::iequals(ext, ".csv")) {
+				converter->AddWaypointFile(it->path().string());
+				if (outputFile.empty()) outputFile = it->path().string();
+			}
 		}
 	}
 	UpdateOutputFilename();
