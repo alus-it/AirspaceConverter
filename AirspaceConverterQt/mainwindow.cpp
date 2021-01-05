@@ -251,12 +251,11 @@ void MainWindow::on_loadAirspaceFolderButton_clicked() {
 
     // Load all the files in the folder
     for (boost::filesystem::directory_iterator it(boost::filesystem::path(selectedDir.toStdString())), endit; it != endit; ++it) {
-        if (!boost::filesystem::is_regular_file(*it) || (
-                    !boost::iequals(it->path().extension().string(), ".txt") &&
-                    !boost::iequals(it->path().extension().string(), ".aip") &&
-                    !boost::iequals(it->path().extension().string(), ".kmz") &&
-                    !boost::iequals(it->path().extension().string(), ".kml"))) continue;
-        converter->AddAirspaceFile(it->path().string());
+        if (boost::filesystem::is_regular_file(*it)) {
+            const std::string ext = it->path().extension().string();
+            if (boost::iequals(ext, ".txt") || boost::iequals(ext, ".aip") || boost::iequals(ext, ".kmz") || boost::iequals(ext, ".kml"))
+                converter->AddAirspaceFile(it->path().string());
+        }
     }
     watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::LoadAirspaces, (AirspaceConverter::OutputType)ui->outputFormatComboBox->currentIndex()));
 }
@@ -268,7 +267,7 @@ void MainWindow::on_unloadAirspacesButton_clicked() {
 }
 
 void MainWindow::on_loadWaypointFileButton_clicked() {
-    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Waypoints files"), suggestedInputDir, tr("All waypoints files(*.cup *.CUP *.aip *.AIP);;SeeYou files(*.cup *.CUP);;openAIP(*.aip *.AIP);;") );
+    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Waypoints files"), suggestedInputDir, tr("All waypoints files(*.cup *.CUP *.aip *.AIP *.csv *.CSV);;SeeYou files(*.cup *.CUP);;openAIP(*.aip *.AIP);;LittleNavMap(*.csv *.CSV);;") );
 
     if(filenames.empty()) return;
 
@@ -295,10 +294,11 @@ void MainWindow::on_loadWaypointsFolderButton_clicked() {
 
     // Load all the files in the folder (.cup only)
     for (boost::filesystem::directory_iterator it(boost::filesystem::path(selectedDir.toStdString())), endit; it != endit; ++it) {
-        if (!boost::filesystem::is_regular_file(*it) || (
-                    !boost::iequals(it->path().extension().string(), ".cup") &&
-                    !boost::iequals(it->path().extension().string(), ".aip"))) continue;
-        converter->AddWaypointFile(it->path().string());
+        if (boost::filesystem::is_regular_file(*it)) {
+            const std::string ext = it->path().extension().string();
+            if (boost::iequals(ext, ".cup") || boost::iequals(ext, ".aip") || boost::iequals(ext, ".csv"))
+                converter->AddWaypointFile(it->path().string());
+        }
     }
     watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::LoadWaypoints));
 }
