@@ -20,3 +20,11 @@ Airfield::Airfield(const std::string& longName, const std::string& shortName, co
 	, radioFreq(freq) {
 	assert(IsAirfield());
 }
+
+Airfield::Airfield(const std::string& longName, const std::string& shortName, const std::string& countryCode, const double lat, const double lon, const float alt, const int style, const std::string& descr)
+	: Waypoint(longName, shortName, countryCode, lat, lon, alt, style, descr)
+	, runwayDir(-1)
+	, runwayLength(-1)
+	, radioFreq(-1) {
+	assert(IsAirfield());
+}

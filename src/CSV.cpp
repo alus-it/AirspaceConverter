@@ -297,8 +297,6 @@ bool CSV::Read(const std::string& fileName) {
 	std::string sLine;
 	bool isCRLF = false, CRLFwarningGiven = false, firstWaypointFound = false;
 
-	//maybe in Label/Tag field: runwayDir,runwayLength,radioFreq
-	float runwayDir=0, runwayLength=0, radioFreq=0;
 	int type;
 	double latitude, longitude;
 	float altitude;
@@ -387,6 +385,9 @@ bool CSV::Read(const std::string& fileName) {
 
 			token++; // Skip Declination
 #if 0
+			//maybe in Label/Tag field: runwayDir,runwayLength,radioFreq
+			//int runwayDir=-1, runwayLength=-1, radioFreq=-1, altRadioFreq=-1;
+
 			// Runway direction
 			if (!ParseRunwayDir(boost::trim_copy(*(++token)),runwayDir)) // check & fix: ParseRunwayDir()
 				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid runway direction: %2s") % linecount % (*token)));
@@ -409,8 +410,8 @@ bool CSV::Read(const std::string& fileName) {
 
 			assert(token != tokens.end());
 
-			// Build the airfield
-			Airfield* airfield = new Airfield(name, code, country, latitude, longitude, altitude, type, runwayDir, runwayLength, radioFreq, description);
+			// Build the airfield (for now without runway dir and length and radio freq)
+			Airfield* airfield = new Airfield(name, code, country, latitude, longitude, altitude, type, description);
 #if 0
 			if (altRadioFreq > 0) {
 				assert(radioFreq > 0);
