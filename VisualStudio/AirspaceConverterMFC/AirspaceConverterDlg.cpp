@@ -477,7 +477,7 @@ void CAirspaceConverterDlg::OnBnClickedInputFile() {
 void CAirspaceConverterDlg::OnBnClickedInputWaypoints() {
 	assert(converter != nullptr);
 	assert(processor != nullptr);
-	CFileDialog dlg(TRUE, NULL, NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("All waypoint files|*.cup; *.aip;|SeeYou waypoints|*.cup|openAIP waypoints|*.aip||"), (CWnd*)this, 0, TRUE);
+	CFileDialog dlg(TRUE, NULL, NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("All waypoint files|*.cup; *.aip; *.csv;|SeeYou waypoints|*.cup|openAIP waypoints|*.aip|LittleNavMap waypoints|*.csv||"), (CWnd*)this, 0, TRUE);
 	dlg.GetOFN().lpstrTitle = L"Load waypoint file(s)";
 	if (dlg.DoModal() == IDOK) {
 		POSITION pos(dlg.GetStartPosition());
