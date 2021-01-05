@@ -74,6 +74,8 @@ public:
 		DANGER,
 		PROHIBITED,
 		RESTRICTED,
+		OTHER,
+		MATZ,
 		CTR,
 		TMA,
 		TMZ,
