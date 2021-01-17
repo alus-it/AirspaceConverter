@@ -302,6 +302,8 @@ bool OpenAir::ParseAC(const std::string & line, Airspace& airspace) {
 	} else if (length == 5 && line.at(3)=='G' && line.at(4) == 'P') type = Airspace::NOGLIDER; //GP glider prohibited
 	else if (length == 7 && line.substr(3) == "GSEC") type = Airspace::GLIDING; //GSEC glider sector
 	else if (length == 8 && line.substr(3) == "NOTAM") type = Airspace::NOTAM;
+	else if (length == 7 && line.substr(3) == "MATZ") type = Airspace::MATZ; //Military ATZ
+        else if (length == 8 && line.substr(3) == "OTHER") type = Airspace::OTHER; //Other
 	else if (length == 10 && line.substr(3) == "UNKNOWN") type = Airspace::UNKNOWN; // UKNOWN can be used in OpneAir
 	if (type == Airspace::UNDEFINED) return false;
 	airspace.SetType(type);
@@ -625,9 +627,11 @@ bool OpenAir::WriteCategory(const Airspace& airspace) {
 			}
 			break;
 		case Airspace::WAVE:		openAirCategory = "W"; break;
-		case Airspace::RMZ:			openAirCategory = "RMZ"; break;
-		case Airspace::TMZ:			openAirCategory = "TMZ"; break;
+		case Airspace::RMZ:		openAirCategory = "RMZ"; break;
+		case Airspace::TMZ:		openAirCategory = "TMZ"; break;
 		case Airspace::NOGLIDER:	openAirCategory = "GP"; break;
+		case Airspace::MATZ:	        openAirCategory = "MATZ"; break;
+		case Airspace::OTHER:	        openAirCategory = "OTHER"; break;
 		case Airspace::GLIDING:		openAirCategory = "GSEC"; break;
 		case Airspace::NOTAM:		openAirCategory = "NOTAM"; break;
 		case Airspace::UNKNOWN:		openAirCategory = "UNKNOWN"; break;
