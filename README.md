@@ -7,6 +7,7 @@ Can read airspace and waypoint files in the following formats:
   - _openAIP_  
   - KML/KMZ  
   - _SeeYou_  
+  - _LittleNavMap_  
 
 Can write in the following formats:  
   - KMZ  
@@ -68,7 +69,7 @@ Possible options:
   - **-q**: optional, specify the QNH in hPa used to calculate height of flight levels  
   - **-a**: optional, specify a default terrain altitude in meters to calculate AGL heights of points not covered by loaded terrain map(s)  
   - **-i**: multiple, input file(s) can be _OpenAir_ (**.txt**), _openAIP_ (**.aip**), _Google Earth_ **.kmz**, **.kml**)  
-  - **-w**: multiple, input waypoint file(s) can be _SeeYou_ (**.cup**) or _openAIP_ (**.aip**)  
+  - **-w**: multiple, input waypoint file(s) can be _SeeYou_ (**.cup**), _openAIP_ (**.aip**) or **.csv** (_LittleNavMap_)  
   - **-m**: optional, multiple, terrain map file(s) (**.dem**) used to lookup terrain heights  
   - **-l**: optional, set filter limits in latitude and longitude for the output, followed by the 4 limit values: northLat,southLat,westLon,eastLon where the limits are comma separated, expressed in degrees, without spaces, negative for west longitudes and south latitudes  
   - **-o**: optional, output file **.kmz** (_Google Earth_), **.txt** (_OpenAir_), **.cup** (_SeeYou_), **.csv** (_LittleNavMap_), **.img** (_Garmin_) or **.mp** (_Polish_). If not specified will be used the name of first input file as **KMZ**  
@@ -92,7 +93,7 @@ This is the default way to use the graphical user interface:
 3. If converting to _GoogleEarth_ specify a default terrain altitude to be used for the points not under terrain raster map coverage.
 4. Select as input multiple _openAIP_ (**.aip**) _OpenAir_ (**.txt**) and/or _GoogleEarth_ (**.kmz**) files or the folder containing them.
 5. If converting to _GoogleEarth_ or to find missing altitudes of _SeeYou_ waypoints it is possible to load multiple raster map files (**.dem**) with the terrain altitude.
-6. And/or select one or multiple waypoints files (**.cup**) or the folder containing them.
+6. And/or select one or multiple waypoints files (**.cup**, **.csv**) or the folder containing them.
 7. Optionally configure the latitude and longitude ranges for filtering the output.
 8. If converting to _OpenAir_ choose if to output only points and the desired coordinates format.
 9. Press the "Convert" button.
@@ -159,7 +160,7 @@ On Windows, the folder `icons` with the placemarks PNG icons must be kept in the
 
 Contributors
 ------------
-- _[Valerio Messina](mailto:efa@iol.it)_ : packaging for _Ubuntu_, various issues fixed and testing
+- _[Valerio Messina](mailto:efa@iol.it)_ : packaging for _Ubuntu_, CSV waypoints, various issues fixed and testing
 
 Contacts
 --------
