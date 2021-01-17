@@ -278,13 +278,14 @@ bool SeeYou::Read(const std::string& fileName) {
 		if (!ParseStyle(boost::trim_copy(*(++token)),type))
 			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid waypoint style: %2s, assuming unknown") %linecount %(*token)));
 
-		// Altitude verification against terrain raster map for only waypoints with null (or empty) altitude
-		if (terrainMapsPresent && ((altitudePresent && altitude == 0) || !altitudePresent) && type > Waypoint::WaypointType::normal) { // Unknown and normal waypoints skipped
+		// Altitude verification against terrain raster map
+		if (terrainMapsPresent && type > Waypoint::WaypointType::normal) { // Unknown and normal waypoints skipped
 			double terrainAlt;
 			if (AirspaceConverter::GetTerrainAltitudeMt(latitude, longitude, terrainAlt)) {
 				if (altitudePresent) {
-					if (fabs(terrainAlt - altitude) >= 5) { // Consider new altitude only if delta > 5 m (maybe it was really intended AMSL)
-						AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: waypoint with null altitude, using terrain altitude: %2g m") %linecount %terrainAlt));
+					const double delta = fabs(altitude - terrainAlt);
+					if (terrainAlt > 5 ? delta > 10 : delta > 15) { // Consider bigger threshold if delta > 5 m (maybe it was really intended AMSL)
+						AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: detected altitude difference of: %2g m respect ground, using terrain altitude: %3g m") %linecount %delta %terrainAlt));
 						altitude = (float)terrainAlt;
 					}
 				} else {
