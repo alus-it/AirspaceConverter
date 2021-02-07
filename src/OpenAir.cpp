@@ -303,7 +303,7 @@ bool OpenAir::ParseAC(const std::string & line, Airspace& airspace) {
 	else if (length == 7 && line.substr(3) == "GSEC") type = Airspace::GLIDING; //GSEC glider sector
 	else if (length == 8 && line.substr(3) == "NOTAM") type = Airspace::NOTAM;
 	else if (length == 7 && line.substr(3) == "MATZ") type = Airspace::MATZ; //Military ATZ
-        else if (length == 8 && line.substr(3) == "OTHER") type = Airspace::OTHER; //Other
+	else if (length == 8 && line.substr(3) == "OTHER") type = Airspace::OTHER; //Other
 	else if (length == 10 && line.substr(3) == "UNKNOWN") type = Airspace::UNKNOWN; // UKNOWN can be used in OpneAir
 	if (type == Airspace::UNDEFINED) return false;
 	airspace.SetType(type);

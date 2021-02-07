@@ -123,8 +123,8 @@ const bool Airspace::CATEGORY_VISIBILITY[] = {
 	true,  //DANGER
 	true,  //PROHIBITED
 	true,  //RESTRICTED
-	true,  //OTHER
-	true,  //MATZ
+	false, //OTHER
+	false, //MATZ
 	true,  //CTR
 	true,  //TMA
 	false, //TMZ
@@ -152,7 +152,7 @@ const std::string Airspace::CATEGORY_NAMES[] = {
 	"Prohibited", //PROHIBITED
 	"Restricted", //RESTRICTED
 	"Other", //OTHER
-	"Mil ATZ", //MATZ
+	"Military ATZ", //MATZ
 	"CTR", //CTR
 	"TMA", //TMA
 	"TMZ", //TMZ
@@ -337,6 +337,7 @@ void Airspace::ClearPoints() {
 	ClearGeometries();
 	points.clear();
 }
+
 void Airspace::ClearGeometries() {
 	if (geometries.empty()) return;
 	for (const Geometry* g : geometries) delete g;
