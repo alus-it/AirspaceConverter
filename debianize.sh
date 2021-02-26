@@ -344,7 +344,8 @@ Description: Airspace Converter
  devices which support OpenAir only format; in particular this feature attempts
  to recalculate arcs and circles (possible definitions in OpenAir) in order to
  contain the size of output files. This software, written entirely in C++, has a
- portable "core", it works from "command line" on Linux.
+ portable "core", it works from "command line" but a graphic interface (package
+ airspaceconverter-gui) is also available.
 Homepage: https://www.alus.it/AirspaceConverter/
 ' > control
 
@@ -445,8 +446,9 @@ Description: Qt GUI for Airspace Converter
  The output in OpenAir is useful to make the data from OpenAIP suitable for many
  devices which support OpenAir only format; in particular this feature attempts
  to recalculate arcs and circles (possible definitions in OpenAir) in order to
- contain the size of output files. This software, written entirely in C++, has a
- portable "core", it works from "command line" on Linux.
+ contain the size of output files. This package is the graphical interface of
+ AirsapceConverter. You can install only the package airspaceconverter if you
+ wish to use it purely from command line.
 Homepage: https://www.alus.it/AirspaceConverter/
 ' > control
 #chmod 0755 control
