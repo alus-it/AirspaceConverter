@@ -11,9 +11,9 @@
 	<key>CFBundleIconFile</key>
 	<string>AirspaceConverter.icns</string>
 	<key>CFBundleVersion</key>
-	<string>0.3.5</string>
+	<string>0.3.8</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.3.6</string>
+	<string>0.3.8</string>
 	<key>CFBundleSupportedPlatforms</key>
 	<array>
 		<string>MacOSX</string>
