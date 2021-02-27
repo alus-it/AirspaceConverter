@@ -730,3 +730,24 @@ void AirspaceConverter::SetOpenAirCoodinatesInDecimalMinutes() {
 void AirspaceConverter::SetOpenAirCoodinatesInSeconds() {
 	OpenAir::SetCoordinateType(OpenAir::CoordinateType::DEG_MIN_SEC);
 }
+
+bool AirspaceConverter::VerifyAltitudeOnTerrainMap(const double& lat, const double& lon, float& alt, const bool& blankAltitude, const bool& altitudeParsed, const int& line) {
+	double terrainAlt;
+	if (GetTerrainAltitudeMt(lat, lon, terrainAlt)) {
+		if (altitudeParsed) {
+			const double delta = fabs(alt - terrainAlt);
+			if (terrainAlt > 5 ? delta > 10 : delta > 15) { // Consider bigger threshold if delta > 5 m (maybe it was really intended AMSL)
+				LogWarning(boost::str(boost::format("on line %1d: detected altitude difference of: %2g m respect ground, using terrain altitude: %3g m") %line %delta %terrainAlt));
+				alt = (float)terrainAlt;
+			}
+		} else {
+			if (blankAltitude) LogWarning(boost::str(boost::format("on line %1d: blank elevation, using terrain altitude: %2g m") %line %terrainAlt));
+			else LogWarning(boost::str(boost::format("on line %1d: invalid elevation, using terrain altitude: %2g m") %line %terrainAlt));
+			alt = (float)terrainAlt;
+		}
+		return true;
+	} 
+	if (blankAltitude) LogWarning(boost::str(boost::format("on line %1d: blank elevation, waypoint out of loaded terrain maps: assuming AMSL") %line));
+	else if (!altitudeParsed) LogWarning(boost::str(boost::format("on line %1d: invalid elevation, waypoint out of loaded terrain maps: assuming AMSL") %line));
+	return false;
+}

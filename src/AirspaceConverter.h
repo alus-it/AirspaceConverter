@@ -96,6 +96,7 @@ public:
 	static void SetOpenAirCoodinatesAutomatic();
 	static void SetOpenAirCoodinatesInDecimalMinutes();
 	static void SetOpenAirCoodinatesInSeconds();
+	static bool VerifyAltitudeOnTerrainMap(const double& lat, const double& lon, float& alt, const bool& blankAltitude, const bool& altitudeParsed, const int& line);
 
 	static const std::vector<std::string> disclaimer;
 	static const std::string basePath;

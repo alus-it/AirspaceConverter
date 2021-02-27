@@ -299,7 +299,8 @@ bool CSV::Read(const std::string& fileName) {
 
 	int type;
 	double latitude, longitude;
-	float altitude;
+	float altitude = 0;
+	const bool terrainMapsPresent(AirspaceConverter::GetNumOfTerrainMaps() > 0);
 
 	while (!input.eof() && input.good()) {
 
@@ -377,8 +378,17 @@ bool CSV::Read(const std::string& fileName) {
 		}
 
 		// Elevation
-		if (!ParseAltitude(boost::trim_copy(*(++token)), altitude)) // check & fix: ParseAltitude()
-			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %(*token)));
+		const std::string elevationText(boost::trim_copy(*(++token)));
+		const bool blankAltitude = elevationText.empty();
+		if (blankAltitude) altitude = 0;
+		const bool altitudeParsed = blankAltitude ? false : ParseAltitude(elevationText, altitude); // check & fix: ParseAltitude()
+		
+		if (!altitudeParsed && !blankAltitude && !terrainMapsPresent)
+			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %elevationText));
+
+		// Altitude verification against terrain raster map
+		if (terrainMapsPresent && type > Waypoint::WaypointType::normal) // Unknown and normal waypoints skipped
+			AirspaceConverter::VerifyAltitudeOnTerrainMap(latitude,longitude,altitude,blankAltitude,altitudeParsed,linecount);
 
 		// If it's an airfield...
 		if(Waypoint::IsTypeAirfield((Waypoint::WaypointType)type)) { // check & fix: Waypoint.h:IsTypeAirfield()
