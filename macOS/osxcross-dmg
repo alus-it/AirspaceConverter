@@ -1,0 +1,229 @@
+#!/bin/bash
+# osxcross-dmg V0.01.00 2021/02/24 Copyright © 2021 Valerio Messina
+# License : GNU GPL v3
+# create a compressed DMG macOS distribution package with all dependancies
+# Note: libraries will be searched in @executable_path by macOS binary
+# Note: AppName.icns will be picked next to binary
+#       AppName.icns and Info.plist must be customized
+#
+echo "osxcross-dmg V0.01.00 2021/02/24 Copyright © 2021 Valerio Messina"
+if (test "" = "$1") then
+   echo "create a standard DMG macOS distribution package with all dependancies"
+   echo "ERROR: osxcross-dmg need a binary"
+   echo "Syntax: $ osxcross-dmg binary [ApplicationName]"
+   exit
+fi
+if (! test -f "$1") then
+   echo "ERROR: osxcross-dmg binary not found"
+   exit
+fi
+bit=64 # target binary bit: 32 or 64
+# cross-compiler environment
+OSX=/opt/osxcross # path to cross compiler
+ODVER=18          # darwin version
+OHOST=x86_64-apple-darwin$ODVER
+if (test "$bit" = "32") then
+   OHOST=i386-apple-darwin$ODVER
+fi
+OCROSS=$OHOST-    # used for cross tools
+PATH=$OSX/target/bin:$PATH
+# maybe need to customize 'RPATH':
+RPATH=$OSX/target/quartz/lib # path of libs file that are marked '@rpath/'
+
+flag=0 # check for common external dependancy compliance
+for extCmd in awk cat chmod dmg genisoimage grep mv rm sed sort tr wc ; do
+   exist=`which $extCmd 2> /dev/null`
+   if (test "" = "$exist") then
+      echo "Required external dependancy: "\"$extCmd\"" unsatisfied!"
+      flag=1
+   fi
+done
+if (test "$flag" = 1) then
+   echo "ERROR: Install the required packages and retry. Exit"
+   exit
+fi
+
+if (test "" = "$2") then
+   AppName=$1
+else
+   AppName=$2
+fi
+echo "Creating package "$AppName" ..."
+mkdir -p DiskImage/$AppName.app/Contents/{MacOS,Resources}
+chmod a+w DiskImage/$AppName.app/Contents/* 2> /dev/null
+mkdir -p DiskImage/$AppName.app/Contents/Resources/icons
+chmod a+w DiskImage/$AppName.app/Contents/Resources/AirspaceConverter.icns 2> /dev/null
+chmod a+w DiskImage/$AppName.app/Contents/MacOS/* 2> /dev/null
+echo "Copying resources ..."
+cp -a osxcross-dmg.icns DiskImage/$AppName.app/Contents/Resources/$AppName.icns
+echo -n "APPL????" > DiskImage/$AppName.app/Contents/PkgInfo
+rm -f DiskImage/$AppName.app/Contents/Info.plist
+echo "<?xml version="1.0" encoding="UTF-8"?>"                                                                 >> DiskImage/$AppName.app/Contents/Info.plist
+echo "<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">" >> DiskImage/$AppName.app/Contents/Info.plist
+echo "<plist version="1.0">"                                                                                  >> DiskImage/$AppName.app/Contents/Info.plist
+echo "<dict>"                                                                                                 >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<key>CFBundleName</key>"                                                                             >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<string>$AppName</string>"                                                                           >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<key>CFBundleExecutable</key>"                                                                       >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<string>$1</string>"                                                                                 >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<key>CFBundleIdentifier</key>"                                                                       >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<string>tld.domain.application</string>"                                                             >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<key>CFBundleIconFile</key>"                                                                         >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<string>$AppName.icns</string>"                                                                      >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<key>CFBundleVersion</key>"                                                                          >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<string>0.0.1</string>"                                                                              >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<key>CFBundleShortVersionString</key>"                                                               >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<string>0.0.1</string>"                                                                              >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<key>CFBundleSupportedPlatforms</key>"                                                               >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<array>"                                                                                             >> DiskImage/$AppName.app/Contents/Info.plist
+echo "		<string>MacOSX</string>"                                                                          >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	</array>"                                                                                            >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<key>CFBundlePackageType</key>"                                                                      >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<string>APPL</string>"                                                                               >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<key>CFBundleDevelopmentRegion</key>"                                                                >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<string>en</string>"                                                                                 >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<key>CFBundleInfoDictionaryVersion</key>"                                                            >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<string>6.0</string>"                                                                                >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<key>CFBundleGetInfoString</key>"                                                                    >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<string>Created by osxcross-dmg script by Valerio Messina</string>"                                  >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<key>CFBundleSignature</key>"                                                                        >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<string>????</string>"                                                                               >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<key>LSMinimumSystemVersion</key>"                                                                   >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<string>10.9</string>"                                                                               >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<key>NSPrincipalClass</key>"                                                                         >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<string>NSApplication</string>"                                                                      >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<key>NSSupportsAutomaticGraphicsSwitching</key>"                                                     >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<true/>"                                                                                             >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<key>NSHumanReadableCopyright</key>"                                                                 >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<string>CopyrightÂ© 2021 Valerio Messina. All rights reserved.</string>"                             >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<key>NSMainStoryboardFile</key>"                                                                     >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<string>Main</string>"                                                                               >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<key>NSSupportsAutomaticTermination</key>"                                                           >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<true/>"                                                                                             >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<key>NSSupportsSuddenTermination</key>"                                                              >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<true/>"                                                                                             >> DiskImage/$AppName.app/Contents/Info.plist
+echo "</dict>"                                                                                                >> DiskImage/$AppName.app/Contents/Info.plist
+echo "</plist>"                                                                                               >> DiskImage/$AppName.app/Contents/Info.plist
+echo ""
+
+echo "Collecting dependencies ..."
+#echo "bin:$1"
+${OCROSS}otool -L $1 > b0.txt   # extract direct deps
+# keep the one in '/opt/local/', discard system/other
+cat b0.txt | grep -vF "/System/Library/Frameworks/" > b1.txt
+cat b1.txt | grep -vF "/usr/lib/" > b0.txt # skip system
+cat b0.txt | grep -vF "$1:"       > b1.txt # binary itself
+cat b1.txt | sed 's/^\t//g'       > b0.txt # remove starting tab
+cat b0.txt | awk '{print $1}'     > b1.txt # remove (desc)
+cat b1.txt | sed 's!@rpath/!'$RPATH/'!g' > b0.txt # change @rpath/ to RPATH/
+cat b0.txt | sort > binlibs.txt
+rm b0.txt b1.txt 2> /dev/null
+rm libslibs.txt 2> /dev/null
+while read -r binpathlib; do   # look for indirect deps
+   #echo binpathlib:$binpathlib
+   binpathlib=`echo $binpathlib | sed 's!@executable_path/!!g'` # remove @executable_path/
+   #echo " binpathlib:$binpathlib"
+   binlib=`basename $binpathlib`
+   #echo " binlib:$binlib"
+   echo "$binpathlib" >> libslibs.txt
+   ${OCROSS}otool -L $binpathlib > l0.txt   # extract indirect deps
+   cat l0.txt | grep -vF "/System/Library/Frameworks/" > l1.txt
+   cat l1.txt | grep -vF "/usr/lib/" > l0.txt # skip system
+   cat l0.txt | sed 's/^\t//g'       > l1.txt # remove starting tab
+   cat l1.txt | awk '{print $1}'     > l0.txt # remove (desc)
+   cat l0.txt | sed 's/:$//g'        > l1.txt # remove ending :
+   cat l1.txt | sed 's!@executable_path/!!g' > l0.txt # remove @executable_path/
+   cat l0.txt | grep -v "^$binlib"   > l1.txt # remove starting own name
+   cat l1.txt | sed 's!@rpath/!'$RPATH/'!g' > l0.txt # change @rpath/ to RPATH/
+   cat l0.txt | sort -u              > l1.txt # remove duplicates
+   cat l1.txt > liblibs.txt
+   while read -r libpathlib; do   # deps of current lib
+      #echo "  libpathlib:$libpathlib"
+      liblib=`basename $libpathlib`
+      #echo "  liblib:$liblib"
+      echo $libpathlib >> libslibs.txt
+   done < liblibs.txt
+done < binlibs.txt
+cat libslibs.txt | sort -u > l0.txt
+cp l0.txt libslibs.txt
+rm l0.txt l1.txt liblibs.txt 2> /dev/null
+lines=`wc -l libslibs.txt | awk '{print $1}'`
+echo -n "Collected $lines dependencies, "
+inds=`diff -y binlibs.txt libslibs.txt | grep ">" | awk '{print $2}' | sort -u` # indirect deps
+lines=`echo $inds | tr ' ' '\n' | wc -l - | awk '{print $1}'`
+echo "with $lines indirect deps:"
+echo $inds | tr ' ' '\n'
+echo ""
+
+echo "Copying binary :$1 ..."
+cp -a $1 DiskImage/$AppName.app/Contents/MacOS
+while read -r libpathlib; do   # copy all deps
+   #echo "  libpathlib:$libpathlib"
+   liblib=`basename $libpathlib`
+   echo "Copying library:$liblib ..."
+   if (test -f $OSX/target/macports/pkgs/opt/local/lib/$liblib) then
+      cp -aL $OSX/target/macports/pkgs/opt/local/lib/$liblib DiskImage/$AppName.app/Contents/MacOS
+   else if (test -f $libpathlib) then
+         cp -aL $libpathlib DiskImage/$AppName.app/Contents/MacOS # workaround for Qt4 that require to be in:
+         # /opt/local/libexec/qt4/Library/Frameworks/Qt*.framework/Versions/4/
+      else
+         echo WARN: $liblib not found
+      fi
+   fi
+done < libslibs.txt
+echo ""
+
+echo "Making paths relative to binary ..."
+mv binlibs.txt libslibs.txt DiskImage/$AppName.app/Contents/MacOS
+cd DiskImage/$AppName.app/Contents/MacOS
+while read -r binpathlib; do   # change the binany
+   #echo binpathlib:$binpathlib
+   binlib=`basename $binpathlib`
+   echo "Changing bin:$1 path of binlib:$binlib"
+   ${OCROSS}install_name_tool -change $binpathlib @executable_path/$binlib $1 # change in BIN
+done < binlibs.txt
+while read -r binpathlib; do   # change the libs
+   #echo "binpathlib:$binpathlib"
+   binlib=`basename $binpathlib`
+   ${OCROSS}otool -L $binlib > l0.txt   # extract indirect deps
+   echo "Changing lib:$binlib install name ..."
+   ${OCROSS}install_name_tool -id @executable_path/$binlib $binlib # change LIB install path
+   cat l0.txt | grep -vF "/System/Library/Frameworks/" > l1.txt
+   cat l1.txt | grep -vF "/usr/lib/"       > l0.txt # skip system
+   cat l0.txt | sed 's/^\t//g'             > l1.txt # remove starting tab
+   cat l1.txt | awk '{print $1}'           > l0.txt # remove (desc)
+   cat l0.txt | sed 's/:$//g'              > l1.txt # remove ending :
+   cat l1.txt | grep -v "$binlib"          > l0.txt # remove own name
+   cat l0.txt | sort -u                    > l1.txt # remove duplicates
+   cat l1.txt > liblibs.txt
+   while read -r libpathlib; do
+      #echo "  libpathlib:$libpathlib"
+      liblib=`basename $libpathlib`
+      echo "Changing lib:$binlib path of liblib:$liblib"
+      ${OCROSS}install_name_tool -change $libpathlib @executable_path/$liblib $binlib # change in LIB
+   done < liblibs.txt
+done < libslibs.txt
+rm l0.txt l1.txt liblibs.txt 2> /dev/null
+rm binlibs.txt libslibs.txt 2> /dev/null
+cd ../../../..
+echo ""
+
+echo "Customize $AppName.icns and Info.plist then press a key"
+read
+
+echo "Setting attributes ..."
+chmod a-w DiskImage/$AppName.app/Contents/*
+chmod a-w DiskImage/$AppName.app/Contents/Resources/AirspaceConverter.icns
+chmod a-w DiskImage/$AppName.app/Contents/MacOS/*
+chmod a+x DiskImage/$AppName.app/Contents/MacOS/*
+echo ""
+
+echo "Generating uncompressesd DMG ..."
+rm $AppName.dmg 2> /dev/null
+genisoimage -V $AppName -D -r -apple -no-pad -o $AppName.dmg DiskImage # not sure of -r / -R
+echo ""
+
+echo "Compressing DMG ..."
+mv $AppName.dmg uncompressed.dmg
+dmg uncompressed.dmg $AppName.dmg
+echo "All Done."
