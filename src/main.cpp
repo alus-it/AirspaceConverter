@@ -145,6 +145,14 @@ int main(int argc, char *argv[]) {
 		case 'v':
 			std::cout << "AirspaceConverter version: " << VERSION << std::endl;
 			std::cout << "Compiled on " << __DATE__ << " at " << __TIME__ << std::endl;
+			{
+				int diffLatestVersion;
+				if (AirspaceConverter::CheckForNewVersion(diffLatestVersion)) {
+					if (diffLatestVersion == 0) std::cout << "This is the latest version." << std::endl;
+					else if (diffLatestVersion > 0) std::cout << "A new version is available!" << std::endl;
+					else std::cout << "This version is not yet released." << std::endl;
+				}
+			}
 			std::cout << "Copyright(C) 2016-2021 Alberto Realis-Luc, Valerio Messina" << std::endl;
 			std::cout << "https://www.alus.it/AirspaceConverter" << std::endl << std::endl;
 			if (argc == 2) return EXIT_SUCCESS;

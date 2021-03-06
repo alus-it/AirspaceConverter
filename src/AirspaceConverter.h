@@ -97,6 +97,7 @@ public:
 	static void SetOpenAirCoodinatesInDecimalMinutes();
 	static void SetOpenAirCoodinatesInSeconds();
 	static bool VerifyAltitudeOnTerrainMap(const double& lat, const double& lon, float& alt, const bool& blankAltitude, const bool& altitudeParsed, const int& line);
+	static bool CheckForNewVersion(int& versionDifference);
 
 	static const std::vector<std::string> disclaimer;
 	static const std::string basePath;
@@ -108,6 +109,7 @@ private:
 	static void DefaultLogError(const std::string& text);
 	static bool Default_cGPSmapper(const std::string& polishFile, const std::string& outputFile);
 	static const std::string Detect_cGPSmapperPath();
+	static int VersionToNumber(const std::string& vesionString);
 
 	std::multimap<int, Airspace> airspaces;
 	std::multimap<int, Waypoint*> waypoints;

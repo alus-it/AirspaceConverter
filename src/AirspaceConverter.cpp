@@ -31,6 +31,9 @@
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
+#include <boost/beast/core.hpp>
+#include <boost/beast/http.hpp>
+#include <boost/beast/version.hpp>
 
 #if BOOST_VERSION >= 106100
 #include <boost/dll/runtime_symbol_info.hpp>
@@ -749,5 +752,76 @@ bool AirspaceConverter::VerifyAltitudeOnTerrainMap(const double& lat, const doub
 	} 
 	if (blankAltitude) LogWarning(boost::str(boost::format("on line %1d: blank elevation, waypoint out of loaded terrain maps: assuming AMSL") %line));
 	else if (!altitudeParsed) LogWarning(boost::str(boost::format("on line %1d: invalid elevation, waypoint out of loaded terrain maps: assuming AMSL") %line));
+	return false;
+}
+
+int AirspaceConverter::VersionToNumber(const std::string& versionString) {
+	int versionNum = -1;
+	if (versionString.length() == 5 && versionString.at(1) == '.' && versionString.at(3) == '.') {
+		const char& major = versionString.at(0);
+		const char& minor = versionString.at(2);
+		const char& patch = versionString.at(4);
+		if (isDigit(major) && isDigit(minor) && isDigit(patch)) versionNum = (major - '0') * 100 + (minor - '0') * 10 + (patch - '0');
+	}
+	return versionNum;
+}
+
+bool AirspaceConverter::CheckForNewVersion(int& versionDifference) {
+	static const int runningVersionNumber = VersionToNumber(VERSION);
+	assert(runningVersionNumber > 0 && runningVersionNumber < 1000);
+	try {
+		// The io_context is required for all I/O
+		boost::asio::io_context ioc;
+
+		// These objects perform our I/O
+		boost::asio::ip::tcp::resolver resolver(ioc);
+		boost::beast::tcp_stream stream(ioc);
+
+		// Look up the domain name
+		const std::string host = "alus.it";
+		const auto results = resolver.resolve(host, "80");
+
+		// Make the connection on the IP address we get from a lookup
+		stream.connect(results);
+
+		// Set up an HTTP GET request message
+		boost::beast::http::request<boost::beast::http::string_body> req{boost::beast::http::verb::get, "/AirspaceConverter/lastVersion.txt", 11};
+		req.set(boost::beast::http::field::host, host);
+		req.set(boost::beast::http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+
+		// Send the HTTP request to the remote host
+		boost::beast::http::write(stream, req);
+
+		// This buffer is used for reading and must be persisted
+		boost::beast::flat_buffer buffer;
+
+		// Declare a container to hold the response
+		boost::beast::http::response<boost::beast::http::string_body> res;
+
+		// Receive the HTTP response
+		boost::beast::http::read(stream, buffer, res);
+
+		// Gracefully close the socket
+		boost::beast::error_code ec;
+		stream.socket().shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+
+		// Not_connected happens sometimes: so don't bother reporting it.
+		if (ec && ec != boost::beast::errc::not_connected) {
+			throw boost::beast::system_error{ec};
+		}
+		
+		// If we get here then the connection is closed gracefully
+
+		// The content is the latest version string
+		const std::string latestVersion = res.body();
+		const int latestVersionNumber = VersionToNumber(latestVersion);
+		if (latestVersionNumber > 0) {
+			versionDifference = latestVersionNumber - runningVersionNumber;
+			return true;
+		}
+
+	} catch (.../*std::exception const& e*/) {
+		LogWarning("Not able to check for new version."/*e.what()*/);
+	}
 	return false;
 }

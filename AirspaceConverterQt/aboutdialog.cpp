@@ -20,6 +20,17 @@ AboutDialog::AboutDialog(QWidget *parent) :
     ui->setupUi(this);
     ui->versionLabel->setText(VERSION);
     ui->compileDateLabel->setText(QString("Compiled on %1 at %2").arg(__DATE__).arg(__TIME__));
+    int diffLatestVersion;
+    if (AirspaceConverter::CheckForNewVersion(diffLatestVersion)) {
+        if (diffLatestVersion == 0) ui->newVersionLabel->setText("Congratulations: this is the latest version.");
+        else if (diffLatestVersion > 0) {
+            QPalette palette = ui->newVersionLabel->palette();
+            palette.setColor(ui->newVersionLabel->foregroundRole(), Qt::red);
+            ui->newVersionLabel->setPalette(palette);
+            ui->newVersionLabel->setText("A new version is available! Check our website.");
+        }
+        else ui->newVersionLabel->setText("This version is not yet released.");
+    }
 }
 
 AboutDialog::~AboutDialog() {
