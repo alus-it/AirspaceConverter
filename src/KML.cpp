@@ -248,7 +248,7 @@ void KML::WriteHeader(const bool airspacePresent, const bool waypointsPresent) {
 void KML::OpenPlacemark(const Airspace& airspace) {
 	const std::string name(PrepareTagText(airspace.GetName()));
 	std::string longName(name);
-	if (airspace.GetClass() != Airspace::UNDEFINED && (airspace.GetType() == Airspace::CTR || airspace.GetType() == Airspace::TMA)) longName.append(" - Class " + Airspace::CategoryName(airspace.GetClass()));
+	if (airspace.GetClass() != Airspace::UNDEFINED && (airspace.GetType() == Airspace::CTR || airspace.GetType() == Airspace::TMA)) longName.append(" - " + Airspace::CategoryName(airspace.GetClass()));
 	double area(0), perimeter(0);
 	airspace.CalculateSurface(area, perimeter);
 	outputFile << "<Placemark>\n"
@@ -258,7 +258,7 @@ void KML::OpenPlacemark(const Airspace& airspace) {
 		<< "<ExtendedData>\n"
 		<< "<SchemaData schemaUrl=\"#AirspaceId\">\n"
 		<< "<SimpleData name=\"Name\">" << longName << "</SimpleData>\n"
-		<< "<SimpleData name=\"Category\">" << (airspace.GetType() <= Airspace::CLASSG ? ("Class " + airspace.GetCategoryName()) : airspace.GetCategoryName() ) << "</SimpleData>\n"
+		<< "<SimpleData name=\"Category\">" <<  airspace.GetLongCategoryName() << "</SimpleData>\n"
 		<< "<SimpleData name=\"Top\">" << airspace.GetTopAltitude().ToString() << "</SimpleData>\n"
 		<< "<SimpleData name=\"Base\">" << airspace.GetBaseAltitude().ToString() << "</SimpleData>\n";
 	outputFile << std::fixed << std::setprecision(3);
@@ -852,12 +852,12 @@ bool KML::ProcessFolder(const boost::property_tree::ptree& folder, const int upp
 				case 'A': thisCategory = Airspace::Type::CLASSA; break;
 				case 'B': thisCategory = Airspace::Type::CLASSB; break;
 				case 'C': thisCategory = Airspace::Type::CLASSC; break;
-				case 'D': thisCategory = (categoryName == "Danger areas (D)") ? Airspace::Type::DANGER : Airspace::Type::CLASSD; break;
+				case 'D': thisCategory = (categoryName == "Danger areas (D)") ? Airspace::Type::D : Airspace::Type::CLASSD; break;
 				case 'E': thisCategory = Airspace::Type::CLASSE; break;
 				case 'F': thisCategory = Airspace::Type::CLASSF; break;
 				case 'G': thisCategory = Airspace::Type::CLASSG; break;
-				case 'P': thisCategory = Airspace::Type::PROHIBITED; break;
-				case 'R': thisCategory = Airspace::Type::RESTRICTED; break;					
+				case 'P': thisCategory = Airspace::Type::P; break;
+				case 'R': thisCategory = Airspace::Type::R; break;					
 				default: break;
 				}
 			} else {
@@ -865,12 +865,12 @@ bool KML::ProcessFolder(const boost::property_tree::ptree& folder, const int upp
 				else if (shortCategory == "CTR") thisCategory = Airspace::Type::CTR; //Control zones
 				else if (shortCategory == "RMZ") thisCategory = Airspace::Type::RMZ; //Radio mandatory zones
 				else if (shortCategory == "TMZ") thisCategory = Airspace::Type::TMZ; //Transponder mandatory zones
-				else if (shortCategory == "TRA") thisCategory = Airspace::Type::RESTRICTED; //Temporary reserved airspaces
-				else if (shortCategory == "MTMA") thisCategory = Airspace::Type::TMA; // Military terminal control areas
+				else if (shortCategory == "TRA") thisCategory = Airspace::Type::TRA; //Temporary reserved airspaces
+				else if (shortCategory == "MTMA") thisCategory = Airspace::Type::MTMA; // Military terminal control areas
 				else if (shortCategory == "MCTR") thisCategory = Airspace::Type::CTR; // Military control zones
-				else if (shortCategory == "MATZ") thisCategory = Airspace::Type::CTR; // Military aerodrome traffic zones
-				else if (shortCategory == "MTRA") thisCategory = Airspace::Type::RESTRICTED; // Military temporary reserved areas
-				else if (shortCategory == "MTA") thisCategory = Airspace::Type::DANGER;  // Military training areas
+				else if (shortCategory == "MATZ") thisCategory = Airspace::Type::MATZ; // Military aerodrome traffic zones
+				else if (shortCategory == "MTRA") thisCategory = Airspace::Type::MTRA; // Military temporary reserved areas
+				else if (shortCategory == "MTA") thisCategory = Airspace::Type::MTA;  // Military training areas
 				//else if (shortCategory == "CTA") thisCategory = Airspace::Type::UNDEFINED; //Control areas: will be converted to normal classes
 			}
 		}
@@ -878,7 +878,7 @@ bool KML::ProcessFolder(const boost::property_tree::ptree& folder, const int upp
 	if (thisCategory == Airspace::Type::UNDEFINED) {
 		if (categoryName == "Gliding areas") thisCategory = Airspace::Type::GLIDING;
 		else if (categoryName == "Hang gliding and para gliding areas") thisCategory = Airspace::Type::GLIDING;
-		else if (categoryName == "Parachute jumping areas") thisCategory = Airspace::Type::DANGER;
+		else if (categoryName == "Parachute jumping areas") thisCategory = Airspace::Type::PARA;
 	}
 	if (thisCategory == Airspace::Type::UNDEFINED) thisCategory = upperCategory;
 	folderCategory = thisCategory;
@@ -1048,9 +1048,9 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 					else if (simpleData.second.data() == "Class E") category = Airspace::Type::CLASSE;
 					else if (simpleData.second.data() == "Class F") category = Airspace::Type::CLASSF;
 					else if (simpleData.second.data() == "Class G") category = Airspace::Type::CLASSG;
-					else if (simpleData.second.data() == "Danger") category = Airspace::Type::DANGER;
-					else if (simpleData.second.data() == "Prohibited") category = Airspace::Type::PROHIBITED;
-					else if (simpleData.second.data() == "Restricted") category = Airspace::Type::RESTRICTED;
+					else if (simpleData.second.data() == "Danger") category = Airspace::Type::D;
+					else if (simpleData.second.data() == "Prohibited") category = Airspace::Type::P;
+					else if (simpleData.second.data() == "Restricted") category = Airspace::Type::R;
 					else if (simpleData.second.data() == "CTR") category = Airspace::Type::CTR;
 					else if (simpleData.second.data() == "TMA") category = Airspace::Type::TMA;
 					else if (simpleData.second.data() == "TMZ") category = Airspace::Type::TMZ;
@@ -1099,7 +1099,7 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 		}
 
 		// The name can be empty also after doing GuessClassFromName(), so make sure there is something there
-		if (airspace.GetName().empty()) airspace.SetName(airspace.GetType() <= Airspace::CLASSG ? ("Class " + airspace.GetCategoryName()) : airspace.GetCategoryName());
+		if (airspace.GetName().empty()) airspace.SetName(airspace.GetLongCategoryName());
 
 		bool pointsFound(false);
 
