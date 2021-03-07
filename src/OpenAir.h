@@ -13,10 +13,10 @@
 #pragma once
 #include <string>
 #include <map>
+#include <unordered_map>
 #include <fstream>
+#include "Airspace.h"
 #include "Geometry.h"
-
-class Airspace;
 
 class OpenAir {
 friend class Point;
@@ -63,6 +63,7 @@ private:
 	void WriteCircle(const Circle& circle);
 	void WriteSector(const Sector& sector);
 
+	static const std::unordered_map<std::string, Airspace::Type> openAirAirspaceTable;
 	static bool calculateArcs;
 	static CoordinateType coordinateType;
 	std::multimap<int, Airspace>& airspaces;

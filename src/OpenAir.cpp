@@ -12,8 +12,6 @@
 
 #include "OpenAir.h"
 #include "AirspaceConverter.h"
-#include "Airspace.h"
-#include <map>
 #include <iomanip>
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
@@ -21,13 +19,58 @@
 #include <boost/format.hpp>
 #include <boost/locale/encoding.hpp>
 
-
-
-static std::unordered_map<std::string,E> const table = {
-		{"a",Airspace::UIR},
-		{"a", Airspace::OTH},
-		{"a",Airspace::GLIDING},
-		{"a",Airspace::NOGLIDER},
+const std::unordered_map<std::string, Airspace::Type> OpenAir::openAirAirspaceTable = {
+	{ "A", Airspace::CLASSA },
+	{ "B", Airspace::CLASSB },
+	{ "C", Airspace::CLASSC },
+	{ "D", Airspace::CLASSD },
+	{ "E", Airspace::CLASSE },
+	{ "F", Airspace::CLASSF },
+	{ "G", Airspace::CLASSG },
+	{ "Q", Airspace::D },
+	{ "P", Airspace::P },
+	{ "R", Airspace::R },
+	{ "OTHER", Airspace::OTHER },
+	{ "CTR", Airspace::CTR },
+	{ "TMA", Airspace::TMA },
+	{ "TMZ", Airspace::TMZ },
+	{ "RMZ", Airspace::RMZ },
+	{ "FIR", Airspace::FIR },
+	{ "UIR", Airspace::UIR },
+	{ "OTH", Airspace::OTH },
+	{ "GSEC", Airspace::GLIDING },
+	{ "GP", Airspace::NOGLIDER },
+	{ "W", Airspace::WAVE },
+	{ "NOTAM", Airspace::NOTAM },
+	{ "AWY", Airspace::ARWY },
+	{ "MATZ", Airspace::MATZ },
+	{ "MTMA", Airspace::MTMA },
+	{ "MTRA", Airspace::MTRA },
+	{ "T", Airspace::TFR },
+	{ "TFR", Airspace::TFR },
+	{ "ADA", Airspace::ADA },
+	{ "ADIZ", Airspace::ADIZ },
+	{ "CTA", Airspace::CTR },
+	{ "DFIR", Airspace::DFIR },
+	{ "TIZ", Airspace::TIZ },
+	{ "TIA", Airspace::TIA },
+	{ "SRZ", Airspace::SRZ },
+	{ "ATZ", Airspace::ATZ },
+	{ "FISA", Airspace::FISA },
+	{ "MBZ", Airspace::MBZ },
+	{ "ASR", Airspace::ASR },
+	{ "COMP", Airspace::COMP },
+	{ "TRZ", Airspace::TRZ },
+	{ "VFRR", Airspace::VFRR },
+	{ "RTZ", Airspace::RTZ },
+	{ "PARA", Airspace::PARA },
+	{ "LFZ", Airspace::LFZ },
+	{ "CFZ", Airspace::CFZ },
+	{ "MOA", Airspace::MOA },
+	{ "MTA", Airspace::MTA },
+	{ "TSA", Airspace::TSA },
+	{ "TRA", Airspace::TRA },
+	{ "UNKNOWN", Airspace::TRA }
 };
 /*
 auto it = table.find(str);
@@ -35,55 +78,6 @@ if (it != table.end()) {
   return it->second;
 } else { error() }
 */
-
-
-
-/*
- *
-
-				Abbreviation - Description - Open Air “AY”
-
-				Control Zone CTR
-				Restricted Area R
-				Prohibited Area P
-				Danger Area Q
-				Glider Sector W, GSEC
-				Airway AWY
-				Transponder Mandatory Zone TMZ
-				Radio Mandatory Zone RMZ
-				Military Terminal Zone MTMA
-
-				NOTAM
-
-				TFR Temporary Flight Restriction
-				ADA Advisory Area
-				ADIZ Air Defense Identification Zone
-				CTA Control Area
-				FIR Flight Information Region
-				TMA Terminal Manoeuvring Area
-				DFIR Delegated FIR
-				TIZ Traffic Information Zone
-				TIA Traffic Information Area
-				SRZ Special Rules Zone
-				ATZ Aerodrome Traffic Zone
-				MATZ Military Aerodrome Traffic Zone
-				FISA Flight Information Service Area
-				T Temporary Reserved
-				MBZ Mandatory Broadcast Zone
-				ASR Aerial Sporting and Recreation Area
-				COMP Competition boundary
-				TRZ Transponder Recommended Zone
-				VFRR VFR Route
-				RTZ Radio/Transponder Mandatory zone
-				PARA Parachute jumping area
-				LFZ Low Flying Zone
-				CFZ Common Frequency Zone
-				MOA Military Operating Area
-				TSA Temporary segregated airspace (from Poland)
-				TRA Temporary reserved airspace (from Poland)
- *
- * */
-
 
 
 
