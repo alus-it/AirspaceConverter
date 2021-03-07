@@ -86,7 +86,7 @@ public:
 		NOGLIDER,	// No gliding area
 		WAVE,		// Wave window
 		NOTAM,		// Notice to Airmen "NOTAM" airspace category can be used in OpenAir files
-		ARWY,		// Airway
+		AWY,		// Airway
 		MATZ,		// Military Aerodrome Traffic Zone
 		MTMA,		// Military Terminal Zone
 		MTRA,		// Military Temporary Reserved Area
@@ -179,9 +179,9 @@ private:
 	void EvaluateAndAddArc(std::vector<Geometry::LatLon*>& arcPoints, std::vector<std::pair<const double, const double>>& centerPoints, const bool& clockwise);
 	void EvaluateAndAddCircle(const std::vector<Geometry::LatLon*>& arcPoints, const std::vector<std::pair<const double, const double>>& centerPoints);
 
-	static const std::string CATEGORY_NAMES[Type::UNDEFINED + 1];
-	static const std::string LONG_CATEGORY_NAMES[Type::UNDEFINED + 1];
-	static const bool CATEGORY_VISIBILITY[Type::UNDEFINED + 1];
+	static const std::string CATEGORY_NAMES[];
+	static const std::string LONG_CATEGORY_NAMES[];
+	static const bool CATEGORY_VISIBILITY[];
 	Altitude top, base;
 	std::vector<const Geometry*> geometries;
 	std::vector<Geometry::LatLon> points;
