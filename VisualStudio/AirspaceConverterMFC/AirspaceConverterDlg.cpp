@@ -62,6 +62,12 @@ BOOL CAboutDlg::OnInitDialog() {
 	compileTime.append(" at ");
 	compileTime.append(__TIME__);
 	this->GetDlgItem(IDC_COMPILE_TIME)->SetWindowTextW(CString(compileTime.c_str()));
+	int diffLatestVersion;
+	if (AirspaceConverter::CheckForNewVersion(diffLatestVersion)) {
+		if (diffLatestVersion == 0) this->GetDlgItem(IDC_NEW_VERSION)->SetWindowTextW(_T("Congratulations: this is the latest version."));
+		else if (diffLatestVersion > 0) this->GetDlgItem(IDC_NEW_VERSION)->SetWindowTextW(_T("A new version is available! Check our website."));
+		else this->GetDlgItem(IDC_NEW_VERSION)->SetWindowTextW(_T("This version is not yet released."));
+	}
 	return TRUE;
 }
 
