@@ -119,7 +119,7 @@ bool OpenAIP::ReadAirspaces(const std::string& fileName) {
 					break;
 				case 'D':
 					if (len == 1) type = Airspace::CLASSD; // D class airspace
-					else if (str == "DANGER") type = Airspace::DANGER; // Dangerous area
+					else if (str == "DANGER") type = Airspace::D; // Dangerous area
 					break;
 				case 'E':
 					if (len == 1) type = Airspace::CLASSE; // E class airspace
@@ -136,10 +136,10 @@ bool OpenAIP::ReadAirspaces(const std::string& fileName) {
 					if (str == "OTH") type = Airspace::OTH;
 					break;
 				case 'P':
-					if (str == "PROHIBITED") type = Airspace::PROHIBITED; // Prohibited area
+					if (str == "PROHIBITED") type = Airspace::P; // Prohibited area
 					break;
 				case 'R':
-					if (str == "RESTRICTED") type = Airspace::RESTRICTED; // Restricted area
+					if (str == "RESTRICTED") type = Airspace::R; // Restricted area
 					else if (str == "RMZ") type = Airspace::RMZ; //RMZ
 					break;
 				case 'T':

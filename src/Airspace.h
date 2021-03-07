@@ -64,57 +64,57 @@ private:
 class Airspace {
 public:
 	typedef enum {
-		CLASSA = 0, // Airspace class A
-		CLASSB,     // Airspace class B
-		CLASSC, // Airspace class C
-		CLASSD, // Airspace class D
-		CLASSE, // Airspace class E
-		CLASSF, // Airspace class F
-		CLASSG, // Airspace class G
-		D, // Danger area
-		P, // Prohibited area
-		R, // Restricted area
-		OTHER, // Generic other type
-		CTR, // Control Traffic Region
-		TMA, // Terminal Manoeuvring Area
-		TMZ, // Transponder Mandatory Zone
-		RMZ, // Radio Mandatory Zone
-		FIR, // Flight Information Region, from here on not visible by default
-		UIR, // Upper Information Region
-		OTH, // Over The Horizon
-		GLIDING, // Gliding area
-		NOGLIDER, // No gliding area
-		WAVE, // Wave window
-		NOTAM, // Notice to Airmen "NOTAM" airspace category can be used in OpenAir files
-		ARWY, // Airway
-		MATZ, // Military Aerodrome Traffic Zone
-		MTMA, // Military Terminal Zone
-		MTRA, // Military Temporary Reserved Area
-		TFR, // Temporary Flight Restriction
-		ADA, // Advisory Area
-		ADIZ, // Air Defense Identification Zone
-		CTA, // Control Area
-		DFIR, // Delegated FIR
-		TIZ, // Traffic Information Zone
-		TIA, // Traffic Information Area
-		SRZ, // Special Rules Zone
-		ATZ, // Aerodrome Traffic Zone
-		FISA, // Flight Information Service Area
-		MBZ, // Mandatory Broadcast Zone
-		ASR, // Aerial Sporting and Recreation Area
-		COMP, // Competition boundary
-		TRZ, // Transponder Recommended Zone
-		VFRR, // VFR Route
-		RTZ, // Radio/Transponder Mandatory zone
-		PARA, // Parachute jumping area
-		LFZ, // Low Flying Zone
-		CFZ, // Common Frequency Zone
-		MOA, // Military Operating Area
-		MTA, // Military Training Area
-		TSA, // Temporary segregated airspace
-		TRA, // Temporary reserved airspace
-		UNKNOWN,  // "UNKNOWN" as well can be used in OpenAir files
-		UNDEFINED // also the last one
+		CLASSA = 0,	// Airspace class A
+		CLASSB,		// Airspace class B
+		CLASSC,		// Airspace class C
+		CLASSD,		// Airspace class D
+		CLASSE,		// Airspace class E
+		CLASSF,		// Airspace class F
+		CLASSG,		// Airspace class G
+		D,			// Danger area
+		P,			// Prohibited area
+		R,			// Restricted area
+		OTHER,		// Generic other type
+		CTR,		// Control Traffic Region
+		TMA,		// Terminal Manoeuvring Area
+		TMZ,		// Transponder Mandatory Zone
+		RMZ,		// Radio Mandatory Zone
+		FIR,		// Flight Information Region, from here on not visible by default
+		UIR,		// Upper Information Region
+		OTH,		// Over The Horizon
+		GLIDING,	// Gliding area
+		NOGLIDER,	// No gliding area
+		WAVE,		// Wave window
+		NOTAM,		// Notice to Airmen "NOTAM" airspace category can be used in OpenAir files
+		ARWY,		// Airway
+		MATZ,		// Military Aerodrome Traffic Zone
+		MTMA,		// Military Terminal Zone
+		MTRA,		// Military Temporary Reserved Area
+		TFR,		// Temporary Flight Restriction
+		ADA,		// Advisory Area
+		ADIZ,		// Air Defense Identification Zone
+		CTA,		// Control Area
+		DFIR,		// Delegated FIR
+		TIZ,		// Traffic Information Zone
+		TIA,		// Traffic Information Area
+		SRZ,		// Special Rules Zone
+		ATZ,		// Aerodrome Traffic Zone
+		FISA,		// Flight Information Service Area
+		MBZ,		// Mandatory Broadcast Zone
+		ASR,		// Aerial Sporting and Recreation Area
+		COMP,		// Competition boundary
+		TRZ,		// Transponder Recommended Zone
+		VFRR,		// VFR Route
+		RTZ,		// Radio/Transponder Mandatory zone
+		PARA,		// Parachute jumping area
+		LFZ,		// Low Flying Zone
+		CFZ,		// Common Frequency Zone
+		MOA,		// Military Operating Area
+		MTA,		// Military Training Area
+		TSA,		// Temporary segregated airspace
+		TRA,		// Temporary reserved airspace
+		UNKNOWN,	// "UNKNOWN" as well can be used in OpenAir files
+		UNDEFINED	// also the last one
 	} Type;
 
 	Airspace() : type(UNDEFINED), airspaceClass(UNDEFINED), transponderCode(-1) {}
@@ -179,9 +179,9 @@ private:
 	void EvaluateAndAddArc(std::vector<Geometry::LatLon*>& arcPoints, std::vector<std::pair<const double, const double>>& centerPoints, const bool& clockwise);
 	void EvaluateAndAddCircle(const std::vector<Geometry::LatLon*>& arcPoints, const std::vector<std::pair<const double, const double>>& centerPoints);
 
-	static const std::string CATEGORY_NAMES[];
-	static const std::string Airspace::LONG_CATEGORY_NAMES[];
-	static const bool CATEGORY_VISIBILITY[];
+	static const std::string CATEGORY_NAMES[Type::UNDEFINED + 1];
+	static const std::string LONG_CATEGORY_NAMES[Type::UNDEFINED + 1];
+	static const bool CATEGORY_VISIBILITY[Type::UNDEFINED + 1];
 	Altitude top, base;
 	std::vector<const Geometry*> geometries;
 	std::vector<Geometry::LatLon> points;
