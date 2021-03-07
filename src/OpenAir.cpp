@@ -13,12 +13,79 @@
 #include "OpenAir.h"
 #include "AirspaceConverter.h"
 #include "Airspace.h"
+#include <map>
 #include <iomanip>
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
 #include <boost/locale/encoding.hpp>
+
+
+
+static std::unordered_map<std::string,E> const table = {
+		{"a",Airspace::UIR},
+		{"a", Airspace::OTH},
+		{"a",Airspace::GLIDING},
+		{"a",Airspace::NOGLIDER},
+};
+/*
+auto it = table.find(str);
+if (it != table.end()) {
+  return it->second;
+} else { error() }
+*/
+
+
+
+/*
+ *
+
+				Abbreviation - Description - Open Air “AY”
+
+				Control Zone CTR
+				Restricted Area R
+				Prohibited Area P
+				Danger Area Q
+				Glider Sector W, GSEC
+				Airway AWY
+				Transponder Mandatory Zone TMZ
+				Radio Mandatory Zone RMZ
+				Military Terminal Zone MTMA
+
+				NOTAM
+
+				TFR Temporary Flight Restriction
+				ADA Advisory Area
+				ADIZ Air Defense Identification Zone
+				CTA Control Area
+				FIR Flight Information Region
+				TMA Terminal Manoeuvring Area
+				DFIR Delegated FIR
+				TIZ Traffic Information Zone
+				TIA Traffic Information Area
+				SRZ Special Rules Zone
+				ATZ Aerodrome Traffic Zone
+				MATZ Military Aerodrome Traffic Zone
+				FISA Flight Information Service Area
+				T Temporary Reserved
+				MBZ Mandatory Broadcast Zone
+				ASR Aerial Sporting and Recreation Area
+				COMP Competition boundary
+				TRZ Transponder Recommended Zone
+				VFRR VFR Route
+				RTZ Radio/Transponder Mandatory zone
+				PARA Parachute jumping area
+				LFZ Low Flying Zone
+				CFZ Common Frequency Zone
+				MOA Military Operating Area
+				TSA Temporary segregated airspace (from Poland)
+				TRA Temporary reserved airspace (from Poland)
+ *
+ * */
+
+
+
 
 bool OpenAir::calculateArcs = true;
 OpenAir::CoordinateType OpenAir::coordinateType = OpenAir::CoordinateType::AUTO;
@@ -281,9 +348,9 @@ bool OpenAir::ParseAC(const std::string & line, Airspace& airspace) {
 	Airspace::Type type = Airspace::UNDEFINED;
 	size_t length(line.size());
 	if (length == 4) switch (line.at(3)) {
-		case 'R': type = Airspace::RESTRICTED; break; // restricted
-		case 'Q': type = Airspace::DANGER; break; // danger
-		case 'P': type = Airspace::PROHIBITED; break; // prohibited
+		case 'R': type = Airspace::R; break; // restricted
+		case 'Q': type = Airspace::D; break; // danger
+		case 'P': type = Airspace::P; break; // prohibited
 		case 'A': type = Airspace::CLASSA; break; // Class A
 		case 'B': type = Airspace::CLASSB; break; // Class B
 		case 'C': type = Airspace::CLASSC; break; // Class C
@@ -599,9 +666,9 @@ void OpenAir::WriteHeader() {
 bool OpenAir::WriteCategory(const Airspace& airspace) {
 	std::string openAirCategory;
 	switch(airspace.GetType()) {
-		case Airspace::RESTRICTED:	openAirCategory = "R"; break;
-		case Airspace::DANGER:		openAirCategory = "Q"; break;
-		case Airspace::PROHIBITED:	openAirCategory = "P"; break;
+		case Airspace::R:			openAirCategory = "R"; break;
+		case Airspace::D:			openAirCategory = "Q"; break;
+		case Airspace::P:			openAirCategory = "P"; break;
 		case Airspace::CTR:			openAirCategory = "CTR"; break;
 		case Airspace::CLASSA:		openAirCategory = "A"; break;
 		case Airspace::CLASSB:		openAirCategory = "B"; break;

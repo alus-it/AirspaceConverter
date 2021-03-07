@@ -64,29 +64,55 @@ private:
 class Airspace {
 public:
 	typedef enum {
-		CLASSA = 0,
-		CLASSB,
-		CLASSC,
-		CLASSD,
-		CLASSE,
-		CLASSF,
-		CLASSG,
-		DANGER,
-		PROHIBITED,
-		RESTRICTED,
-		OTHER,
-		MATZ,
-		CTR,
-		TMA,
-		TMZ,
-		RMZ,
-		FIR, // from here on not visible by default
-		UIR,
-		OTH,
-		GLIDING,
-		NOGLIDER,
-		WAVE,
-		NOTAM,    // "NOTAM" airspace category can be used in OpenAir files
+		CLASSA = 0, // Airspace class A
+		CLASSB,     // Airspace class B
+		CLASSC, // Airspace class C
+		CLASSD, // Airspace class D
+		CLASSE, // Airspace class E
+		CLASSF, // Airspace class F
+		CLASSG, // Airspace class G
+		D, // Danger area
+		P, // Prohibited area
+		R, // Restricted area
+		OTHER, // Generic other type
+		CTR, // Control Traffic Region
+		TMA, // Terminal Manoeuvring Area
+		TMZ, // Transponder Mandatory Zone
+		RMZ, // Radio Mandatory Zone
+		FIR, // Flight Information Region, from here on not visible by default
+		UIR, // Upper Information Region
+		OTH, // Over The Horizon
+		GLIDING, // Gliding area
+		NOGLIDER, // No gliding area
+		WAVE, // Wave window
+		NOTAM, // Notice to Airmen "NOTAM" airspace category can be used in OpenAir files
+		ARWY, // Airway
+		MATZ, // Military Aerodrome Traffic Zone
+		MTMA, // Military Terminal Zone
+		MTRA, // Military Temporary Reserved Area
+		TFR, // Temporary Flight Restriction
+		ADA, // Advisory Area
+		ADIZ, // Air Defense Identification Zone
+		CTA, // Control Area
+		DFIR, // Delegated FIR
+		TIZ, // Traffic Information Zone
+		TIA, // Traffic Information Area
+		SRZ, // Special Rules Zone
+		ATZ, // Aerodrome Traffic Zone
+		FISA, // Flight Information Service Area
+		MBZ, // Mandatory Broadcast Zone
+		ASR, // Aerial Sporting and Recreation Area
+		COMP, // Competition boundary
+		TRZ, // Transponder Recommended Zone
+		VFRR, // VFR Route
+		RTZ, // Radio/Transponder Mandatory zone
+		PARA, // Parachute jumping area
+		LFZ, // Low Flying Zone
+		CFZ, // Common Frequency Zone
+		MOA, // Military Operating Area
+		MTA, // Military Training Area
+		TSA, // Temporary segregated airspace
+		TRA, // Temporary reserved airspace
 		UNKNOWN,  // "UNKNOWN" as well can be used in OpenAir files
 		UNDEFINED // also the last one
 	} Type;
@@ -100,6 +126,7 @@ public:
 	Airspace& operator=(const Airspace& other);
 	bool operator==(const Airspace& other) const;
 	inline static const std::string& CategoryName(const Type& category) { return CATEGORY_NAMES[category]; }
+	inline static const std::string& LongCategoryName(const Type& category) { return LONG_CATEGORY_NAMES[category]; }
 	static bool CategoryVisibleByDefault(const Type& category) { return CATEGORY_VISIBILITY[category]; }
 	void SetType(const Type& category);
 	void SetClass(const Type& airspClass);
@@ -125,6 +152,7 @@ public:
 	inline const Type& GetType() const { return type; }
 	inline const Type& GetClass() const { return airspaceClass; }
 	inline const std::string& GetCategoryName() const { return CategoryName(type); }
+	inline const std::string& GetLongCategoryName() const { return LongCategoryName(type); }
 	inline const Altitude& GetTopAltitude() const { return top; }
 	inline const Altitude& GetBaseAltitude() const { return base; }
 	inline const std::string& GetName() const { return name; }
@@ -152,6 +180,7 @@ private:
 	void EvaluateAndAddCircle(const std::vector<Geometry::LatLon*>& arcPoints, const std::vector<std::pair<const double, const double>>& centerPoints);
 
 	static const std::string CATEGORY_NAMES[];
+	static const std::string Airspace::LONG_CATEGORY_NAMES[];
 	static const bool CATEGORY_VISIBILITY[];
 	Altitude top, base;
 	std::vector<const Geometry*> geometries;

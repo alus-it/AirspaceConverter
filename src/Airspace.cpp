@@ -124,11 +124,10 @@ const bool Airspace::CATEGORY_VISIBILITY[] = {
 	true,  //PROHIBITED
 	true,  //RESTRICTED
 	false, //OTHER
-	false, //MATZ
 	true,  //CTR
 	true,  //TMA
-	false, //TMZ
-	false, //RMZ
+	true,  //TMZ
+	true,  //RMZ
 	false, //FIR
 	false, //UIR
 	false, //OTH
@@ -136,36 +135,144 @@ const bool Airspace::CATEGORY_VISIBILITY[] = {
 	false, //NOGLIDER
 	false, //WAVE
 	true,  //NOTAM
+	true,  //NOTAM
+	true,  //ARWY
+	true,  //MATZ
+	true,  //MTMA
+	true,  //MTRA
+	true,  //TFR
+	true,  //ADA
+	true,  //ADIZ
+	true,  //CTA
+	true,  //DFIR
+	true,  //TIZ
+	true,  //TIA
+	true,  //SRZ
+	true,  //ATZ
+	true,  //FISA
+	true,  //MBZ
+	true,  //ASR
+	true,  //COMP
+	true,  //TRZ
+	true,  //VFRR
+	true,  //RTZ
+	true,  //PARA
+	true,  //LFZ
+	true,  //CFZ
+	true,  //MOA
+	true,  //MTA
+	true,  //TSA
+	true,  //TRA
 	false, //UNKNOWN
 	false  //UNDEFINED
 };
 
 const std::string Airspace::CATEGORY_NAMES[] = {
-	"A", //CLASSA
-	"B", //CLASSB
-	"C", //CLASSC
-	"D", //CLASSD
-	"E", //CLASSE
-	"F", //CLASSF
-	"G", //CLASSG
-	"Danger", //DANGER
-	"Prohibited", //PROHIBITED
-	"Restricted", //RESTRICTED
-	"Other", //OTHER
-	"Military ATZ", //MATZ
-	"CTR", //CTR
-	"TMA", //TMA
-	"TMZ", //TMZ
-	"RMZ", //RMZ
-	"FIR", //FIR
-	"UIR", //UIR
-	"OTH", //OTH
-	"Gliding area", //GLIDING
-	"No glider", //NOGLIDER
-	"Wave window", //WAVE
-	"NOTAM", //NOTAM
-	"Unknown", //UNKNOWN
-	"UNDEFINED" //UNDEFINED
+	"Class A",
+	"Class B",
+	"Class C",
+	"Class D",
+	"Class E",
+	"Class F",
+	"Class G",
+	"D",
+	"P",
+	"R",
+	"Other",
+	"CTR",
+	"TMA",
+	"TMZ",
+	"RMZ",
+	"FIR",
+	"UIR",
+	"OTH",
+	"Gliding",
+	"No Glider",
+	"Wave",
+	"NOTAM",
+	"ARWY",
+	"MATZ",
+	"MTMA",
+	"MTRA",
+	"TFR",
+	"ADA",
+	"ADIZ",
+	"CTA",
+	"DFIR",
+	"TIZ",
+	"TIA",
+	"SRZ",
+	"ATZ",
+	"FISA",
+	"MBZ",
+	"ASR",
+	"COMP",
+	"TRZ",
+	"VFRR",
+	"RTZ",
+	"PARA",
+	"LFZ",
+	"CFZ",
+	"MOA",
+	"MTA",
+	"TSA",
+	"TRA",
+	"Unknown",
+	"UNDEFINED"
+};
+
+const std::string Airspace::LONG_CATEGORY_NAMES[] = {
+	"Airspace class A",
+	"Airspace class B",
+	"Airspace class C",
+	"Airspace class D",
+	"Airspace class E",
+	"Airspace class F",
+	"Airspace class G",
+	"Danger area",
+	"Prohibited area",
+	"Restricted area",
+	"Other airspace type",
+	"Control Traffic Region",
+	"Terminal Manoeuvring Area",
+	"Transponder Mandatory Zone",
+	"Radio Mandatory Zone",
+	"Flight Information Region",
+	"Upper Information Region",
+	"Over The Horizon",
+	"Gliding area",
+	"No gliding area",
+	"Wave window",
+	"Notice to Airmen",
+	"Airway",
+	"Military Aerodrome Traffic Zone",
+	"Military Terminal Zone",
+	"Military Temporary Reserved Area",
+	"Temporary Flight Restriction",
+	"Advisory Area",
+	"Air Defense Identification Zone",
+	"Control Area",
+	"Delegated FIR",
+	"Traffic Information Zone",
+	"Traffic Information Area",
+	"Special Rules Zone",
+	"Aerodrome Traffic Zone",
+	"Flight Information Service Area",
+	"Mandatory Broadcast Zone",
+	"Aerial Sporting and Recreation Area",
+	"Competition boundary",
+	"Transponder Recommended Zone",
+	"VFR Route",
+	"Radio/Transponder Mandatory zone",
+	"Parachute jumping area",
+	"Low Flying Zone",
+	"Common Frequency Zone",
+	"Military Operating Area",
+	"Military Training Area",
+	"Temporary Segregated Airspace",
+	"Temporary Reserved Airspace",
+	"Unknown",
+	"Undefined"
 };
 
 Airspace::Airspace(Type category)
