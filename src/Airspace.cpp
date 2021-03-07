@@ -112,7 +112,7 @@ bool Altitude::operator!=(const Altitude& other) const {
 	return altFt != other.altFt || refIsMsl != other.refIsMsl || fl != other.fl;
 }
 
-const bool Airspace::CATEGORY_VISIBILITY[] = {
+const bool Airspace::CATEGORY_VISIBILITY[Airspace::UNDEFINED + 1] = {
 	false,	//CLASSA
 	false,	//CLASSB
 	false,	//CLASSC
@@ -135,7 +135,7 @@ const bool Airspace::CATEGORY_VISIBILITY[] = {
 	true,	//NOGLIDER
 	true,	//WAVE
 	true,	//NOTAM
-	false,	//ARWY
+	false,	//AWY
 	true,	//MATZ
 	false,	//MTMA
 	false,	//MTRA
@@ -166,7 +166,7 @@ const bool Airspace::CATEGORY_VISIBILITY[] = {
 	false	//UNDEFINED
 };
 
-const std::string Airspace::CATEGORY_NAMES[] = {
+const std::string Airspace::CATEGORY_NAMES[Airspace::UNDEFINED + 1] = {
 	"Class A",
 	"Class B",
 	"Class C",
@@ -177,7 +177,7 @@ const std::string Airspace::CATEGORY_NAMES[] = {
 	"D",
 	"P",
 	"R",
-	"Other",
+	"OTHER",
 	"CTR",
 	"TMA",
 	"TMZ",
@@ -189,7 +189,7 @@ const std::string Airspace::CATEGORY_NAMES[] = {
 	"No Glider",
 	"Wave",
 	"NOTAM",
-	"ARWY",
+	"AWY",
 	"MATZ",
 	"MTMA",
 	"MTRA",
@@ -216,11 +216,11 @@ const std::string Airspace::CATEGORY_NAMES[] = {
 	"MTA",
 	"TSA",
 	"TRA",
-	"Unknown",
+	"UNKNOWN",
 	"UNDEFINED"
 };
 
-const std::string Airspace::LONG_CATEGORY_NAMES[] = {
+const std::string Airspace::LONG_CATEGORY_NAMES[Airspace::UNDEFINED + 1] = {
 	"Airspace class A",
 	"Airspace class B",
 	"Airspace class C",

@@ -25,7 +25,7 @@
 #include <boost/tokenizer.hpp>
 #include <cmath>
 
-const std::string KML::colors[][2] = {
+const std::string KML::colors[Airspace::UNDEFINED + 1][2] = {
 	{ "509900ff", "7f9900ff" }, //CLASSA
 	{ "50cc0000", "7fcc0000" }, //CLASSB
 	{ "50cc3399", "7fcc3399" }, //CLASSC
@@ -36,6 +36,7 @@ const std::string KML::colors[][2] = {
 	{ "500000FF", "7F0000FF" }, //DANGER
 	{ "500000FF", "7F0000FF" }, //PROHIBITED
 	{ "50FF0080", "7FFF0080" }, //RESTRICTED
+	{ "40000000", "7fd4d4d4" }, //OTHER
 	{ "501947ff", "7f1947ff" }, //CTR
 	{ "50ffdd01", "7fffdd01" }, //TMA
 	{ "50000000", "7fd4d4d4" }, //TMZ
@@ -47,6 +48,33 @@ const std::string KML::colors[][2] = {
 	{ "400000FF", "7fd4d4d4" }, //NOGLIDER
 	{ "403399ff", "7fd4d4d4" }, //WAVE
 	{ "500000FF", "7F0000FF" }, //NOTAM
+	{ "40000000", "7fd4d4d4" }, //AWY
+	{ "40000000", "7fd4d4d4" }, //MATZ
+	{ "40000000", "7fd4d4d4" }, //MTMA
+	{ "40000000", "7fd4d4d4" }, //MTRA
+	{ "40000000", "7fd4d4d4" }, //TFR
+	{ "40000000", "7fd4d4d4" }, //ADA
+	{ "40000000", "7fd4d4d4" }, //ADIZ
+	{ "40000000", "7fd4d4d4" }, //CTA
+	{ "40000000", "7fd4d4d4" }, //DFIR
+	{ "40000000", "7fd4d4d4" }, //TIZ
+	{ "40000000", "7fd4d4d4" }, //TIA
+	{ "40000000", "7fd4d4d4" }, //SRZ
+	{ "40000000", "7fd4d4d4" }, //ATZ
+	{ "40000000", "7fd4d4d4" }, //FISA
+	{ "40000000", "7fd4d4d4" }, //MBZ
+	{ "40000000", "7fd4d4d4" }, //ASR
+	{ "40000000", "7fd4d4d4" }, //COMP
+	{ "40000000", "7fd4d4d4" }, //TRZ
+	{ "40000000", "7fd4d4d4" }, //VFRR
+	{ "40000000", "7fd4d4d4" }, //RTZ
+	{ "40000000", "7fd4d4d4" }, //PARA
+	{ "40000000", "7fd4d4d4" }, //LFZ
+	{ "40000000", "7fd4d4d4" }, //CFZ
+	{ "40000000", "7fd4d4d4" }, //MOA
+	{ "40000000", "7fd4d4d4" }, //MTA
+	{ "40000000", "7fd4d4d4" }, //TSA
+	{ "40000000", "7fd4d4d4" }, //TRA
 	{ "40000000", "7fd4d4d4" }, //UNKNOWN
 	{ "40000000", "7fd4d4d4" }  //UNDEFINED
 };

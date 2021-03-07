@@ -42,7 +42,7 @@ const std::unordered_map<std::string, Airspace::Type> OpenAir::openAirAirspaceTa
 	{ "GP", Airspace::NOGLIDER },
 	{ "W", Airspace::WAVE },
 	{ "NOTAM", Airspace::NOTAM },
-	{ "AWY", Airspace::ARWY },
+	{ "AWY", Airspace::AWY },
 	{ "MATZ", Airspace::MATZ },
 	{ "MTMA", Airspace::MTMA },
 	{ "MTRA", Airspace::MTRA },
@@ -70,16 +70,8 @@ const std::unordered_map<std::string, Airspace::Type> OpenAir::openAirAirspaceTa
 	{ "MTA", Airspace::MTA },
 	{ "TSA", Airspace::TSA },
 	{ "TRA", Airspace::TRA },
-	{ "UNKNOWN", Airspace::TRA }
+	{ "UNKNOWN", Airspace::UNKNOWN }
 };
-/*
-auto it = table.find(str);
-if (it != table.end()) {
-  return it->second;
-} else { error() }
-*/
-
-
 
 bool OpenAir::calculateArcs = true;
 OpenAir::CoordinateType OpenAir::coordinateType = OpenAir::CoordinateType::AUTO;
@@ -340,32 +332,9 @@ bool OpenAir::ParseAC(const std::string & line, Airspace& airspace) {
 	InsertAirspace(airspace); // If new airspace first store the actual one
 	assert(airspace.GetType() == Airspace::UNDEFINED);
 	Airspace::Type type = Airspace::UNDEFINED;
-	size_t length(line.size());
-	if (length == 4) switch (line.at(3)) {
-		case 'R': type = Airspace::R; break; // restricted
-		case 'Q': type = Airspace::D; break; // danger
-		case 'P': type = Airspace::P; break; // prohibited
-		case 'A': type = Airspace::CLASSA; break; // Class A
-		case 'B': type = Airspace::CLASSB; break; // Class B
-		case 'C': type = Airspace::CLASSC; break; // Class C
-		case 'D': type = Airspace::CLASSD; break; // Class D
-		case 'E': type = Airspace::CLASSE; break; // Class E
-		case 'F': type = Airspace::CLASSF; break; // Class F
-		case 'G': type = Airspace::CLASSG; break; // Class G
-		case 'W': type = Airspace::WAVE; break; // Wave Window
-	} else if (length == 6) {
-		if (line.at(3) == 'C' && line.at(4) == 'T' && line.at(5) == 'R') type = Airspace::CTR;
-		else if (line.at(3) == 'U' && line.at(4) == 'K' && line.at(5) == 'N') type = Airspace::UNKNOWN; // UKNOWN can be used in OpneAir
-		else if (line.at(4) == 'M' && line.at(5) == 'Z') {
-			if (line.at(3) == 'T') type = Airspace::TMZ;
-			else if (line.at(3) == 'R') type = Airspace::RMZ;
-		}
-	} else if (length == 5 && line.at(3)=='G' && line.at(4) == 'P') type = Airspace::NOGLIDER; //GP glider prohibited
-	else if (length == 7 && line.substr(3) == "GSEC") type = Airspace::GLIDING; //GSEC glider sector
-	else if (length == 8 && line.substr(3) == "NOTAM") type = Airspace::NOTAM;
-	else if (length == 7 && line.substr(3) == "MATZ") type = Airspace::MATZ; //Military ATZ
-	else if (length == 8 && line.substr(3) == "OTHER") type = Airspace::OTHER; //Other
-	else if (length == 10 && line.substr(3) == "UNKNOWN") type = Airspace::UNKNOWN; // UKNOWN can be used in OpneAir
+	if (line.size() < 4 || line.at(2) !=' ') return false;
+	auto it = openAirAirspaceTable.find(line.substr(3));
+	if (it != openAirAirspaceTable.end()) type = it->second;
 	if (type == Airspace::UNDEFINED) return false;
 	airspace.SetType(type);
 	return true;
@@ -660,10 +629,6 @@ void OpenAir::WriteHeader() {
 bool OpenAir::WriteCategory(const Airspace& airspace) {
 	std::string openAirCategory;
 	switch(airspace.GetType()) {
-		case Airspace::R:			openAirCategory = "R"; break;
-		case Airspace::D:			openAirCategory = "Q"; break;
-		case Airspace::P:			openAirCategory = "P"; break;
-		case Airspace::CTR:			openAirCategory = "CTR"; break;
 		case Airspace::CLASSA:		openAirCategory = "A"; break;
 		case Airspace::CLASSB:		openAirCategory = "B"; break;
 		case Airspace::CLASSC:		openAirCategory = "C"; break;
@@ -671,34 +636,15 @@ bool OpenAir::WriteCategory(const Airspace& airspace) {
 		case Airspace::CLASSE:		openAirCategory = "E"; break;
 		case Airspace::CLASSF:		openAirCategory = "F"; break;
 		case Airspace::CLASSG:		openAirCategory = "G"; break;
-		case Airspace::TMA: // TMA is not an OpenAir definition but better to fall back on CTR
-			switch (airspace.GetClass()) {
-				case Airspace::CLASSA:	openAirCategory = "A"; break;
-				case Airspace::CLASSB:	openAirCategory = "B"; break;
-				case Airspace::CLASSC:	openAirCategory = "C"; break;
-				case Airspace::CLASSD:	openAirCategory = "D"; break;
-				case Airspace::CLASSE:	openAirCategory = "E"; break;
-				case Airspace::CLASSF:	openAirCategory = "F"; break;
-				case Airspace::CLASSG:	openAirCategory = "G"; break;
-				case Airspace::UNDEFINED:
-					openAirCategory = "CTR";
-					AirspaceConverter::LogWarning(boost::str(boost::format("TMA %1s written as CTR.") % airspace.GetName()));
-					break;
-				default: assert(false);
-			}
-			break;
+		case Airspace::D:			openAirCategory = "Q"; break;
 		case Airspace::WAVE:		openAirCategory = "W"; break;
-		case Airspace::RMZ:		openAirCategory = "RMZ"; break;
-		case Airspace::TMZ:		openAirCategory = "TMZ"; break;
 		case Airspace::NOGLIDER:	openAirCategory = "GP"; break;
-		case Airspace::MATZ:	        openAirCategory = "MATZ"; break;
-		case Airspace::OTHER:	        openAirCategory = "OTHER"; break;
 		case Airspace::GLIDING:		openAirCategory = "GSEC"; break;
-		case Airspace::NOTAM:		openAirCategory = "NOTAM"; break;
-		case Airspace::UNKNOWN:		openAirCategory = "UNKNOWN"; break;
-		default: // other cases not existent in OpenAir: FIR, UIR, OTH, GLIDING, UNDEFINED
-			AirspaceConverter::LogWarning(boost::str(boost::format("skipping airspace %1s of category %2s not existent in OpenAir.") % airspace.GetName() % Airspace::CategoryName(airspace.GetType())));
+		case Airspace::UNDEFINED:
+			AirspaceConverter::LogWarning(boost::str(boost::format("skipping undefined airspace %1s.") % airspace.GetName()));
+			assert(false);
 			return false;
+		default: openAirCategory = airspace.CategoryName(airspace.GetType()); break;
 	}
 	file << "AC " << openAirCategory << "\r\n";
 	lastPointWasDDMMSS = false;
