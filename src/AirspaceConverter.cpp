@@ -784,7 +784,7 @@ bool AirspaceConverter::CheckForNewVersion(int& versionDifference) {
 		// Make the connection on the IP address we get from a lookup
 		stream.connect(results);
 
-		// Set up an HTTP GET request message
+		// Set up an HTTP GET request message (for HTTPS more libs would be required)
 		boost::beast::http::request<boost::beast::http::string_body> req{boost::beast::http::verb::get, "/AirspaceConverter/lastVersion.txt", 11};
 		req.set(boost::beast::http::field::host, host);
 		req.set(boost::beast::http::field::user_agent, BOOST_BEAST_VERSION_STRING);
@@ -820,8 +820,8 @@ bool AirspaceConverter::CheckForNewVersion(int& versionDifference) {
 			return true;
 		}
 
-	} catch (.../*std::exception const& e*/) {
-		LogWarning("Not able to check for new version."/*e.what()*/);
+	} catch (...) {
+		// This can happen in many cases including when no Internet connection is availble; so: no need to bother the user
 	}
 	return false;
 }
