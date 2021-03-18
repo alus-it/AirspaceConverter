@@ -819,7 +819,6 @@ bool AirspaceConverter::CheckForNewVersion(int& versionDifference) {
 			versionDifference = latestVersionNumber - runningVersionNumber;
 			return true;
 		}
-
 	} catch (...) {
 		// This can happen in many cases including when no Internet connection is availble; so: no need to bother the user
 	}
