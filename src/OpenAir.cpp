@@ -30,18 +30,19 @@ const std::unordered_map<std::string, Airspace::Type> OpenAir::openAirAirspaceTa
 	{ "Q", Airspace::D },
 	{ "P", Airspace::P },
 	{ "R", Airspace::R },
-	{ "OTHER", Airspace::OTHER },
 	{ "CTR", Airspace::CTR },
-	{ "TMA", Airspace::TMA },
 	{ "TMZ", Airspace::TMZ },
 	{ "RMZ", Airspace::RMZ },
-	{ "FIR", Airspace::FIR },
-	{ "UIR", Airspace::UIR },
-	{ "OTH", Airspace::OTH },
 	{ "GSEC", Airspace::GLIDING },
 	{ "GP", Airspace::NOGLIDER },
 	{ "W", Airspace::WAVE },
+	{ "WAVE", Airspace::WAVE },
 	{ "NOTAM", Airspace::NOTAM },
+	{ "OTHER", Airspace::OTHER },
+	{ "TMA", Airspace::TMA },
+	{ "FIR", Airspace::FIR },
+	{ "UIR", Airspace::UIR },
+	{ "OTH", Airspace::OTH },
 	{ "AWY", Airspace::AWY },
 	{ "MATZ", Airspace::MATZ },
 	{ "MTMA", Airspace::MTMA },
@@ -70,6 +71,7 @@ const std::unordered_map<std::string, Airspace::Type> OpenAir::openAirAirspaceTa
 	{ "MTA", Airspace::MTA },
 	{ "TSA", Airspace::TSA },
 	{ "TRA", Airspace::TRA },
+	{ "UKN", Airspace::UNKNOWN },
 	{ "UNKNOWN", Airspace::UNKNOWN }
 };
 
@@ -344,9 +346,16 @@ bool OpenAir::ParseAN(const std::string & line, Airspace& airspace, const bool i
 	if (airspace.GetType() == Airspace::UNDEFINED) return true;
 	if (line.size() < 4) return false;
 	if (airspace.GetName().empty()) {
-		const std::string name(line.substr(3));
-		if (name == "COLORENTRY") airspace.SetType(Airspace::UNDEFINED); // Skip Strepla colortable entries
-		else airspace.SetName(isUTF8 ? name : boost::locale::conv::between(name,"utf-8","ISO8859-1"));
+		std::string name(line.substr(3));
+		if (name == "COLORENTRY") {
+			airspace.SetType(Airspace::UNDEFINED); // Skip Strepla colortable entries
+			return true;
+		}
+		if (airspace.GetType() > Airspace::Type::OTHER && // If the type will be not (yet) recognized by LK8000 (from Type::OTHER on)
+			name.rfind(airspace.GetCategoryName()) == std::string::npos) { // ... and the name does not alredy contain it ...
+			name.insert (0, airspace.GetCategoryName() + " "); // Then make sure the name contains the type as text
+		}
+		airspace.SetName(isUTF8 ? name : boost::locale::conv::between(name,"utf-8","ISO8859-1"));
 		return true;
 	}
 	AirspaceConverter::LogError(boost::str(boost::format("airspace %1s has already a name.") % airspace.GetName()));

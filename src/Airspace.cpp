@@ -123,18 +123,18 @@ const bool Airspace::CATEGORY_VISIBILITY[Airspace::UNDEFINED + 1] = {
 	true,	//DANGER
 	true,	//PROHIBITED
 	true,	//RESTRICTED
-	false,	//OTHER
 	true,	//CTR
-	true,	//TMA
 	true,	//TMZ
 	true,	//RMZ
-	false,	//FIR
-	false,	//UIR
-	false,	//OTH
 	true,	//GLIDING
 	true,	//NOGLIDER
 	true,	//WAVE
 	true,	//NOTAM
+	false,	//OTHER
+	true,	//TMA
+	false,	//FIR
+	false,	//UIR
+	false,	//OTH
 	false,	//AWY
 	true,	//MATZ
 	false,	//MTMA
@@ -177,18 +177,18 @@ const std::string Airspace::CATEGORY_NAMES[Airspace::UNDEFINED + 1] = {
 	"D",
 	"P",
 	"R",
-	"OTHER",
 	"CTR",
-	"TMA",
 	"TMZ",
 	"RMZ",
-	"FIR",
-	"UIR",
-	"OTH",
 	"Gliding",
 	"No Glider",
 	"Wave",
 	"NOTAM",
+	"OTHER",
+	"TMA",
+	"FIR",
+	"UIR",
+	"OTH",
 	"AWY",
 	"MATZ",
 	"MTMA",
@@ -231,18 +231,18 @@ const std::string Airspace::LONG_CATEGORY_NAMES[Airspace::UNDEFINED + 1] = {
 	"Danger area",
 	"Prohibited area",
 	"Restricted area",
-	"Other airspace type",
 	"Control Traffic Region",
-	"Terminal Manoeuvring Area",
 	"Transponder Mandatory Zone",
 	"Radio Mandatory Zone",
-	"Flight Information Region",
-	"Upper Information Region",
-	"Over The Horizon",
 	"Gliding area",
 	"No gliding area",
 	"Wave window",
 	"Notice to Airmen",
+	"Other airspace type",
+	"Terminal Manoeuvring Area",
+	"Flight Information Region",
+	"Upper Information Region",
+	"Over The Horizon",
 	"Airway",
 	"Military Aerodrome Traffic Zone",
 	"Military Terminal Zone",

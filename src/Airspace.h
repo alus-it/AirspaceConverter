@@ -74,18 +74,18 @@ public:
 		D,			// Danger area
 		P,			// Prohibited area
 		R,			// Restricted area
-		OTHER,		// Generic other type
 		CTR,		// Control Traffic Region
-		TMA,		// Terminal Manoeuvring Area
 		TMZ,		// Transponder Mandatory Zone
 		RMZ,		// Radio Mandatory Zone
-		FIR,		// Flight Information Region, from here on not visible by default
-		UIR,		// Upper Information Region
-		OTH,		// Over The Horizon
 		GLIDING,	// Gliding area
 		NOGLIDER,	// No gliding area
 		WAVE,		// Wave window
 		NOTAM,		// Notice to Airmen "NOTAM" airspace category can be used in OpenAir files
+		OTHER,		// Generic other type
+		TMA,		// Terminal Manoeuvring Area
+		FIR,		// Flight Information Region, from here on not visible by default
+		UIR,		// Upper Information Region
+		OTH,		// Over The Horizon
 		AWY,		// Airway
 		MATZ,		// Military Aerodrome Traffic Zone
 		MTMA,		// Military Terminal Zone
