@@ -31,9 +31,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
-#include <boost/beast/core.hpp>
-#include <boost/beast/http.hpp>
-#include <boost/beast/version.hpp>
 
 #if BOOST_VERSION >= 106100
 #include <boost/dll/runtime_symbol_info.hpp>
@@ -43,6 +40,13 @@ const std::string AirspaceConverter::basePath(boost::filesystem::path(boost::dll
 
 // This is for older Linux distributions where boost::dll is not available
 const std::string AirspaceConverter::basePath(boost::filesystem::exists("/usr/bin/airspaceconverter") ? "/usr/bin" : ".");
+#endif
+
+// The HTTP client used to check for new version from Boost Beast is availble from version 1.70
+#if BOOST_VERSION >= 107000
+#include <boost/beast/core.hpp>
+#include <boost/beast/http.hpp>
+#include <boost/beast/version.hpp>
 #endif
 
 std::function<void(const std::string&)> AirspaceConverter::LogMessage = DefaultLogMessage;
@@ -769,6 +773,7 @@ int AirspaceConverter::VersionToNumber(const std::string& versionString) {
 bool AirspaceConverter::CheckForNewVersion(int& versionDifference) {
 	static const int runningVersionNumber = VersionToNumber(VERSION);
 	assert(runningVersionNumber > 0 && runningVersionNumber < 1000);
+	#if BOOST_VERSION >= 107000
 	try {
 		// The io_context is required for all I/O
 		boost::asio::io_context ioc;
@@ -822,5 +827,6 @@ bool AirspaceConverter::CheckForNewVersion(int& versionDifference) {
 	} catch (...) {
 		// This can happen in many cases including when no Internet connection is availble; so: no need to bother the user
 	}
+	#endif
 	return false;
 }
