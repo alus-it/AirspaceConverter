@@ -388,7 +388,7 @@ bool CSV::Read(const std::string& fileName) {
 
 		// Altitude verification against terrain raster map
 		if (terrainMapsPresent && type > Waypoint::WaypointType::normal) // Unknown and normal waypoints skipped
-			AirspaceConverter::VerifyAltitudeOnTerrainMap(latitude,longitude,altitude,blankAltitude,altitudeParsed,linecount);
+			AirspaceConverter::VerifyAltitudeOnTerrainMap(latitude,longitude,altitude,blankAltitude,altitudeParsed,linecount,type >= Waypoint::WaypointType::mtTop && type <= Waypoint::WaypointType::dam);
 
 		// If it's an airfield...
 		if(Waypoint::IsTypeAirfield((Waypoint::WaypointType)type)) { // check & fix: Waypoint.h:IsTypeAirfield()

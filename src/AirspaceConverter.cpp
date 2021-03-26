@@ -738,12 +738,12 @@ void AirspaceConverter::SetOpenAirCoodinatesInSeconds() {
 	OpenAir::SetCoordinateType(OpenAir::CoordinateType::DEG_MIN_SEC);
 }
 
-bool AirspaceConverter::VerifyAltitudeOnTerrainMap(const double& lat, const double& lon, float& alt, const bool& blankAltitude, const bool& altitudeParsed, const int& line) {
+bool AirspaceConverter::VerifyAltitudeOnTerrainMap(const double& lat, const double& lon, float& alt, const bool& blankAltitude, const bool& altitudeParsed, const int& line, const bool isSpike) {
 	double terrainAlt;
 	if (GetTerrainAltitudeMt(lat, lon, terrainAlt)) {
 		if (altitudeParsed) {
-			const double delta = fabs(alt - terrainAlt);
-			if (terrainAlt > 5 ? delta > 10 : delta > 15) { // Consider bigger threshold if delta > 5 m (maybe it was really intended AMSL)
+			const double delta = isSpike ? alt - terrainAlt : fabs(alt - terrainAlt); // Spike such as an antenna, tower, VOR, etc: consider higher theresold in this case
+			if (isSpike ? delta > 100 || delta < 0 : terrainAlt > 5 ? delta > 10 : delta > 15) { // Consider bigger threshold if delta > 5 m (maybe it was really intended AMSL)
 				LogWarning(boost::str(boost::format("on line %1d: detected altitude difference of: %2g m respect ground, using terrain altitude: %3g m") %line %delta %terrainAlt));
 				alt = (float)terrainAlt;
 			}
