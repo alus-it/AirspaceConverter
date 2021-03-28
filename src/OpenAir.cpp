@@ -363,6 +363,7 @@ bool OpenAir::ParseAN(const std::string & line, Airspace& airspace, const bool i
 }
 
 bool OpenAir::ParseAF(const std::string& line, Airspace& airspace, const bool isUTF8) {
+	if (airspace.GetType() == Airspace::UNDEFINED) return true;
 	if (line.size() < 4) return false;
 	std::string descr(line.substr(3));
 	try {

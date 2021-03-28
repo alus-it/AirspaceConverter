@@ -112,7 +112,7 @@ bool Altitude::operator!=(const Altitude& other) const {
 	return altFt != other.altFt || refIsMsl != other.refIsMsl || fl != other.fl;
 }
 
-const bool Airspace::CATEGORY_VISIBILITY[Airspace::UNDEFINED + 1] = {
+const bool Airspace::CATEGORY_VISIBILITY[Airspace::UNDEFINED] = {
 	false,	//CLASSA
 	false,	//CLASSB
 	false,	//CLASSC
@@ -162,11 +162,10 @@ const bool Airspace::CATEGORY_VISIBILITY[Airspace::UNDEFINED + 1] = {
 	false,	//MTA
 	false,	//TSA
 	false,	//TRA
-	false,	//UNKNOWN
-	false	//UNDEFINED
+	false	//UNKNOWN
 };
 
-const std::string Airspace::CATEGORY_NAMES[Airspace::UNDEFINED + 1] = {
+const std::string Airspace::CATEGORY_NAMES[Airspace::UNDEFINED] = {
 	"Class A",
 	"Class B",
 	"Class C",
@@ -216,11 +215,10 @@ const std::string Airspace::CATEGORY_NAMES[Airspace::UNDEFINED + 1] = {
 	"MTA",
 	"TSA",
 	"TRA",
-	"UNKNOWN",
-	"UNDEFINED"
+	"UNKNOWN"
 };
 
-const std::string Airspace::LONG_CATEGORY_NAMES[Airspace::UNDEFINED + 1] = {
+const std::string Airspace::LONG_CATEGORY_NAMES[Airspace::UNDEFINED] = {
 	"Airspace class A",
 	"Airspace class B",
 	"Airspace class C",
@@ -270,8 +268,7 @@ const std::string Airspace::LONG_CATEGORY_NAMES[Airspace::UNDEFINED + 1] = {
 	"Military Training Area",
 	"Temporary Segregated Airspace",
 	"Temporary Reserved Airspace",
-	"Unknown",
-	"Undefined"
+	"Unknown"
 };
 
 Airspace::Airspace(Type category)

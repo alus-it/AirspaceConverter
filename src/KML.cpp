@@ -25,7 +25,7 @@
 #include <boost/tokenizer.hpp>
 #include <cmath>
 
-const std::string KML::colors[Airspace::UNDEFINED + 1][2] = {
+const std::string KML::colors[Airspace::UNDEFINED][2] = {
 	{ "509900ff", "7f9900ff" }, //CLASSA
 	{ "50cc0000", "7fcc0000" }, //CLASSB
 	{ "50cc3399", "7fcc3399" }, //CLASSC
@@ -33,21 +33,21 @@ const std::string KML::colors[Airspace::UNDEFINED + 1][2] = {
 	{ "50339900", "7f339900" }, //CLASSE
 	{ "503399ff", "7f3399ff" }, //CLASSF
 	{ "50ff99ff", "7fff99ff" }, //CLASSG
-	{ "500000FF", "7F0000FF" }, //DANGER
-	{ "500000FF", "7F0000FF" }, //PROHIBITED
-	{ "50FF0080", "7FFF0080" }, //RESTRICTED
-	{ "40000000", "7fd4d4d4" }, //OTHER
+	{ "500000ff", "7F0000ff" }, //D
+	{ "500000ff", "7F0000ff" }, //P
+	{ "50FF0080", "7FFF0080" }, //R
 	{ "501947ff", "7f1947ff" }, //CTR
-	{ "50ffdd01", "7fffdd01" }, //TMA
 	{ "50000000", "7fd4d4d4" }, //TMZ
 	{ "50000000", "7fd4d4d4" }, //RMZ
-	{ "40000000", "7fd4d4d4" }, //FIR
-	{ "40000000", "7fd4d4d4" }, //UIR
-	{ "40000000", "7fd4d4d4" }, //OTH
 	{ "ff00aa55", "7f00e2e2" }, //GLIDING
 	{ "400000FF", "7fd4d4d4" }, //NOGLIDER
 	{ "403399ff", "7fd4d4d4" }, //WAVE
-	{ "500000FF", "7F0000FF" }, //NOTAM
+	{ "500000ff", "7F0000ff" }, //NOTAM
+	{ "40000000", "7fd4d4d4" }, //OTHER
+	{ "50ffdd01", "7fffdd01" }, //TMA
+	{ "40000000", "7fd4d4d4" }, //FIR
+	{ "40000000", "7fd4d4d4" }, //UIR
+	{ "40000000", "7fd4d4d4" }, //OTH
 	{ "40000000", "7fd4d4d4" }, //AWY
 	{ "40000000", "7fd4d4d4" }, //MATZ
 	{ "40000000", "7fd4d4d4" }, //MTMA
@@ -75,8 +75,7 @@ const std::string KML::colors[Airspace::UNDEFINED + 1][2] = {
 	{ "40000000", "7fd4d4d4" }, //MTA
 	{ "40000000", "7fd4d4d4" }, //TSA
 	{ "40000000", "7fd4d4d4" }, //TRA
-	{ "40000000", "7fd4d4d4" }, //UNKNOWN
-	{ "40000000", "7fd4d4d4" }  //UNDEFINED
+	{ "40000000", "7fd4d4d4" }  //UNKNOWN
 };
 
 const std::string KML::airfieldColors[][2] = {
@@ -176,7 +175,7 @@ void KML::WriteHeader(const bool airspacePresent, const bool waypointsPresent) {
 		<< "<Document>\n"
 		<< "<open>true</open>\n";
 		if (airspacePresent) {
-			for (int t = Airspace::CLASSA; t <= Airspace::UNDEFINED; t++) {
+			for (int t = Airspace::CLASSA; t < Airspace::UNDEFINED; t++) {
 				outputFile << "<Style id = \"Style" << Airspace::CategoryName((Airspace::Type)t) << "\">\n"
 					<< "<LineStyle>\n"
 					<< "<color>" << colors[t][0] << "</color>\n"
@@ -574,7 +573,7 @@ bool KML::Write(const std::string& filename) {
 				"<open>true</open>\n";
 
 		// For each airspace category
-		for (int t = Airspace::CLASSA; t <= Airspace::UNDEFINED; t++) {
+		for (int t = Airspace::CLASSA; t < Airspace::UNDEFINED; t++) {
 
 			// First verify if there are airspaces of that class
 			if (airspaces.count(t) == 0) continue;
@@ -869,37 +868,21 @@ bool KML::ReadKMZ(const std::string& filename) {
 
 bool KML::ProcessFolder(const boost::property_tree::ptree& folder, const int upperCategory) {
 	const std::string categoryName = folder.get<std::string>("name"); // Try to guess the category from the name of folder
-	int thisCategory = Airspace::Type::UNDEFINED;
+	Airspace::Type thisCategory = Airspace::Type::UNDEFINED;
 	const std::string::size_type first = categoryName.find('(');
 	if (first != std::string::npos) {
 		const std::string::size_type last = categoryName.find(')');
 		if (last != std::string::npos && first < last) {
 			const std::string shortCategory = categoryName.substr(first+1, last-first-1);
-			if (shortCategory.length() == 1) {
-				switch (shortCategory.at(0)) {
-				case 'A': thisCategory = Airspace::Type::CLASSA; break;
-				case 'B': thisCategory = Airspace::Type::CLASSB; break;
-				case 'C': thisCategory = Airspace::Type::CLASSC; break;
-				case 'D': thisCategory = (categoryName == "Danger areas (D)") ? Airspace::Type::D : Airspace::Type::CLASSD; break;
-				case 'E': thisCategory = Airspace::Type::CLASSE; break;
-				case 'F': thisCategory = Airspace::Type::CLASSF; break;
-				case 'G': thisCategory = Airspace::Type::CLASSG; break;
-				case 'P': thisCategory = Airspace::Type::P; break;
-				case 'R': thisCategory = Airspace::Type::R; break;					
-				default: break;
-				}
-			} else {
-				if (shortCategory == "TMA") thisCategory = Airspace::Type::TMA; //Terminal control areas
-				else if (shortCategory == "CTR") thisCategory = Airspace::Type::CTR; //Control zones
-				else if (shortCategory == "RMZ") thisCategory = Airspace::Type::RMZ; //Radio mandatory zones
-				else if (shortCategory == "TMZ") thisCategory = Airspace::Type::TMZ; //Transponder mandatory zones
-				else if (shortCategory == "TRA") thisCategory = Airspace::Type::TRA; //Temporary reserved airspaces
-				else if (shortCategory == "MTMA") thisCategory = Airspace::Type::MTMA; // Military terminal control areas
-				else if (shortCategory == "MCTR") thisCategory = Airspace::Type::CTR; // Military control zones
-				else if (shortCategory == "MATZ") thisCategory = Airspace::Type::MATZ; // Military aerodrome traffic zones
-				else if (shortCategory == "MTRA") thisCategory = Airspace::Type::MTRA; // Military temporary reserved areas
-				else if (shortCategory == "MTA") thisCategory = Airspace::Type::MTA;  // Military training areas
-				//else if (shortCategory == "CTA") thisCategory = Airspace::Type::UNDEFINED; //Control areas: will be converted to normal classes
+			bool found = false;
+			unsigned int cat = Airspace::Type::CLASSA;
+			do {
+				if (shortCategory == Airspace::CategoryName((Airspace::Type)cat)) found = true;
+				else cat++;
+			} while (cat < Airspace::Type::UNDEFINED && !found);
+			if (found) {
+				thisCategory = (Airspace::Type)cat;
+				if (thisCategory == Airspace::Type::CLASSD && categoryName == "Danger areas (D)") thisCategory = Airspace::Type::D;
 			}
 		}
 	}
@@ -908,7 +891,7 @@ bool KML::ProcessFolder(const boost::property_tree::ptree& folder, const int upp
 		else if (categoryName == "Hang gliding and para gliding areas") thisCategory = Airspace::Type::GLIDING;
 		else if (categoryName == "Parachute jumping areas") thisCategory = Airspace::Type::PARA;
 	}
-	if (thisCategory == Airspace::Type::UNDEFINED) thisCategory = upperCategory;
+	if (thisCategory == Airspace::Type::UNDEFINED) thisCategory = (Airspace::Type)upperCategory;
 	folderCategory = thisCategory;
 
 	// Visit the folder elements
@@ -1057,8 +1040,6 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 
 		if (isMultiGeometry || isPolygon) {
 			boost::property_tree::ptree schemaData = placemark.get_child("ExtendedData").get_child("SchemaData");
-
-			
 			std::string labelName, ident;
 			for (boost::property_tree::ptree::value_type const& simpleData : schemaData) {
 				if (simpleData.first != "SimpleData") continue;
@@ -1069,28 +1050,27 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 				else if (str == "NAM" || str == "name" || str == "Name") labelName = simpleData.second.data();
 				else if (str == "IDENT") ident = simpleData.second.data();
 				else if (str == "Category") {
-					if (simpleData.second.data() == "Class A") category = Airspace::Type::CLASSA;
-					else if (simpleData.second.data() == "Class B") category = Airspace::Type::CLASSB;
-					else if (simpleData.second.data() == "Class C") category = Airspace::Type::CLASSC;
-					else if (simpleData.second.data() == "Class D") category = Airspace::Type::CLASSD;
-					else if (simpleData.second.data() == "Class E") category = Airspace::Type::CLASSE;
-					else if (simpleData.second.data() == "Class F") category = Airspace::Type::CLASSF;
-					else if (simpleData.second.data() == "Class G") category = Airspace::Type::CLASSG;
-					else if (simpleData.second.data() == "Danger") category = Airspace::Type::D;
-					else if (simpleData.second.data() == "Prohibited") category = Airspace::Type::P;
-					else if (simpleData.second.data() == "Restricted") category = Airspace::Type::R;
-					else if (simpleData.second.data() == "CTR") category = Airspace::Type::CTR;
-					else if (simpleData.second.data() == "TMA") category = Airspace::Type::TMA;
-					else if (simpleData.second.data() == "TMZ") category = Airspace::Type::TMZ;
-					else if (simpleData.second.data() == "RMZ") category = Airspace::Type::RMZ;
-					else if (simpleData.second.data() == "FIR") category = Airspace::Type::FIR;
-					else if (simpleData.second.data() == "UIR") category = Airspace::Type::UIR;
-					else if (simpleData.second.data() == "OTH") category = Airspace::Type::OTH;
-					else if (simpleData.second.data() == "Gliding area") category = Airspace::Type::GLIDING;
-					else if (simpleData.second.data() == "No glider") category = Airspace::Type::NOGLIDER;
-					else if (simpleData.second.data() == "Wave window") category = Airspace::Type::WAVE;
-					else if (simpleData.second.data() == "Unknown") category = Airspace::Type::UNKNOWN;
-					else AirspaceConverter::LogError("Unable to parse airspace category in the label: " + simpleData.second.data());
+					unsigned int cat = Airspace::Type::CLASSA;
+					bool found = false;
+					do {
+						if (simpleData.second.data() == Airspace::LongCategoryName((Airspace::Type)cat)) found = true;
+						else cat++;
+					} while (cat < Airspace::Type::UNDEFINED && !found);
+					if (!found) {
+						cat = Airspace::Type::CLASSA;
+						 do {
+							if (simpleData.second.data() == Airspace::CategoryName((Airspace::Type)cat)) found = true;
+							else cat++;
+						 } while (cat < Airspace::Type::UNDEFINED && !found);
+					
+					}
+					if (found) category = (Airspace::Type)cat;
+					else {
+						if (simpleData.second.data() == "Danger") category = Airspace::Type::D;
+						else if (simpleData.second.data() == "Prohibited") category = Airspace::Type::P;
+						else if (simpleData.second.data() == "Restricted") category = Airspace::Type::R;
+						else AirspaceConverter::LogError("Unable to parse airspace category in the label: " + simpleData.second.data());
+					}				
 				}
 			}
 
@@ -1238,7 +1218,7 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 
 		if (pointsFound) {
 			// Check if the altitudes make sense
-			if (airspace.GetBaseAltitude() < airspace.GetTopAltitude()) {
+			if (airspace.GetType() != Airspace::Type::UNDEFINED && airspace.GetBaseAltitude() < airspace.GetTopAltitude()) {
 				airspaces.insert(std::pair<int, Airspace>(airspace.GetType(), std::move(airspace)));
 				return true;
 			} else AirspaceConverter::LogWarning("skipping Placemark with invalid altitudes: " + airspace.GetName());
