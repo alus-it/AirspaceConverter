@@ -213,12 +213,16 @@ void KML::WriteHeader(const bool airspacePresent, const bool waypointsPresent) {
 		}
 		if (waypointsPresent) {
 			for (int t = Waypoint::normal; t < Waypoint::numOfWaypointTypes; t++) {
-				outputFile << "<Style id = \"Style" << Waypoint::TypeName(t) << "\">\n"
-					<< "<IconStyle>\n"
-					<< "<Icon>\n"
-					<< "<href>icons/" << waypointIcons[t] <<"</href>\n"
-					<< "</Icon>\n"
-					<< "</IconStyle>\n";
+				outputFile << "<Style id = \"Style" << Waypoint::TypeName(t) << "\">\n";
+
+				// Put the icon only if there is the right icon PNG file availble
+				if (boost::filesystem::exists(iconsPath + waypointIcons[t])) {
+					outputFile << "<IconStyle>\n"
+						<< "<Icon>\n"
+						<< "<href>icons/" << waypointIcons[t] << "</href>\n"
+						<< "</Icon>\n"
+						<< "</IconStyle>\n";
+				}
 				if (Waypoint::IsTypeAirfield(t))
 					outputFile << "<LineStyle>\n"
 						<< "<color>4b" << airfieldColors[t-2] << "</color>\n"
@@ -712,7 +716,7 @@ bool KML::Write(const std::string& filename) {
 
 			// Check if we can get that PNG file
 			if (!boost::filesystem::exists(iconPath)) {
-				AirspaceConverter::LogError("Unable to find icon PNG file: " + iconPath);
+				AirspaceConverter::LogWarning("Skipping non existant icon PNG file: " + iconPath);
 				continue;
 			}
 
