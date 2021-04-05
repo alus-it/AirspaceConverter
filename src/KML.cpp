@@ -25,69 +25,67 @@
 #include <boost/tokenizer.hpp>
 #include <cmath>
 
-const std::string KML::colors[Airspace::UNDEFINED][2] = {
-	{ "509900ff", "7f9900ff" }, //CLASSA
-	{ "50cc0000", "7fcc0000" }, //CLASSB
-	{ "50cc3399", "7fcc3399" }, //CLASSC
-	{ "50ff9900", "7fff9900" }, //CLASSD
-	{ "50339900", "7f339900" }, //CLASSE
-	{ "503399ff", "7f3399ff" }, //CLASSF
-	{ "50ff99ff", "7fff99ff" }, //CLASSG
-	{ "500000ff", "7F0000ff" }, //D
-	{ "500000ff", "7F0000ff" }, //P
-	{ "50FF0080", "7FFF0080" }, //R
-	{ "501947ff", "7f1947ff" }, //CTR
-	{ "50000000", "7fd4d4d4" }, //TMZ
-	{ "50000000", "7fd4d4d4" }, //RMZ
-	{ "ff00aa55", "7f00e2e2" }, //GLIDING
-	{ "400000FF", "7fd4d4d4" }, //NOGLIDER
-	{ "403399ff", "7fd4d4d4" }, //WAVE
-	{ "500000ff", "7F0000ff" }, //NOTAM
-	{ "40000000", "7fd4d4d4" }, //OTHER
-	{ "50ffdd01", "7fffdd01" }, //TMA
-	{ "40000000", "7fd4d4d4" }, //FIR
-	{ "40000000", "7fd4d4d4" }, //UIR
-	{ "40000000", "7fd4d4d4" }, //OTH
-	{ "40000000", "7fd4d4d4" }, //AWY
-	{ "40000000", "7fd4d4d4" }, //MATZ
-	{ "40000000", "7fd4d4d4" }, //MTMA
-	{ "40000000", "7fd4d4d4" }, //MTRA
-	{ "40000000", "7fd4d4d4" }, //TFR
-	{ "40000000", "7fd4d4d4" }, //ADA
-	{ "40000000", "7fd4d4d4" }, //ADIZ
-	{ "40000000", "7fd4d4d4" }, //CTA
-	{ "40000000", "7fd4d4d4" }, //DFIR
-	{ "40000000", "7fd4d4d4" }, //TIZ
-	{ "40000000", "7fd4d4d4" }, //TIA
-	{ "40000000", "7fd4d4d4" }, //SRZ
-	{ "40000000", "7fd4d4d4" }, //ATZ
-	{ "40000000", "7fd4d4d4" }, //FISA
-	{ "40000000", "7fd4d4d4" }, //MBZ
-	{ "40000000", "7fd4d4d4" }, //ASR
-	{ "40000000", "7fd4d4d4" }, //COMP
-	{ "40000000", "7fd4d4d4" }, //TRZ
-	{ "40000000", "7fd4d4d4" }, //VFRR
-	{ "40000000", "7fd4d4d4" }, //RTZ
-	{ "40000000", "7fd4d4d4" }, //PARA
-	{ "40000000", "7fd4d4d4" }, //LFZ
-	{ "40000000", "7fd4d4d4" }, //CFZ
-	{ "40000000", "7fd4d4d4" }, //MOA
-	{ "40000000", "7fd4d4d4" }, //MTA
-	{ "40000000", "7fd4d4d4" }, //TSA
-	{ "40000000", "7fd4d4d4" }, //TRA
-	{ "40000000", "7fd4d4d4" }  //UNKNOWN
+const std::string KML::colors[Airspace::Type::UNDEFINED] = {
+	"9900ff", //CLASSA
+	"cc0000", //CLASSB
+	"cc3399", //CLASSC
+	"ff9900", //CLASSD
+	"339900", //CLASSE
+	"3399ff", //CLASSF
+	"ff99ff", //CLASSG
+	"0000ff", //D
+	"0000ff", //P
+	"ff0080", //R
+	"1947ff", //CTR
+	"d4d4d4", //TMZ
+	"d4d4d4", //RMZ
+	"00e2e2", //GLIDING
+	"d4d4d4", //NOGLIDER
+	"d4d4d4", //WAVE
+	"0000ff", //NOTAM
+	"d4d4d4", //OTHER
+	"ffdd01", //TMA
+	"d4d4d4", //FIR
+	"d4d4d4", //UIR
+	"d4d4d4", //OTH
+	"d4d4d4", //AWY
+	"d4d4d4", //MATZ
+	"d4d4d4", //MTMA
+	"d4d4d4", //MTRA
+	"d4d4d4", //TFR
+	"d4d4d4", //ADA
+	"d4d4d4", //ADIZ
+	"d4d4d4", //CTA
+	"d4d4d4", //DFIR
+	"d4d4d4", //TIZ
+	"d4d4d4", //TIA
+	"d4d4d4", //SRZ
+	"d4d4d4", //ATZ
+	"d4d4d4", //FISA
+	"d4d4d4", //MBZ
+	"d4d4d4", //ASR
+	"d4d4d4", //COMP
+	"d4d4d4", //TRZ
+	"d4d4d4", //VFRR
+	"d4d4d4", //RTZ
+	"d4d4d4", //PARA
+	"d4d4d4", //LFZ
+	"d4d4d4", //CFZ
+	"d4d4d4", //MOA
+	"d4d4d4", //MTA
+	"d4d4d4", //TSA
+	"d4d4d4", //TRA
+	"d4d4d4"  //UNKNOWN
 };
 
-const std::string KML::airfieldColors[][2] = {
-	{ "", "" }, //UNDEFINED
-	{ "", "" }, //Normal
-	{ "4b14F064", "3214F064" }, //AirfieldGrass
-	{ "4b143C64", "37143C64" }, //Outlanding
-	{ "4bFAFAFA", "37FAFAFA" }, //GliderSite
-	{ "4b6E6E6E", "376E6E6E" }, //AirfieldSolid
+const std::string KML::airfieldColors[] = {
+	"14f064",	//AirfieldGrass
+	"143c64",	//Outlanding
+	"fafafa",	//GliderSite
+	"6e6e6e",	//AirfieldSolid
 };
 
-const std::string KML::waypointIcons[] = {
+const std::string KML::waypointIcons[Waypoint::WaypointType::numOfWaypointTypes] = {
 	"undefined.png", //UNDEFINED
 	"normal.png", //Normal
 	"airfieldgrass.png", //AirfieldGrass
@@ -178,11 +176,11 @@ void KML::WriteHeader(const bool airspacePresent, const bool waypointsPresent) {
 			for (int t = Airspace::CLASSA; t < Airspace::UNDEFINED; t++) {
 				outputFile << "<Style id = \"Style" << Airspace::CategoryName((Airspace::Type)t) << "\">\n"
 					<< "<LineStyle>\n"
-					<< "<color>" << colors[t][0] << "</color>\n"
+					<< "<color>50" << colors[t] << "</color>\n"
 					<< "<width>1.5</width>\n"
 					<< "</LineStyle>\n"
 					<< "<PolyStyle>\n"
-					<< "<color>" << colors[t][1] << "</color>\n"
+					<< "<color>55" << colors[t] << "</color>\n"
 					<< "</PolyStyle>\n"
 					<< "</Style>\n";
 			}
@@ -215,19 +213,19 @@ void KML::WriteHeader(const bool airspacePresent, const bool waypointsPresent) {
 		}
 		if (waypointsPresent) {
 			for (int t = Waypoint::normal; t < Waypoint::numOfWaypointTypes; t++) {
-				outputFile << "<Style id = \"Style" << Waypoint::TypeName((Waypoint::WaypointType)t) << "\">\n"
+				outputFile << "<Style id = \"Style" << Waypoint::TypeName(t) << "\">\n"
 					<< "<IconStyle>\n"
 					<< "<Icon>\n"
 					<< "<href>icons/" << waypointIcons[t] <<"</href>\n"
 					<< "</Icon>\n"
 					<< "</IconStyle>\n";
-				if (Waypoint::IsTypeAirfield((Waypoint::WaypointType)t))
+				if (Waypoint::IsTypeAirfield(t))
 					outputFile << "<LineStyle>\n"
-						<< "<color>" << airfieldColors[t][0] << "</color>\n"
+						<< "<color>4b" << airfieldColors[t-2] << "</color>\n"
 						<< "<width>1.5</width>\n"
 						<< "</LineStyle>\n"
 						<< "<PolyStyle>\n"
-						<< "<color>" << airfieldColors[t][1] << "</color>\n"
+						<< "<color>37" << airfieldColors[t-2] << "</color>\n"
 						<< "</PolyStyle>\n";
 				outputFile << "</Style>\n";
 			}

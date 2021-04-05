@@ -49,8 +49,8 @@ private:
 	static bool ProcessCoordinates(const boost::property_tree::ptree& coordinates, Airspace& airspace, double& avgAltitude);
 	static const std::string DetectIconsPath();
 
-	static const std::string colors[][2];
-	static const std::string airfieldColors[][2];
+	static const std::string colors[];
+	static const std::string airfieldColors[];
 	static const std::string waypointIcons[];
 	static const std::string iconsPath;
 	std::multimap<int, Airspace>& airspaces;

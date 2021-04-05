@@ -44,6 +44,7 @@ public:
 	virtual ~Waypoint() {}
 
 	inline static bool IsTypeAirfield(const Waypoint::WaypointType& kind) { return kind >= airfieldGrass && kind <= airfieldSolid; }
+	inline static bool IsTypeAirfield(const int& kind) { return kind >= airfieldGrass && kind <= airfieldSolid; }
 
 	inline const std::string& GetName() const { return name; }
 	inline const std::string& GetCode() const { return code; }
@@ -61,6 +62,7 @@ public:
 	inline int GetOtherFrequency() const { return otherFreq; }
 
 	inline static const std::string& TypeName(const WaypointType& type) { return TYPE_NAMES[type]; }
+	inline static const std::string& TypeName(const int& type) { return TYPE_NAMES[type]; }
 
 private:
 	Geometry::LatLon pos;
