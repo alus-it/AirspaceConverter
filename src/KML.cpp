@@ -33,48 +33,48 @@ const std::string KML::colors[Airspace::Type::UNDEFINED] = {
 	"339900", //CLASSE
 	"3399ff", //CLASSF
 	"ff99ff", //CLASSG
-	"0000ff", //D
+	"f42e0e", //D
 	"0000ff", //P
 	"ff0080", //R
 	"1947ff", //CTR
-	"d4d4d4", //TMZ
-	"d4d4d4", //RMZ
+	"f8d1ab", //TMZ
+	"857037", //RMZ
 	"00e2e2", //GLIDING
 	"d4d4d4", //NOGLIDER
-	"d4d4d4", //WAVE
-	"0000ff", //NOTAM
+	"a6789f", //WAVE
+	"ebdf1a", //NOTAM
 	"d4d4d4", //OTHER
 	"ffdd01", //TMA
-	"d4d4d4", //FIR
-	"d4d4d4", //UIR
-	"d4d4d4", //OTH
-	"d4d4d4", //AWY
-	"d4d4d4", //MATZ
-	"d4d4d4", //MTMA
-	"d4d4d4", //MTRA
-	"d4d4d4", //TFR
-	"d4d4d4", //ADA
-	"d4d4d4", //ADIZ
-	"d4d4d4", //CTA
-	"d4d4d4", //DFIR
-	"d4d4d4", //TIZ
-	"d4d4d4", //TIA
-	"d4d4d4", //SRZ
-	"d4d4d4", //ATZ
-	"d4d4d4", //FISA
-	"d4d4d4", //MBZ
-	"d4d4d4", //ASR
-	"d4d4d4", //COMP
-	"d4d4d4", //TRZ
-	"d4d4d4", //VFRR
-	"d4d4d4", //RTZ
-	"d4d4d4", //PARA
-	"d4d4d4", //LFZ
-	"d4d4d4", //CFZ
-	"d4d4d4", //MOA
-	"d4d4d4", //MTA
-	"d4d4d4", //TSA
-	"d4d4d4", //TRA
+	"82f2d6", //FIR
+	"13a8b9", //UIR
+	"ebbd87", //OTH
+	"ef1679", //AWY
+	"107b0d", //MATZ
+	"5de959", //MTMA
+	"e9541c", //MTRA
+	"c38711", //TFR
+	"dacb0e", //ADA
+	"fc7c0b", //ADIZ
+	"0b48fc", //CTA
+	"0bb2fc", //DFIR
+	"03abdb", //TIZ
+	"03dbc6", //TIA
+	"bc75f4", //SRZ
+	"2f30df", //ATZ
+	"5bb5db", //FISA
+	"ba715e", //MBZ
+	"f1b51b", //ASR
+	"caf11b", //COMP
+	"92775e", //TRZ
+	"ac60e5", //VFRR
+	"844857", //RTZ
+	"ef3f2b", //PARA
+	"cd2175", //LFZ
+	"bf91d7", //CFZ
+	"10861e", //MOA
+	"64974f", //MTA
+	"7248e2", //TSA
+	"8c64ba", //TRA
 	"d4d4d4"  //UNKNOWN
 };
 
