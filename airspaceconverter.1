@@ -25,6 +25,7 @@ Can read airspace and waypoint files in the following formats:
     - openAIP
     - KML/KMZ
     - SeeYou
+    - LittleNavMap
 .PP
 And the output can be done in the following formats:
     - KMZ
@@ -78,7 +79,7 @@ Additional input airspace files must be specified repeating the option \-i in fr
 OpenAir input files are expected to be encoded in ANSI but if encoded in UTF-8 with BOM they will be also read properly.
 .TP
 .BR \-w " " \fIwaypointFile\fR
-Multiple, input waypoint file(s) can be SeeYou (.cup) or openAIP (.aip).
+Multiple, input waypoint file(s) can be SeeYou (.cup), openAIP (.aip) or LittleNavMap (.csv).
 At least one input airspace or waypoint file must be present.
 Additional input waypoint files must be specified repeating the option \-w in front of each of them.
 The waypoints will be used only if converting to KMZ or to SeeYou.

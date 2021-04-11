@@ -69,7 +69,7 @@ Possible options:
   - **-q**: optional, specify the QNH in hPa used to calculate height of flight levels  
   - **-a**: optional, specify a default terrain altitude in meters to calculate AGL heights of points not covered by loaded terrain map(s)  
   - **-i**: multiple, input file(s) can be _OpenAir_ (**.txt**), _openAIP_ (**.aip**), _Google Earth_ **.kmz**, **.kml**)  
-  - **-w**: multiple, input waypoint file(s) can be _SeeYou_ (**.cup**), _openAIP_ (**.aip**) or **.csv** (_LittleNavMap_)  
+  - **-w**: multiple, input waypoint file(s) can be _SeeYou_ (**.cup**), _openAIP_ (**.aip**) or _LittleNavMap_ (**.csv**)  
   - **-m**: optional, multiple, terrain map file(s) (**.dem**) used to lookup terrain heights  
   - **-l**: optional, set filter limits in latitude and longitude for the output, followed by the 4 limit values: northLat,southLat,westLon,eastLon where the limits are comma separated, expressed in degrees, without spaces, negative for west longitudes and south latitudes  
   - **-o**: optional, output file **.kmz** (_Google Earth_), **.txt** (_OpenAir_), **.cup** (_SeeYou_), **.csv** (_LittleNavMap_), **.img** (_Garmin_) or **.mp** (_Polish_). If not specified will be used the name of first input file as **KMZ**  
