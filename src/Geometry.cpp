@@ -5,7 +5,7 @@
 //               Valerio Messina <efa@iol.it>
 // Repository  : https://github.com/alus-it/AirspaceConverter.git
 // Web         : https://www.alus.it/AirspaceConverter
-// Copyright   : (C) 2016-2021 Alberto Realis-Luc
+// Copyright   : (C) 2016-2022 Alberto Realis-Luc
 // License     : GNU GPL v3
 //
 // This source file is part of AirspaceConverter project
