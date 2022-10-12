@@ -352,7 +352,7 @@ bool SeeYou::Write(const std::string& fileName) {
 	file << "name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc\r\n";
 
 	// Go trough all waypoints
-	for (const std::pair<int,Waypoint*>& pair : waypoints) {
+	for (const std::pair<const int,Waypoint*>& pair : waypoints) {
 		assert(pair.second != nullptr);
 		const Waypoint& w(*pair.second);
 

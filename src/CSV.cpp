@@ -491,7 +491,7 @@ bool CSV::Write(const std::string& fileName) {
 	//file << "Type,Name,Ident,Lat,Lon,Elev,Decl,Label,Desc,Country,Range,ModificationTime,SourceFile\r\n";
 
 	// Go trough all waypoints
-	for (const std::pair<int,Waypoint*>& pair : waypoints) {
+	for (const std::pair<const int,Waypoint*>& pair : waypoints) {
 		assert(pair.second != nullptr);
 		const Waypoint& w(*pair.second);
 

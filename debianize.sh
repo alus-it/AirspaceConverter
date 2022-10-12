@@ -195,6 +195,17 @@ case $OSVER in
 		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER})"
 		MANT="Alberto Realis-Luc <admin@alus.it>"
 		;;
+	22.04)
+		echo "Packaging for Ubuntu 22.04 Jammy..."
+		DISTR=ubn
+		LIBCVER=2.35
+		ZIPLIB=libzip5
+		ZIPVER=1.5.1
+		BOOSTVER=1.74.0
+		QTVER=5.15.3
+		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER})"
+		MANT="Alberto Realis-Luc <admin@alus.it>"
+		;;
 	*)
 	echo "ERROR: This version of Debian, Ubuntu or Mint: ${OSVER} is not known by this script, please add it!"
 	exit 1

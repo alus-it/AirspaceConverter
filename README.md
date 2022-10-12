@@ -122,7 +122,8 @@ In order to compile this project the following libraries are required:
 Compiling and installing AirspaceConverter from sources on Linux
 ----------------------------------------------------------------
 First it is necessary to install the dependencies, on a _Debian_ based distribution it would be:  
-`sudo apt install libzip-dev libboost-filesystem-dev libboost-locale-dev libqt4-dev lsb-release`  
+`sudo apt install libzip-dev libboost-filesystem-dev libboost-locale-dev libqt5-private-dev lsb-release`  
+On older _Ubuntu_ or _Debian_ install `libqt4-dev` instead of `libqt5-private-dev`
 On _Fedora_:  
 `sudo dnf install libzip-devel boost-devel qt-devel lsb-release`  
 Then, to compile, from the root of this project: `./build.sh`  
