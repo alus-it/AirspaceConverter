@@ -10,16 +10,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AirspaceConverterMFC", "Air
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AirspaceConverterLib", "AirspaceConverterLib\AirspaceConverterLib.vcxproj", "{1412BB18-5649-411D-B0A2-0A32E6402939}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "AirspaceConverterSetup32", "AirspaceConverterSetup32\AirspaceConverterSetup32.vdproj", "{8E0CD3A0-7EE2-478D-A21E-4C19F3E911CA}"
-	ProjectSection(ProjectDependencies) = postProject
-		{1412BB18-5649-411D-B0A2-0A32E6402939} = {1412BB18-5649-411D-B0A2-0A32E6402939}
-		{AF75346B-F52C-41C5-B762-8A84487874F9} = {AF75346B-F52C-41C5-B762-8A84487874F9}
-		{39B99CB8-DFCA-45A2-8AB8-FAC2EA6EE35E} = {39B99CB8-DFCA-45A2-8AB8-FAC2EA6EE35E}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AirspaceConverter", "AirspaceConverter\AirspaceConverter.vcxproj", "{AF75346B-F52C-41C5-B762-8A84487874F9}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "AirspaceConverterSetup64", "AirspaceConverterSetup64\AirspaceConverterSetup64.vdproj", "{4861A012-9358-4EED-B132-5C005B18B53D}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "AirspaceConverterSetup", "AirspaceConverterSetup64\AirspaceConverterSetup64.vdproj", "{4861A012-9358-4EED-B132-5C005B18B53D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{1412BB18-5649-411D-B0A2-0A32E6402939} = {1412BB18-5649-411D-B0A2-0A32E6402939}
 		{AF75346B-F52C-41C5-B762-8A84487874F9} = {AF75346B-F52C-41C5-B762-8A84487874F9}
@@ -29,43 +22,23 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
 		Release|x64 = Release|x64
-		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{39B99CB8-DFCA-45A2-8AB8-FAC2EA6EE35E}.Debug|x64.ActiveCfg = Debug|x64
 		{39B99CB8-DFCA-45A2-8AB8-FAC2EA6EE35E}.Debug|x64.Build.0 = Debug|x64
-		{39B99CB8-DFCA-45A2-8AB8-FAC2EA6EE35E}.Debug|x86.ActiveCfg = Debug|Win32
-		{39B99CB8-DFCA-45A2-8AB8-FAC2EA6EE35E}.Debug|x86.Build.0 = Debug|Win32
 		{39B99CB8-DFCA-45A2-8AB8-FAC2EA6EE35E}.Release|x64.ActiveCfg = Release|x64
 		{39B99CB8-DFCA-45A2-8AB8-FAC2EA6EE35E}.Release|x64.Build.0 = Release|x64
-		{39B99CB8-DFCA-45A2-8AB8-FAC2EA6EE35E}.Release|x86.ActiveCfg = Release|Win32
-		{39B99CB8-DFCA-45A2-8AB8-FAC2EA6EE35E}.Release|x86.Build.0 = Release|Win32
 		{1412BB18-5649-411D-B0A2-0A32E6402939}.Debug|x64.ActiveCfg = Debug|x64
 		{1412BB18-5649-411D-B0A2-0A32E6402939}.Debug|x64.Build.0 = Debug|x64
-		{1412BB18-5649-411D-B0A2-0A32E6402939}.Debug|x86.ActiveCfg = Debug|Win32
-		{1412BB18-5649-411D-B0A2-0A32E6402939}.Debug|x86.Build.0 = Debug|Win32
 		{1412BB18-5649-411D-B0A2-0A32E6402939}.Release|x64.ActiveCfg = Release|x64
 		{1412BB18-5649-411D-B0A2-0A32E6402939}.Release|x64.Build.0 = Release|x64
-		{1412BB18-5649-411D-B0A2-0A32E6402939}.Release|x86.ActiveCfg = Release|Win32
-		{1412BB18-5649-411D-B0A2-0A32E6402939}.Release|x86.Build.0 = Release|Win32
-		{8E0CD3A0-7EE2-478D-A21E-4C19F3E911CA}.Debug|x64.ActiveCfg = Release
-		{8E0CD3A0-7EE2-478D-A21E-4C19F3E911CA}.Debug|x86.ActiveCfg = Release
-		{8E0CD3A0-7EE2-478D-A21E-4C19F3E911CA}.Release|x64.ActiveCfg = Release
-		{8E0CD3A0-7EE2-478D-A21E-4C19F3E911CA}.Release|x86.ActiveCfg = Release
 		{AF75346B-F52C-41C5-B762-8A84487874F9}.Debug|x64.ActiveCfg = Debug|x64
 		{AF75346B-F52C-41C5-B762-8A84487874F9}.Debug|x64.Build.0 = Debug|x64
-		{AF75346B-F52C-41C5-B762-8A84487874F9}.Debug|x86.ActiveCfg = Debug|Win32
-		{AF75346B-F52C-41C5-B762-8A84487874F9}.Debug|x86.Build.0 = Debug|Win32
 		{AF75346B-F52C-41C5-B762-8A84487874F9}.Release|x64.ActiveCfg = Release|x64
 		{AF75346B-F52C-41C5-B762-8A84487874F9}.Release|x64.Build.0 = Release|x64
-		{AF75346B-F52C-41C5-B762-8A84487874F9}.Release|x86.ActiveCfg = Release|Win32
-		{AF75346B-F52C-41C5-B762-8A84487874F9}.Release|x86.Build.0 = Release|Win32
 		{4861A012-9358-4EED-B132-5C005B18B53D}.Debug|x64.ActiveCfg = Release
-		{4861A012-9358-4EED-B132-5C005B18B53D}.Debug|x86.ActiveCfg = Release
 		{4861A012-9358-4EED-B132-5C005B18B53D}.Release|x64.ActiveCfg = Release
-		{4861A012-9358-4EED-B132-5C005B18B53D}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

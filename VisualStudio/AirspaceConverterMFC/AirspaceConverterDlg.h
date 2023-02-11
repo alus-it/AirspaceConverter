@@ -98,9 +98,6 @@ private:
 	unsigned long numAirspacesLoaded;
 	unsigned long numWaypointsLoaded;
 	int numRasterMapLoaded;
-#ifndef _WIN64
-	bool isWinXPorOlder;
-#endif
 	bool conversionDone;
 	std::chrono::high_resolution_clock::time_point startTime;
 };

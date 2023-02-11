@@ -96,9 +96,6 @@ CAirspaceConverterDlg::CAirspaceConverterDlg(CWnd* pParent /*=NULL*/)
 	, numWaypointsLoaded(0)
 	, numRasterMapLoaded(0)
 	, busy(false)
-#ifndef _WIN64
-	, isWinXPorOlder(false)
-#endif
 	, conversionDone(false) {
 }
 
@@ -200,20 +197,6 @@ BOOL CAirspaceConverterDlg::OnInitDialog() {
 	else LogWarning("cGPSmapper not found so the conversion to Garmin IMG is not possible.");
 
 	OutputTypeCombo.SetCurSel(AirspaceConverter::OutputType::KMZ_Format);
-
-	// Check if is running on Windows XP (v 5.2) or older. Only on the 32 bit version, on 64 bit we assume that we are using something newer than WinXP
-#ifndef _WIN64
-	OSVERSIONINFOEX osvi;
-	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
-	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-	if (GetVersionEx((OSVERSIONINFO*)&osvi) && osvi.dwMajorVersion * 10 + osvi.dwMinorVersion <= 52) isWinXPorOlder = true;
-	
-	// In case of Windows XP disable button that can't be used
-	if (isWinXPorOlder) {
-		OpenOutputFileBt.EnableWindow(FALSE);
-		OpenOutputFolderBt.EnableWindow(FALSE);
-	}
-#endif
 
 	// Initialize OpenAir coordinate format combo box
 	OpenAirCoordinateFormatCombo.InsertString(-1, _T("DD:MM.MMM"));
@@ -332,14 +315,8 @@ void CAirspaceConverterDlg::StartBusy() {
 	LoadAirspacesFolderBt.EnableWindow(FALSE);
 	loadWaypointsFolderBt.EnableWindow(FALSE);
 	LoadRasterMapsFolderBt.EnableWindow(FALSE);
-#ifndef _WIN64
-	if (!isWinXPorOlder) {
-#endif
-		OpenOutputFileBt.EnableWindow(FALSE);
-		OpenOutputFolderBt.EnableWindow(FALSE);
-#ifndef _WIN64
-	}
-#endif
+	OpenOutputFileBt.EnableWindow(FALSE);
+	OpenOutputFolderBt.EnableWindow(FALSE);
 	unloadAirspacesBt.EnableWindow(FALSE);
 	unloadWaypointsBt.EnableWindow(FALSE);
 	unloadRasterMapsBt.EnableWindow(FALSE);
@@ -434,14 +411,8 @@ void CAirspaceConverterDlg::EndBusy(const bool takeTime /* = false */) {
 	LoadAirspacesFolderBt.EnableWindow(!isWaypointFile);
 	loadWaypointsFolderBt.EnableWindow(isKmzFile || isWaypointFile);
 	LoadRasterMapsFolderBt.EnableWindow(isKmzFile || isWaypointFile);
-#ifndef _WIN64
-	if (!isWinXPorOlder) {
-#endif
-		OpenOutputFileBt.EnableWindow(conversionDone);
-		OpenOutputFolderBt.EnableWindow(conversionDone);
-#ifndef _WIN64
-	}
-#endif
+	OpenOutputFileBt.EnableWindow(conversionDone);
+	OpenOutputFolderBt.EnableWindow(conversionDone);
 	unloadAirspacesBt.EnableWindow(numAirspacesLoaded > 0 ? TRUE : FALSE);
 	unloadWaypointsBt.EnableWindow(numWaypointsLoaded > 0 ? TRUE : FALSE);
 	unloadRasterMapsBt.EnableWindow(numRasterMapLoaded > 0 ? TRUE : FALSE);
@@ -526,16 +497,11 @@ void CAirspaceConverterDlg::OnBnClickedInputFolderBt() {
 
 	// Ask for the airspaces input folder
 	std::string inputPath;
-#ifndef _WIN64
-	if (!isWinXPorOlder) {
-#endif
-		CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
-		dlgFolder.GetOFN().lpstrTitle = L"Select airspace folder";
-		if (dlgFolder.DoModal() == IDOK) inputPath = CT2CA(dlgFolder.GetFolderPath());
-		else return;
-#ifndef _WIN64
-	} else if (!BrowseForFolderDialog(inputPath)) return;
-#endif
+	CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
+	dlgFolder.GetOFN().lpstrTitle = L"Select airspace folder";
+	if (dlgFolder.DoModal() == IDOK) inputPath = CT2CA(dlgFolder.GetFolderPath());
+	else return;
+
 	assert(!inputPath.empty());
 
 	outputFile.clear();
@@ -562,17 +528,10 @@ void CAirspaceConverterDlg::OnBnClickedInputWaypointsFolderBt() {
 
 	// Ask for the waypoints input folder
 	std::string inputPath;
-#ifndef _WIN64
-	if (!isWinXPorOlder) {
-#endif
-		CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
-		dlgFolder.GetOFN().lpstrTitle = L"Select waypoints folder";
-		if (dlgFolder.DoModal() == IDOK) inputPath = CT2CA(dlgFolder.GetFolderPath());
-		else return;
-#ifndef _WIN64
-	}
-	else if (!BrowseForFolderDialog(inputPath)) return;
-#endif
+	CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
+	dlgFolder.GetOFN().lpstrTitle = L"Select waypoints folder";
+	if (dlgFolder.DoModal() == IDOK) inputPath = CT2CA(dlgFolder.GetFolderPath());
+	else return;
 	assert(!inputPath.empty());
 
 	boost::filesystem::path root(inputPath);
@@ -597,17 +556,10 @@ void CAirspaceConverterDlg::OnBnClickedLoadDemFolderBt() {
 
 	// Ask for the raster maps input folder
 	std::string inputPath;
-#ifndef _WIN64
-	if (!isWinXPorOlder) {
-#endif
-		CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
-		dlgFolder.GetOFN().lpstrTitle = L"Select terrain maps folder";
-		if (dlgFolder.DoModal() == IDOK) inputPath = CT2CA(dlgFolder.GetFolderPath());
-		else return;
-#ifndef _WIN64
-	}
-	else if (!BrowseForFolderDialog(inputPath)) return;
-#endif
+	CFolderPickerDialog dlgFolder(NULL, OFN_PATHMUSTEXIST, (CWnd*)this);
+	dlgFolder.GetOFN().lpstrTitle = L"Select terrain maps folder";
+	if (dlgFolder.DoModal() == IDOK) inputPath = CT2CA(dlgFolder.GetFolderPath());
+	else return;
 	assert(!inputPath.empty());
 
 	boost::filesystem::path root(inputPath);
