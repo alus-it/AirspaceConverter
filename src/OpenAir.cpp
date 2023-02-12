@@ -285,7 +285,7 @@ bool OpenAir::Read(const std::string& fileName) {
 				lineParsedOK = ParseDP(sLine, airspace, linecount);
 				break;
 			case 'A': // DA
-				lineParsedOK = ParseDA(sLine, airspace);
+				lineParsedOK = ParseDA(sLine, airspace, linecount);
 				break;
 			case 'B': // DB
 				lineParsedOK = ParseDB(sLine, airspace);
@@ -444,7 +444,11 @@ bool OpenAir::ParseV(const std::string & line, Airspace& airspace) {
 	return true;
 }
 
-bool OpenAir::ParseDA(const std::string& line, Airspace& airspace) {
+bool OpenAir::CheckAngleDeg(const double& angleDeg) {
+	return angleDeg >= 0 && angleDeg <= 360;
+}
+
+bool OpenAir::ParseDA(const std::string& line, Airspace& airspace, const int& linenumber) {
 	if (airspace.GetType() == Airspace::UNDEFINED) return true;
 	if (varPoint.Lat() == Geometry::LatLon::UNDEF_LAT || line.length() < 8) return false;
 	const std::string data(line.substr(3));
@@ -455,6 +459,7 @@ bool OpenAir::ParseDA(const std::string& line, Airspace& airspace) {
 		double radius = std::stod(*token);
 		double angleStart = std::stod(*(++token));
 		double angleEnd = std::stod(*(++token));
+		if (!CheckAngleDeg(angleStart) || !CheckAngleDeg(angleEnd)) AirspaceConverter::LogWarning(boost::str(boost::format("angle not in range 0-360 on line %1d: %2s") % linenumber % line));
 		airspace.AddGeometry(new Sector(varPoint, radius, angleStart, angleEnd, varRotationClockwise));
 	} catch (...) {
 		return false;
