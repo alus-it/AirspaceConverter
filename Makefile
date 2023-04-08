@@ -74,7 +74,8 @@ CPPFILES =                \
 	Polish.cpp            \
 	RasterMap.cpp         \
 	Waypoint.cpp          \
-	CSV.cpp
+	CSV.cpp               \
+	IGC.cpp
 
 # List of object files
 OBJS = $(patsubst %.cpp, $(BIN)%.o, $(CPPFILES))
