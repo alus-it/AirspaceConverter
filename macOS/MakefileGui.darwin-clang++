@@ -7,9 +7,10 @@
 #############################################################################
 # Note: use this Makefile to cross-compile from Linux to macOS
 # Note: need to be exported the env vars:
-#       $(OSX)    point to cross-compiler environment path
-#       $(OCROSS) cross-compiler tools prefix, eg. x86_64-apple-darwin18-
-# Note: $(OSX)/target/bin/$(OCROSS)tools must be in PATH
+#       $(OCROSS)  cross-compiler tools prefix, eg. x86_64-apple-darwin18-
+#       $(OSXROOT) point to cross-compiler root path, eg. /opt/osxcross
+#       $(OSXDEPS) point to $(OSXROOT)/target/macports
+# Note: $(OSXROOT)/target/bin   must be in PATH to find $(OCROSS)<tools>
 
 ####### Compiler, tools and options
 
@@ -17,14 +18,15 @@ CC            = $(OCROSS)clang
 CXX           = $(OCROSS)clang++
 DEFINES       = -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED
 CFLAGS        = -pipe -O2 -Wall -W $(DEFINES)
-CXXFLAGS      = -pipe -std=c++11 -O2 -Wall -W $(DEFINES)
-INCPATH       = -I$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/darwin-g++ -I../AirspaceConverterQt -I. -I../src -I$(OSX)/target/macports/pkgs/opt/local/include -I$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/include -I$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/include/QtCore -I$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/include/QtGui -I../AirspaceConverterQt
+CXXFLAGS      = -pipe -std=c++14 -O2 -Wall -W $(DEFINES)
+INCPATH       = -I$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/darwin-g++ -I../AirspaceConverterQt -I. -I../src -I$(OSXDEPS)/pkgs/opt/local/include -I$(OSXDEPS)/pkgs/opt/local/libexec/qt4/include -I$(OSXDEPS)/pkgs/opt/local/libexec/qt4/include/QtCore -I$(OSXDEPS)/pkgs/opt/local/libexec/qt4/include/QtGui -I$(OSXDEPS)/pkgs/opt/local/libexec/qt4/Library/Frameworks/QtGui.framework/Versions/4 -I../AirspaceConverterQt
 LINK          = $(OCROSS)clang++
 LFLAGS        = 
-LIBS          = $(SUBLIBS) -L../Release -lairspaceconverter -L$(OSX)/target/macports/pkgs/opt/local/lib -lboost_filesystem-mt -lboost_system-mt -lboost_locale-mt -lzip -L$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/lib -lQtGui -lQtCore
+LIBS          = $(SUBLIBS) -L../Release -lairspaceconverter -L$(OSXDEPS)/pkgs/opt/local/lib -lboost_filesystem-mt -lboost_system-mt -lboost_locale-mt -lzip -L$(OSXDEPS)/pkgs/opt/local/libexec/qt4/lib -lQtGui -lQtCore
 AR            = ar cq
 RANLIB        = ranlib -s
-QMAKE         = /usr/lib/x86_64-linux-gnu/qt4/bin/qmake
+#QMAKE         = /usr/lib/x86_64-linux-gnu/qt4/bin/qmake
+QMAKE         = /usr/bin/qmake
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 COPY          = cp -f
@@ -41,6 +43,9 @@ DEL_DIR       = rmdir
 MOVE          = mv -f
 CHK_DIR_EXISTS= test -d
 MKDIR         = mkdir -p
+MOC           = /usr/lib/qt5/bin/moc
+RCC           = /usr/lib/qt5/bin/rcc
+UIC           = /usr/lib/qt5/bin/uic
 
 ####### Output directory
 
@@ -63,32 +68,32 @@ OBJECTS       = main.o \
 		moc_aboutdialog.o \
 		moc_limitsdialog.o \
 		qrc_resources.o
-DIST          = $(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/common/unix.conf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/qconfig.pri \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/qt_functions.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/qt_config.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/exclusive_builds.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/default_pre.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/default_pre.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/release.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/default_post.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/default_post.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/objective_cxx.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/objective_c.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/split_sources.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/x86_64.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/shared.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/warn_on.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/qt.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/unix/thread.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/moc.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/rez.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/sdk.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/resources.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/uic.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/yacc.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/lex.prf \
-		$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/include_source_dir.prf \
+DIST          = $(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/common/unix.conf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/qconfig.pri \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/qt_functions.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/qt_config.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/exclusive_builds.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/default_pre.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/default_pre.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/release.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/default_post.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/default_post.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/objective_cxx.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/objective_c.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/split_sources.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/x86_64.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/shared.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/warn_on.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/qt.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/unix/thread.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/moc.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/rez.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/sdk.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/resources.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/uic.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/yacc.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/lex.prf \
+		$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/include_source_dir.prf \
 		../AirspaceConverterQt/AirspaceConverterQt.pro
 QMAKE_TARGET  = airspaceconverter-gui
 DESTDIR       = 
@@ -126,71 +131,85 @@ all: Makefile $(TARGET)
 $(TARGET): ui_mainwindow.h ui_aboutdialog.h ui_limitsdialog.h $(OBJECTS)
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 
-Makefile: ../AirspaceConverterQt/AirspaceConverterQt.pro $(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/darwin-g++/qmake.conf $(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/common/unix.conf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/qconfig.pri \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/qt_functions.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/qt_config.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/exclusive_builds.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/default_pre.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/default_pre.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/release.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/default_post.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/default_post.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/objective_cxx.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/objective_c.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/split_sources.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/x86_64.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/shared.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/warn_on.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/qt.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/unix/thread.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/moc.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/rez.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/sdk.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/resources.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/uic.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/yacc.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/lex.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/include_source_dir.prf \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/lib/libQtGui.prl \
-	$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/lib/libQtCore.prl
-	$(QMAKE) -spec $(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/darwin-g++ CONFIG+=x86_64 -o Makefile ../AirspaceConverterQt/AirspaceConverterQt.pro
+Makefile: ../AirspaceConverterQt/AirspaceConverterQt.pro \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/darwin-g++/qmake.conf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/common/unix.conf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/qconfig.pri \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/qt_functions.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/qt_config.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/exclusive_builds.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/default_pre.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/default_pre.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/release.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/default_post.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/default_post.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/objective_cxx.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/objective_c.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/split_sources.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/x86_64.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/shared.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/warn_on.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/qt.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/unix/thread.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/moc.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/rez.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/sdk.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/resources.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/uic.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/yacc.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/lex.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/include_source_dir.prf \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/lib/libQtGui.prl \
+	$(OSXDEPS)/pkgs/opt/local/libexec/qt4/lib/libQtCore.prl
+	$(QMAKE) -spec $(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/darwin-g++ CONFIG+=x86_64 -o Makefile ../AirspaceConverterQt/AirspaceConverterQt.pro
 
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/common/unix.conf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/qconfig.pri:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/qt_functions.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/qt_config.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/exclusive_builds.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/default_pre.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/default_pre.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/release.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/default_post.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/default_post.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/objective_cxx.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/objective_c.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/split_sources.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/x86_64.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/shared.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/warn_on.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/qt.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/unix/thread.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/moc.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/rez.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/sdk.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/resources.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/uic.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/yacc.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/lex.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/features/include_source_dir.prf:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/lib/libQtGui.prl:
-$(OSX)/target/macports/pkgs/opt/local/libexec/qt4/lib/libQtCore.prl:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/common/unix.conf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/qconfig.pri:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/qt_functions.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/qt_config.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/exclusive_builds.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/default_pre.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/default_pre.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/release.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/default_post.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/default_post.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/objective_cxx.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/objective_c.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/split_sources.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/x86_64.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/shared.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/warn_on.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/qt.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/unix/thread.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/moc.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/rez.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/mac/sdk.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/resources.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/uic.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/yacc.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/lex.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/features/include_source_dir.prf:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/lib/libQtGui.prl:
+$(OSXDEPS)/pkgs/opt/local/libexec/qt4/lib/libQtCore.prl:
 
 qmake: FORCE
-	@$(QMAKE) -spec $(OSX)/target/macports/pkgs/opt/local/libexec/qt4/share/mkspecs/darwin-g++ CONFIG+=x86_64 -o Makefile ../AirspaceConverterQt/AirspaceConverterQt.pro
+	@$(QMAKE) -spec $(OSXDEPS)/pkgs/opt/local/libexec/qt4/share/mkspecs/darwin-g++ CONFIG+=x86_64 -o Makefile ../AirspaceConverterQt/AirspaceConverterQt.pro
 
 dist: 
 	@$(CHK_DIR_EXISTS) .tmp/airspaceconverter-gui1.0.0 || $(MKDIR) .tmp/airspaceconverter-gui1.0.0 
-	$(COPY_FILE) --parents $(SOURCES) $(DIST) .tmp/airspaceconverter-gui1.0.0/ && $(COPY_FILE) --parents ../AirspaceConverterQt/mainwindow.h ../AirspaceConverterQt/aboutdialog.h ../AirspaceConverterQt/limitsdialog.h .tmp/airspaceconverter-gui1.0.0/ && $(COPY_FILE) --parents ../AirspaceConverterQt/resources.qrc .tmp/airspaceconverter-gui1.0.0/ && $(COPY_FILE) --parents ../AirspaceConverterQt/main.cpp ../AirspaceConverterQt/mainwindow.cpp ../AirspaceConverterQt/aboutdialog.cpp ../AirspaceConverterQt/limitsdialog.cpp .tmp/airspaceconverter-gui1.0.0/ && $(COPY_FILE) --parents ../AirspaceConverterQt/mainwindow.ui ../AirspaceConverterQt/aboutdialog.ui ../AirspaceConverterQt/limitsdialog.ui .tmp/airspaceconverter-gui1.0.0/ && (cd `dirname .tmp/airspaceconverter-gui1.0.0` && $(TAR) airspaceconverter-gui1.0.0.tar airspaceconverter-gui1.0.0 && $(COMPRESS) airspaceconverter-gui1.0.0.tar) && $(MOVE) `dirname .tmp/airspaceconverter-gui1.0.0`/airspaceconverter-gui1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/airspaceconverter-gui1.0.0
+	$(COPY_FILE) --parents $(SOURCES) $(DIST) .tmp/airspaceconverter-gui1.0.0/ && \
+	$(COPY_FILE) --parents ../AirspaceConverterQt/mainwindow.h ../AirspaceConverterQt/aboutdialog.h \
+	../AirspaceConverterQt/limitsdialog.h .tmp/airspaceconverter-gui1.0.0/ && \
+	$(COPY_FILE) --parents ../AirspaceConverterQt/resources.qrc .tmp/airspaceconverter-gui1.0.0/ && \
+	$(COPY_FILE) --parents ../AirspaceConverterQt/main.cpp ../AirspaceConverterQt/mainwindow.cpp \
+	../AirspaceConverterQt/aboutdialog.cpp ../AirspaceConverterQt/limitsdialog.cpp .tmp/airspaceconverter-gui1.0.0/ && \
+	$(COPY_FILE) --parents ../AirspaceConverterQt/mainwindow.ui ../AirspaceConverterQt/aboutdialog.ui \
+	../AirspaceConverterQt/limitsdialog.ui .tmp/airspaceconverter-gui1.0.0/ && \
+	(cd `dirname .tmp/airspaceconverter-gui1.0.0` && \
+	$(TAR) airspaceconverter-gui1.0.0.tar airspaceconverter-gui1.0.0 && \
+	$(COMPRESS) airspaceconverter-gui1.0.0.tar) && \
+	$(MOVE) `dirname .tmp/airspaceconverter-gui1.0.0`/airspaceconverter-gui1.0.0.tar.gz . && \
+	$(DEL_FILE) -r .tmp/airspaceconverter-gui1.0.0
 
 clean:compiler_clean 
 	-$(DEL_FILE) $(OBJECTS)
@@ -218,20 +237,20 @@ compiler_moc_header_clean:
 moc_mainwindow.cpp: ../AirspaceConverterQt/aboutdialog.h \
 	../AirspaceConverterQt/limitsdialog.h \
 	../AirspaceConverterQt/mainwindow.h
-	/usr/lib/x86_64-linux-gnu/qt4/bin/moc $(DEFINES) $(INCPATH) ../AirspaceConverterQt/mainwindow.h -o moc_mainwindow.cpp
+	$(MOC) $(DEFINES) $(INCPATH) ../AirspaceConverterQt/mainwindow.h -o moc_mainwindow.cpp
 
 moc_aboutdialog.cpp: ../AirspaceConverterQt/aboutdialog.h
-	/usr/lib/x86_64-linux-gnu/qt4/bin/moc $(DEFINES) $(INCPATH) ../AirspaceConverterQt/aboutdialog.h -o moc_aboutdialog.cpp
+	$(MOC) $(DEFINES) $(INCPATH) ../AirspaceConverterQt/aboutdialog.h -o moc_aboutdialog.cpp
 
 moc_limitsdialog.cpp: ../AirspaceConverterQt/limitsdialog.h
-	/usr/lib/x86_64-linux-gnu/qt4/bin/moc $(DEFINES) $(INCPATH) ../AirspaceConverterQt/limitsdialog.h -o moc_limitsdialog.cpp
+	$(MOC) $(DEFINES) $(INCPATH) ../AirspaceConverterQt/limitsdialog.h -o moc_limitsdialog.cpp
 
 compiler_rcc_make_all: qrc_resources.cpp
 compiler_rcc_clean:
 	-$(DEL_FILE) qrc_resources.cpp
 qrc_resources.cpp: ../AirspaceConverterQt/resources.qrc \
 	../AirspaceConverterQt/airspaceconverter128.xpm
-	/usr/lib/x86_64-linux-gnu/qt4/bin/rcc -name resources ../AirspaceConverterQt/resources.qrc -o qrc_resources.cpp
+	$(RCC) -name resources ../AirspaceConverterQt/resources.qrc -o qrc_resources.cpp
 
 compiler_image_collection_make_all: qmake_image_collection.cpp
 compiler_image_collection_clean:
@@ -244,13 +263,13 @@ compiler_uic_make_all: ui_mainwindow.h ui_aboutdialog.h ui_limitsdialog.h
 compiler_uic_clean:
 	-$(DEL_FILE) ui_mainwindow.h ui_aboutdialog.h ui_limitsdialog.h
 ui_mainwindow.h: ../AirspaceConverterQt/mainwindow.ui
-	/usr/lib/x86_64-linux-gnu/qt4/bin/uic ../AirspaceConverterQt/mainwindow.ui -o ui_mainwindow.h
+	$(UIC) ../AirspaceConverterQt/mainwindow.ui -o ui_mainwindow.h
 
 ui_aboutdialog.h: ../AirspaceConverterQt/aboutdialog.ui
-	/usr/lib/x86_64-linux-gnu/qt4/bin/uic ../AirspaceConverterQt/aboutdialog.ui -o ui_aboutdialog.h
+	$(UIC) ../AirspaceConverterQt/aboutdialog.ui -o ui_aboutdialog.h
 
 ui_limitsdialog.h: ../AirspaceConverterQt/limitsdialog.ui
-	/usr/lib/x86_64-linux-gnu/qt4/bin/uic ../AirspaceConverterQt/limitsdialog.ui -o ui_limitsdialog.h
+	$(UIC) ../AirspaceConverterQt/limitsdialog.ui -o ui_limitsdialog.h
 
 compiler_yacc_decl_make_all:
 compiler_yacc_decl_clean:

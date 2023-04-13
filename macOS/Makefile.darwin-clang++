@@ -4,16 +4,17 @@
 # Authors     : Alberto Realis-Luc <alberto.realisluc@gmail.com>
 #               Valerio Messina <efa@iol.it>
 # Web         : https://www.alus.it/AirspaceConverter
-# Copyright   : (C) 2016-2020 Alberto Realis-Luc
+# Copyright   : (C) 2016-2023 Alberto Realis-Luc
 # License     : GNU GPL v3
 #
 # This source file is part of AirspaceConverter project
 #============================================================================
 # Note: use this Makefile to cross-compile from Linux to macOS
 # Note: need to be exported the env vars:
-#       $(OSX)    point to cross-compiler environment path
-#       $(OCROSS) cross-compiler tools prefix, eg. x86_64-apple-darwin18-
-# Note: $(OSX)/target/bin/$(OCROSS)tools must be in PATH
+#       $(OCROSS)  cross-compiler tools prefix, eg. x86_64-apple-darwin18-
+#       $(OSXROOT) point to cross-compiler root path, eg. /opt/osxcross
+#       $(OSXDEPS) point to $(OSXROOT)/target/macports
+# Note: $(OSXROOT)/target/bin   must be in PATH to find $(OCROSS)<tools>
 #
 CC=$(OCROSS)clang    # CC=o64-clang
 CXX=$(OCROSS)clang++ # CXX=o64-clang++
@@ -21,10 +22,10 @@ LD=$(OCROSS)clang++
 AR=$(OCROSS)ar
 PKG-CONFIG=$(OCROSS)pkg-config
 STRIP=$(OCROSS)strip
-CFLAGS = -I$(OSX)/target/macports/pkgs/opt/local/include
+CFLAGS = -I$(OSXDEPS)/pkgs/opt/local/include
 
 # Compiler options
-CPPFLAGS = -std=c++11 -stdlib=libc++ -Wall -Werror -fmessage-length=0 $(CFLAGS)
+CPPFLAGS = -std=c++14 -stdlib=libc++ -Wall -fmessage-length=0 $(CFLAGS)
 
 # Product name
 APPNAME = airspaceconverter
@@ -33,11 +34,11 @@ APPNAME = airspaceconverter
 PLATFORM=$(shell uname -s)
 
 # Linker and strip options
-LFLAGS = -L$(OSX)/target/macports/pkgs/opt/local/lib -lzip -lboost_system-mt -lboost_filesystem-mt '-Wl,-rpath,$$ORIGIN'
+LFLAGS = -L$(OSXDEPS)/pkgs/opt/local/lib -lzip -lboost_system-mt -lboost_filesystem-mt '-Wl,-rpath,$$ORIGIN'
 STRIPFLAGS = -S
 
 ifeq ($(PLATFORM),Linux)
-	LIB = $(OSX)/target/macports/pkgs/opt/local/lib
+	LIB = $(OSXDEPS)/pkgs/opt/local/lib
 	LIBFILE = lib$(APPNAME).dylib
 	LFLAGS += -lboost_locale-mt
 	DYNLIBFLAGS = $(LFLAGS) -Wl,-install_name,$(LIBFILE)
