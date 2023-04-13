@@ -1,19 +1,25 @@
 #!/bin/bash
-# crossBuild.sh V0.01.00 2021/03/03 Copyright © 2021 Valerio Messina
+# crossBuild.sh V0.02.00 2023/04/13 Copyright © 2021-2023 Valerio Messina
 # License : GNU GPL v3
 # cross-build AirspaceConverter from Linux to macOS
 # Note: For the thing to work it is necessary to install 'osxcross'
 # and need to be exported the env vars:
-#       ${OSX}    point to cross-compiler environment path
-#       ${OCROSS} cross-compiler tools prefix, eg. x86_64-apple-darwin18-
-#       PATH=${OSX}/target/bin/${OCROSS}tools:$PATH
+#       $(OCROSS)  cross-compiler tools prefix, eg. x86_64-apple-darwin18-
+#       $(OSXROOT) point to cross-compiler root path, eg. /opt/osxcross
+#       $(OSXDEPS) point to $(OSXROOT)/target/macports
+# Note: $(OSXROOT)/target/bin   must be in PATH to find $(OCROSS)<tools>
 #
-echo "crossBuild.sh V0.01.00 2021/03/03 Copyright © 2021 Valerio Messina"
+echo "crossBuild.sh V0.02.00 2023/04/13 Copyright © 2021-2023 Valerio Messina"
 cd ..
+mkdir -p buildQt
 cp macOS/Makefile.darwin-clang++ .
 cp macOS/MakefileGui.darwin-clang++ buildQt
+echo "CrossBuilding CLI and LIB ..."
 make -f Makefile.darwin-clang++
+echo ""
 cd buildQt
+cp -a MakefileGui.darwin-clang++ Makefile
+echo "CrossBuilding GUI ..."
 make -f MakefileGui.darwin-clang++
 cp airspaceconverter-gui ../Release
 

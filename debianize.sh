@@ -151,6 +151,17 @@ case $OSVER in
 		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER}), libgl1-mesa-glx (>= 18.3.6)"
 		MANT="Valerio Messina <efa@iol.it>"
 		;;
+   11)
+      echo "Packaging for Debian 11 Bullseye..."
+      DISTR=deb
+      LIBCVER=2.31
+      ZIPLIB=libzip4
+      ZIPVER=1.7.3
+      BOOSTVER=1.74.0
+      QTVER=5.15.2
+      QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER}), libgl1-mesa-glx (>= 18.3.6)"
+      MANT="Valerio Messina <efa@iol.it>"
+      ;;
 	4)
 		echo "Packaging for LMDE4 (Debian 10 Buster)..."
 		DISTR=lmde
@@ -159,6 +170,17 @@ case $OSVER in
 		ZIPVER=1.5.1
 		BOOSTVER=1.67.0
 		QTVER=5.11.3
+		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER}), libgl1-mesa-glx (>= 18.3.6)"
+		MANT="Valerio Messina <efa@iol.it>"
+		;;
+	5)
+		echo "Packaging for LMDE5 (Debian 11 Bullseye)..."
+		DISTR=lmde
+		LIBCVER=2.31
+		ZIPLIB=libzip4
+		ZIPVER=1.7.3
+		BOOSTVER=1.74.0
+		QTVER=5.15.2
 		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER}), libgl1-mesa-glx (>= 18.3.6)"
 		MANT="Valerio Messina <efa@iol.it>"
 		;;
