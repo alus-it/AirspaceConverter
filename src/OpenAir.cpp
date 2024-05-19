@@ -213,7 +213,7 @@ bool OpenAir::Read(const std::string& fileName) {
 
 	int linecount = 0;
 	std::string sLine;
-	bool allParsedOK = true, isCRLF = false, CRLFwarningGiven = false;
+	bool allParsedOK = true, needToDetectCRLF = true, initialCRLF = false, isCRLF = false, lineEndindingConsistent = true;
 	Airspace airspace;
 	while (!input.eof() && input.good()) {
 
@@ -221,12 +221,18 @@ bool OpenAir::Read(const std::string& fileName) {
 		AirspaceConverter::SafeGetline(input, sLine, isCRLF);
 		++linecount;
 
+		// Verify line endig at first line
+		if (needToDetectCRLF) {
+			initialCRLF = isCRLF;
+			needToDetectCRLF = false;
+		}
+
 		// Verify line ending
-		if (!CRLFwarningGiven && !isCRLF) {
-			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: not valid Windows style end of line (expected CR LF).") % linecount));
+		if (lineEndindingConsistent && isCRLF != initialCRLF) {
+			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: not consistent line ending style, file started with: %s.") % linecount %(initialCRLF ? "CR LF" : "LF")));
 
 			// OpenAir files may contain thousands of lines we don't want to print this warning all the time
-			CRLFwarningGiven = true;
+			lineEndindingConsistent = false;
 		}
 		
 		// Directly skip empty lines
@@ -589,11 +595,11 @@ bool OpenAir::Write(const std::string& fileName) {
 		if (!WriteCategory(a)) continue;
 
 		// Write the name
-		file << "AN " << boost::locale::conv::between(a.GetName(),"ISO8859-1","utf-8") << "\r\n";
+		file << "AN " << boost::locale::conv::between(a.GetName(),"ISO8859-1","utf-8") << "\n";
 		
 		// Write base and ceiling altitudes
-		file << "AL " << a.GetBaseAltitude().ToString() << "\r\n";
-		file << "AH " << a.GetTopAltitude().ToString() << "\r\n";
+		file << "AL " << a.GetBaseAltitude().ToString() << "\n";
+		file << "AH " << a.GetTopAltitude().ToString() << "\n";
 
 		// Write frequencies
 		if (a.GetNumberOfRadioFrequencies() > 0) {
@@ -602,13 +608,13 @@ bool OpenAir::Write(const std::string& fileName) {
 				const std::pair<int, std::string>& f = a.GetRadioFrequencyAt(i);
 				file << "AF " << AirspaceConverter::FrequencyMHz(f.first);
 				if (!f.second.empty()) file << ' ' << boost::locale::conv::between(f.second,"ISO8859-1","utf-8");
-				file << "\r\n";
+				file << "\n";
 			}
 			file.unsetf(std::ios_base::floatfield); //file << std::defaultfloat; not supported by older GCC 4.9.0
 		}
 
 		// Write transponder code
-		if (a.HasTransponderCode()) file << "AX " << a.GetTransponderCode() << "\r\n";
+		if (a.HasTransponderCode()) file << "AX " << a.GetTransponderCode() << "\n";
 
 		// Set the stream
 		file << std::setfill('0');
@@ -634,15 +640,15 @@ bool OpenAir::Write(const std::string& fileName) {
 		else for (size_t i = 0; i < a.GetNumberOfPoints() - 1; i++) WritePoint(a.GetPointAt(i));
 
 		// Add an empty line at the end of the airspace
-		file << "\r\n";
+		file << "\n";
 	}
 	file.close();
 	return true;
 }
 
 void OpenAir::WriteHeader() {
-	for(const std::string& line: AirspaceConverter::disclaimer) file << "* " << line << "\r\n";
-	file << "\r\n* " << AirspaceConverter::GetCreationDateString() << "\r\n\r\n";
+	for(const std::string& line: AirspaceConverter::disclaimer) file << "* " << line << "\n";
+	file << "\n* " << AirspaceConverter::GetCreationDateString() << "\n\n";
 }
 
 bool OpenAir::WriteCategory(const Airspace& airspace) {
@@ -665,7 +671,7 @@ bool OpenAir::WriteCategory(const Airspace& airspace) {
 			return false;
 		default: openAirCategory = airspace.CategoryName(airspace.GetType()); break;
 	}
-	file << "AC " << openAirCategory << "\r\n";
+	file << "AC " << openAirCategory << "\n";
 	lastPointWasDDMMSS = false;
 	return true;
 }
@@ -727,7 +733,7 @@ void OpenAir::WritePoint(const Geometry::LatLon& point, bool isCenterPoint /* = 
 			else file << lonD << ":" << decimalLonM << " " << point.GetEorW();
 		}
 	}
-	if (addPrefix) file << "\r\n";
+	if (addPrefix) file << "\n";
 }
 
 void OpenAir::WritePoint(const Point& point) {
@@ -736,13 +742,13 @@ void OpenAir::WritePoint(const Point& point) {
 
 void OpenAir::WriteCircle(const Circle& circle) {
 	WritePoint(circle.GetCenterPoint(),true);
-	file << "DC " << circle.GetRadiusNM() << "\r\n";
+	file << "DC " << circle.GetRadiusNM() << "\n";
 }
 
 void OpenAir::WriteSector(const Sector& sector) {
 	if (varRotationClockwise != sector.IsClockwise()) { // Write var if changed
 		varRotationClockwise = !varRotationClockwise;
-		file << "V D=" << (varRotationClockwise ? "+" : "-") << "\r\n";
+		file << "V D=" << (varRotationClockwise ? "+" : "-") << "\n";
 	}
 	WritePoint(sector.GetCenterPoint(),true);
 	int dir1, dir2;
@@ -754,5 +760,5 @@ void OpenAir::WriteSector(const Sector& sector) {
 		file << ",";
 		WritePoint(sector.GetEndPoint(),true,false);
 	}
-	file << "\r\n";
+	file << "\n";
 }
