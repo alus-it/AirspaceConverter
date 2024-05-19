@@ -66,6 +66,7 @@ private:
 
 	static const std::unordered_map<std::string, Airspace::Type> openAirAirspaceTable;
 	static bool calculateArcs;
+	static bool lastPointWasEqualToFirst;
 	static CoordinateType coordinateType;
 	std::multimap<int, Airspace>& airspaces;
 	bool varRotationClockwise;

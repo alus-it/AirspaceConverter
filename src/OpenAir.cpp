@@ -76,6 +76,7 @@ const std::unordered_map<std::string, Airspace::Type> OpenAir::openAirAirspaceTa
 };
 
 bool OpenAir::calculateArcs = true;
+bool OpenAir::lastPointWasEqualToFirst = false;
 OpenAir::CoordinateType OpenAir::coordinateType = OpenAir::CoordinateType::AUTO;
 
 OpenAir::OpenAir(std::multimap<int, Airspace>& airspacesMap):
@@ -228,7 +229,7 @@ bool OpenAir::Read(const std::string& fileName) {
 		}
 
 		// Verify line ending
-		if (lineEndindingConsistent && isCRLF != initialCRLF) {
+		if (lineEndindingConsistent && isCRLF != initialCRLF && !sLine.empty()) {
 			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: not consistent line ending style, file started with: %s.") % linecount %(initialCRLF ? "CR LF" : "LF")));
 
 			// OpenAir files may contain thousands of lines we don't want to print this warning all the time
@@ -414,7 +415,26 @@ bool OpenAir::ParseDP(const std::string& line, Airspace& airspace, const int& li
 	if (line.length() < 14) return false;
 	Geometry::LatLon point;
 	if (ParseCoordinates(line.substr(3), point)) {
-		if (!airspace.AddPoint(point)) AirspaceConverter::LogWarning(boost::str(boost::format("skipping unnecessary repeated point on line %1d: %2s") % linenumber % line));
+	
+		// If adding the point did not succeed because it's a duplicate...
+		if (!airspace.AddPoint(point)) {
+
+			// If the last point was not yet detected as equal to the first
+			if (!lastPointWasEqualToFirst) {
+
+				// If this point is matching the first point (can happen that last point matches the first point of last geometry) ... 
+				size_t numGeo = airspace.GetNumberOfGeometries();
+				if (numGeo > 1 && !airspace.GetGeometryAt(numGeo - 1)->IsPoint() && airspace.GetFirstPoint() == point) {
+					
+					// ... take a note that the last point is matching the fisrt (as it should be)
+					lastPointWasEqualToFirst = true;
+					return true;
+				}
+			}
+
+			// If the last point equal to the first was alredy detected than there is really a duplicate
+			AirspaceConverter::LogWarning(boost::str(boost::format("skipping unnecessary repeated point on line %1d: %2s") % linenumber % line));	
+		}
 		return true;
 	}
 	return false;
@@ -520,6 +540,7 @@ bool OpenAir::ParseDY(const std::string & line, Airspace& airspace)
 bool OpenAir::InsertAirspace(Airspace& airspace) {
 	if (airspace.GetType() == Airspace::UNDEFINED || airspace.GetName().empty()) {
 		airspace.Clear();
+		lastPointWasEqualToFirst = false;
 		return false;
 	}
 
