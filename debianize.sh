@@ -105,7 +105,7 @@ else
 	exit 1
 fi
 
-# Check what Debian or Ubuntu release we are talking about
+# Check which Debian or Ubuntu release we are talking about
 case $OSVER in
 	7)
 		echo "Packaging for Debian 7 Wheezy..."
@@ -151,17 +151,17 @@ case $OSVER in
 		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER}), libgl1-mesa-glx (>= 18.3.6)"
 		MANT="Valerio Messina <efa@iol.it>"
 		;;
-   11)
-      echo "Packaging for Debian 11 Bullseye..."
-      DISTR=deb
-      LIBCVER=2.31
-      ZIPLIB=libzip4
-      ZIPVER=1.7.3
-      BOOSTVER=1.74.0
-      QTVER=5.15.2
-      QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER}), libgl1-mesa-glx (>= 18.3.6)"
-      MANT="Valerio Messina <efa@iol.it>"
-      ;;
+	11)
+		echo "Packaging for Debian 11 Bullseye..."
+		DISTR=deb
+		LIBCVER=2.31
+		ZIPLIB=libzip4
+		ZIPVER=1.7.3
+		BOOSTVER=1.74.0
+		QTVER=5.15.2
+		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER}), libgl1-mesa-glx (>= 18.3.6)"
+		MANT="Valerio Messina <efa@iol.it>"
+		;;
 	4)
 		echo "Packaging for LMDE4 (Debian 10 Buster)..."
 		DISTR=lmde
@@ -524,4 +524,3 @@ if [[ "$CLEAN" == "Y" || "$CLEAN" == "y" ]]; then
 fi
 
 exit 0
-
