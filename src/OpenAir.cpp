@@ -101,8 +101,8 @@ bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg) {
 	// The OpenAir coordinate string can't be empty
 	if(dddmmss.empty()) return false;
 
-	// The OpenAir coordinate string must contain only numbers and colons ':'
-	if(std::find_if(dddmmss.begin(), dddmmss.end(), [](char c) { return !std::isdigit(c) && c != ':'; }) != dddmmss.end()) return false;
+	// The OpenAir coordinate string must contain only numbers, points and colons ':'
+	if(std::find_if(dddmmss.begin(), dddmmss.end(), [](char c) { return !std::isdigit(c) && c != ':' && c != '.'; }) != dddmmss.end()) return false;
 
 	// Tokenize on columns
 	boost::tokenizer<boost::char_separator<char>> tokens(dddmmss, boost::char_separator<char>(":"));
@@ -113,7 +113,7 @@ bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg) {
 	boost::tokenizer<boost::char_separator<char>>::iterator token=tokens.begin();
 	if ((*token).empty()) return false;
 	try {
-		deg = std::stoi(*token);
+		deg = std::stod(*token);
 
 		// Minutes
 		if (++token != tokens.end()) {
