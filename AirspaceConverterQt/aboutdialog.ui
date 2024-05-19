@@ -99,7 +99,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Copyright (C) 2016-2023</string>
+    <string>Copyright (C) 2016-2024</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_4">
