@@ -1,5 +1,5 @@
 #!/bin/bash
-# crossBuild.sh V0.01.01 2021/05/18 Copyright © 2021 Valerio Messina
+# crossBuild.sh V0.01.01 2021/05/18 Copyright Â© 2021 Valerio Messina
 # License : GNU GPL v3
 # cross-build AirspaceConverter from Linux to macOS
 # Note: For the thing to work it is necessary to install 'osxcross'
@@ -8,7 +8,7 @@
 #       ${OCROSS} cross-compiler tools prefix, eg. x86_64-apple-darwin18-
 #       PATH=${OSX}/target/bin:$PATH     location of ${OCROSS}tools
 #
-echo "crossBuild.sh V0.01.01 2021/05/18 Copyright © 2021 Valerio Messina"
+echo "crossBuild.sh V0.01.01 2021/05/18 Copyright Â© 2021 Valerio Messina"
 cd ..
 cp macOS/Makefile.darwin-clang++ .
 make -f Makefile.darwin-clang++
