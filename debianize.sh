@@ -5,7 +5,7 @@
 # Authors     : Alberto Realis-Luc <alberto.realisluc@gmail.com>
 #               Valerio Messina <efa@iol.it>
 # Web         : https://www.alus.it/AirspaceConverter
-# Copyright   : (C) 2016 Alberto Realis-Luc
+# Copyright   : (C) 2017 Alberto Realis-Luc
 # License     : GNU GPL v3
 #
 # This script is part of AirspaceConverter project
@@ -307,7 +307,7 @@ Name: airspaceconverter
 Maintainer: Alberto Realis-Luc <admin@alus.it>
 Source: https://github.com/alus-it/AirspaceConverter.git
 
-Copyright: 2016-2017 Alberto Realis-Luc <alberto.realisluc@gmail.com>
+Copyright: (C) 2016 Alberto Realis-Luc <alberto.realisluc@gmail.com>
 License: GPL-3+
 
 Files: icons/*

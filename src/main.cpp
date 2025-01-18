@@ -153,7 +153,7 @@ int main(int argc, char *argv[]) {
 					else std::cout << "This version is not yet released." << std::endl;
 				}
 			}
-			std::cout << "Copyright(C) 2016-2021 Alberto Realis-Luc, Valerio Messina" << std::endl;
+			std::cout << "Copyright(C) 2016 Alberto Realis-Luc, Valerio Messina" << std::endl;
 			std::cout << "https://www.alus.it/AirspaceConverter" << std::endl << std::endl;
 			if (argc == 2) return EXIT_SUCCESS;
 			break;

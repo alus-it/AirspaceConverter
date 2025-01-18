@@ -1,12 +1,12 @@
 #!/bin/bash
-# osxcross-dmg V0.01.00 2021/02/24 Copyright © 2021 Valerio Messina
+# osxcross-dmg V0.01.00 2021/02/24 Copyright (C) 2021 Valerio Messina
 # License : GNU GPL v3
 # create a compressed DMG macOS distribution package with all dependancies
 # Note: libraries will be searched in @executable_path by macOS binary
 # Note: AppName.icns will be picked next to binary
 #       AppName.icns and Info.plist must be customized
 #
-echo "osxcross-dmg V0.01.00 2021/02/24 Copyright © 2021 Valerio Messina"
+echo "osxcross-dmg V0.01.00 2021/02/24 Copyright (C) 2021 Valerio Messina"
 if (test "" = "$1") then
    echo "create a standard DMG macOS distribution package with all dependancies"
    echo "ERROR: osxcross-dmg need a binary"
@@ -95,7 +95,7 @@ echo "	<string>NSApplication</string>"                                          
 echo "	<key>NSSupportsAutomaticGraphicsSwitching</key>"                                                     >> DiskImage/$AppName.app/Contents/Info.plist
 echo "	<true/>"                                                                                             >> DiskImage/$AppName.app/Contents/Info.plist
 echo "	<key>NSHumanReadableCopyright</key>"                                                                 >> DiskImage/$AppName.app/Contents/Info.plist
-echo "	<string>CopyrightÂ© 2021 Valerio Messina. All rights reserved.</string>"                             >> DiskImage/$AppName.app/Contents/Info.plist
+echo "	<string>Copyright Â© 2021 Valerio Messina. All rights reserved.</string>"                             >> DiskImage/$AppName.app/Contents/Info.plist
 echo "	<key>NSMainStoryboardFile</key>"                                                                     >> DiskImage/$AppName.app/Contents/Info.plist
 echo "	<string>Main</string>"                                                                               >> DiskImage/$AppName.app/Contents/Info.plist
 echo "	<key>NSSupportsAutomaticTermination</key>"                                                           >> DiskImage/$AppName.app/Contents/Info.plist
