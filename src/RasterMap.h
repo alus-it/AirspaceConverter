@@ -18,6 +18,7 @@
 
 #pragma once
 #include <string>
+#include <cstdint>
 
 class RasterMap final {
 public:
