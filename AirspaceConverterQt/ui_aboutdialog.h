@@ -114,7 +114,7 @@ public:
         OKpushButton->setText(QCoreApplication::translate("AboutDialog", "&OK", nullptr));
         label->setText(QCoreApplication::translate("AboutDialog", "AirspaceConverter", nullptr));
         label_2->setText(QCoreApplication::translate("AboutDialog", "Version:", nullptr));
-        label_3->setText(QCoreApplication::translate("AboutDialog", "Copyright (C) 2016-2024", nullptr));
+        label_3->setText(QCoreApplication::translate("AboutDialog", "Copyright (C) 2016", nullptr));
 #if QT_CONFIG(whatsthis)
         label_4->setWhatsThis(QCoreApplication::translate("AboutDialog", "<html><head/><body><p>AirspaceConverter author</p></body></html>", nullptr));
 #endif // QT_CONFIG(whatsthis)
