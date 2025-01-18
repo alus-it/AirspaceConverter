@@ -239,6 +239,17 @@ case $OSVER in
 		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER})"
 		MANT="Alberto Realis-Luc <admin@alus.it>"
 		;;
+	24.04)
+		echo "Packaging for Ubuntu 24.04 Noble..."
+		DISTR=ubn
+		LIBCVER=2.39
+		ZIPLIB=libzip4t64
+		ZIPVER=1.7.3
+		BOOSTVER=1.83.0
+		QTVER=5.15.13
+		QTDEPS="libqt5core5t64 (>= ${QTVER}), libqt5gui5t64 (>= ${QTVER}), libqt5widgets5t64 (>= ${QTVER})"
+		MANT="Alberto Realis-Luc <admin@alus.it>"
+		;;
 	*)
 	echo "ERROR: This version of Debian, Ubuntu or Mint: ${OSVER} is not known by this script, please add it!"
 	exit 1
