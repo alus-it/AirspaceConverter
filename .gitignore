@@ -92,3 +92,4 @@ build-*
 # QT stuff
 *.user
 *.pro.user.*
+/AirspaceConverterQt/.qtc_clangd/*

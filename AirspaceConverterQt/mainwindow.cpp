@@ -364,7 +364,7 @@ void MainWindow::on_convertButton_clicked() {
 
     // Prepare dialog to ask for output file, will be without extension if not manually typed by the user
     std::string desiredOutputFile = QFileDialog::getSaveFileName(this, tr("Convert to..."),
-                                                                 QString::fromStdString(boost::filesystem::change_extension(converter->GetOutputFile(), "").string()),
+                                                                 QString::fromStdString(boost::filesystem::path(converter->GetOutputFile()).replace_extension("").string()),
                                                                  AirspaceConverter::Is_cGPSmapperAvailable() ?
                                                                      tr("Google Earth(*.kmz);;OpenAir(*.txt);;SeeYou(*.cup);;LittleNavMap(*.csv);;Polish(*.mp);;Garmin img(*.img)") :
                                                                      tr("Google Earth(*.kmz);;OpenAir(*.txt);;SeeYou(*.cup);;LittleNavMap(*.csv);;Polish(*.mp)"),
