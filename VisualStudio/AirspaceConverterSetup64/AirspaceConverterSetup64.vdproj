@@ -1049,7 +1049,7 @@
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:0.4.0"
+        "ProductVersion" = "8:0.4.1"
         "Manufacturer" = "8:Alberto Realis-Luc"
         "ARPHELPTELEPHONE" = "8:+41 26 5263358"
         "ARPHELPLINK" = "8:https://www.alus.it/AirspaceConverter"
