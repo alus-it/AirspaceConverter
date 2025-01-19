@@ -50,16 +50,16 @@
 *.gz
 
 # Ignore bin and build folders
-/bin
-/Debug
-/Release
+bin
+Debug
+Release
 */Debug
 */Release
 */*/Debug
 */*/Release
 build-*
-/buildQt
-/AirspaceConverterQt-build*
+buildQt
+AirspaceConverterQt-build*
 
 # Ignore Eclipse project files
 .project
@@ -67,9 +67,9 @@ build-*
 .settings/*
 
 # Visual studio stuff
-/VisualStudio/.vs
-/VisualStudio/packages
-/VisualStudio/ipch
+VisualStudio/.vs
+VisualStudio/packages
+VisualStudio/ipch
 *.aps
 *.idb
 *.ipch
@@ -86,10 +86,13 @@ build-*
 *.tmp
 *.cache
 
+# Visual Studio Code stuff
+.vscode/*
+
 # Generated readme
-/VisualStudio/Readme.rtf
+VisualStudio/Readme.rtf
 
 # QT stuff
 *.user
 *.pro.user.*
-/AirspaceConverterQt/.qtc_clangd/*
+AirspaceConverterQt/.qtc_clangd/*
