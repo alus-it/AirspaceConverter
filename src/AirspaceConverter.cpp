@@ -825,7 +825,7 @@ bool AirspaceConverter::CheckForNewVersion(int& versionDifference) {
 			return true;
 		}
 	} catch (...) {
-		// This can happen in many cases including when no Internet connection is availble; so: no need to bother the user
+		// This can happen in many cases including when no Internet connection is available; so: no need to bother the user
 	}
 	#endif
 	return false;
