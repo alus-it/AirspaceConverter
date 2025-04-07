@@ -78,6 +78,7 @@ const std::unordered_map<std::string, Airspace::Type> OpenAir::openAirAirspaceTa
 bool OpenAir::calculateArcs = true;
 bool OpenAir::lastPointWasEqualToFirst = false;
 OpenAir::CoordinateType OpenAir::coordinateType = OpenAir::CoordinateType::AUTO;
+int OpenAir::linecount = 0;
 
 OpenAir::OpenAir(std::multimap<int, Airspace>& airspacesMap):
 	airspaces(airspacesMap),
@@ -97,7 +98,7 @@ std::string& OpenAir::RemoveComments(std::string &s) {
 	return s;
 }
 
-bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg) {
+bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg, bool isLon) {
 	// The OpenAir coordinate string can't be empty
 	if(dddmmss.empty()) return false;
 
@@ -107,28 +108,54 @@ bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg) {
 	// Tokenize on columns
 	boost::tokenizer<boost::char_separator<char>> tokens(dddmmss, boost::char_separator<char>(":"));
 	const int fields = (int)std::distance(tokens.begin(),tokens.end());
-	if(fields < 1 || fields > 3) return false; // We expect from 1 to 3 fields
-
-	// Degrees
+	if(fields < 2 || fields > 3) return false; // We expect from 2 to 3 fields
 	boost::tokenizer<boost::char_separator<char>>::iterator token=tokens.begin();
 	if ((*token).empty()) return false;
 	try {
+		// Degrees
+		if ((*token).length() != (isLon ? 3 : 2))
+			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: wrong number of digits for %s degrees.") % linecount %(isLon ? "longitude" : "latitude")));
 		deg = std::stod(*token);
+		if (deg < 0 || deg >= (isLon ? 180 : 90)) {
+			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: invalid value of degrees for %s.") % linecount %(isLon ? "longitude" : "latitude")));
+			return false;
+		}
 
 		// Minutes
 		if (++token != tokens.end()) {
 			if ((*token).empty()) return false;
-			deg += std::stod(*token) / 60;
+			if (fields == 3 && (*token).length() != 2)
+				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: wrong number of digits for %s minutes.") % linecount %(isLon ? "longitude" : "latitude")));
+			const double min = std::stod(*token);
+			if (min < 0 || min >= 60) {
+				AirspaceConverter::LogError(boost::str(boost::format("on line %1d: invalid value of minutes for %s.") % linecount %(isLon ? "longitude" : "latitude")));
+				return false;
+			}
+			deg += min / 60;
 
 			// Seconds
 			if (++token != tokens.end()) {
 				if ((*token).empty()) return false;
-				deg += std::stod(*token) / 3600;
+				if ((*token).length() != 2)
+					AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: wrong number of digits for %s seconds.") % linecount %(isLon ? "longitude" : "latitude")));
+				const double sec = std::stod(*token);
+				if (sec < 0 || sec >= 60) {
+					AirspaceConverter::LogError(boost::str(boost::format("on line %1d: invalid value of seconds for %s.") % linecount %(isLon ? "longitude" : "latitude")));
+					return false;
+				}
+				deg += sec / 3600;
 			}
 		}
 	} catch (...) {
 		return false;
 	}
+
+	// Check if the final value is valid
+	if (deg > (isLon ? 180 : 90)) {
+		AirspaceConverter::LogError(boost::str(boost::format("on line %1d: invalid %s value.") % linecount %(isLon ? "longitude" : "latitude")));
+		return false;
+	}
+
 	return true;
 }
 
@@ -154,7 +181,7 @@ bool OpenAir::ParseCoordinates(const std::string& text, Geometry::LatLon& point)
 
 	// Parse the latitude
 	double lat = Geometry::LatLon::UNDEF_LAT;
-	if (!ParseDegrees(coord, lat)) return false;
+	if (!ParseDegrees(coord, lat, false)) return false;
 
 	// Apply latitude sign N or S
 	if (sign == 'S' || sign == 's') lat = -lat;
@@ -179,7 +206,7 @@ bool OpenAir::ParseCoordinates(const std::string& text, Geometry::LatLon& point)
 
 	// Parse the longitude
 	double lon = Geometry::LatLon::UNDEF_LON;
-	if (!ParseDegrees(coord, lon)) return false;
+	if (!ParseDegrees(coord, lon, true)) return false;
 
 	// Apply the longitude sign E or W
 	if (sign == 'W' || sign == 'w') lon = -lon;
@@ -212,7 +239,7 @@ bool OpenAir::Read(const std::string& fileName) {
 	// Check if the input file is encoded in UTF-8
 	const bool isUTF8 = IsFileUTF8(input);
 
-	int linecount = 0;
+	linecount = 0;
 	std::string sLine;
 	bool allParsedOK = true, needToDetectCRLF = true, initialCRLF = false, isCRLF = false, lineEndindingConsistent = true;
 	Airspace airspace;
