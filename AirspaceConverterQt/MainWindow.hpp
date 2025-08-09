@@ -13,8 +13,8 @@
 #pragma once
 #include <QMainWindow>
 #include <QFutureWatcher>
-#include "aboutdialog.h"
-#include "limitsdialog.h"
+#include "AboutDialog.hpp"
+#include "LimitsDialog.hpp"
 #include <chrono>
 
 class AirspaceConverter;

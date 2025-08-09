@@ -10,12 +10,12 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
-#include "SeeYou.h"
-#include "AirspaceConverter.h"
-#include "Waypoint.h"
-#include "Airfield.h"
-#include "Airspace.h"
-#include "Geometry.h"
+#include "SeeYou.hpp"
+#include "AirspaceConverter.hpp"
+#include "Waypoint.hpp"
+#include "Airfield.hpp"
+#include "Airspace.hpp"
+#include "Geometry.hpp"
 #include <fstream>
 #include <iomanip>
 #include <boost/algorithm/string.hpp>

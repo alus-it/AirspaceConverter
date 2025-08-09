@@ -10,10 +10,10 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
-#include "limitsdialog.h"
-#include "ui_limitsdialog.h"
+#include "LimitsDialog.hpp"
+#include "ui_LimitsDialog.h"
 #include <QMessageBox>
-#include "Geometry.h"
+#include "Geometry.hpp"
 
 LimitsDialog::LimitsDialog(QWidget *parent) :
     QDialog(parent),

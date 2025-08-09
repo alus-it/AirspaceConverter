@@ -10,9 +10,9 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
-#include "Polish.h"
-#include "AirspaceConverter.h"
-#include "Airspace.h"
+#include "Polish.hpp"
+#include "AirspaceConverter.hpp"
+#include "Airspace.hpp"
 #include <sstream>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -40,7 +40,7 @@ const int PFMwriter::types[] = {
 	0x69, //GLIDING
 	0x62, //NOGLIDER
 	0x69, //WAVE
-	0x01,  //UNKNOWN
+	0x01, //UNKNOWN
 	0x01  //UNDEFINED
 };
 */

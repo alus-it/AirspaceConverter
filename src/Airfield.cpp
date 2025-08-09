@@ -10,7 +10,7 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
-#include "Airfield.h"
+#include "Airfield.hpp"
 #include <cassert>
 
 Airfield::Airfield(const std::string& longName, const std::string& shortName, const std::string& countryCode, const double lat, const double lon, const float alt, const int style, const int rwyDir, const int rwyLen, const int freq, const std::string& descr)

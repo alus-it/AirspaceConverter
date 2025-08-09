@@ -10,7 +10,7 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
-#include "Airspace.h"
+#include "Airspace.hpp"
 #include <algorithm>
 #include <cassert>
 #include <iomanip>

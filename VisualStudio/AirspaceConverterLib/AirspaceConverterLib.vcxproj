@@ -97,18 +97,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\Airfield.h" />
-    <ClInclude Include="..\..\src\Airspace.h" />
-    <ClInclude Include="..\..\src\AirspaceConverter.h" />
-    <ClInclude Include="..\..\src\CSV.h" />
-    <ClInclude Include="..\..\src\Geometry.h" />
-    <ClInclude Include="..\..\src\KML.h" />
-    <ClInclude Include="..\..\src\OpenAIP.h" />
+    <ClInclude Include="..\..\src\Airfield.hpp" />
+    <ClInclude Include="..\..\src\Airspace.hpp" />
+    <ClInclude Include="..\..\src\AirspaceConverter.hpp" />
+    <ClInclude Include="..\..\src\CSV.hpp" />
+    <ClInclude Include="..\..\src\Geometry.hpp" />
+    <ClInclude Include="..\..\src\KML.hpp" />
+    <ClInclude Include="..\..\src\OpenAIP.hpp" />
     <ClInclude Include="..\..\src\OpenAir.h" />
-    <ClInclude Include="..\..\src\Polish.h" />
-    <ClInclude Include="..\..\src\RasterMap.h" />
-    <ClInclude Include="..\..\src\SeeYou.h" />
-    <ClInclude Include="..\..\src\Waypoint.h" />
+    <ClInclude Include="..\..\src\Polish.hpp" />
+    <ClInclude Include="..\..\src\RasterMap.hpp" />
+    <ClInclude Include="..\..\src\SeeYou.hpp" />
+    <ClInclude Include="..\..\src\Waypoint.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Airfield.cpp" />

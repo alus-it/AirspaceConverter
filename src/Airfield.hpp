@@ -11,7 +11,7 @@
 //============================================================================
 
 #pragma once
-#include "Waypoint.h"
+#include "Waypoint.hpp"
 
 class Airfield: public Waypoint {
 public:

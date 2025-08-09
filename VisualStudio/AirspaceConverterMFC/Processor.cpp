@@ -12,7 +12,7 @@
 
 #include "stdafx.h"
 #include "Processor.h"
-#include "AirspaceConverter.h"
+#include "AirspaceConverter.hpp"
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>

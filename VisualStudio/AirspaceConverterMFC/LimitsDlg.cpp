@@ -13,7 +13,7 @@
 #include "stdafx.h"
 #include "LimitsDlg.h"
 #include "Resource.h"
-#include "Geometry.h"
+#include "Geometry.hpp"
 
 CLimitsDlg::CLimitsDlg() :
 	CDialog(IDD_LIMITS_DIALOG),

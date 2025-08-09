@@ -11,40 +11,40 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\Airfield.h">
+    <ClInclude Include="..\..\src\Airfield.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Airspace.h">
+    <ClInclude Include="..\..\src\Airspace.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Geometry.h">
+    <ClInclude Include="..\..\src\Geometry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\OpenAir.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\RasterMap.h">
+    <ClInclude Include="..\..\src\RasterMap.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Waypoint.h">
+    <ClInclude Include="..\..\src\Waypoint.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\AirspaceConverter.h">
+    <ClInclude Include="..\..\src\AirspaceConverter.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\KML.h">
+    <ClInclude Include="..\..\src\KML.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\OpenAIP.h">
+    <ClInclude Include="..\..\src\OpenAIP.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Polish.h">
+    <ClInclude Include="..\..\src\Polish.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\SeeYou.h">
+    <ClInclude Include="..\..\src\SeeYou.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\CSV.h">
+    <ClInclude Include="..\..\src\CSV.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

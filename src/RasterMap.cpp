@@ -16,8 +16,8 @@
 //
 //============================================================================
 
-#include "RasterMap.h"
-#include "AirspaceConverter.h"
+#include "RasterMap.hpp"
+#include "AirspaceConverter.hpp"
 #include <algorithm>
 #include <cassert>
 #include <cmath>

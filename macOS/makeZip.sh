@@ -27,7 +27,7 @@ then
 fi
 
 # Get version number, try from the sources (sources should be present)
-VERSION="$(grep -s "define VERSION" ../src/AirspaceConverter.h | awk -F\" '{print $2}')"
+VERSION="$(grep -s "define VERSION" ../src/AirspaceConverter.hpp | awk -F\" '{print $2}')"
 
 # If no valid version number, then ask the user
 if [[ "$VERSION" =~ [0-9].[0-9].[0-9] ]]; then

@@ -11,7 +11,7 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
-#include "mainwindow.h"
+#include "MainWindow.hpp"
 #include <QApplication>
 #include <locale.h>
 
