@@ -290,17 +290,17 @@ mainwindow.o: ../AirspaceConverterQt/mainwindow.cpp ../AirspaceConverterQt/mainw
 	../AirspaceConverterQt/aboutdialog.h \
 	../AirspaceConverterQt/limitsdialog.h \
 	ui_mainwindow.h \
-	../src/AirspaceConverter.h
+	../src/AirspaceConverter.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o ../AirspaceConverterQt/mainwindow.cpp
 
 aboutdialog.o: ../AirspaceConverterQt/aboutdialog.cpp ../AirspaceConverterQt/aboutdialog.h \
 	ui_aboutdialog.h \
-	../src/AirspaceConverter.h
+	../src/AirspaceConverter.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o aboutdialog.o ../AirspaceConverterQt/aboutdialog.cpp
 
 limitsdialog.o: ../AirspaceConverterQt/limitsdialog.cpp ../AirspaceConverterQt/limitsdialog.h \
 	ui_limitsdialog.h \
-	../src/Geometry.h
+	../src/Geometry.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o limitsdialog.o ../AirspaceConverterQt/limitsdialog.cpp
 
 moc_mainwindow.o: moc_mainwindow.cpp 

@@ -17,7 +17,7 @@
 #include "AirspaceConverterDlg.h"
 #include "LimitsDlg.h"
 #include "Processor.h"
-#include "AirspaceConverter.h"
+#include "AirspaceConverter.hpp"
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/predicate.hpp>

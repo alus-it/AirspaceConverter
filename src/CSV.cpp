@@ -23,12 +23,12 @@
 // Note: LNM fill the SourceFile field on export, ignore it when importing and take note of source file, leave empty
 // https://www.littlenavmap.org/manuals/littlenavmap/release/2.4/en/USERPOINT.html#csv-data-format
 
-#include "CSV.h"
-#include "AirspaceConverter.h"
-#include "Waypoint.h"
-#include "Airfield.h"
-#include "Airspace.h"
-#include "Geometry.h"
+#include "CSV.hpp"
+#include "AirspaceConverter.hpp"
+#include "Waypoint.hpp"
+#include "Airfield.hpp"
+#include "Airspace.hpp"
+#include "Geometry.hpp"
 #include <fstream>
 #include <iomanip>
 #include <boost/algorithm/string.hpp>
@@ -391,7 +391,7 @@ bool CSV::Read(const std::string& fileName) {
 			AirspaceConverter::VerifyAltitudeOnTerrainMap(latitude,longitude,altitude,blankAltitude,altitudeParsed,linecount,type >= Waypoint::WaypointType::mtTop && type <= Waypoint::WaypointType::dam);
 
 		// If it's an airfield...
-		if(Waypoint::IsTypeAirfield((Waypoint::WaypointType)type)) { // check & fix: Waypoint.h:IsTypeAirfield()
+		if(Waypoint::IsTypeAirfield((Waypoint::WaypointType)type)) { // check & fix: Waypoint.hpp:IsTypeAirfield()
 
 			token++; // Skip Declination
 #if 0

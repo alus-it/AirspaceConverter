@@ -267,7 +267,7 @@ if [[ "$ACTION" == "C" || "$ACTION" == "c" || "$ACTION" == "" ]]; then
 fi
 
 # Get version number, try from the sources (sources should be present)
-VERSION="$(grep -s "define VERSION" src/AirspaceConverter.h | awk -F\" '{print $2}')"
+VERSION="$(grep -s "define VERSION" src/AirspaceConverter.hpp | awk -F\" '{print $2}')"
 
 # Other possibility: get version number from compiled executable (not needed it should be the same as from the sources)
 #cd Release # so find local shared object: libairspaceconverter.so #WARNING: not always true, can be also the installed lib!!

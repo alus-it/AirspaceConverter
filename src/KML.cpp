@@ -10,12 +10,12 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
-#include "KML.h"
-#include "Airspace.h"
-#include "AirspaceConverter.h"
-#include "Waypoint.h"
-#include "Airfield.h"
-#include "Geometry.h"
+#include "KML.hpp"
+#include "Airspace.hpp"
+#include "AirspaceConverter.hpp"
+#include "Waypoint.hpp"
+#include "Airfield.hpp"
+#include "Geometry.hpp"
 #include <zip.h>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/path.hpp>

@@ -10,8 +10,8 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "MainWindow.hpp"
+#include "ui_MainWindow.h"
 
 #if QT_VERSION >= 0x050000
     #include <QtConcurrent/QtConcurrent>
@@ -35,7 +35,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
 #include <cassert>
-#include "AirspaceConverter.h"
+#include "AirspaceConverter.hpp"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),

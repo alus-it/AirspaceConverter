@@ -17,7 +17,7 @@ CXX           = x86_64-linux-gnu-g++
 DEFINES       = -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -O2 -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -O2 -std=gnu++11 -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I. -I../src -IC:/boost_1_61_0 -I/home/alus/workspace/AirspaceConverter/AirspaceConverterQt/../VisualStudio/packages/libzip.1.1.2.7/build/native/include -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I. -I. -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++
+INCPATH       = -I. -I../src -IC:/boost_1_61_0 -I/home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt/../VisualStudio/packages/libzip.1.1.2.7/build/native/include -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I. -I. -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++
 QMAKE         = /usr/lib/qt5/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -37,10 +37,10 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = airspaceconverter-gui1.0.0
-DISTDIR = /home/alus/workspace/AirspaceConverter/AirspaceConverterQt/.tmp/airspaceconverter-gui1.0.0
+DISTDIR = /home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt/.tmp/airspaceconverter-gui1.0.0
 LINK          = x86_64-linux-gnu-g++
 LFLAGS        = -Wl,-O1
-LIBS          = $(SUBLIBS) -L/home/alus/workspace/AirspaceConverter/AirspaceConverterQt/../Release/ -lairspaceconverter '-Wl,-rpath=$$ORIGIN' -L/usr/lib/x86_64-linux-gnu/ -lboost_filesystem -lboost_system -lboost_locale -lzip /usr/lib/x86_64-linux-gnu/libQt5Widgets.so /usr/lib/x86_64-linux-gnu/libQt5Gui.so /usr/lib/x86_64-linux-gnu/libQt5Core.so -lGL -lpthread   
+LIBS          = $(SUBLIBS) -L/home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt/../Release/ -lairspaceconverter '-Wl,-rpath=$$ORIGIN' -L/usr/lib/x86_64-linux-gnu/ -lboost_filesystem -lboost_system -lboost_locale -lzip /usr/lib/x86_64-linux-gnu/libQt5Widgets.so /usr/lib/x86_64-linux-gnu/libQt5Gui.so /usr/lib/x86_64-linux-gnu/libQt5Core.so -lGL -lpthread   
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
@@ -53,20 +53,20 @@ OBJECTS_DIR   = ./
 ####### Files
 
 SOURCES       = main.cpp \
-		mainwindow.cpp \
-		aboutdialog.cpp \
-		limitsdialog.cpp qrc_resources.cpp \
-		moc_mainwindow.cpp \
-		moc_aboutdialog.cpp \
-		moc_limitsdialog.cpp
+		AboutDialog.cpp \
+		LimitsDialog.cpp \
+		MainWindow.cpp qrc_resources.cpp \
+		moc_AboutDialog.cpp \
+		moc_LimitsDialog.cpp \
+		moc_MainWindow.cpp
 OBJECTS       = main.o \
-		mainwindow.o \
-		aboutdialog.o \
-		limitsdialog.o \
+		AboutDialog.o \
+		LimitsDialog.o \
+		MainWindow.o \
 		qrc_resources.o \
-		moc_mainwindow.o \
-		moc_aboutdialog.o \
-		moc_limitsdialog.o
+		moc_AboutDialog.o \
+		moc_LimitsDialog.o \
+		moc_MainWindow.o
 DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/unix.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/linux.conf \
@@ -144,12 +144,12 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/exceptions.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/yacc.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
-		AirspaceConverterQt.pro mainwindow.h \
-		aboutdialog.h \
-		limitsdialog.h main.cpp \
-		mainwindow.cpp \
-		aboutdialog.cpp \
-		limitsdialog.cpp
+		AirspaceConverterQt.pro AboutDialog.hpp \
+		LimitsDialog.hpp \
+		MainWindow.hpp main.cpp \
+		AboutDialog.cpp \
+		LimitsDialog.cpp \
+		MainWindow.cpp
 QMAKE_TARGET  = airspaceconverter-gui
 DESTDIR       = 
 TARGET        = airspaceconverter-gui
@@ -158,7 +158,7 @@ TARGET        = airspaceconverter-gui
 first: all
 ####### Build rules
 
-airspaceconverter-gui: ui_mainwindow.h ui_aboutdialog.h ui_limitsdialog.h $(OBJECTS)  
+airspaceconverter-gui: ui_AboutDialog.h ui_LimitsDialog.h ui_MainWindow.h $(OBJECTS)  
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 
 Makefile: AirspaceConverterQt.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.conf /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
@@ -336,9 +336,9 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents resources.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents mainwindow.h aboutdialog.h limitsdialog.h $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp mainwindow.cpp aboutdialog.cpp limitsdialog.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents mainwindow.ui aboutdialog.ui limitsdialog.ui $(DISTDIR)/
+	$(COPY_FILE) --parents AboutDialog.hpp LimitsDialog.hpp MainWindow.hpp $(DISTDIR)/
+	$(COPY_FILE) --parents main.cpp AboutDialog.cpp LimitsDialog.cpp MainWindow.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents AboutDialog.ui LimitsDialog.ui MainWindow.ui $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -376,44 +376,44 @@ compiler_moc_predefs_clean:
 moc_predefs.h: /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 	x86_64-linux-gnu-g++ -pipe -O2 -std=gnu++11 -Wall -Wextra -dM -E -o moc_predefs.h /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_mainwindow.cpp moc_aboutdialog.cpp moc_limitsdialog.cpp
+compiler_moc_header_make_all: moc_AboutDialog.cpp moc_LimitsDialog.cpp moc_MainWindow.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_mainwindow.cpp moc_aboutdialog.cpp moc_limitsdialog.cpp
-moc_mainwindow.cpp: mainwindow.h \
-		aboutdialog.h \
-		limitsdialog.h \
+	-$(DEL_FILE) moc_AboutDialog.cpp moc_LimitsDialog.cpp moc_MainWindow.cpp
+moc_AboutDialog.cpp: AboutDialog.hpp \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
-	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/alus/workspace/AirspaceConverter/AirspaceConverterQt/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/alus/workspace/AirspaceConverter/AirspaceConverterQt -I/home/alus/workspace/AirspaceConverter/src -I/home/alus/workspace/AirspaceConverter/AirspaceConverterQt/C:/boost_1_61_0 -I/home/alus/workspace/AirspaceConverter/VisualStudio/packages/libzip.1.1.2.7/build/native/include -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/11 -I/usr/include/x86_64-linux-gnu/c++/11 -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-linux-gnu/11/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include mainwindow.h -o moc_mainwindow.cpp
+	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt -I/home/alus/source/workspace/AirspaceConverter/src -I/home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt/C:/boost_1_61_0 -I/home/alus/source/workspace/AirspaceConverter/VisualStudio/packages/libzip.1.1.2.7/build/native/include -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/11 -I/usr/include/x86_64-linux-gnu/c++/11 -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-linux-gnu/11/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include AboutDialog.hpp -o moc_AboutDialog.cpp
 
-moc_aboutdialog.cpp: aboutdialog.h \
+moc_LimitsDialog.cpp: LimitsDialog.hpp \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
-	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/alus/workspace/AirspaceConverter/AirspaceConverterQt/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/alus/workspace/AirspaceConverter/AirspaceConverterQt -I/home/alus/workspace/AirspaceConverter/src -I/home/alus/workspace/AirspaceConverter/AirspaceConverterQt/C:/boost_1_61_0 -I/home/alus/workspace/AirspaceConverter/VisualStudio/packages/libzip.1.1.2.7/build/native/include -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/11 -I/usr/include/x86_64-linux-gnu/c++/11 -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-linux-gnu/11/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include aboutdialog.h -o moc_aboutdialog.cpp
+	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt -I/home/alus/source/workspace/AirspaceConverter/src -I/home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt/C:/boost_1_61_0 -I/home/alus/source/workspace/AirspaceConverter/VisualStudio/packages/libzip.1.1.2.7/build/native/include -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/11 -I/usr/include/x86_64-linux-gnu/c++/11 -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-linux-gnu/11/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include LimitsDialog.hpp -o moc_LimitsDialog.cpp
 
-moc_limitsdialog.cpp: limitsdialog.h \
+moc_MainWindow.cpp: MainWindow.hpp \
+		AboutDialog.hpp \
+		LimitsDialog.hpp \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
-	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/alus/workspace/AirspaceConverter/AirspaceConverterQt/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/alus/workspace/AirspaceConverter/AirspaceConverterQt -I/home/alus/workspace/AirspaceConverter/src -I/home/alus/workspace/AirspaceConverter/AirspaceConverterQt/C:/boost_1_61_0 -I/home/alus/workspace/AirspaceConverter/VisualStudio/packages/libzip.1.1.2.7/build/native/include -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/11 -I/usr/include/x86_64-linux-gnu/c++/11 -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-linux-gnu/11/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include limitsdialog.h -o moc_limitsdialog.cpp
+	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt -I/home/alus/source/workspace/AirspaceConverter/src -I/home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt/C:/boost_1_61_0 -I/home/alus/source/workspace/AirspaceConverter/VisualStudio/packages/libzip.1.1.2.7/build/native/include -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/11 -I/usr/include/x86_64-linux-gnu/c++/11 -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-linux-gnu/11/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include MainWindow.hpp -o moc_MainWindow.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
-compiler_uic_make_all: ui_mainwindow.h ui_aboutdialog.h ui_limitsdialog.h
+compiler_uic_make_all: ui_AboutDialog.h ui_LimitsDialog.h ui_MainWindow.h
 compiler_uic_clean:
-	-$(DEL_FILE) ui_mainwindow.h ui_aboutdialog.h ui_limitsdialog.h
-ui_mainwindow.h: mainwindow.ui \
+	-$(DEL_FILE) ui_AboutDialog.h ui_LimitsDialog.h ui_MainWindow.h
+ui_AboutDialog.h: AboutDialog.ui \
 		/usr/lib/qt5/bin/uic
-	/usr/lib/qt5/bin/uic mainwindow.ui -o ui_mainwindow.h
+	/usr/lib/qt5/bin/uic AboutDialog.ui -o ui_AboutDialog.h
 
-ui_aboutdialog.h: aboutdialog.ui \
+ui_LimitsDialog.h: LimitsDialog.ui \
 		/usr/lib/qt5/bin/uic
-	/usr/lib/qt5/bin/uic aboutdialog.ui -o ui_aboutdialog.h
+	/usr/lib/qt5/bin/uic LimitsDialog.ui -o ui_LimitsDialog.h
 
-ui_limitsdialog.h: limitsdialog.ui \
+ui_MainWindow.h: MainWindow.ui \
 		/usr/lib/qt5/bin/uic
-	/usr/lib/qt5/bin/uic limitsdialog.ui -o ui_limitsdialog.h
+	/usr/lib/qt5/bin/uic MainWindow.ui -o ui_MainWindow.h
 
 compiler_yacc_decl_make_all:
 compiler_yacc_decl_clean:
@@ -425,39 +425,39 @@ compiler_clean: compiler_rcc_clean compiler_moc_predefs_clean compiler_moc_heade
 
 ####### Compile
 
-main.o: main.cpp mainwindow.h \
-		aboutdialog.h \
-		limitsdialog.h
+main.o: main.cpp MainWindow.hpp \
+		AboutDialog.hpp \
+		LimitsDialog.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
-mainwindow.o: mainwindow.cpp mainwindow.h \
-		aboutdialog.h \
-		limitsdialog.h \
-		ui_mainwindow.h \
-		../src/AirspaceConverter.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o mainwindow.cpp
+AboutDialog.o: AboutDialog.cpp AboutDialog.hpp \
+		ui_AboutDialog.h \
+		../src/AirspaceConverter.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o AboutDialog.o AboutDialog.cpp
 
-aboutdialog.o: aboutdialog.cpp aboutdialog.h \
-		ui_aboutdialog.h \
-		../src/AirspaceConverter.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o aboutdialog.o aboutdialog.cpp
+LimitsDialog.o: LimitsDialog.cpp LimitsDialog.hpp \
+		ui_LimitsDialog.h \
+		../src/Geometry.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o LimitsDialog.o LimitsDialog.cpp
 
-limitsdialog.o: limitsdialog.cpp limitsdialog.h \
-		ui_limitsdialog.h \
-		../src/Geometry.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o limitsdialog.o limitsdialog.cpp
+MainWindow.o: MainWindow.cpp MainWindow.hpp \
+		AboutDialog.hpp \
+		LimitsDialog.hpp \
+		ui_MainWindow.h \
+		../src/AirspaceConverter.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o MainWindow.o MainWindow.cpp
 
 qrc_resources.o: qrc_resources.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o qrc_resources.o qrc_resources.cpp
 
-moc_mainwindow.o: moc_mainwindow.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_mainwindow.o moc_mainwindow.cpp
+moc_AboutDialog.o: moc_AboutDialog.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_AboutDialog.o moc_AboutDialog.cpp
 
-moc_aboutdialog.o: moc_aboutdialog.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_aboutdialog.o moc_aboutdialog.cpp
+moc_LimitsDialog.o: moc_LimitsDialog.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_LimitsDialog.o moc_LimitsDialog.cpp
 
-moc_limitsdialog.o: moc_limitsdialog.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_limitsdialog.o moc_limitsdialog.cpp
+moc_MainWindow.o: moc_MainWindow.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_MainWindow.o moc_MainWindow.cpp
 
 ####### Install
 

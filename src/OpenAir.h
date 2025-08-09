@@ -15,8 +15,8 @@
 #include <map>
 #include <unordered_map>
 #include <fstream>
-#include "Airspace.h"
-#include "Geometry.h"
+#include "Airspace.hpp"
+#include "Geometry.hpp"
 
 class OpenAir {
 friend class Point;

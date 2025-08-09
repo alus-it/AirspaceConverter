@@ -10,16 +10,16 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
-#include "AirspaceConverter.h"
-#include "Airspace.h"
-#include "Waypoint.h"
-#include "RasterMap.h"
-#include "KML.h"
+#include "AirspaceConverter.hpp"
+#include "Airspace.hpp"
+#include "Waypoint.hpp"
+#include "RasterMap.hpp"
+#include "KML.hpp"
 #include "OpenAir.h"
-#include "SeeYou.h"
-#include "OpenAIP.h"
-#include "Polish.h"
-#include "CSV.h"
+#include "SeeYou.hpp"
+#include "OpenAIP.hpp"
+#include "Polish.hpp"
+#include "CSV.hpp"
 #include <iostream>
 #include <locale>
 #include <sstream>

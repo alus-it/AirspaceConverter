@@ -10,9 +10,9 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
-#include "aboutdialog.h"
-#include "ui_aboutdialog.h"
-#include "AirspaceConverter.h"
+#include "AboutDialog.hpp"
+#include "ui_AboutDialog.h"
+#include "AirspaceConverter.hpp"
 
 AboutDialog::AboutDialog(QWidget *parent) :
     QDialog(parent),

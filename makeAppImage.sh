@@ -60,7 +60,7 @@ OS=`uname` # current OS
 if (test "$OS" != "Darwin") then
    OS=`uname -o`  # Msys or GNU/Linux, illegal on macOS
 fi
-VER=`grep "define VERSION" src/AirspaceConverter.h | cut -d' ' -f3 | tr -d '"'`
+VER=`grep "define VERSION" src/AirspaceConverter.hpp | cut -d' ' -f3 | tr -d '"'`
 DATE=`date -I`
 DIR=`pwd`
 BIN=Release

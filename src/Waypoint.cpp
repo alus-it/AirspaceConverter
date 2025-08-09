@@ -10,7 +10,7 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
-#include "Waypoint.h"
+#include "Waypoint.hpp"
 #include <cassert>
 
 const std::string Waypoint::TYPE_NAMES[] = {

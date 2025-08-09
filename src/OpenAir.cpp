@@ -11,7 +11,7 @@
 //============================================================================
 
 #include "OpenAir.h"
-#include "AirspaceConverter.h"
+#include "AirspaceConverter.hpp"
 #include <iomanip>
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>

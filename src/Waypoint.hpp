@@ -12,7 +12,7 @@
 
 #pragma once
 #include <string>
-#include "Geometry.h"
+#include "Geometry.hpp"
 
 class Waypoint {
 

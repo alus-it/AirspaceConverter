@@ -10,11 +10,11 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
-#include "OpenAIP.h"
-#include "Airspace.h"
-#include "AirspaceConverter.h"
-#include "Waypoint.h"
-#include "Airfield.h"
+#include "OpenAIP.hpp"
+#include "Airspace.hpp"
+#include "AirspaceConverter.hpp"
+#include "Waypoint.hpp"
+#include "Airfield.hpp"
 #include <cmath>
 #include <fstream>
 #include <boost/property_tree/xml_parser.hpp>
