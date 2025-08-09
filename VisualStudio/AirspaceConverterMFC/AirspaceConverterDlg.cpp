@@ -13,10 +13,10 @@
 #include "stdafx.h"
 #include "afxdialogex.h"
 #include "afxwin.h"
-#include "AirspaceConverterApp.h"
-#include "AirspaceConverterDlg.h"
-#include "LimitsDlg.h"
-#include "Processor.h"
+#include "AirspaceConverterApp.hpp"
+#include "AirspaceConverterDlg.hpp"
+#include "LimitsDlg.hpp"
+#include "Processor.hpp"
 #include "AirspaceConverter.hpp"
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem.hpp>

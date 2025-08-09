@@ -11,8 +11,8 @@
 //============================================================================
 
 #include "stdafx.h"
-#include "AirspaceConverterApp.h"
-#include "AirspaceConverterDlg.h"
+#include "AirspaceConverterApp.hpp"
+#include "AirspaceConverterDlg.hpp"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
