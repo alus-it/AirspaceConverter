@@ -11,7 +11,7 @@
 //============================================================================
 
 #include "stdafx.h"
-#include "LimitsDlg.h"
+#include "LimitsDlg.hpp"
 #include "Resource.h"
 #include "Geometry.hpp"
 

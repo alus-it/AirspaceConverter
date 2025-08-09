@@ -116,10 +116,10 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="AirspaceConverterApp.h" />
-    <ClInclude Include="AirspaceConverterDlg.h" />
-    <ClInclude Include="LimitsDlg.h" />
-    <ClInclude Include="Processor.h" />
+    <ClInclude Include="AirspaceConverterApp.hpp" />
+    <ClInclude Include="AirspaceConverterDlg.hpp" />
+    <ClInclude Include="LimitsDlg.hpp" />
+    <ClInclude Include="Processor.hpp" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />

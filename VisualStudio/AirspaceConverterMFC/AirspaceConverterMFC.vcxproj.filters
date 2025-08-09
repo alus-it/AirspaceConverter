@@ -11,7 +11,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AirspaceConverterDlg.h">
+    <ClInclude Include="AirspaceConverterDlg.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Resource.h">
@@ -23,13 +23,13 @@
     <ClInclude Include="targetver.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="AirspaceConverterApp.h">
+    <ClInclude Include="AirspaceConverterApp.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Processor.h">
+    <ClInclude Include="Processor.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="LimitsDlg.h">
+    <ClInclude Include="LimitsDlg.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

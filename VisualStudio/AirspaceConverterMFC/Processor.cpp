@@ -11,7 +11,7 @@
 //============================================================================
 
 #include "stdafx.h"
-#include "Processor.h"
+#include "Processor.hpp"
 #include "AirspaceConverter.hpp"
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
