@@ -112,9 +112,10 @@ bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg, bool isLon) 
 	boost::tokenizer<boost::char_separator<char>>::iterator token=tokens.begin();
 	if ((*token).empty()) return false;
 	try {
+		bool warnDegDigits = false, warnMinDigits = false;
+
 		// Degrees
-		if ((*token).length() != (isLon ? 3 : 2))
-			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: wrong number of digits for %s degrees.") % linecount %(isLon ? "longitude" : "latitude")));
+		if ((*token).length() != (isLon ? 3 : 2)) warnDegDigits = true;
 		deg = std::stod(*token);
 		if (deg < 0 || deg >= (isLon ? 180 : 90)) {
 			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: invalid value of degrees for %s.") % linecount %(isLon ? "longitude" : "latitude")));
@@ -124,8 +125,7 @@ bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg, bool isLon) 
 		// Minutes
 		if (++token != tokens.end()) {
 			if ((*token).empty()) return false;
-			if (fields == 3 && (*token).length() != 2)
-				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: wrong number of digits for %s minutes.") % linecount %(isLon ? "longitude" : "latitude")));
+			if (fields == 3 && (*token).length() != 2) warnMinDigits = true;
 			const double min = std::stod(*token);
 			if (min < 0 || min >= 60) {
 				AirspaceConverter::LogError(boost::str(boost::format("on line %1d: invalid value of minutes for %s.") % linecount %(isLon ? "longitude" : "latitude")));
@@ -136,6 +136,10 @@ bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg, bool isLon) 
 			// Seconds
 			if (++token != tokens.end()) {
 				if ((*token).empty()) return false;
+				if (warnDegDigits)
+					AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: wrong number of digits for %s degrees.") % linecount %(isLon ? "longitude" : "latitude")));
+				if (warnMinDigits)
+					AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: wrong number of digits for %s minutes.") % linecount %(isLon ? "longitude" : "latitude")));
 				if ((*token).length() != 2)
 					AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: wrong number of digits for %s seconds.") % linecount %(isLon ? "longitude" : "latitude")));
 				const double sec = std::stod(*token);
