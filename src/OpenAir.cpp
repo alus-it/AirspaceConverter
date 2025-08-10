@@ -10,7 +10,7 @@
 // This source file is part of AirspaceConverter project
 //============================================================================
 
-#include "OpenAir.h"
+#include "OpenAir.hpp"
 #include "AirspaceConverter.hpp"
 #include <iomanip>
 #include <boost/algorithm/string.hpp>

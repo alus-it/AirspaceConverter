@@ -104,7 +104,7 @@
     <ClInclude Include="..\..\src\Geometry.hpp" />
     <ClInclude Include="..\..\src\KML.hpp" />
     <ClInclude Include="..\..\src\OpenAIP.hpp" />
-    <ClInclude Include="..\..\src\OpenAir.h" />
+    <ClInclude Include="..\..\src\OpenAir.hpp" />
     <ClInclude Include="..\..\src\Polish.hpp" />
     <ClInclude Include="..\..\src\RasterMap.hpp" />
     <ClInclude Include="..\..\src\SeeYou.hpp" />

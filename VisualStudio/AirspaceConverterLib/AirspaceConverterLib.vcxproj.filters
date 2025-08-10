@@ -20,7 +20,7 @@
     <ClInclude Include="..\..\src\Geometry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\OpenAir.h">
+    <ClInclude Include="..\..\src\OpenAir.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\RasterMap.hpp">

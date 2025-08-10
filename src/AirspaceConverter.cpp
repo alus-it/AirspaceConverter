@@ -15,7 +15,7 @@
 #include "Waypoint.hpp"
 #include "RasterMap.hpp"
 #include "KML.hpp"
-#include "OpenAir.h"
+#include "OpenAir.hpp"
 #include "SeeYou.hpp"
 #include "OpenAIP.hpp"
 #include "Polish.hpp"

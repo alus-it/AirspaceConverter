@@ -12,7 +12,7 @@
 //============================================================================
 
 #include "Geometry.hpp"
-#include "OpenAir.h"
+#include "OpenAir.hpp"
 #include <cmath>
 #include <cassert>
 
