@@ -143,10 +143,10 @@ bool Polish::Write(const std::string& filename, const std::multimap<int, Airspac
 		double lat,lon;
 		for (size_t i=0; i<a.GetNumberOfPoints()-1; i++) {
 			a.GetPointAt(i).GetLatLon(lat,lon);
-			file << "(" << lat << "," << lon << "),";
+			file << std::fixed << "(" << lat << "," << lon << "),";
 		}
 		a.GetLastPoint().GetLatLon(lat,lon);
-		file << "(" << lat << "," << lon << ")\n";
+		file << std::fixed << "(" << lat << "," << lon << ")\n";
 
 		//file<< "EndLevel=4\n";
 
