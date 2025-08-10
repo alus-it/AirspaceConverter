@@ -59,7 +59,7 @@ Release
 */*/Release
 build-*
 buildQt
-AirspaceConverterQt-build*
+QtGUI-build*
 
 # Ignore Eclipse project files
 .project
@@ -67,9 +67,9 @@ AirspaceConverterQt-build*
 .settings/*
 
 # Visual studio stuff
-VisualStudio/.vs
-VisualStudio/packages
-VisualStudio/ipch
+Windows/.vs
+Windows/packages
+Windows/ipch
 *.aps
 *.idb
 *.ipch
@@ -90,9 +90,9 @@ VisualStudio/ipch
 .vscode/*
 
 # Generated readme
-VisualStudio/Readme.rtf
+Windows/Readme.rtf
 
 # QT stuff
 *.user
 *.pro.user.*
-AirspaceConverterQt/.qtc_clangd/*
+QtGUI/.qtc_clangd/*
