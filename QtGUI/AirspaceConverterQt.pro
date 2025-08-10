@@ -74,10 +74,10 @@ macx: LIBS += -L/usr/local/lib/ -lzip
 win32:contains(QMAKE_HOST.arch, x86_64) {
 
     # libAirspaceConverter
-    win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../VisualStudio/Release/x64/ -lAirspaceConverterLib
-    else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../VisualStudio/Debug/x64/ -lAirspaceConverterLib
-    win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../VisualStudio/Release/x64/AirspaceConverterLib.lib
-    else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../VisualStudio/Debug/x64/AirspaceConverterLib.lib
+    win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../Windows/Release/x64/ -lAirspaceConverterLib
+    else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../Windows/Debug/x64/ -lAirspaceConverterLib
+    win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../Windows/Release/x64/AirspaceConverterLib.lib
+    else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../Windows/Debug/x64/AirspaceConverterLib.lib
 
     # Boost libraries
 
@@ -94,19 +94,19 @@ win32:contains(QMAKE_HOST.arch, x86_64) {
     #DEPENDPATH += C:/boost_1_65_1
 
     # libzip
-    win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../VisualStudio/packages/libzip.1.1.2.7/build/native/lib/x64/v140/Release/ -lzip
-    else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../VisualStudio/packages/libzip.1.1.2.7/build/native/lib/x64/v140/Debug/ -lzip
-    INCLUDEPATH += $$PWD/../VisualStudio/packages/libzip.1.1.2.7/build/native/include
-    DEPENDPATH += $$PWD/../VisualStudio/packages/libzip.1.1.2.7/build/native/include
+    win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../Windows/packages/libzip.1.1.2.7/build/native/lib/x64/v140/Release/ -lzip
+    else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../Windows/packages/libzip.1.1.2.7/build/native/lib/x64/v140/Debug/ -lzip
+    INCLUDEPATH += $$PWD/../Windows/packages/libzip.1.1.2.7/build/native/include
+    DEPENDPATH += $$PWD/../Windows/packages/libzip.1.1.2.7/build/native/include
 
 ## Windows libraries on 32 bit
 } else {
 
     # Windows link to libAirspaceConverter
-    win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../VisualStudio/Release/Win32/ -lAirspaceConverterLib
-    else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../VisualStudio/Debug/Win32/ -lAirspaceConverterLib
-    win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../VisualStudio/Release/Win32/AirspaceConverterLib.lib
-    else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../VisualStudio/Debug/Win32/AirspaceConverterLib.lib
+    win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../Windows/Release/Win32/ -lAirspaceConverterLib
+    else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../Windows/Debug/Win32/ -lAirspaceConverterLib
+    win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../Windows/Release/Win32/AirspaceConverterLib.lib
+    else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../Windows/Debug/Win32/AirspaceConverterLib.lib
 
     # Windows link to boost libraries
 
@@ -123,8 +123,8 @@ win32:contains(QMAKE_HOST.arch, x86_64) {
     #DEPENDPATH += C:\boost_1_65_1
 
     # Windows link to libzip
-    win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../VisualStudio/packages/libzip.1.1.2.7/build/native/lib/Win32/v140/Release/ -lzip
-    else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../VisualStudio/packages/libzip.1.1.2.7/build/native/lib/Win32/v140/Debug/ -lzip
-    INCLUDEPATH += $$PWD/../VisualStudio/packages/libzip.1.1.2.7/build/native/include
-    DEPENDPATH += $$PWD/../VisualStudio/packages/libzip.1.1.2.7/build/native/include
+    win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../Windows/packages/libzip.1.1.2.7/build/native/lib/Win32/v140/Release/ -lzip
+    else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../Windows/packages/libzip.1.1.2.7/build/native/lib/Win32/v140/Debug/ -lzip
+    INCLUDEPATH += $$PWD/../Windows/packages/libzip.1.1.2.7/build/native/include
+    DEPENDPATH += $$PWD/../Windows/packages/libzip.1.1.2.7/build/native/include
 }

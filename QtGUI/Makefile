@@ -17,7 +17,7 @@ CXX           = x86_64-linux-gnu-g++
 DEFINES       = -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -O2 -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -O2 -std=gnu++11 -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I. -I../src -IC:/boost_1_61_0 -I/home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt/../VisualStudio/packages/libzip.1.1.2.7/build/native/include -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I. -I. -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++
+INCPATH       = -I. -I../src -IC:/boost_1_61_0 -I/home/alus/source/workspace/AirspaceConverter/QtGUI/../Windows/packages/libzip.1.1.2.7/build/native/include -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I. -I. -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++
 QMAKE         = /usr/lib/qt5/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -37,10 +37,10 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = airspaceconverter-gui1.0.0
-DISTDIR = /home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt/.tmp/airspaceconverter-gui1.0.0
+DISTDIR = /home/alus/source/workspace/AirspaceConverter/QtGUI/.tmp/airspaceconverter-gui1.0.0
 LINK          = x86_64-linux-gnu-g++
 LFLAGS        = -Wl,-O1
-LIBS          = $(SUBLIBS) -L/home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt/../Release/ -lairspaceconverter '-Wl,-rpath=$$ORIGIN' -L/usr/lib/x86_64-linux-gnu/ -lboost_filesystem -lboost_system -lboost_locale -lzip /usr/lib/x86_64-linux-gnu/libQt5Widgets.so /usr/lib/x86_64-linux-gnu/libQt5Gui.so /usr/lib/x86_64-linux-gnu/libQt5Core.so -lGL -lpthread   
+LIBS          = $(SUBLIBS) -L/home/alus/source/workspace/AirspaceConverter/QtGUI/../Release/ -lairspaceconverter '-Wl,-rpath=$$ORIGIN' -L/usr/lib/x86_64-linux-gnu/ -lboost_filesystem -lboost_system -lboost_locale -lzip /usr/lib/x86_64-linux-gnu/libQt5Widgets.so /usr/lib/x86_64-linux-gnu/libQt5Gui.so /usr/lib/x86_64-linux-gnu/libQt5Core.so -lGL -lpthread   
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
@@ -382,19 +382,19 @@ compiler_moc_header_clean:
 moc_AboutDialog.cpp: AboutDialog.hpp \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
-	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt -I/home/alus/source/workspace/AirspaceConverter/src -I/home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt/C:/boost_1_61_0 -I/home/alus/source/workspace/AirspaceConverter/VisualStudio/packages/libzip.1.1.2.7/build/native/include -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/11 -I/usr/include/x86_64-linux-gnu/c++/11 -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-linux-gnu/11/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include AboutDialog.hpp -o moc_AboutDialog.cpp
+	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/alus/source/workspace/AirspaceConverter/QtGUI/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/alus/source/workspace/AirspaceConverter/QtGUI -I/home/alus/source/workspace/AirspaceConverter/src -I/home/alus/source/workspace/AirspaceConverter/QtGUI/C:/boost_1_61_0 -I/home/alus/source/workspace/AirspaceConverter/Windows/packages/libzip.1.1.2.7/build/native/include -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/11 -I/usr/include/x86_64-linux-gnu/c++/11 -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-linux-gnu/11/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include AboutDialog.hpp -o moc_AboutDialog.cpp
 
 moc_LimitsDialog.cpp: LimitsDialog.hpp \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
-	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt -I/home/alus/source/workspace/AirspaceConverter/src -I/home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt/C:/boost_1_61_0 -I/home/alus/source/workspace/AirspaceConverter/VisualStudio/packages/libzip.1.1.2.7/build/native/include -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/11 -I/usr/include/x86_64-linux-gnu/c++/11 -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-linux-gnu/11/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include LimitsDialog.hpp -o moc_LimitsDialog.cpp
+	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/alus/source/workspace/AirspaceConverter/QtGUI/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/alus/source/workspace/AirspaceConverter/QtGUI -I/home/alus/source/workspace/AirspaceConverter/src -I/home/alus/source/workspace/AirspaceConverter/QtGUI/C:/boost_1_61_0 -I/home/alus/source/workspace/AirspaceConverter/Windows/packages/libzip.1.1.2.7/build/native/include -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/11 -I/usr/include/x86_64-linux-gnu/c++/11 -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-linux-gnu/11/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include LimitsDialog.hpp -o moc_LimitsDialog.cpp
 
 moc_MainWindow.cpp: MainWindow.hpp \
 		AboutDialog.hpp \
 		LimitsDialog.hpp \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
-	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt -I/home/alus/source/workspace/AirspaceConverter/src -I/home/alus/source/workspace/AirspaceConverter/AirspaceConverterQt/C:/boost_1_61_0 -I/home/alus/source/workspace/AirspaceConverter/VisualStudio/packages/libzip.1.1.2.7/build/native/include -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/11 -I/usr/include/x86_64-linux-gnu/c++/11 -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-linux-gnu/11/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include MainWindow.hpp -o moc_MainWindow.cpp
+	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/alus/source/workspace/AirspaceConverter/QtGUI/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/alus/source/workspace/AirspaceConverter/QtGUI -I/home/alus/source/workspace/AirspaceConverter/src -I/home/alus/source/workspace/AirspaceConverter/QtGUI/C:/boost_1_61_0 -I/home/alus/source/workspace/AirspaceConverter/Windows/packages/libzip.1.1.2.7/build/native/include -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/11 -I/usr/include/x86_64-linux-gnu/c++/11 -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-linux-gnu/11/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include MainWindow.hpp -o moc_MainWindow.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:

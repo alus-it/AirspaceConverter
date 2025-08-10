@@ -42,9 +42,9 @@ echo "Building AirspaceConverter Qt GUI ..."
 mkdir -p buildQt
 cd buildQt
 if [ ${SYSTEM} == "Linux" ]; then
-	$QMAKE ../AirspaceConverterQt/AirspaceConverterQt.pro -r -spec linux-g++-64
+	$QMAKE ../QtGUI/AirspaceConverterQt.pro -r -spec linux-g++-64
 else
-	$QMAKE ../AirspaceConverterQt/AirspaceConverterQt.pro -r -spec macx-clang CONFIG+=x86_64
+	$QMAKE ../QtGUI/AirspaceConverterQt.pro -r -spec macx-clang CONFIG+=x86_64
 fi
 if [ "$?" -ne 0 ]; then
 	echo "ERROR: Failed to run qmake."
