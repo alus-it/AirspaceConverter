@@ -241,7 +241,7 @@ bool OpenAir::Read(const std::string& fileName) {
 
 	linecount = 0;
 	std::string sLine;
-	bool allParsedOK = true, needToDetectCRLF = true, initialCRLF = false, isCRLF = false, lineEndindingConsistent = true;
+	bool allParsedOK = true, needToDetectCRLF = true, initialCRLF = false, isCRLF = false, lineEndingConsistent = true;
 	Airspace airspace;
 	while (!input.eof() && input.good()) {
 
@@ -249,18 +249,18 @@ bool OpenAir::Read(const std::string& fileName) {
 		AirspaceConverter::SafeGetline(input, sLine, isCRLF);
 		++linecount;
 
-		// Verify line endig at first line
+		// Verify line ending at first line
 		if (needToDetectCRLF) {
 			initialCRLF = isCRLF;
 			needToDetectCRLF = false;
 		}
 
 		// Verify line ending
-		if (lineEndindingConsistent && isCRLF != initialCRLF && !sLine.empty()) {
+		if (lineEndingConsistent && isCRLF != initialCRLF && !sLine.empty()) {
 			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: not consistent line ending style, file started with: %s.") % linecount %(initialCRLF ? "CR LF" : "LF")));
 
 			// OpenAir files may contain thousands of lines we don't want to print this warning all the time
-			lineEndindingConsistent = false;
+			lineEndingConsistent = false;
 		}
 		
 		// Directly skip empty lines
