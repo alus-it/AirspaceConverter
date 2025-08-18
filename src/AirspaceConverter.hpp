@@ -23,6 +23,7 @@
 #include <istream>
 
 class Airspace;
+class Altitude;
 class Waypoint;
 class RasterMap;
 
@@ -90,6 +91,7 @@ public:
 	inline unsigned long GetNumOfAirspaces() const { return (unsigned long)airspaces.size(); }
 	inline unsigned long GetNumOfWaypoints() const { return (unsigned long)waypoints.size(); }
 	bool FilterOnLatLonLimits(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon);
+	bool FilterOnAltitudeLimits(const Altitude& floor, const Altitude& ceiling);
 	inline void ProcessTracksAsAirspaces(const bool treatTracksAsAirspaces = true) { processLineStrings = treatTracksAsAirspaces; }
 	static void DoNotCalculateArcsAndCirconferences(const bool doNotCalcArcs = true);
 	static void SetOpenAirCoodinatesAutomatic();

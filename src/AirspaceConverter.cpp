@@ -573,10 +573,10 @@ bool AirspaceConverter::FilterOnLatLonLimits(const double& topLat, const double&
 	if (!airspaces.empty()) {
 		const unsigned long origAirspaces(GetNumOfAirspaces());
 		for (std::multimap<int, Airspace>::iterator it = airspaces.begin(); it != airspaces.end(); ) {
-			if ((*it).second.IsWithinLimits(limits)) ++it;
+			if ((*it).second.IsWithinLatLonLimits(limits)) ++it;
 			else it = airspaces.erase(it);
 		}
-		LogMessage(boost::str(boost::format("Filtering airspaces... excluded: %1d, remaining: %2d") %(origAirspaces - GetNumOfAirspaces()) %GetNumOfAirspaces()));
+		LogMessage(boost::str(boost::format("Filtering airspaces on position... excluded: %1d, remaining: %2d") %(origAirspaces - GetNumOfAirspaces()) %GetNumOfAirspaces()));
 	}
 
 	// Filter waypoints
@@ -590,10 +590,47 @@ bool AirspaceConverter::FilterOnLatLonLimits(const double& topLat, const double&
 				delete(w);
 			}
 		}
-		LogMessage(boost::str(boost::format("Filtering waypoints... excluded: %1d, remaining: %2d ") %(origWaypoints - GetNumOfWaypoints()) %GetNumOfWaypoints()));
+		LogMessage(boost::str(boost::format("Filtering waypoints on position... excluded: %1d, remaining: %2d ") %(origWaypoints - GetNumOfWaypoints()) %GetNumOfWaypoints()));
 	}
 
 	return true;
+}
+
+bool AirspaceConverter::FilterOnAltitudeLimits(const Altitude& floor, const Altitude& ceiling) {
+	// Check if it is necessary to filter
+	if (floor.GetAltFt() <= -10000 && ceiling.IsUnlimited()) return true;
+
+	// Check if it is valid limits
+	if (ceiling < floor) return false;
+
+	// Filter airspace
+	if (!airspaces.empty()) {
+		const unsigned long origAirspaces(GetNumOfAirspaces());
+		for (std::multimap<int, Airspace>::iterator it = airspaces.begin(); it != airspaces.end(); ) {
+			if ((*it).second.IsWithinAltLimits(floor, ceiling)) ++it;
+			else it = airspaces.erase(it);
+		}
+		LogMessage(boost::str(boost::format("Filtering airspaces on altitude... excluded: %1d, remaining: %2d") %(origAirspaces - GetNumOfAirspaces()) %GetNumOfAirspaces()));
+	}
+
+	// Filter waypoints
+	if (!waypoints.empty()) {
+		const unsigned long origWaypoints(GetNumOfWaypoints());
+		for (std::multimap<int, Waypoint*>::iterator it = waypoints.begin(); it != waypoints.end(); ) {
+			Waypoint* w = (*it).second;
+			const Altitude altWptMt(w->GetAltitude(), true, true);
+
+			if (altWptMt >= floor && altWptMt <= ceiling) ++it;
+			else {
+				it = waypoints.erase(it);
+				delete(w);
+			}
+		}
+		LogMessage(boost::str(boost::format("Filtering waypoints on altitude... excluded: %1d, remaining: %2d ") %(origWaypoints - GetNumOfWaypoints()) %GetNumOfWaypoints()));
+	}
+
+	return true;
+
 }
 
 void AirspaceConverter::DoNotCalculateArcsAndCirconferences(const bool doNotCalcArcs /*= true*/) {

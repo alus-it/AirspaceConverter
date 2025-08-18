@@ -95,6 +95,11 @@ Output filter limits in latitude and longitude, it must be followed by the 4 lim
 The limits are comma separated, expressed in degrees, without spaces.
 Negative values represent south latitudes or west longitudes.
 .TP
+.BR \-u " " \fIlowAltitude,hiAltitude\fR
+Output filter limits in altitude, it must be followed by 1 or 2 limit values.
+The limits are comma separated, expressed in feet, without spaces.
+If the high limit is omitted it will be considered as unlimited.
+.TP
 .BR \-o " " \fIoutputFile\fR
 Output file, can be: .kmz (Google Earth), .txt (OpenAir), .cup (SeeYou), .csv (LittleNavMap), .img (Garmin) or .mp (Polish).
 If not specified will be used the name of first input file as KMZ.
