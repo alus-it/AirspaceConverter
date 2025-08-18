@@ -56,7 +56,6 @@ int main(int argc, char *argv[]) {
 	Altitude limitLowAltitude(-10000), limitHiAltitude;
 	limitHiAltitude.SetUnlimited();
 
-
 	for(int i=1; i<argc; i++) {
 		size_t len=strlen(argv[i]);
 		if(len != 2 || argv[i][0]!='-') {
