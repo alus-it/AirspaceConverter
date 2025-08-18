@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>469</width>
-    <height>314</height>
+    <width>481</width>
+    <height>556</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,228 +16,492 @@
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
-     <x>360</x>
-     <y>10</y>
-     <width>91</width>
-     <height>51</height>
+     <x>300</x>
+     <y>520</y>
+     <width>171</width>
+     <height>31</height>
     </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
    </property>
    <property name="toolTip">
     <string>Confirm and apply filter selection with &quot;OK&quot; or abort with &quot;Cancel&quot;.</string>
    </property>
    <property name="orientation">
-    <enum>Qt::Vertical</enum>
+    <enum>Qt::Horizontal</enum>
    </property>
    <property name="standardButtons">
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
    </property>
   </widget>
-  <widget class="QFrame" name="frame">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>70</y>
-     <width>211</width>
-     <height>161</height>
-    </rect>
-   </property>
-   <property name="frameShape">
-    <enum>QFrame::StyledPanel</enum>
-   </property>
-   <property name="frameShadow">
-    <enum>QFrame::Raised</enum>
-   </property>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>60</x>
-      <y>70</y>
-      <width>101</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Selected area</string>
-    </property>
-   </widget>
-  </widget>
-  <widget class="QDoubleSpinBox" name="topLatSpinBox">
-   <property name="geometry">
-    <rect>
-     <x>250</x>
-     <y>40</y>
-     <width>91</width>
-     <height>24</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>Enter here the northern latitude of your selection</string>
-   </property>
-   <property name="decimals">
-    <number>3</number>
-   </property>
-   <property name="minimum">
-    <double>-90.000000000000000</double>
-   </property>
-   <property name="maximum">
-    <double>90.000000000000000</double>
-   </property>
-   <property name="value">
-    <double>90.000000000000000</double>
-   </property>
-  </widget>
-  <widget class="QDoubleSpinBox" name="bottomLatSpinBox">
-   <property name="geometry">
-    <rect>
-     <x>250</x>
-     <y>240</y>
-     <width>91</width>
-     <height>24</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>Enter here the southern latitude of your selection</string>
-   </property>
-   <property name="decimals">
-    <number>3</number>
-   </property>
-   <property name="minimum">
-    <double>-90.000000000000000</double>
-   </property>
-   <property name="maximum">
-    <double>90.000000000000000</double>
-   </property>
-   <property name="value">
-    <double>-90.000000000000000</double>
-   </property>
-  </widget>
-  <widget class="QDoubleSpinBox" name="rightLonSpinBox">
-   <property name="geometry">
-    <rect>
-     <x>350</x>
-     <y>130</y>
-     <width>101</width>
-     <height>24</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>Enter here the eastern longitude of your selection</string>
-   </property>
-   <property name="decimals">
-    <number>3</number>
-   </property>
-   <property name="minimum">
-    <double>-180.000000000000000</double>
-   </property>
-   <property name="maximum">
-    <double>180.000000000000000</double>
-   </property>
-   <property name="value">
-    <double>180.000000000000000</double>
-   </property>
-  </widget>
-  <widget class="QDoubleSpinBox" name="leftLonSpinBox">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>130</y>
-     <width>101</width>
-     <height>24</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>Enter here the western longitude of your selection</string>
-   </property>
-   <property name="decimals">
-    <number>3</number>
-   </property>
-   <property name="minimum">
-    <double>-180.000000000000000</double>
-   </property>
-   <property name="maximum">
-    <double>180.000000000000000</double>
-   </property>
-   <property name="value">
-    <double>-180.000000000000000</double>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>40</y>
-     <width>111</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>North latitude:</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_3">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>110</y>
-     <width>111</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>West longitude:</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_4">
-   <property name="geometry">
-    <rect>
-     <x>350</x>
-     <y>110</y>
-     <width>111</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>East longitude:</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_5">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>240</y>
-     <width>111</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>South latitude:</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_6">
+  <widget class="QGroupBox" name="positionGroupBox">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>341</width>
-     <height>16</height>
+     <width>461</width>
+     <height>301</height>
     </rect>
    </property>
-   <property name="text">
-    <string>Insert the bounds of the area to filter on.</string>
+   <property name="title">
+    <string>Filter on postion</string>
    </property>
+   <widget class="QLabel" name="label_7">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>270</y>
+      <width>451</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Negative latitudes are to South, negative longitudes are to West.</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>80</y>
+      <width>111</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>North latitude:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>240</y>
+      <width>111</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>South latitude:</string>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="leftLonSpinBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>160</y>
+      <width>101</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Enter here the western longitude of your selection</string>
+    </property>
+    <property name="decimals">
+     <number>3</number>
+    </property>
+    <property name="minimum">
+     <double>-180.000000000000000</double>
+    </property>
+    <property name="maximum">
+     <double>180.000000000000000</double>
+    </property>
+    <property name="value">
+     <double>-180.000000000000000</double>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="bottomLatSpinBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>240</y>
+      <width>91</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Enter here the southern latitude of your selection</string>
+    </property>
+    <property name="decimals">
+     <number>3</number>
+    </property>
+    <property name="minimum">
+     <double>-90.000000000000000</double>
+    </property>
+    <property name="maximum">
+     <double>90.000000000000000</double>
+    </property>
+    <property name="value">
+     <double>-90.000000000000000</double>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="rightLonSpinBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>350</x>
+      <y>160</y>
+      <width>101</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Enter here the eastern longitude of your selection</string>
+    </property>
+    <property name="decimals">
+     <number>3</number>
+    </property>
+    <property name="minimum">
+     <double>-180.000000000000000</double>
+    </property>
+    <property name="maximum">
+     <double>180.000000000000000</double>
+    </property>
+    <property name="value">
+     <double>180.000000000000000</double>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="topLatSpinBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>80</y>
+      <width>91</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Enter here the northern latitude of your selection</string>
+    </property>
+    <property name="decimals">
+     <number>3</number>
+    </property>
+    <property name="minimum">
+     <double>-90.000000000000000</double>
+    </property>
+    <property name="maximum">
+     <double>90.000000000000000</double>
+    </property>
+    <property name="value">
+     <double>90.000000000000000</double>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_6">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>60</y>
+      <width>341</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Insert the bounds of the area to filter on.</string>
+    </property>
+   </widget>
+   <widget class="QFrame" name="positionArea">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>110</y>
+      <width>211</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>50</y>
+       <width>101</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Selected area</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>140</y>
+      <width>111</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>West longitude:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>350</x>
+      <y>140</y>
+      <width>111</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>East longitude:</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="filterOnPositionCheckBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>161</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Tick this check box to enable the area filter.</string>
+    </property>
+    <property name="text">
+     <string>Enable area filter</string>
+    </property>
+   </widget>
   </widget>
-  <widget class="QLabel" name="label_7">
+  <widget class="QGroupBox" name="altitudeGroupBox">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>270</y>
-     <width>451</width>
-     <height>20</height>
+     <y>320</y>
+     <width>461</width>
+     <height>191</height>
     </rect>
    </property>
-   <property name="text">
-    <string>Negative latitudes are to South, negative longitudes are to West.</string>
+   <property name="title">
+    <string>Filter on altitude</string>
    </property>
+   <widget class="QCheckBox" name="filterOnAltitudeCheckBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>161</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Tick this check box to enable the altitude filter.</string>
+    </property>
+    <property name="text">
+     <string>Enable altitude filter</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_8">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>70</y>
+      <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Celing limit:</string>
+    </property>
+   </widget>
+   <widget class="QFrame" name="altitudeArea">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>70</y>
+      <width>121</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QLabel" name="label_9">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>50</y>
+       <width>111</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Selected height</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QLabel" name="label_10">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>160</y>
+      <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Floor limit:</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="hiAltLimitSpinBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>70</y>
+      <width>121</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Enter here the maximum altitude MSL for the altitude filter.</string>
+    </property>
+    <property name="minimum">
+     <number>-10000</number>
+    </property>
+    <property name="maximum">
+     <number>200000</number>
+    </property>
+    <property name="value">
+     <number>200000</number>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="lowAltLimitSpinBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>160</y>
+      <width>121</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Enter here the minimum altitude MSL for the altitude filter.</string>
+    </property>
+    <property name="minimum">
+     <number>-10000</number>
+    </property>
+    <property name="maximum">
+     <number>200000</number>
+    </property>
+    <property name="value">
+     <number>-10000</number>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="unlimitedTopAltitudeCheckBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>40</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Tick this check box to remove the maximum altitude limit.</string>
+    </property>
+    <property name="text">
+     <string>Unlimited top</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="hiAltLimitUnitComboBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>70</y>
+      <width>61</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Select here the measure unit for the maximum filtering altitude.</string>
+    </property>
+    <property name="maxVisibleItems">
+     <number>2</number>
+    </property>
+    <property name="insertPolicy">
+     <enum>QComboBox::NoInsert</enum>
+    </property>
+    <item>
+     <property name="text">
+      <string>Ft</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>m</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QComboBox" name="lowAltLimitUnitComboBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>160</y>
+      <width>61</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Select here the measure unit for the minimum filtering altitude.</string>
+    </property>
+    <property name="maxVisibleItems">
+     <number>2</number>
+    </property>
+    <property name="insertPolicy">
+     <enum>QComboBox::NoInsert</enum>
+    </property>
+    <item>
+     <property name="text">
+      <string>Ft</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>m</string>
+     </property>
+    </item>
+   </widget>
   </widget>
  </widget>
  <tabstops>

@@ -675,7 +675,6 @@
     </property>
     <property name="font">
      <font>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
     </property>
@@ -699,13 +698,13 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Opens a dialog to define a filtering area. When the filter is applied all airspace and waypoints outside the defined area will be unloaded. So, when converting, the resulting output will be only in the selected area.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Opens a dialog to define a filtering area and or altitude range. When the filter is applied all airspace and waypoints outside the defined area will be unloaded. So, when converting, the resulting output will be only in the selected area and or altitude range.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="locale">
      <locale language="English" country="UnitedStates"/>
     </property>
     <property name="text">
-     <string>Filter on area</string>
+     <string>Filter</string>
     </property>
    </widget>
    <widget class="QCheckBox" name="onlyPointsCheckBox">

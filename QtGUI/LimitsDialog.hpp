@@ -17,6 +17,8 @@ namespace Ui {
 class LimitsDialog;
 }
 
+class Altitude;
+
 class LimitsDialog : public QDialog
 {
     Q_OBJECT
@@ -27,11 +29,15 @@ public:
 
 private slots:
     void on_buttonBox_accepted();
+    void on_filterOnAltitudeCheckBox_stateChanged(int checked);
+    void on_filterOnPositionCheckBox_stateChanged(int checked);
+    void on_unlimitedTopAltitudeCheckBox_stateChanged(int checked);
 
 private:
     Ui::LimitsDialog *ui;
     bool validLimits;
 
 signals:
-    void validLimitsSet(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon);
+    void validPositionLimitsSet(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon);
+    void validAltitudeLimitsSet(const Altitude& floor, const Altitude& ceil);
 };
