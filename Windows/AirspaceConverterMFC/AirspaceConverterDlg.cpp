@@ -603,7 +603,7 @@ void CAirspaceConverterDlg::OnBnClickedFilterBt() {
 	assert(converter != nullptr);
 	CLimitsDlg dlgLimits;
 	dlgLimits.DoModal();
-	if (dlgLimits.HasValidLimits()) {
+	if (dlgLimits.HasValidAreaLimits()) {
 		StartBusy();
 		converter->FilterOnLatLonLimits(dlgLimits.GetTopLatLimit(), dlgLimits.GetBottomLatLimit(), dlgLimits.GetLeftLonLimit(), dlgLimits.GetRightLonLimit());
 		EndBusy();

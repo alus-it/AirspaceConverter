@@ -21,7 +21,10 @@ CLimitsDlg::CLimitsDlg() :
 	southLatLimit(-90),
 	eastLonLimit(180),
 	westLonLimit(-180),
-	validLimitsSet(false) {
+	validAreaLimitsSet(false),
+	topAltitude(200000.0),
+	lowAltitude(-10000.0),
+	validAltitudeLimitsSet(false) {
 }
 
 void CLimitsDlg::DoDataExchange(CDataExchange* pDX) {
@@ -34,14 +37,21 @@ void CLimitsDlg::DoDataExchange(CDataExchange* pDX) {
 	DDV_MinMaxDouble(pDX, eastLonLimit, -180, 180);
 	DDX_Text(pDX, IDC_WEST, westLonLimit);
 	DDV_MinMaxDouble(pDX, westLonLimit, -180, 180);
+
+	//TODO: work in progress...
+	double topAltLimit = topAltitude.GetAltFt();
+	DDX_Text(pDX, IDC_TOP_ALT_LIMIT, topAltLimit);
+	DDV_MinMaxDouble(pDX, topAltLimit, -10000, 200000);
+	topAltitude = Altitude(topAltLimit);
+	double lowAltLimit = lowAltitude.GetAltFt();
+	DDX_Text(pDX, IDC_LOW_ALT_LIMIT, lowAltLimit);
+	DDV_MinMaxDouble(pDX, lowAltLimit, -10000, 200000);
+	lowAltitude = Altitude(lowAltLimit);
 }
 
 void CLimitsDlg::OnOK() {
 	if (!UpdateData(TRUE)) return;
-	validLimitsSet = Geometry::Limits(northLatLimit, southLatLimit, westLonLimit, eastLonLimit).IsValid();
-	if (validLimitsSet) return CDialog::OnOK();
+	validAreaLimitsSet = Geometry::Limits(northLatLimit, southLatLimit, westLonLimit, eastLonLimit).IsValid();
+	if (validAreaLimitsSet) return CDialog::OnOK();
 	MessageBox(_T("The inserted limits are not valid!"), _T("Error"), MB_ICONERROR);
 }
-BEGIN_MESSAGE_MAP(CLimitsDlg, CDialog)
-	
-END_MESSAGE_MAP()
