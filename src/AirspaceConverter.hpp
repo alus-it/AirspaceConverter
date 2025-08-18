@@ -82,7 +82,6 @@ public:
 	inline static void SetDefaultTerrainAlt(const double& defaultAltMt) { defaultTerrainAltitudeMt = defaultAltMt; }
 	inline static double GetDefaultTerrainAlt() { return defaultTerrainAltitudeMt; }
 	bool Convert();
-	bool ConvertOpenAIPdir(const std::string openAIPdir);
 	inline bool IsConversionDone() const { return conversionDone; }
 	inline OutputType GetOutputType() const { return DetermineType(outputFile); }
 	inline bool SetOutputType(const OutputType type) { return PutTypeExtension(type, outputFile); }
