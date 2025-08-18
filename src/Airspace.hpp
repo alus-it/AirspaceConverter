@@ -14,52 +14,7 @@
 #include <string>
 #include <vector>
 #include "Geometry.hpp"
-
-class Altitude {
-public:
-	Altitude() : refIsMsl(false), fl(0), altFt(0), altMt(0), isUnlimited(false) {}
-	//Altitude(const int feet, const bool isAMSL) : refIsMsl(isAMSL), fl(0), altFt(feet), altMt(feet * FEET2METER), isUnlimited(false) {}
-	//Altitude(const double meters, const bool isAMSL) : refIsMsl(isAMSL), fl(0), altFt((int)(meters / FEET2METER)), altMt(meters), isUnlimited(false) {}
-	//Altitude(const int FL);
-
-	inline void SetAltFt(const int ft, const bool isAMSL = true) { refIsMsl = isAMSL; altMt = ft*FEET2METER; altFt = ft; fl = 0; isUnlimited = false; }
-	inline void SetAltMt(const double mt, const bool isAMSL = true) { refIsMsl = isAMSL;  altFt = (int)(mt / FEET2METER); altMt = mt; fl = 0; isUnlimited = false; }
-	void SetFlightLevel(const int FL);
-	inline void SetGND() { refIsMsl = false; altMt = 0; altFt = 0; fl = 0; isUnlimited = false; }
-	inline void SetUnlimited() { SetFlightLevel(600); isUnlimited = true; }
-	inline bool IsAMSL() const { return refIsMsl; }
-	inline bool IsAGL() const { return !refIsMsl; }
-	inline bool IsFL() const { return fl != 0; }
-	inline bool IsUnlimited() const { return isUnlimited; }
-	inline int GetAltFt() const { return altFt; }
-	inline double GetAltMt() const { return altMt; }
-	inline bool IsGND() const { return !refIsMsl && altFt == 0; }
-	inline bool IsMSL() const { return refIsMsl && altFt == 0; }
-	bool operator<(const Altitude& other) const;
-	bool operator>(const Altitude& other) const;
-	bool operator>=(const Altitude& other) const;
-	bool operator<=(const Altitude& other) const;
-	bool operator==(const Altitude& other) const;
-	bool operator!=(const Altitude& other) const;
-	
-	const std::string ToString() const;
-	inline static void SetQNH(const double QNHmb) { QNH = QNHmb; }
-	inline static double GetQNH() { return QNH; }
-	static const double FEET2METER;
-
-private:
-	static double QNEaltitudeToStaticPressure(const double alt);
-	static double StaticPressureToQNHaltitude(const double ps);
-	static double QNEaltitudeToQNHaltitude(const double ps);
-
-	bool refIsMsl;
-	int fl; // Flight level
-	int altFt; // Alt in feet
-	double altMt; // Alt in meters
-	bool isUnlimited;
-	static const double K1, K2, QNE;
-	static double QNH;
-};
+#include "Altitude.hpp"
 
 class Airspace {
 public:
@@ -147,7 +102,8 @@ public:
 	bool ArePointsValid() const;
 	void RemoveTooCloseConsecutivePoints();
 	bool Undiscretize();
-	bool IsWithinLimits(const Geometry::Limits& limits) const;
+	bool IsWithinLatLonLimits(const Geometry::Limits& limits) const;
+	bool IsWithinAltLimits(const Altitude& floor, const Altitude& ceil) const;
 	inline void CutPointsFrom(Airspace& orig) { points = std::move(orig.points); }
 	inline const Type& GetType() const { return type; }
 	inline const Type& GetClass() const { return airspaceClass; }

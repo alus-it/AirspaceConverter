@@ -64,6 +64,7 @@ DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)$*.Td
 # List of C++ source files
 CPPFILES =                \
 	Airfield.cpp          \
+	Altitude.cpp          \
 	Airspace.cpp          \
 	AirspaceConverter.cpp \
 	SeeYou.cpp            \
