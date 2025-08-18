@@ -12,6 +12,7 @@
 
 #pragma once
 #include "afxwin.h"
+#include "Altitude.hpp"
 
 // CLimitsDlg dialog used to se the limits for filtering
 class CLimitsDlg : public CDialog {
@@ -23,11 +24,15 @@ public:
 	enum { IDD = IDD_LIMITS_DIALOG };
 #endif
 
-	inline bool HasValidLimits() const { return validLimitsSet; }
+	inline bool HasValidAreaLimits() const { return validAreaLimitsSet; }
 	inline double GetTopLatLimit() const { return northLatLimit; }
 	inline double GetBottomLatLimit() const { return southLatLimit; }
 	inline double GetLeftLonLimit() const { return westLonLimit; }
 	inline double GetRightLonLimit() const { return eastLonLimit; }
+	inline const Altitude& GetTopAltitude() const { return topAltitude; }
+	inline const Altitude& GetLowAltitude() const { return lowAltitude; }
+	inline bool HasValidAltitudeLimits() const { return validAltitudeLimitsSet; }
+
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -38,7 +43,8 @@ private:
 	double southLatLimit;
 	double eastLonLimit;
 	double westLonLimit;
-	bool validLimitsSet;
-public:
-	DECLARE_MESSAGE_MAP()
+	bool validAreaLimitsSet;
+	Altitude topAltitude;
+	Altitude lowAltitude;
+	bool validAltitudeLimitsSet;
 };
