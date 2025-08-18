@@ -50,7 +50,6 @@ int main(int argc, char *argv[]) {
 	AirspaceConverter ac;
 	bool limitsAreSet(false);
 	double topLat(90), bottomLat(-90), leftLon(-180), rightLon(180);
-	std::string openAIPdir;
 
 	for(int i=1; i<argc; i++) {
 		size_t len=strlen(argv[i]);
@@ -157,17 +156,13 @@ int main(int argc, char *argv[]) {
 			std::cout << "https://www.alus.it/AirspaceConverter" << std::endl << std::endl;
 			if (argc == 2) return EXIT_SUCCESS;
 			break;
-		case 'D':
-			if(hasValueAfter) openAIPdir = argv[++i];
-			else std::cerr << "ERROR: input openAIP airspace directory path not found."<< std::endl;
-			break;
 		default:
 			std::cerr << "Warning: Skipping unknown option: " << argv[i] << std::endl;
 			break;
 		}
 	}
 
-	if (openAIPdir.empty() && ac.GetNumberOfAirspaceFiles() == 0 && ac.GetNumberOfWaypointFiles() == 0) {
+	if (ac.GetNumberOfAirspaceFiles() == 0 && ac.GetNumberOfWaypointFiles() == 0) {
 		std::cerr << "ERROR: No input files (airspace or waypoint) specified." << std::endl << std::endl;
 		return EXIT_FAILURE;
 	}
@@ -180,24 +175,21 @@ int main(int argc, char *argv[]) {
 
 	bool result(false);
 
-	if (openAIPdir.empty()) {
-		// Load airspaces and waypoints
-		ac.LoadAirspaces();
-		ac.LoadWaypoints();
+	// Load airspaces and waypoints
+	ac.LoadAirspaces();
+	ac.LoadWaypoints();
 
-		// Verify that there is at least one airspace or waypoint
-		if(ac.GetNumOfAirspaces() == 0 && ac.GetNumOfWaypoints() == 0) {
-			std::cerr << "ERROR: no usable data found in the input files specified." << std::endl << std::endl;
-			return EXIT_FAILURE;
-		}
+	// Verify that there is at least one airspace or waypoint
+	if(ac.GetNumOfAirspaces() == 0 && ac.GetNumOfWaypoints() == 0) {
+		std::cerr << "ERROR: no usable data found in the input files specified." << std::endl << std::endl;
+		return EXIT_FAILURE;
+	}
 
-		// Apply filter if required
-		if (limitsAreSet && !ac.FilterOnLatLonLimits(topLat, bottomLat, leftLon, rightLon)) std::cerr << "ERROR: filter limit bounds are not valid." << std::endl;
+	// Apply filter if required
+	if (limitsAreSet && !ac.FilterOnLatLonLimits(topLat, bottomLat, leftLon, rightLon)) std::cerr << "ERROR: filter limit bounds are not valid." << std::endl;
 
-		// Convert!
-		result = ac.Convert();
-
-	} else result = ac.ConvertOpenAIPdir(openAIPdir);
+	// Convert!
+	result = ac.Convert();
 
 	// Stop the timer
 	const double elapsedTimeSec = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - startTime).count() / 1e6;
