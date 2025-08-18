@@ -39,4 +39,6 @@ private:
 	double eastLonLimit;
 	double westLonLimit;
 	bool validLimitsSet;
+public:
+	DECLARE_MESSAGE_MAP()
 };

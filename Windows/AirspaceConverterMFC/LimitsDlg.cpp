@@ -42,3 +42,6 @@ void CLimitsDlg::OnOK() {
 	if (validLimitsSet) return CDialog::OnOK();
 	MessageBox(_T("The inserted limits are not valid!"), _T("Error"), MB_ICONERROR);
 }
+BEGIN_MESSAGE_MAP(CLimitsDlg, CDialog)
+	
+END_MESSAGE_MAP()
