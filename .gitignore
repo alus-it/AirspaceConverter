@@ -38,6 +38,7 @@
 *.exe
 *.out
 *.app
+QtGUI/airspaceconverter-gui
 
 # Installation files
 *.deb
@@ -92,7 +93,12 @@ Windows/ipch
 # Generated readme
 Windows/Readme.rtf
 
-# QT stuff
+# Qt Creator stuff
 *.user
 *.pro.user.*
 QtGUI/.qtc_clangd/*
+QtGUI/ui_*.h
+QtGUI/moc_*.h
+QtGUI/moc_*.cpp
+QtGUI/Makefile
+QtGUI/qrc_resources.cpp
