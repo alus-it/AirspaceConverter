@@ -47,6 +47,9 @@
     <ClInclude Include="..\..\src\CSV.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Altitude.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Airfield.cpp">
@@ -83,6 +86,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\CSV.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Altitude.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

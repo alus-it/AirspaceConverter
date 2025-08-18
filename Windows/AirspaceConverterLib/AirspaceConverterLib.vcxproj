@@ -100,6 +100,7 @@
     <ClInclude Include="..\..\src\Airfield.hpp" />
     <ClInclude Include="..\..\src\Airspace.hpp" />
     <ClInclude Include="..\..\src\AirspaceConverter.hpp" />
+    <ClInclude Include="..\..\src\Altitude.hpp" />
     <ClInclude Include="..\..\src\CSV.hpp" />
     <ClInclude Include="..\..\src\Geometry.hpp" />
     <ClInclude Include="..\..\src\KML.hpp" />
@@ -114,6 +115,7 @@
     <ClCompile Include="..\..\src\Airfield.cpp" />
     <ClCompile Include="..\..\src\Airspace.cpp" />
     <ClCompile Include="..\..\src\AirspaceConverter.cpp" />
+    <ClCompile Include="..\..\src\Altitude.cpp" />
     <ClCompile Include="..\..\src\CSV.cpp" />
     <ClCompile Include="..\..\src\Geometry.cpp" />
     <ClCompile Include="..\..\src\KML.cpp" />
