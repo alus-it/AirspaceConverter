@@ -413,11 +413,11 @@ void CAirspaceConverterDlg::EndBusy(const bool takeTime /* = false */) {
 	LoadRasterMapsFolderBt.EnableWindow(isKmzFile || isWaypointFile);
 	OpenOutputFileBt.EnableWindow(conversionDone);
 	OpenOutputFolderBt.EnableWindow(conversionDone);
-	unloadAirspacesBt.EnableWindow(numAirspacesLoaded > 0 ? TRUE : FALSE);
-	unloadWaypointsBt.EnableWindow(numWaypointsLoaded > 0 ? TRUE : FALSE);
-	unloadRasterMapsBt.EnableWindow(numRasterMapLoaded > 0 ? TRUE : FALSE);
-	filterBt.EnableWindow(numAirspacesLoaded > 0 ? TRUE : FALSE);
-	ConvertBt.EnableWindow((numAirspacesLoaded > 0 || ((isKmzFile || isWaypointFile) && numWaypointsLoaded > 0)) ? TRUE : FALSE);
+	unloadAirspacesBt.EnableWindow(numAirspacesLoaded > 0);
+	unloadWaypointsBt.EnableWindow(numWaypointsLoaded > 0);
+	unloadRasterMapsBt.EnableWindow(numRasterMapLoaded > 0);
+	filterBt.EnableWindow(numAirspacesLoaded > 0 || numWaypointsLoaded > 0);
+	ConvertBt.EnableWindow(numAirspacesLoaded > 0 || ((isKmzFile || isWaypointFile) && numWaypointsLoaded > 0));
 	OutputTypeCombo.EnableWindow(TRUE);
 	editQNHtextField.EnableWindow(isKmzFile ? numAirspacesLoaded == 0 : FALSE);
 	editDefualtAltTextField.EnableWindow(isKmzFile);
@@ -603,9 +603,10 @@ void CAirspaceConverterDlg::OnBnClickedFilterBt() {
 	assert(converter != nullptr);
 	CLimitsDlg dlgLimits;
 	dlgLimits.DoModal();
-	if (dlgLimits.HasValidAreaLimits()) {
+	if (dlgLimits.HasValidAreaLimits() || dlgLimits.HasValidAltitudeLimits()) {
 		StartBusy();
-		converter->FilterOnLatLonLimits(dlgLimits.GetTopLatLimit(), dlgLimits.GetBottomLatLimit(), dlgLimits.GetLeftLonLimit(), dlgLimits.GetRightLonLimit());
+		if (dlgLimits.HasValidAltitudeLimits()) converter->FilterOnAltitudeLimits(dlgLimits.GetLowAltitude(), dlgLimits.GetTopAltitude());
+		if (dlgLimits.HasValidAreaLimits()) converter->FilterOnLatLonLimits(dlgLimits.GetTopLatLimit(), dlgLimits.GetBottomLatLimit(), dlgLimits.GetLeftLonLimit(), dlgLimits.GetRightLonLimit());
 		EndBusy();
 	}
 }
@@ -625,7 +626,7 @@ void CAirspaceConverterDlg::OnBnClickedOutputTypeCombo() {
 	editDefualtAltTextField.EnableWindow(isKmzFile);
 	pointsCheckBox.EnableWindow(isOpenAirFile);
 	OpenAirCoordinateFormatCombo.EnableWindow(isOpenAirFile);
-	ConvertBt.EnableWindow((numAirspacesLoaded > 0 || ((isKmzFile || isWaypointFile) && numWaypointsLoaded > 0)) && !outputFile.empty() ? TRUE : FALSE);
+	ConvertBt.EnableWindow((numAirspacesLoaded > 0 || ((isKmzFile || isWaypointFile) && numWaypointsLoaded > 0)) && !outputFile.empty());
 	UpdateData(FALSE);
 }
 

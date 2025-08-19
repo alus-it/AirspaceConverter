@@ -14,7 +14,6 @@
 #include "afxwin.h"
 #include "Altitude.hpp"
 
-// CLimitsDlg dialog used to se the limits for filtering
 class CLimitsDlg : public CDialog {
 public:
 	CLimitsDlg();
@@ -24,21 +23,26 @@ public:
 	enum { IDD = IDD_LIMITS_DIALOG };
 #endif
 
-	inline bool HasValidAreaLimits() const { return validAreaLimitsSet; }
 	inline double GetTopLatLimit() const { return northLatLimit; }
 	inline double GetBottomLatLimit() const { return southLatLimit; }
 	inline double GetLeftLonLimit() const { return westLonLimit; }
 	inline double GetRightLonLimit() const { return eastLonLimit; }
+	inline bool HasValidAreaLimits() const { return validAreaLimitsSet; }
 	inline const Altitude& GetTopAltitude() const { return topAltitude; }
 	inline const Altitude& GetLowAltitude() const { return lowAltitude; }
 	inline bool HasValidAltitudeLimits() const { return validAltitudeLimitsSet; }
-
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual void OnOK();
 
 private:
+	DECLARE_MESSAGE_MAP()
+	virtual BOOL OnInitDialog();
+	afx_msg void OnBnClickedCheckUnlimitedAltLimit();
+	afx_msg void OnBnClickedCheckFilterOnAltitude();
+	afx_msg void OnBnClickedCheckFilterOnArea();
+
 	double northLatLimit;
 	double southLatLimit;
 	double eastLonLimit;
@@ -47,4 +51,15 @@ private:
 	Altitude topAltitude;
 	Altitude lowAltitude;
 	bool validAltitudeLimitsSet;
+	CButton filterOnAreaCheckbox;
+	CButton filterOnAltitudeCheckbox;
+	CButton unlimitedTopAltitudeCheckbox;
+	CComboBox topAltitudeUnitCombo;
+	CComboBox lowAltitudeUnitCombo;
+	CEdit northLatLimitEdit;
+	CEdit southLatLimitEdit;
+	CEdit eastLonLimitEdit;
+	CEdit westLonLimitEdit;
+	CEdit topAltitudeEdit;
+	CEdit lowAltitudeEdit;
 };

@@ -592,7 +592,6 @@ bool AirspaceConverter::FilterOnLatLonLimits(const double& topLat, const double&
 		}
 		LogMessage(boost::str(boost::format("Filtering waypoints on position... excluded: %1d, remaining: %2d ") %(origWaypoints - GetNumOfWaypoints()) %GetNumOfWaypoints()));
 	}
-
 	return true;
 }
 
@@ -628,9 +627,7 @@ bool AirspaceConverter::FilterOnAltitudeLimits(const Altitude& floor, const Alti
 		}
 		LogMessage(boost::str(boost::format("Filtering waypoints on altitude... excluded: %1d, remaining: %2d ") %(origWaypoints - GetNumOfWaypoints()) %GetNumOfWaypoints()));
 	}
-
 	return true;
-
 }
 
 void AirspaceConverter::DoNotCalculateArcsAndCirconferences(const bool doNotCalcArcs /*= true*/) {
