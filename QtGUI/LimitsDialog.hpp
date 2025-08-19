@@ -38,6 +38,5 @@ private:
     bool validLimits;
 
 signals:
-    void validPositionLimitsSet(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon);
-    void validAltitudeLimitsSet(const Altitude& floor, const Altitude& ceil);
+    void validLimitsSet(bool validAreaLimits, const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon, bool validAltLimits, const Altitude& floor, const Altitude& ceil);
 };

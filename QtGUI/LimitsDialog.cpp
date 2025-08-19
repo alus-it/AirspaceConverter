@@ -28,19 +28,23 @@ LimitsDialog::~LimitsDialog() {
 }
 
 void LimitsDialog::on_buttonBox_accepted() {
+    bool validAreaLimits(false);
     if (ui->filterOnPositionCheckBox->isChecked()) {
-        if (Geometry::Limits(ui->topLatSpinBox->value(), ui->bottomLatSpinBox->value(), ui->leftLonSpinBox->value(), ui->rightLonSpinBox->value()).IsValid())
-            emit validPositionLimitsSet(ui->topLatSpinBox->value(), ui->bottomLatSpinBox->value(), ui->leftLonSpinBox->value(), ui->rightLonSpinBox->value());
-        else QMessageBox::warning(this, "Invalid area limits", tr("The entered area limit bounds are not valid."), QMessageBox::Ok);
+        validAreaLimits = Geometry::Limits(ui->topLatSpinBox->value(), ui->bottomLatSpinBox->value(), ui->leftLonSpinBox->value(), ui->rightLonSpinBox->value()).IsValid();
+        if (!validAreaLimits) QMessageBox::warning(this, "Invalid area limits", tr("The entered area limit bounds are not valid."), QMessageBox::Ok);
     }
+    bool validAltLimits(false);
+    Altitude ceiling;
+    Altitude floor;
     if (ui->filterOnAltitudeCheckBox->isChecked()) {
-        Altitude ceiling;
         if (ui->unlimitedTopAltitudeCheckBox->isChecked()) ceiling.SetUnlimited();
         else ceiling = Altitude(double(ui->hiAltLimitSpinBox->value()), ui->hiAltLimitUnitComboBox->currentIndex() == 1, true);
-        Altitude floor(double(ui->lowAltLimitSpinBox->value()), ui->lowAltLimitUnitComboBox->currentIndex() == 1, true);
-        if (ceiling >= floor) emit validAltitudeLimitsSet(floor, ceiling);
-        else QMessageBox::warning(this, "Invalid altitude limits", tr("The entered altitude limits are not valid."), QMessageBox::Ok);
+        floor = Altitude(double(ui->lowAltLimitSpinBox->value()), ui->lowAltLimitUnitComboBox->currentIndex() == 1, true);
+        validAltLimits = (ceiling >= floor);
+        if (!validAltLimits) QMessageBox::warning(this, "Invalid altitude limits", tr("The entered altitude limits are not valid."), QMessageBox::Ok);
     }
+    if (validAreaLimits || validAltLimits)
+        emit validLimitsSet(validAreaLimits, ui->topLatSpinBox->value(), ui->bottomLatSpinBox->value(), ui->leftLonSpinBox->value(), ui->rightLonSpinBox->value(), validAltLimits, floor, ceiling);
 }
 
 void LimitsDialog::on_filterOnPositionCheckBox_stateChanged(int checked) {

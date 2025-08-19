@@ -54,8 +54,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(warningPosted(QString)), this, SLOT(logWarning(QString)));
     connect(this, SIGNAL(errorPosted(QString)), this, SLOT(logError(QString)));
     connect(&watcher, SIGNAL(finished()), this, SLOT(endBusy()));
-    connect(&filter, SIGNAL(validPositionLimitsSet(double, double, double, double)), this, SLOT(applyAreaFilter(double, double, double, double)));
-    connect(&filter, SIGNAL(validAltitudeLimitsSet(Altitude, Altitude)), this, SLOT(applyAltitudeFilter(Altitude, Altitude)));
+    connect(&filter, SIGNAL(validLimitsSet(bool, double, double, double, double, bool, Altitude, Altitude)), this, SLOT(applyFilter(bool, double, double, double, double, bool, Altitude, Altitude)));
 
     // Set the logging functions (to write in the logging texbox)
     AirspaceConverter::SetLogMessageFunction(std::function<void(const std::string&)>(std::bind(&MainWindow::postMessage, this, std::placeholders::_1)));
@@ -467,18 +466,20 @@ void MainWindow::on_filterButton_clicked() {
     filter.show();
 }
 
-void MainWindow::applyAreaFilter(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon) {
+void MainWindow::applyFilter(bool area, const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon, bool altitude, const Altitude& floor, const Altitude& ceil) {
+    if (!area && !altitude) return;
+
     // Start to work...
     startBusy();
 
-    // Apply filter
-    watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::FilterOnLatLonLimits, topLat, bottomLat, leftLon, rightLon));
-}
+    // Filter first on altitude and then on area
+    watcher.setFuture(QtConcurrent::run([this, area, topLat, bottomLat, leftLon, rightLon, altitude, floor, ceil](){
 
-void MainWindow::applyAltitudeFilter(const Altitude& floor, const Altitude& ceil) {
-    // Start to work...
-    startBusy();
+        // Apply altitude filter
+        if (altitude) converter->FilterOnAltitudeLimits(floor, ceil);
 
-    // Apply filter
-    watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::FilterOnAltitudeLimits, floor, ceil));
+        // Apply area filter
+        if (area) converter->FilterOnLatLonLimits(topLat, bottomLat, leftLon, rightLon);
+
+    }));
 }
