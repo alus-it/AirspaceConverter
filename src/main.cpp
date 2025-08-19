@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
 			else {
 				const std::string limits(argv[++i]);
 				boost::tokenizer<boost::char_separator<char>> tokens(limits, boost::char_separator<char>(","));
-				const int numOfTokens = std::distance(tokens.begin(), tokens.end());
+				const auto numOfTokens = std::distance(tokens.begin(), tokens.end());
 				if (numOfTokens < 1 || numOfTokens > 2) {
 					std::cerr << "ERROR: wrong number (expected 1 or 2) of limit found." << std::endl;
 					break;

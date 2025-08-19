@@ -7,14 +7,12 @@ const double Altitude::K2 = 8.417286e-5;
 const double Altitude::QNE = 1013.25;
 double Altitude::QNH = QNE;
 
-
-Altitude::Altitude(): refIsMsl(false), fl(0), altFt(0), altMt(0), isUnlimited(false) {
-}
+Altitude::Altitude(): refIsMsl(false), fl(0), altFt(0), altMt(0), isUnlimited(false) {}
 
 Altitude::Altitude(const double value, bool isInMeters /* = false */, bool isMSL /* = true */):
 	refIsMsl(isMSL),
 	fl(0),
-	altFt(isInMeters ? value / FEET2METER : value),
+	altFt(int(isInMeters ? value / FEET2METER : value)),
 	altMt(isInMeters ? value : value * FEET2METER),
 	isUnlimited(false) {
 }

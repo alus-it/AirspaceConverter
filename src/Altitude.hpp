@@ -23,7 +23,7 @@ public:
 	inline void SetAltMt(const double mt, const bool isAMSL = true) { refIsMsl = isAMSL;  altFt = (int)(mt / FEET2METER); altMt = mt; fl = 0; isUnlimited = false; }
 	void SetFlightLevel(const int FL);
 	inline void SetGND() { refIsMsl = false; altMt = 0; altFt = 0; fl = 0; isUnlimited = false; }
-	inline void SetUnlimited() { SetFlightLevel(600); isUnlimited = true; }
+	inline void SetUnlimited(bool unlimited = true) { if (unlimited) SetFlightLevel(600); isUnlimited = unlimited; }
 	inline bool IsAMSL() const { return refIsMsl; }
 	inline bool IsAGL() const { return !refIsMsl; }
 	inline bool IsFL() const { return fl != 0; }
