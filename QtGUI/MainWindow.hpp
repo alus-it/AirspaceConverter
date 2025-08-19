@@ -71,8 +71,7 @@ private slots:
     void logMessage(const QString& text);
     void logWarning(const QString& text);
     void logError(const QString& text);
-    void applyAreaFilter(const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon);
-    void applyAltitudeFilter(const Altitude& floor, const Altitude& ceil);
+    void applyFilter(bool area, const double& topLat, const double& bottomLat, const double& leftLon, const double& rightLon, bool altitude, const Altitude& floor, const Altitude& ceil);
 
 signals:
     void messagePosted(const QString& text);
