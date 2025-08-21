@@ -173,6 +173,17 @@ case $OSVER in
 		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER}), libgl1-mesa-glx (>= 18.3.6)"
 		MANT="Valerio Messina <efa@iol.it>"
 		;;
+	13)
+		echo "Packaging for Debian 13 Trixie..."
+		DISTR=deb
+		LIBCVER=2.41
+		ZIPLIB=libzip4
+		ZIPVER=1.7.3
+		BOOSTVER=1.83.0
+		QTVER=5.15.15
+		QTDEPS="libqt5core5a (>= ${QTVER}), libqt5gui5 (>= ${QTVER}), libqt5widgets5 (>= ${QTVER}), libgl1-mesa-glx (>= 18.3.6)"
+		MANT="Valerio Messina <efa@iol.it>"
+		;;
 	4)
 		echo "Packaging for LMDE4 (Debian 10 Buster)..."
 		DISTR=lmde
