@@ -423,7 +423,7 @@ cd ..
 
 #Make airspaceconverter DEB package
 rm -f airspaceconverter_${VERSION}-${DISTR}${OSVER}_${ARCH}.deb
-dpkg-deb --build airspaceconverter_${VERSION}-${DISTR}${OSVER}_${ARCH}
+dpkg-deb --root-owner-group --build airspaceconverter_${VERSION}-${DISTR}${OSVER}_${ARCH}
 
 # Make folder for airspaceconverter-gui
 sudo rm -rf airspaceconverter-gui_${VERSION}-${DISTR}${OSVER}_${ARCH}
@@ -543,7 +543,7 @@ cd ..
 
 #Make DEB package for airspaceconverter-gui
 rm -f airspaceconverter-gui_${VERSION}-${DISTR}${OSVER}_${ARCH}.deb
-dpkg-deb --build airspaceconverter-gui_${VERSION}-${DISTR}${OSVER}_${ARCH}
+dpkg-deb --root-owner-group --build airspaceconverter-gui_${VERSION}-${DISTR}${OSVER}_${ARCH}
 
 # Clean
 echo Cleaning temp files...
