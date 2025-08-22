@@ -417,11 +417,11 @@ Homepage: https://www.alus.it/AirspaceConverter/
 
 cd ..
 
-#Root has to be the owner of all files
+# Root has to be the owner of all files
 sudo chown -R root:root *
 cd ..
 
-#Make airspaceconverter DEB package
+# Make airspaceconverter DEB package
 rm -f airspaceconverter_${VERSION}-${DISTR}${OSVER}_${ARCH}.deb
 dpkg-deb --root-owner-group --build airspaceconverter_${VERSION}-${DISTR}${OSVER}_${ARCH}
 
@@ -537,11 +537,11 @@ chmod 0755 postrm
 
 cd ..
 
-#Root has to be the owner of all files
+# Root has to be the owner of all files
 sudo chown -R root:root *
 cd ..
 
-#Make DEB package for airspaceconverter-gui
+# Make DEB package for airspaceconverter-gui
 rm -f airspaceconverter-gui_${VERSION}-${DISTR}${OSVER}_${ARCH}.deb
 dpkg-deb --root-owner-group --build airspaceconverter-gui_${VERSION}-${DISTR}${OSVER}_${ARCH}
 
