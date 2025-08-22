@@ -72,6 +72,7 @@ Possible options:
   - **-w**: multiple, input waypoint file(s) can be _SeeYou_ (**.cup**), _openAIP_ (**.aip**) or _LittleNavMap_ (**.csv**)  
   - **-m**: optional, multiple, terrain map file(s) (**.dem**) used to lookup terrain heights  
   - **-l**: optional, set filter limits in latitude and longitude for the output, followed by the 4 limit values: northLat,southLat,westLon,eastLon where the limits are comma separated, expressed in degrees, without spaces, negative for west longitudes and south latitudes  
+  - **-u**: optional, set filter limits in altitude for the output, followed by 1 or 2 limit values: lowAltitude,hiAltitude where the limits are comma separated, expressed in feet, without spaces. If the high limit is omitted it will be considered as unlimited.  
   - **-o**: optional, output file **.kmz** (_Google Earth_), **.txt** (_OpenAir_), **.cup** (_SeeYou_), **.csv** (_LittleNavMap_), **.img** (_Garmin_) or **.mp** (_Polish_). If not specified will be used the name of first input file as **KMZ**  
   - **-p**: optional, when writing in _OpenAir_ avoid to use arcs and circles but only points (DP)  
   - **-s**: optional, when writing in _OpenAir_ use coordinates always with minutes and seconds (DD:MM:SS)  
