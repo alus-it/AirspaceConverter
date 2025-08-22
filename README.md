@@ -134,6 +134,15 @@ After it will be possible to run AirspaceConverter CLI from anywhere simply call
 The same for the AirspaceConverter _Qt_ GUI graphical interface: `airspaceconverter-gui`  
 To uninstall (from the root of the project): `./uninstall.sh`  
 
+Compiling AirspaceConverter on Windows
+--------------------------------------
+In the "Windows" folder there is the VisualStudio solution and project files.  
+It requires to have the proper Boost libraries installed, with their location configured in the VS project.  
+From [Boost.org](https://www.boost.org/releases/latest/) download the right version (mind the compiler version and architecture) of Boost libraries already compiled for VisualStudio.  
+While libzip and zlib (also not included in this repository) can be obtained via nuget.  
+When compiling with VisualStudio 2017 (vs141), and newer, in order to link with libzip it is necessary to modify `libzip.targets` located in `Windows\packages\libzip.1.1.2.7\build\native` replacing all occurrences of `PlatformToolset.ToLower().IndexOf('v140')` with `PlatformToolset.ToLower().IndexOf('v14')`  
+If required _cGPSmapper_ can be found in the portable distribution archive of this project.  
+
 Compiling and installing AirspaceConverter from sources on macOS
 ----------------------------------------------------------------
 First it is necessary to install _Qt_ and the other dependencies:  
@@ -145,15 +154,6 @@ This will install everything: the shared library the command line executable and
 After it will be possible to run AirspaceConverter CLI from anywhere simply calling: `airspaceconverter`  
 While the AirspaceConverter _Qt_ GUI graphical interface will be directly available from the Launchpad menu.  
 To uninstall (from the root of the project): `./uninstall.sh`  
-
-Compiling AirspaceConverter on Windows
---------------------------------------
-In the "Windows" folder there is the VisualStudio solution and project files.  
-It requires to have the proper Boost libraries installed, with their location configured in the VS project.  
-From [Boost.org](https://www.boost.org/releases/latest/) download the right version (mind the compiler version and architecture) of Boost libraries already compiled for VisualStudio.  
-While libzip and zlib (also not included in this repository) can be obtained via nuget.  
-When compiling with VisualStudio 2017 (vs141), and newer, in order to link with libzip it is necessary to modify `libzip.targets` located in `Windows\packages\libzip.1.1.2.7\build\native` replacing all occurrences of `PlatformToolset.ToLower().IndexOf('v140')` with `PlatformToolset.ToLower().IndexOf('v14')`  
-If required _cGPSmapper_ can be found in the portable distribution archive of this project.  
 
 Placemarks icons credits
 ------------------------
