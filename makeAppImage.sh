@@ -1,5 +1,5 @@
 #!/bin/bash
-# makeAppImage.sh: Copyright 2024 Valerio Messina efa@iol.it
+# makeAppImage.sh: Copyright 2024-2025 Valerio Messina efa@iol.it
 # makeAppImage is part of AirspaceConverter - convert different airspace/waypoint formats
 # AirspaceConverter is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,10 +17,9 @@
 # Script to generate a Linux AppImage portable package of 'AirspaceConverter'
 # used on: Linux=>bin64, Linux=>bin32
 #
-# Syntax: $ makeAppImage.sh
+# Syntax: $ makeAppImage.sh [-y]
 
-makever=2024-05-22
-
+makever=2025-08-22
 
 DSTPATH="." # path where create the Linux package directory
 
@@ -28,7 +27,7 @@ echo "makeAppImage: Create a Linux AppImage package for AirspaceConverter ..."
 
 # check for external dependency compliance
 flag=0
-for extCmd in cp cut grep mkdir mv rm tr uname ; do
+for extCmd in chmod cp cut getconf grep mkdir mv pwd rm tr uname wget ; do
    exist=`which $extCmd 2> /dev/null`
    if (test "" = "$exist") then
       echo "Required external dependency: "\"$extCmd\"" unsatisfied!"
@@ -36,13 +35,18 @@ for extCmd in cp cut grep mkdir mv rm tr uname ; do
    fi
 done
 if [[ "$flag" = 1 ]]; then
-   echo "ERROR: Install the required packages and retry. Exit"
+   echo "ERROR: makeAppImage Install the required packages and retry. Exit"
    exit
 fi
 
+if [[ "$1" = "-y" ]]; then
+   batch=1
+   shift
+fi
 if [[ "$1" != "" ]]; then
-   echo "makeAppImage ERROR: no parameter are needed"
-   echo "Syntax: $ makeAppImage.sh"
+   echo "ERROR: makeAppImage no parameter are needed"
+   echo "Syntax: $ makeAppImage.sh [-y]"
+   echo "          -y for bath execution, no confirmation"
    exit
 fi
 
@@ -70,7 +74,7 @@ DMG=""
 DST="AirspaceConverter${VER}_${DATE}_${TGT}_${CPU}_${BIT}bit"
 
 if [[ "$OS" != "GNU/Linux" ]]; then
-   echo "ERROR: work in OS different than Linux"
+   echo "ERROR: makeAppImage do not work on OS different than Linux"
    exit
 fi
 
@@ -85,7 +89,9 @@ echo "DEP : $DEP"
 echo "TGT : $TGT"
 echo "DATE: $DATE"
 echo "DST : $DSTPATH/$DST"
-read -p "Proceed? A key to continue"
+if [[ "$batch" != "1" ]]; then
+   read -p "Proceed? A key to continue"
+fi
 echo ""
 
 echo "makeAppImage: Creating AirspaceConverter $VER package for $CPU $TGT $BIT bit ..."
@@ -138,7 +144,7 @@ if (test "$PKG" = "Linux" && (test "$CPU" = "x86_64" || test "$CPU" = "i686")) t
          chmod +x linuxdeploy-plugin-appimage-x86_64.AppImage
       fi
       rm -f AirspaceConverter-x86_64.AppImage 2> /dev/null
-      linuxdeploy-x86_64.AppImage -e $BIN/airspaceconverter-gui --appdir AppDir -p qt -i AirspaceConverter.png -d airspaceconverter-gui.desktop --output appimage > logLinuxdeploy$DATE.txt
+      ./linuxdeploy-x86_64.AppImage -e $BIN/airspaceconverter-gui --appdir AppDir -p qt -i AirspaceConverter.png -d airspaceconverter-gui.desktop --output appimage > logLinuxdeploy$DATE.txt
       if (test -f AirspaceConverter-x86_64.AppImage) then
          file=$DST.AppImage
          mv AirspaceConverter-x86_64.AppImage $file
@@ -151,9 +157,11 @@ if (test "$PKG" = "Linux" && (test "$CPU" = "x86_64" || test "$CPU" = "i686")) t
       echo "As now skip AppImage at 32 bit"
    fi
 fi
-read -p "Delete tmp file and AppDir directory? (y/n) " ret
+if [[ "$batch" != "1" ]]; then
+   read -p "Delete tmp file and AppDir directory? (y/n) " ret
+fi
 #echo "ret:$ret"
-if (test "$ret" != "n") then
+if (test "$ret" = "y") then
    rm airspaceconverter-gui.desktop
    rm -rf AppDir
 fi
