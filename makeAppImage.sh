@@ -95,6 +95,7 @@ mkdir -p AppDir/usr/bin
 mkdir -p AppDir/usr/lib
 mkdir -p AppDir/usr/share/man/man1
 mkdir -p AppDir/usr/share/airspaceconverter/icons
+mkdir -p AppDir/usr/share/pixmaps
 
 # copy binaries:
 cp -a $BIN/airspaceconverter       AppDir/usr/bin/
