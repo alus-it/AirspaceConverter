@@ -144,7 +144,7 @@ if (test "$PKG" = "Linux" && (test "$CPU" = "x86_64" || test "$CPU" = "i686")) t
          chmod +x linuxdeploy-plugin-appimage-x86_64.AppImage
       fi
       rm -f AirspaceConverter-x86_64.AppImage 2> /dev/null
-      ./linuxdeploy-x86_64.AppImage -e $BIN/airspaceconverter-gui --appdir AppDir -p qt -i AirspaceConverter.png -d airspaceconverter-gui.desktop --output appimage > logLinuxdeploy$DATE.txt
+      ./linuxdeploy-x86_64.AppImage -e $BIN/airspaceconverter-gui --library=$BIN/libairspaceconverter.so --appdir AppDir -p qt -i AirspaceConverter.png -d airspaceconverter-gui.desktop --output appimage > logLinuxdeploy$DATE.txt
       if (test -f AirspaceConverter-x86_64.AppImage) then
          file=$DST.AppImage
          mv AirspaceConverter-x86_64.AppImage $file
