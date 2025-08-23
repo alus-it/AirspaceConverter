@@ -27,7 +27,8 @@ jobs:
       - name: List bin/pkg files
         run: pwd ;
              ls -l ${{ github.workspace }} ;
-             ls -l ${{ github.workspace }}/Release
+             ls -l ${{ github.workspace }}/Release ;
+             cat logLinuxdeploy2025-08-23.txt
       - name: Get date
         run: |
              export DATE=$(date -I)
