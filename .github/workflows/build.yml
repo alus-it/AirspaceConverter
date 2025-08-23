@@ -20,14 +20,15 @@ jobs:
              sudo apt install 7zip grep tar wget
       - name: Check out code
         uses: actions/checkout@v4
-      - name: Build ci Linux bin
+      - name: Build CI Linux bin
         run: ./build.sh
-      - name: Build ci Linux pkg
+      - name: Build CI Linux pkg
         run: ./makeAppImage.sh -y
       - name: List bin/pkg files
         run: pwd ;
              ls -l ${{ github.workspace }} ;
-             ls -l ${{ github.workspace }}/Release
+             ls -l ${{ github.workspace }}/Release ;
+             cat logLinuxdeploy2025-08-23.txt
       - name: Get date
         run: |
              export DATE=$(date -I)
