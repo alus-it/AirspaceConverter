@@ -42,8 +42,11 @@
 #ifdef __linux__ // If on Linux...
 	const std::string AirspaceConverter::basePath(std::filesystem::canonical("/proc/self/exe").string());
 #elif _WIN32 // or if on Windows...
-	//libloaderapi.h
-	const std::string AirspaceConverter::basePath(GetModuleFileNameA(NULL));
+	const std::string AirspaceConverter::basePath = []() {
+		wchar_t wpath[MAX_PATH];
+		GetModuleFileNameW(NULL, wpath, MAX_PATH);
+		return std::string(std::filesystem::path(wpath).parent_path().string());
+	}();
 #elif __APPLE__ // or if on macOS
 	//TODO....
 #endif
