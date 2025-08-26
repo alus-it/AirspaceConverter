@@ -19,7 +19,7 @@ Can write in the following formats:
 
 While converting to _OpenAir_ AirspaceConverter estimates if the points are part of arcs or circumferences in order to make use of arc and circumference definitions of the _OpenAir_ format and so avoiding to output all points one by one.  
 The ability to read **KML**/**KMZ** is based on the **KMZ** airspace files produced by _Austrocontrol_. This utility can convert also _SeeYou_ **.CUP** waypoint files to **KMZ** (for _Google Earth_). The conversion to **IMG** for _Garmin_ devices is done using _cGPSmapper_.  
-AirspaceConverter is written in C++11 and runs on _Linux_, _Windows_ and _macOS_. In order to be immediately easy to use it has _Qt_ and _Windows MFC_ user interfaces. But it can also work from command line.  
+AirspaceConverter is written in C++17 and runs on _Linux_, _Windows_ and _macOS_. In order to be immediately easy to use it has _Qt_ and _Windows MFC_ user interfaces. But it can also work from command line.  
 
 
 For more information's about this project: [alus.it/AirspaceConverter](https://www.alus.it/AirspaceConverter)  
@@ -118,12 +118,12 @@ Build dependencies
 In order to compile this project the following libraries are required:  
 - Qt (`libqt4-dev`)
 - libzip2 (`libzip-dev`) and dependencies (zlib)
-- Boost libraries (`libboost-filesystem-dev` and `libboost-locale-dev`)  
+- Boost libraries (`libboost-locale-dev`)  
 
 Compiling and installing AirspaceConverter from sources on Linux
 ----------------------------------------------------------------
 First it is necessary to install the dependencies, on a _Debian_ based distribution it would be:  
-`sudo apt install libzip-dev libboost-filesystem-dev libboost-locale-dev libqt5-private-dev lsb-release`  
+`sudo apt install libzip-dev libboost-locale-dev libqt5-private-dev lsb-release`  
 On older _Ubuntu_ or _Debian_ install `libqt4-dev` instead of `libqt5-private-dev`
 On _Fedora_:  
 `sudo dnf install libzip-devel boost-devel qt-devel lsb-release`  

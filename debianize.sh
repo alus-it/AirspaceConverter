@@ -391,10 +391,10 @@ echo 'Package: airspaceconverter
 Version: '${VERSION}'-'${DISTR}${OSVER}'
 Section: misc
 Priority: optional
-Build-Depends: libc6-dev (>= '${LIBCVER}'), libboost-system-dev (>= '${BOOSTVER}'), libboost-filesystem-dev (>= '${BOOSTVER}'), libboost-locale-dev (>= '${BOOSTVER}'), libzip-dev (>= '${ZIPVER}')
+Build-Depends: libc6-dev (>= '${LIBCVER}'), libboost-locale-dev (>= '${BOOSTVER}'), libzip-dev (>= '${ZIPVER}')
 Standards-Version: 3.9.4
 Architecture: '${ARCH}'
-Depends: libc6 (>= '${LIBCVER}'), libboost-system'${BOOSTVER}' (>= '${BOOSTVER}'), libboost-filesystem'${BOOSTVER}' (>= '${BOOSTVER}'), libboost-locale'${BOOSTVER}' (>= '${BOOSTVER}'), '${ZIPLIB}' (>= '${ZIPVER}')
+Depends: libc6 (>= '${LIBCVER}'), libboost-locale'${BOOSTVER}' (>= '${BOOSTVER}'), '${ZIPLIB}' (>= '${ZIPVER}')
 Enhances: airspaceconverter-gui (>= '${VERSION}'), cgpsmapper (>= 0.0.9.3c)
 Maintainer: '${MANT}'
 Installed-size: '${SIZE}'
@@ -496,7 +496,7 @@ Section: misc
 Priority: optional
 Standards-Version: 3.9.4
 Architecture: '${ARCH}'
-Depends: libc6 (>= '${LIBCVER}'), airspaceconverter (>= '${VERSION}'), '${QTDEPS}', libboost-system'${BOOSTVER}' (>= '${BOOSTVER}') ,libboost-filesystem'${BOOSTVER}' (>= '${BOOSTVER}')
+Depends: libc6 (>= '${LIBCVER}'), airspaceconverter (>= '${VERSION}'), '${QTDEPS}', libboost-locale'${BOOSTVER}' (>= '${BOOSTVER}')
 Suggests: airspaceconverter (>= '${VERSION}')
 Enhances: cgpsmapper (>= 0.0.9.3c)
 Maintainer: '${MANT}'

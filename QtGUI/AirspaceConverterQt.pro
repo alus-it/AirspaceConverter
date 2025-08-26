@@ -50,8 +50,6 @@ unix: LIBS += -L$$PWD/../Release/ -lairspaceconverter \'-Wl,-rpath=\$$ORIGIN\'
 ## Linux libraries
 
 # Boost libraries
-#unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu/ -lboost_filesystem
-#unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu/ -lboost_system
 unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu/ -lboost_locale
 
 # Zip library
@@ -62,8 +60,6 @@ unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu/ -lzip
 macx: INCLUDEPATH += /usr/local/include/
 
 # Boost libraries
-#macx: LIBS += -L/usr/local/lib/ -lboost_filesystem
-#macx: LIBS += -L/usr/local/lib/ -lboost_system
 macx: LIBS += -L/usr/local/lib/ -lboost_locale-mt
 
 # Zip library
@@ -79,19 +75,11 @@ win32:contains(QMAKE_HOST.arch, x86_64) {
     win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../Windows/Release/x64/AirspaceConverterLib.lib
     else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../Windows/Debug/x64/AirspaceConverterLib.lib
 
-    # Boost libraries
-
-    # Boost 1.61.0
-    #win32:CONFIG(release, debug|release): LIBS += -LC:/boost_1_61_0/lib64/ -llibboost_filesystem-vc140-mt-1_61
-    #else:win32:CONFIG(debug, debug|release): LIBS += -LC:/boost_1_61_0/lib64/ -llibboost_filesystem-vc140-mt-gd-1_61
+    # Boost 1.61.0 (to be updated...)
+    win32:CONFIG(release, debug|release): LIBS += -LC:/boost_1_61_0/lib64/ -llibboost_locale-vc140-mt-1_61
+    else:win32:CONFIG(debug, debug|release): LIBS += -LC:/boost_1_61_0/lib64/ -llibboost_locale-vc140-mt-gd-1_61
     INCLUDEPATH += C:/boost_1_61_0
     DEPENDPATH += C:/boost_1_61_0
-
-    # Boost 1.65.1
-    #win32:CONFIG(release, debug|release): LIBS += -LC:/boost_1_65_1/lib32-msvc-14.1/ -llibboost_filesystem-vc141-mt-1_65_1
-    #else:win32:CONFIG(debug, debug|release): LIBS += -LC:/boost_1_65_1/lib32-msvc-14.1/ -llibboost_filesystem-vc141-mt-gd-1_65_1
-    #INCLUDEPATH += C:/boost_1_65_1
-    #DEPENDPATH += C:/boost_1_65_1
 
     # libzip
     win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../Windows/packages/libzip.1.1.2.7/build/native/lib/x64/v140/Release/ -lzip
@@ -108,19 +96,11 @@ win32:contains(QMAKE_HOST.arch, x86_64) {
     win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../Windows/Release/Win32/AirspaceConverterLib.lib
     else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../Windows/Debug/Win32/AirspaceConverterLib.lib
 
-    # Windows link to boost libraries
-
-    # Boost 1.61.0
-    win32:CONFIG(release, debug|release): LIBS += -LC:/boost_1_61_0/lib32/ -llibboost_filesystem-vc140-mt-1_61
-    else:win32:CONFIG(debug, debug|release): LIBS += -LC:/boost_1_61_0/lib32/ -llibboost_filesystem-vc140-mt-gd-1_61
+    # Boost 1.61.0 (to be updated...)
+    win32:CONFIG(release, debug|release): LIBS += -LC:/boost_1_61_0/lib32/ -llibboost_locale-vc140-mt-1_61
+    else:win32:CONFIG(debug, debug|release): LIBS += -LC:/boost_1_61_0/lib32/ -llibboost_locale-vc140-mt-gd-1_61
     INCLUDEPATH += C:/boost_1_61_0
     DEPENDPATH += C:/boost_1_61_0
-
-    # Boost 1.65.1
-    #win32:CONFIG(release, debug|release): LIBS += -LC:\boost_1_65_1\lib64-msvc-14.1\ -llibboost_filesystem-vc141-mt-1_65_1
-    #else:win32:CONFIG(debug, debug|release): LIBS += -LC:\boost_1_65_1/lib64-msvc-14.1\ -llibboost_filesystem-vc141-mt-gd-1_65_1
-    #INCLUDEPATH += C:\boost_1_65_1
-    #DEPENDPATH += C:\boost_1_65_1
 
     # Windows link to libzip
     win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../Windows/packages/libzip.1.1.2.7/build/native/lib/Win32/v140/Release/ -lzip
