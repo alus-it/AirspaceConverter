@@ -18,8 +18,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = airspaceconverter-gui
 TEMPLATE = app
 
-greaterThan(QT_MAJOR_VERSION, 4): CONFIG += c++11
-lessThan(QT_MAJOR_VERSION, 5): QMAKE_CXXFLAGS += -std=c++11
+greaterThan(QT_MAJOR_VERSION, 4): CONFIG += c++23
+lessThan(QT_MAJOR_VERSION, 5): QMAKE_CXXFLAGS += -std=c++23
 
 RESOURCES += \
     resources.qrc
@@ -50,8 +50,8 @@ unix: LIBS += -L$$PWD/../Release/ -lairspaceconverter \'-Wl,-rpath=\$$ORIGIN\'
 ## Linux libraries
 
 # Boost libraries
-unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu/ -lboost_filesystem
-unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu/ -lboost_system
+#unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu/ -lboost_filesystem
+#unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu/ -lboost_system
 unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu/ -lboost_locale
 
 # Zip library
@@ -62,8 +62,8 @@ unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu/ -lzip
 macx: INCLUDEPATH += /usr/local/include/
 
 # Boost libraries
-macx: LIBS += -L/usr/local/lib/ -lboost_filesystem
-macx: LIBS += -L/usr/local/lib/ -lboost_system
+#macx: LIBS += -L/usr/local/lib/ -lboost_filesystem
+#macx: LIBS += -L/usr/local/lib/ -lboost_system
 macx: LIBS += -L/usr/local/lib/ -lboost_locale-mt
 
 # Zip library
@@ -82,8 +82,8 @@ win32:contains(QMAKE_HOST.arch, x86_64) {
     # Boost libraries
 
     # Boost 1.61.0
-    win32:CONFIG(release, debug|release): LIBS += -LC:/boost_1_61_0/lib64/ -llibboost_filesystem-vc140-mt-1_61
-    else:win32:CONFIG(debug, debug|release): LIBS += -LC:/boost_1_61_0/lib64/ -llibboost_filesystem-vc140-mt-gd-1_61
+    #win32:CONFIG(release, debug|release): LIBS += -LC:/boost_1_61_0/lib64/ -llibboost_filesystem-vc140-mt-1_61
+    #else:win32:CONFIG(debug, debug|release): LIBS += -LC:/boost_1_61_0/lib64/ -llibboost_filesystem-vc140-mt-gd-1_61
     INCLUDEPATH += C:/boost_1_61_0
     DEPENDPATH += C:/boost_1_61_0
 

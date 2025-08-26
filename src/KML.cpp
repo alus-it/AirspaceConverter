@@ -17,8 +17,7 @@
 #include "Airfield.hpp"
 #include "Geometry.hpp"
 #include <zip.h>
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -113,17 +112,17 @@ const std::string KML::DetectIconsPath() {
 #ifdef __APPLE__
 	// Default installed CLI macOS location
 	path("/usr/local/share/airspaceconverter/icons/");
-	if (boost::filesystem::exists(path)) return path;
+	if (std::filesystem::exists(path)) return path;
 
 	// Default installed GUI macOS location
-	path = boost::filesystem::path(boost::filesystem::path(AirspaceConverter::basePath) / boost::filesystem::path("../Resources/icons/")).string();
-	if (boost::filesystem::exists(path)) return path;
+	path = std::filesystem::path(std::filesystem::path(AirspaceConverter::basePath) / std::filesystem::path("../Resources/icons/")).string();
+	if (std::filesystem::exists(path)) return path;
 #elif __linux__
 	path("/usr/share/airspaceconverter/icons/"); // Default installed Linux location
-	if (boost::filesystem::exists(path)) return path;
+	if (std::filesystem::exists(path)) return path;
 #endif
-	path = boost::filesystem::path(boost::filesystem::path(AirspaceConverter::basePath) / boost::filesystem::path("icons/")).string();
-	if (boost::filesystem::exists(path)) return path;
+	path = std::filesystem::path(std::filesystem::path(AirspaceConverter::basePath) / std::filesystem::path("icons/")).string();
+	if (std::filesystem::exists(path)) return path;
 	return "./icons/";
 }
 
@@ -216,7 +215,7 @@ void KML::WriteHeader(const bool airspacePresent, const bool waypointsPresent) {
 				outputFile << "<Style id = \"Style" << Waypoint::TypeName(t) << "\">\n";
 
 				// Put the icon only if there is the right icon PNG file available
-				if (boost::filesystem::exists(iconsPath + waypointIcons[t])) {
+				if (std::filesystem::exists(iconsPath + waypointIcons[t])) {
 					outputFile << "<IconStyle>\n"
 						<< "<Icon>\n"
 						<< "<href>icons/" << waypointIcons[t] << "</href>\n"
@@ -431,13 +430,13 @@ bool KML::Write(const std::string& filename) {
 	}
 	
 	// The file must be a KMZ
-	if (!boost::iequals(boost::filesystem::path(filename).extension().string(), ".kmz")) {
-		AirspaceConverter::LogError("Expected KMZ extension but found: " + boost::filesystem::path(filename).extension().string());
+	if (!boost::iequals(std::filesystem::path(filename).extension().string(), ".kmz")) {
+		AirspaceConverter::LogError("Expected KMZ extension but found: " + std::filesystem::path(filename).extension().string());
 		return false;
 	}
 
 	// Prepare pathname to the KML doc.kml; KMZ files should have the KML file name named as "doc.kml"
-	const std::string fileKML(boost::filesystem::path(boost::filesystem::path(filename).parent_path() / boost::filesystem::path("doc.kml")).string());
+	const std::string fileKML(std::filesystem::path(std::filesystem::path(filename).parent_path() / std::filesystem::path("doc.kml")).string());
 
 	// Make sure the file is not already open
 	if (outputFile.is_open()) outputFile.close();
@@ -667,7 +666,7 @@ bool KML::Write(const std::string& filename) {
 	AirspaceConverter::LogMessage("Compressing into KMZ: " + filename);
 
 	// To avoid problems it is better to delete the KMZ file if already existing, user has already been warned
-	if (boost::filesystem::exists(filename)) std::remove(filename.c_str()); // Delete KMZ file
+	if (std::filesystem::exists(filename)) std::remove(filename.c_str()); // Delete KMZ file
 
 	// Open the ZIP file
 	int error = 0;
@@ -678,7 +677,7 @@ bool KML::Write(const std::string& filename) {
 	}
 
 	// Create source buffer from KML file
-	assert(boost::filesystem::path(fileKML).filename().string() == "doc.kml");
+	assert(std::filesystem::path(fileKML).filename().string() == "doc.kml");
 	zip_source* source = zip_source_file(archive, fileKML.c_str(), 0, 0);
 	if (source == nullptr) { // "failed to create source buffer. " << zip_strerror(archive)
 		// Discard zip file. In case ZIP_FL_OVERWRITE is not defined we are using an older libzib version such as 0.10.1, so we have to use the older functions
@@ -715,7 +714,7 @@ bool KML::Write(const std::string& filename) {
 			const std::string iconPath = iconsPath + waypointIcons[i];
 
 			// Check if we can get that PNG file
-			if (!boost::filesystem::exists(iconPath)) {
+			if (!std::filesystem::exists(iconPath)) {
 				AirspaceConverter::LogWarning("Skipping non existant icon PNG file: " + iconPath);
 				continue;
 			}
@@ -797,7 +796,7 @@ bool KML::ReadKMZ(const std::string& filename) {
 		// Skip empty files
 		if(sb.size == 0) continue;
 
-		boost::filesystem::path zippedFilePath(sb.name);
+		std::filesystem::path zippedFilePath(sb.name);
 
 		// Skip files not in the root of the ZIP
 		if (!zippedFilePath.parent_path().string().empty()) continue;
@@ -812,10 +811,10 @@ bool KML::ReadKMZ(const std::string& filename) {
 		}
 
 		// Prepare path and name of the kml file
-		extractedKmlFile = boost::filesystem::path(boost::filesystem::path(filename).parent_path() / boost::filesystem::path(sb.name)).string();
+		extractedKmlFile = std::filesystem::path(std::filesystem::path(filename).parent_path() / std::filesystem::path(sb.name)).string();
 
 		// To avoid problems it is better to delete the KML file if already existing, user has already been warned
-		if (boost::filesystem::exists(extractedKmlFile)) std::remove(extractedKmlFile.c_str()); // Delete KML file
+		if (std::filesystem::exists(extractedKmlFile)) std::remove(extractedKmlFile.c_str()); // Delete KML file
 
 		// Open the file to be extracted: open new file
 		std::ofstream kmlFile;

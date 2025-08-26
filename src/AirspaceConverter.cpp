@@ -28,7 +28,7 @@
 #include <cmath>
 #include <map>
 #include <tuple>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
 
@@ -39,14 +39,13 @@
 #include <boost/beast/version.hpp>
 #endif
 
-#if BOOST_VERSION >= 106100
-#include <boost/dll/runtime_symbol_info.hpp>
-
-const std::string AirspaceConverter::basePath(boost::filesystem::path(boost::dll::program_location().parent_path()).string());
-#else
-
-// This is for older Linux distributions where boost::dll is not available
-const std::string AirspaceConverter::basePath(boost::filesystem::exists("/usr/bin/airspaceconverter") ? "/usr/bin" : ".");
+#ifdef __linux__ // If on Linux...
+	const std::string AirspaceConverter::basePath(std::filesystem::canonical("/proc/self/exe").string());
+#elif _WIN32 // or if on Windows...
+	//libloaderapi.h
+	const std::string AirspaceConverter::basePath(GetModuleFileNameA(NULL));
+#elif __APPLE__ // or if on macOS
+	//TODO....
 #endif
 
 std::function<void(const std::string&)> AirspaceConverter::LogMessage = DefaultLogMessage;
@@ -108,12 +107,12 @@ void AirspaceConverter::DefaultLogError(const std::string& text) {
 
 const std::string AirspaceConverter::Detect_cGPSmapperPath() {
 #ifdef __linux__ // If on Linux...
-	if (boost::filesystem::exists("/usr/bin/cgpsmapper")) return "cgpsmapper"; // Check the default installation path then use the "cgpsmapper" command
+	if (std::filesystem::exists("/usr/bin/cgpsmapper")) return "cgpsmapper"; // Check the default installation path then use the "cgpsmapper" command
 	const std::string cGPSmapperCmd(basePath + "/cgpsmapper"); // Otherwise try to look in the same folder as the executable
-	if (boost::filesystem::exists(cGPSmapperCmd)) return cGPSmapperCmd;
+	if (std::filesystem::exists(cGPSmapperCmd)) return cGPSmapperCmd;
 #elif _WIN32 // or if on Windows...
 	const std::string cGPSmapperCmd(basePath + "\\cGPSmapper\\cgpsmapper.exe"); // Check the default installation path ... 
-	if (boost::filesystem::exists(cGPSmapperCmd)) return cGPSmapperCmd; // then use it as command
+	if (std::filesystem::exists(cGPSmapperCmd)) return cGPSmapperCmd; // then use it as command
 #elif __APPLE__ // or if on macOS
 	// Unfortunately there in no version of cGPSmapper available for macOS
 #endif
@@ -169,7 +168,7 @@ std::istream& AirspaceConverter::SafeGetline(std::istream& is, std::string& line
 AirspaceConverter::OutputType AirspaceConverter::DetermineType(const std::string& filename) {
 	if (filename.empty()) return OutputType::KMZ_Format; // KMZ default
 	OutputType outputType = OutputType::KMZ_Format; // KMZ default
-	std::string outputExt(boost::filesystem::path(filename).extension().string());
+	std::string outputExt(std::filesystem::path(filename).extension().string());
 	if (!boost::iequals(outputExt, ".kmz")) {
 		if (boost::iequals(outputExt, ".txt")) outputType = OutputType::OpenAir_Format;
 		else if (boost::iequals(outputExt, ".cup")) outputType = OutputType::SeeYou_Format;
@@ -183,7 +182,7 @@ AirspaceConverter::OutputType AirspaceConverter::DetermineType(const std::string
 
 bool AirspaceConverter::PutTypeExtension(const OutputType type, std::string& filename) {
 	if (filename.empty()) return false;
-	boost::filesystem::path outputPath(filename);
+	std::filesystem::path outputPath(filename);
 	switch (type) {
 	case OutputType::KMZ_Format:
 		outputPath.replace_extension(".kmz");
@@ -222,7 +221,7 @@ void AirspaceConverter::LoadAirspaces(const OutputType suggestedTypeForOutputFil
 	kml.ProcessLineStrings(processLineStrings);
 	const size_t initialAirspacesNumber = airspaces.size(); // Airspaces originally already loaded
 	for (const std::string& inputFile : airspaceFiles) {
-		const std::string ext(boost::filesystem::path(inputFile).extension().string());
+		const std::string ext(std::filesystem::path(inputFile).extension().string());
 		if(boost::iequals(ext, ".txt")) openAir.Read(inputFile);
 		else if (boost::iequals(ext, ".aip")) openAIP.ReadAirspaces(inputFile);
 		else if (boost::iequals(ext, ".kmz")) kml.ReadKMZ(inputFile);
@@ -238,16 +237,16 @@ void AirspaceConverter::LoadAirspaces(const OutputType suggestedTypeForOutputFil
 				assert(false);
 				/* no break */
 			case OutputType::KMZ_Format: // KMZ default extension
-				outputFile = boost::filesystem::path(inputFile).replace_extension(".kmz").string();
+				outputFile = std::filesystem::path(inputFile).replace_extension(".kmz").string();
 				break;
 			case OutputType::OpenAir_Format:
-				outputFile = boost::filesystem::path(inputFile).replace_extension(".txt").string();
+				outputFile = std::filesystem::path(inputFile).replace_extension(".txt").string();
 				break;
 			case OutputType::Polish_Format:
-				outputFile = boost::filesystem::path(inputFile).replace_extension(".mp").string();
+				outputFile = std::filesystem::path(inputFile).replace_extension(".mp").string();
 				break;
 			case OutputType::Garmin_Format:
-				outputFile = boost::filesystem::path(inputFile).replace_extension(".img").string();
+				outputFile = std::filesystem::path(inputFile).replace_extension(".img").string();
 		}
 	}
 	LogMessage(boost::str(boost::format("Read %1d airspace definition(s) from %2d file(s).") %(airspaces.size() - initialAirspacesNumber) %airspaceFiles.size()));
@@ -284,7 +283,7 @@ void AirspaceConverter::LoadWaypoints() {
 	OpenAIP openAIP(airspaces, waypoints);
 	for (const std::string& inputFile : waypointFiles) {
 		bool readOk(false);
-		const std::string ext(boost::filesystem::path(inputFile).extension().string());
+		const std::string ext(std::filesystem::path(inputFile).extension().string());
 		if(boost::iequals(ext, ".cup")) readOk = cu.Read(inputFile);
 		else if (boost::iequals(ext, ".csv")) readOk = csv.Read(inputFile);
 		else if (boost::iequals(ext, ".aip")) readOk = openAIP.ReadWaypoints(inputFile);
@@ -293,7 +292,7 @@ void AirspaceConverter::LoadWaypoints() {
 			continue;
 		}
 		if (readOk) counter++;
-		if (readOk && outputFile.empty()) outputFile = boost::filesystem::path(inputFile).replace_extension(".kmz").string(); // Default output as KMZ
+		if (readOk && outputFile.empty()) outputFile = std::filesystem::path(inputFile).replace_extension(".kmz").string(); // Default output as KMZ
 	}
 	waypointFiles.clear();
 	if (counter > 0) LogMessage(boost::str(boost::format("Read successfully %1d waypoint(s) from %2d file(s).") % (waypoints.size() - wptCounter) %counter));
@@ -395,7 +394,7 @@ bool AirspaceConverter::Convert() {
 	case OutputType::Garmin_Format: // For Garmin IMG will be necessary to call cGPSmapper
 		{
 			// First make the Polish file
-			const std::string polishFile(boost::filesystem::path(outputFile).replace_extension(".mp").string());
+			const std::string polishFile(std::filesystem::path(outputFile).replace_extension(".mp").string());
 			LogMessage("Building Polish file: " + polishFile);
 			if(!Polish().Write(polishFile, airspaces)) break;
 
