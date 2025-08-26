@@ -67,7 +67,7 @@ BOOL CAboutDlg::OnInitDialog() {
 		if (diffLatestVersion == 0) this->GetDlgItem(IDC_NEW_VERSION)->SetWindowTextW(_T("Congratulations: this is the latest version."));
 		else if (diffLatestVersion > 0) {
 			this->GetDlgItem(IDC_NEW_VERSION)->SetWindowTextW(_T("A new version is available! Check our website."));
-			AirspaceConverter::LogWarning("A new version of AirspaceConverter is availble! Please update.");
+			AirspaceConverter::LogWarning("A new version of AirspaceConverter is available! Please update.");
 		}
 		else this->GetDlgItem(IDC_NEW_VERSION)->SetWindowTextW(_T("This version is not yet released."));
 	}

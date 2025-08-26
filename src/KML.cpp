@@ -215,7 +215,7 @@ void KML::WriteHeader(const bool airspacePresent, const bool waypointsPresent) {
 			for (int t = Waypoint::normal; t < Waypoint::numOfWaypointTypes; t++) {
 				outputFile << "<Style id = \"Style" << Waypoint::TypeName(t) << "\">\n";
 
-				// Put the icon only if there is the right icon PNG file availble
+				// Put the icon only if there is the right icon PNG file available
 				if (boost::filesystem::exists(iconsPath + waypointIcons[t])) {
 					outputFile << "<IconStyle>\n"
 						<< "<Icon>\n"
