@@ -32,7 +32,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
 
-// The HTTP client used to check for new version from Boost Beast is availble from version 1.70
+// The HTTP client used to check for new version from Boost Beast is available from version 1.70
 #if BOOST_VERSION >= 107000
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
