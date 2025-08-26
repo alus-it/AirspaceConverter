@@ -29,9 +29,7 @@
 #include <QDesktopServices>
 #include <QFuture>
 #include <QFutureWatcher>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/convenience.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
 #include <cassert>
@@ -227,7 +225,7 @@ void MainWindow::on_loadAirspaceFileButton_clicked() {
     startBusy();
 
     // Remember the directory
-    suggestedInputDir = QString::fromStdString(boost::filesystem::path(filenames.front().toStdString()).parent_path().string());
+    suggestedInputDir = QString::fromStdString(std::filesystem::path(filenames.front().toStdString()).parent_path().string());
 
     // Set QNH
     converter->SetQNH(ui->QNHspinBox->value());
@@ -251,8 +249,8 @@ void MainWindow::on_loadAirspaceFolderButton_clicked() {
     converter->SetQNH(ui->QNHspinBox->value());
 
     // Load all the files in the folder
-    for (boost::filesystem::directory_iterator it(boost::filesystem::path(selectedDir.toStdString())), endit; it != endit; ++it) {
-        if (boost::filesystem::is_regular_file(*it)) {
+    for (std::filesystem::directory_iterator it(std::filesystem::path(selectedDir.toStdString())), endit; it != endit; ++it) {
+        if (std::filesystem::is_regular_file(*it)) {
             const std::string ext = it->path().extension().string();
             if (boost::iequals(ext, ".txt") || boost::iequals(ext, ".aip") || boost::iequals(ext, ".kmz") || boost::iequals(ext, ".kml"))
                 converter->AddAirspaceFile(it->path().string());
@@ -276,7 +274,7 @@ void MainWindow::on_loadWaypointFileButton_clicked() {
     startBusy();
 
     // Remember the directory
-    suggestedInputDir = QString::fromStdString(boost::filesystem::path(filenames.front().toStdString()).parent_path().string());
+    suggestedInputDir = QString::fromStdString(std::filesystem::path(filenames.front().toStdString()).parent_path().string());
 
     // Load all the files
     for(const auto& file : filenames) converter->AddWaypointFile(file.toStdString());
@@ -294,8 +292,8 @@ void MainWindow::on_loadWaypointsFolderButton_clicked() {
     suggestedInputDir = selectedDir;
 
     // Load all the files in the folder (.cup only)
-    for (boost::filesystem::directory_iterator it(boost::filesystem::path(selectedDir.toStdString())), endit; it != endit; ++it) {
-        if (boost::filesystem::is_regular_file(*it)) {
+    for (std::filesystem::directory_iterator it(std::filesystem::path(selectedDir.toStdString())), endit; it != endit; ++it) {
+        if (std::filesystem::is_regular_file(*it)) {
             const std::string ext = it->path().extension().string();
             if (boost::iequals(ext, ".cup") || boost::iequals(ext, ".aip") || boost::iequals(ext, ".csv"))
                 converter->AddWaypointFile(it->path().string());
@@ -318,7 +316,7 @@ void MainWindow::on_loadRasterMapFileButton_clicked() {
     startBusy();
 
     // Remember the directory
-    suggestedInputDir = QString::fromStdString(boost::filesystem::path(filenames.front().toStdString()).parent_path().string());
+    suggestedInputDir = QString::fromStdString(std::filesystem::path(filenames.front().toStdString()).parent_path().string());
 
     // Load terrain maps
     for(const auto& mapFile : filenames) converter->AddTerrainRasterMapFile(mapFile.toStdString());
@@ -336,8 +334,8 @@ void MainWindow::on_loadRasterMapFolderButton_clicked() {
     suggestedInputDir = selectedDir;
 
     // Load all the .dem files in the folder
-    for (boost::filesystem::directory_iterator it(boost::filesystem::path(selectedDir.toStdString())), endit; it != endit; ++it) {
-        if (!boost::filesystem::is_regular_file(*it)) continue;
+    for (std::filesystem::directory_iterator it(std::filesystem::path(selectedDir.toStdString())), endit; it != endit; ++it) {
+        if (!std::filesystem::is_regular_file(*it)) continue;
         if(boost::iequals(it->path().extension().string(), ".dem")) converter->AddTerrainRasterMapFile(it->path().string());
     }
     watcher.setFuture(QtConcurrent::run(converter, &AirspaceConverter::LoadTerrainRasterMaps));
@@ -365,7 +363,7 @@ void MainWindow::on_convertButton_clicked() {
 
     // Prepare dialog to ask for output file, will be without extension if not manually typed by the user
     std::string desiredOutputFile = QFileDialog::getSaveFileName(this, tr("Convert to..."),
-                                                                 QString::fromStdString(boost::filesystem::path(converter->GetOutputFile()).replace_extension("").string()),
+                                                                 QString::fromStdString(std::filesystem::path(converter->GetOutputFile()).replace_extension("").string()),
                                                                  AirspaceConverter::Is_cGPSmapperAvailable() ?
                                                                      tr("Google Earth(*.kmz);;OpenAir(*.txt);;SeeYou(*.cup);;LittleNavMap(*.csv);;Polish(*.mp);;Garmin img(*.img)") :
                                                                      tr("Google Earth(*.kmz);;OpenAir(*.txt);;SeeYou(*.cup);;LittleNavMap(*.csv);;Polish(*.mp)"),
@@ -413,17 +411,17 @@ void MainWindow::on_convertButton_clicked() {
     if(!conversionPossible) return;
 
     // Ask confirmation to overwrite the output file
-    boost::filesystem::path path(converter->GetOutputFile());
-    if(!outputFileInsertedViaDialog && boost::filesystem::exists(path) &&
+    std::filesystem::path path(converter->GetOutputFile());
+    if(!outputFileInsertedViaDialog && std::filesystem::exists(path) &&
             QMessageBox::warning(this, "Overwrite?", tr("Selected output file already exists. Overwrite?"), QMessageBox::Yes | QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) return;
 
     // Ask confirmation to overwrite any other file that will be created during the conversion process
     switch(converter->GetOutputType()) {
         case AirspaceConverter::OutputType::KMZ_Format:
-            if(boost::filesystem::exists(boost::filesystem::path(path.parent_path() / boost::filesystem::path("doc.kml"))) && QMessageBox::warning(this, "Overwrite?", tr("The already existing doc.kml file will be deleted, continue?"), QMessageBox::Yes | QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) return;
+            if(std::filesystem::exists(std::filesystem::path(path.parent_path() / std::filesystem::path("doc.kml"))) && QMessageBox::warning(this, "Overwrite?", tr("The already existing doc.kml file will be deleted, continue?"), QMessageBox::Yes | QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) return;
             break;
         case AirspaceConverter::OutputType::Garmin_Format:
-            if(boost::filesystem::exists(path.replace_extension(".mp")) && QMessageBox::warning(this, "Overwrite?", tr("The already existing .MP file will be deleted, continue?"), QMessageBox::Yes | QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) return;
+            if(std::filesystem::exists(path.replace_extension(".mp")) && QMessageBox::warning(this, "Overwrite?", tr("The already existing .MP file will be deleted, continue?"), QMessageBox::Yes | QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) return;
             break;
         default:
             break;
@@ -459,7 +457,7 @@ void MainWindow::on_openOutputFileButton_clicked() {
 }
 
 void MainWindow::on_openOutputFolderButton_clicked() {
-    QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(boost::filesystem::path(converter->GetOutputFile()).parent_path().string())));
+    QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(std::filesystem::path(converter->GetOutputFile()).parent_path().string())));
 }
 
 void MainWindow::on_filterButton_clicked() {

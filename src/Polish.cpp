@@ -14,7 +14,7 @@
 #include "AirspaceConverter.hpp"
 #include "Airspace.hpp"
 #include <sstream>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include <boost/algorithm/string/predicate.hpp>
 #include <cassert>
 
@@ -61,7 +61,7 @@ void Polish::WriteHeader(const std::string& filename) {
 	file << "\n;" << AirspaceConverter::GetCreationDateString() << "\n\n"
 		<< "[IMG ID]\n" //section identifier
 		<< "ID=62831853\n" // unique identifier: 2 PI
-		<< "Name=" << boost::filesystem::path(filename).stem().string() << "\n" // map name
+		<< "Name=" << std::filesystem::path(filename).stem().string() << "\n" // map name
 		<< "LBLcoding=6\n"
 		<< "Codepage=1252\n"
 		<< "Datum=W84\n"
@@ -98,8 +98,8 @@ bool Polish::Write(const std::string& filename, const std::multimap<int, Airspac
 	}
 
 	// Check if has the right extension
-	if (!boost::iequals(boost::filesystem::path(filename).extension().string(), ".mp")) {
-		AirspaceConverter::LogError("expected MP extension but found: " + boost::filesystem::path(filename).extension().string());
+	if (!boost::iequals(std::filesystem::path(filename).extension().string(), ".mp")) {
+		AirspaceConverter::LogError("expected MP extension but found: " + std::filesystem::path(filename).extension().string());
 		return false;
 	}
 
