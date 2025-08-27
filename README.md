@@ -128,7 +128,7 @@ On older _Ubuntu_ or _Debian_ install `libqt4-dev` instead of `libqt5-private-de
 On _Fedora_:  
 `sudo dnf install libzip-devel boost-devel qt-devel lsb-release`  
 Then, to compile, from the root of this project: `./build.sh`  
-To install: `./install.sh`  
+To install: `sudo ./install.sh`  
 This will install everything: the shared library the command line executable and the _Qt_ GUI interface.  
 After it will be possible to run AirspaceConverter CLI from anywhere simply calling: `airspaceconverter`  
 The same for the AirspaceConverter _Qt_ GUI graphical interface: `airspaceconverter-gui`  

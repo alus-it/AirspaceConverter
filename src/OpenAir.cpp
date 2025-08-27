@@ -397,7 +397,7 @@ bool OpenAir::ParseAN(const std::string & line, Airspace& airspace, const bool i
 			name.rfind(airspace.GetCategoryName()) == std::string::npos) { // ... and the name does not alredy contain it ...
 			name.insert (0, airspace.GetCategoryName() + " "); // Then make sure the name contains the type as text
 		}
-		airspace.SetName(isUTF8 ? name : boost::locale::conv::between(name,"utf-8","ISO8859-1"));
+		airspace.SetName(isUTF8 ? name : boost::locale::conv::between(name, "utf-8", "ISO8859-1"));
 		return true;
 	}
 	AirspaceConverter::LogError(boost::str(boost::format("airspace %1s has already a name.") % airspace.GetName()));
@@ -417,7 +417,7 @@ bool OpenAir::ParseAF(const std::string& line, Airspace& airspace, const bool is
 			descr.erase(0,pos);
 			if (descr.at(0) == ' ') descr.erase(0,1); // remove the separating space
 		} else descr.erase();
-		airspace.AddRadioFrequency(freqHz, isUTF8 ? descr : boost::locale::conv::between(descr,"utf-8","ISO8859-1"));
+		airspace.AddRadioFrequency(freqHz, isUTF8 ? descr : boost::locale::conv::between(descr, "utf-8", "ISO8859-1"));
 		return true;
 	} catch(...) {
 		return false;
@@ -647,7 +647,7 @@ bool OpenAir::Write(const std::string& fileName) {
 		if (!WriteCategory(a)) continue;
 
 		// Write the name
-		file << "AN " << boost::locale::conv::between(a.GetName(),"ISO8859-1","utf-8") << "\n";
+		file << "AN " << a.GetName() << "\n";
 		
 		// Write base and ceiling altitudes
 		file << "AL " << a.GetBaseAltitude().ToString() << "\n";
@@ -659,7 +659,7 @@ bool OpenAir::Write(const std::string& fileName) {
 			for (size_t i=0; i<a.GetNumberOfRadioFrequencies(); i++) {
 				const std::pair<int, std::string>& f = a.GetRadioFrequencyAt(i);
 				file << "AF " << AirspaceConverter::FrequencyMHz(f.first);
-				if (!f.second.empty()) file << ' ' << boost::locale::conv::between(f.second,"ISO8859-1","utf-8");
+				if (!f.second.empty()) file << ' ' << f.second;
 				file << "\n";
 			}
 			file.unsetf(std::ios_base::floatfield); //file << std::defaultfloat; not supported by older GCC 4.9.0
