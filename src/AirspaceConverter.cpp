@@ -499,25 +499,44 @@ bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop,
 	return true;
 }
 
-std::string AirspaceConverter::GetCreationDateString() {
+std::string AirspaceConverter::GetCurrentDateString() {
+	const time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+	std::stringstream ss;
+#ifdef __GNUC__
+#if __GNUC__ > 4
+	ss << std::put_time(gmtime(&now), "%d-%m-%Y");
+#else
+	char dateString[20];
+	struct tm *utc;
+	utc = gmtime(&now);
+	strftime(dateString, sizeof(dateString), "%d-%m-%Y", utc);
+	ss << dateString;
+#endif
+#elif _WIN32
+	struct tm utc;
+	gmtime_s(&utc, &now);
+	ss << std::put_time(&utc, "%d-%m-%Y");
+#endif
+	return ss.str();
+}
+
+std::string AirspaceConverter::GetFullCreationDateTimeString() {
 	const time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 	std::stringstream ss;
 #ifdef __GNUC__
 #if __GNUC__ > 4
 	ss << "This file was created on: " << std::put_time(gmtime(&now), "%a %d %B %Y at %T UTC");
 #else
-	char dateString[40];
+	char dateTimeString[40];
 	struct tm *utc;
 	utc = gmtime(&now);
-	strftime(dateString, sizeof(dateString), "%a %d %B %Y at %T UTC", utc);
-	ss << "This file was created on: " << dateString;
+	strftime(dateTimeString, sizeof(dateTimeString), "%a %d %B %Y at %T UTC", utc);
+	ss << "This file was created on: " << dateTimeString;
 #endif
-#else
-#ifdef _WIN32
+#elif _WIN32
 	struct tm utc;
 	gmtime_s(&utc, &now);
 	ss << "This file was created on: " << std::put_time(&utc, "%a %d %B %Y at %T UTC");
-#endif
 #endif
 	return ss.str();
 }

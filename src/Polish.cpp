@@ -58,7 +58,7 @@ const std::string Polish::MakeLabel(const Airspace& airspace) {
 
 void Polish::WriteHeader(const std::string& filename) {
 	for(const std::string& line: AirspaceConverter::disclaimer) file << ";" << line << "\n";
-	file << "\n;" << AirspaceConverter::GetCreationDateString() << "\n\n"
+	file << "\n;" << AirspaceConverter::GetFullCreationDateTimeString() << "\n\n"
 		<< "[IMG ID]\n" //section identifier
 		<< "ID=62831853\n" // unique identifier: 2 PI
 		<< "Name=" << std::filesystem::path(filename).stem().string() << "\n" // map name

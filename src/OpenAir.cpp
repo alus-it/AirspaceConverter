@@ -699,8 +699,11 @@ bool OpenAir::Write(const std::string& fileName) {
 }
 
 void OpenAir::WriteHeader() {
+	file << "*VERSION: 2.0\n";
+	file << "*WRITTEN_BY: AirspaceConverter\n";
+	file << "*DATE: " << AirspaceConverter::GetCurrentDateString() << "\n";
 	for(const std::string& line: AirspaceConverter::disclaimer) file << "* " << line << "\n";
-	file << "\n* " << AirspaceConverter::GetCreationDateString() << "\n\n";
+	file << "\n* " << AirspaceConverter::GetFullCreationDateTimeString() << "\n\n";
 }
 
 bool OpenAir::WriteCategory(const Airspace& airspace) {
