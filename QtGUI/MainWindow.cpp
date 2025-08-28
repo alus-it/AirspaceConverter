@@ -218,7 +218,7 @@ void MainWindow::on_outputFormatComboBox_currentIndexChanged(int index) {
 }
 
 void MainWindow::on_loadAirspaceFileButton_clicked() {
-    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Airspace files"), suggestedInputDir, tr("All airspace files(*.txt *.TXT *.aip *.AIP *.kml *.KML *.kmz *.KMZ);;OpenAir(*.txt *.TXT);;openAIP(*.aip *.AIP);;Google Earth(*.kml *.KML *.kmz *.KMZ);;") );
+    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Airspace files"), suggestedInputDir, tr("All airspace files(*.openair *.OPENAIR *.OpenAir *.txt *.TXT *.aip *.AIP *.kml *.KML *.kmz *.KMZ);;OpenAir(*.openair *.OPENAIR *.OpenAir *.txt *.TXT);;openAIP(*.aip *.AIP);;Google Earth(*.kml *.KML *.kmz *.KMZ);;") );
     if(filenames.empty()) return;
 
     // Start to work
@@ -252,7 +252,7 @@ void MainWindow::on_loadAirspaceFolderButton_clicked() {
     for (std::filesystem::directory_iterator it(std::filesystem::path(selectedDir.toStdString())), endit; it != endit; ++it) {
         if (std::filesystem::is_regular_file(*it)) {
             const std::string ext = it->path().extension().string();
-            if (boost::iequals(ext, ".txt") || boost::iequals(ext, ".aip") || boost::iequals(ext, ".kmz") || boost::iequals(ext, ".kml"))
+            if (boost::iequals(ext, ".openair") || boost::iequals(ext, ".txt") || boost::iequals(ext, ".aip") || boost::iequals(ext, ".kmz") || boost::iequals(ext, ".kml"))
                 converter->AddAirspaceFile(it->path().string());
         }
     }
@@ -353,7 +353,7 @@ void MainWindow::on_convertButton_clicked() {
     // The desired format is initially dictated by the combo box: the user will have it already preselected in the file dialog
     switch(ui->outputFormatComboBox->currentIndex()) {
         case AirspaceConverter::OutputType::KMZ_Format:     selectedFilter = tr("Google Earth(*.kmz)"); break;
-        case AirspaceConverter::OutputType::OpenAir_Format: selectedFilter = tr("OpenAir(*.txt)"); break;
+        case AirspaceConverter::OutputType::OpenAir_Format: selectedFilter = tr("OpenAir(*.openair)"); break;
         case AirspaceConverter::OutputType::SeeYou_Format:  selectedFilter = tr("SeeYou(*.cup)"); break;
         case AirspaceConverter::OutputType::CSV_Format:     selectedFilter = tr("LittleNavMap(*.csv)"); break;
         case AirspaceConverter::OutputType::Polish_Format:  selectedFilter = tr("Polish(*.mp)"); break;
@@ -365,8 +365,8 @@ void MainWindow::on_convertButton_clicked() {
     std::string desiredOutputFile = QFileDialog::getSaveFileName(this, tr("Convert to..."),
                                                                  QString::fromStdString(std::filesystem::path(converter->GetOutputFile()).replace_extension("").string()),
                                                                  AirspaceConverter::Is_cGPSmapperAvailable() ?
-                                                                     tr("Google Earth(*.kmz);;OpenAir(*.txt);;SeeYou(*.cup);;LittleNavMap(*.csv);;Polish(*.mp);;Garmin img(*.img)") :
-                                                                     tr("Google Earth(*.kmz);;OpenAir(*.txt);;SeeYou(*.cup);;LittleNavMap(*.csv);;Polish(*.mp)"),
+                                                                     tr("Google Earth(*.kmz);;OpenAir(*.openair);;SeeYou(*.cup);;LittleNavMap(*.csv);;Polish(*.mp);;Garmin img(*.img)") :
+                                                                     tr("Google Earth(*.kmz);;OpenAir(*.openair);;SeeYou(*.cup);;LittleNavMap(*.csv);;Polish(*.mp)"),
                                                                  &selectedFilter).toStdString();
 
     // If no file selected or entered: do nothing
@@ -381,7 +381,7 @@ void MainWindow::on_convertButton_clicked() {
         // In this case, may be, the user typed just a name but selecting the extension in the save as combo box file type
         desiredFormat = AirspaceConverter::KMZ_Format; // KMZ default
         if (selectedFilter != "Google Earth(*.kmz)") {
-            if (selectedFilter == "OpenAir(*.txt)") desiredFormat = AirspaceConverter::OpenAir_Format;
+            if (selectedFilter == "OpenAir(*.openair)") desiredFormat = AirspaceConverter::OpenAir_Format;
             else if (selectedFilter == "SeeYou(*.cup)") desiredFormat = AirspaceConverter::SeeYou_Format;
             else if (selectedFilter == "LittleNavMap(*.csv)") desiredFormat = AirspaceConverter::CSV_Format;
             else if (selectedFilter == "Polish(*.mp)") desiredFormat = AirspaceConverter::Polish_Format;

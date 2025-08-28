@@ -436,7 +436,7 @@ void CAirspaceConverterDlg::OnBnClickedInputFile() {
 	assert(converter != nullptr);
 	assert(processor != nullptr);
 	if (!UpdateData(TRUE)) return; // Force the user to enter valid QNH
-	CFileDialog dlg(TRUE, NULL, NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("All airspace files|*.txt; *.aip; *.kmz; *.kml|openAIP airspace|*.aip|OpenAir|*.txt|Google Earth|*.kmz; *.kml||"), (CWnd*)this, 0, TRUE);
+	CFileDialog dlg(TRUE, NULL, NULL, OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST, _T("All airspace files|*.openair; *.txt; *.aip; *.kmz; *.kml|OpenAir|.openair; *.txt|openAIP airspace|*.aip|Google Earth|*.kmz; *.kml||"), (CWnd*)this, 0, TRUE);
 	dlg.GetOFN().lpstrTitle = L"Load airspace file(s)";
 	if (dlg.DoModal() == IDOK) {
 		outputFile.clear();
@@ -511,7 +511,7 @@ void CAirspaceConverterDlg::OnBnClickedInputFolderBt() {
 	for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
 		if (boost::filesystem::is_regular_file(*it)) {
 			const std::string ext = it->path().extension().string();
-			if (boost::iequals(ext, ".txt") || boost::iequals(ext, ".aip") || boost::iequals(ext, ".kmz") || boost::iequals(ext, ".kml")) {
+			if (boost::iequals(ext, ".openair") || boost::iequals(ext, ".txt") || boost::iequals(ext, ".aip") || boost::iequals(ext, ".kmz") || boost::iequals(ext, ".kml")) {
 				converter->AddAirspaceFile(it->path().string());
 				if (outputFile.empty()) outputFile = it->path().string();
 			}
@@ -637,8 +637,8 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 	// Prepare and show the open file dialog asking where the user wants to save the converted file
 	boost::filesystem::path outputPath(outputFile);
 	CFileDialog dlg(FALSE, NULL, CString(outputPath.stem().c_str()) , OFN_HIDEREADONLY, AirspaceConverter::Is_cGPSmapperAvailable() ?
-			_T("KMZ|*.kmz|OpenAir|*.txt|SeeYou|*.cup|LittleNavMap|*.csv|Polish|*.mp|Garmin|*.img||") :
-			_T("KMZ|*.kmz|OpenAir|*.txt|SeeYou|*.cup|LittleNavMap|*.csv|Polish|*.mp||"),
+			_T("KMZ|*.kmz|OpenAir|*.openair|SeeYou|*.cup|LittleNavMap|*.csv|Polish|*.mp|Garmin|*.img||") :
+			_T("KMZ|*.kmz|OpenAir|*.openair|SeeYou|*.cup|LittleNavMap|*.csv|Polish|*.mp||"),
 		(CWnd*)this, 0, TRUE);
 	dlg.GetOFN().lpstrTitle = L"Convert to ...";
 	dlg.GetOFN().lpstrInitialDir = CString(outputPath.parent_path().c_str());

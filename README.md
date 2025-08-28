@@ -68,12 +68,12 @@ The `airspaceconverter` command line executable, works taking several arguments,
 Possible options:  
   - **-q**: optional, specify the QNH in hPa used to calculate height of flight levels  
   - **-a**: optional, specify a default terrain altitude in meters to calculate AGL heights of points not covered by loaded terrain map(s)  
-  - **-i**: multiple, input file(s) can be _OpenAir_ (**.txt**), _openAIP_ (**.aip**), _Google Earth_ **.kmz**, **.kml**)  
+  - **-i**: multiple, input file(s) can be _OpenAir_ (**.openair**, **.txt**), _openAIP_ (**.aip**), _Google Earth_ **.kmz**, **.kml**)  
   - **-w**: multiple, input waypoint file(s) can be _SeeYou_ (**.cup**), _openAIP_ (**.aip**) or _LittleNavMap_ (**.csv**)  
   - **-m**: optional, multiple, terrain map file(s) (**.dem**) used to lookup terrain heights  
   - **-l**: optional, set filter limits in latitude and longitude for the output, followed by the 4 limit values: northLat,southLat,westLon,eastLon where the limits are comma separated, expressed in degrees, without spaces, negative for west longitudes and south latitudes  
   - **-u**: optional, set filter limits in altitude for the output, followed by 1 or 2 limit values: lowAltitude,hiAltitude where the limits are comma separated, expressed in feet, without spaces. If the high limit is omitted it will be considered as unlimited.  
-  - **-o**: optional, output file **.kmz** (_Google Earth_), **.txt** (_OpenAir_), **.cup** (_SeeYou_), **.csv** (_LittleNavMap_), **.img** (_Garmin_) or **.mp** (_Polish_). If not specified will be used the name of first input file as **KMZ**  
+  - **-o**: optional, output file **.kmz** (_Google Earth_), **.openair**, **.txt** (_OpenAir_), **.cup** (_SeeYou_), **.csv** (_LittleNavMap_), **.img** (_Garmin_) or **.mp** (_Polish_). If not specified will be used the name of first input file as **KMZ**  
   - **-p**: optional, when writing in _OpenAir_ avoid to use arcs and circles but only points (DP)  
   - **-s**: optional, when writing in _OpenAir_ use coordinates always with minutes and seconds (DD:MM:SS)  
   - **-d**: optional, when writing in _OpenAir_ use coordinates always with decimal minutes (DD:MM.MMM)  
@@ -92,7 +92,7 @@ This is the default way to use the graphical user interface:
 1. Choose the desired output format.
 2. If needed, specify the QNH to be used for calculating the height of flight levels, this must be done before reading airspace files.
 3. If converting to _GoogleEarth_ specify a default terrain altitude to be used for the points not under terrain raster map coverage.
-4. Select as input multiple _openAIP_ (**.aip**) _OpenAir_ (**.txt**) and/or _GoogleEarth_ (**.kmz**) files or the folder containing them.
+4. Select as input multiple _openAIP_ (**.aip**) _OpenAir_ (**.openair**, **.txt**) and/or _GoogleEarth_ (**.kmz**) files or the folder containing them.
 5. If converting to _GoogleEarth_ or to find missing altitudes of _SeeYou_ waypoints it is possible to load multiple raster map files (**.dem**) with the terrain altitude.
 6. And/or select one or multiple waypoints files (**.cup**, **.csv**) or the folder containing them.
 7. Optionally configure the latitude and longitude ranges for filtering the output.
