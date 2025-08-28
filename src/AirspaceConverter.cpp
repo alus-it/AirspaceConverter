@@ -169,16 +169,17 @@ std::istream& AirspaceConverter::SafeGetline(std::istream& is, std::string& line
 }
 
 AirspaceConverter::OutputType AirspaceConverter::DetermineType(const std::string& filename) {
-	if (filename.empty()) return OutputType::KMZ_Format; // KMZ default
 	OutputType outputType = OutputType::KMZ_Format; // KMZ default
-	std::string outputExt(std::filesystem::path(filename).extension().string());
-	if (!boost::iequals(outputExt, ".kmz")) {
-		if (boost::iequals(outputExt, ".txt")) outputType = OutputType::OpenAir_Format;
-		else if (boost::iequals(outputExt, ".cup")) outputType = OutputType::SeeYou_Format;
-		else if (boost::iequals(outputExt, ".mp")) outputType = OutputType::Polish_Format;
-		else if (boost::iequals(outputExt, ".img")) outputType = OutputType::Garmin_Format;
-		else if (boost::iequals(outputExt, ".csv")) outputType = OutputType::CSV_Format;
-		else outputType = OutputType::Unknown_Format;
+	if (!filename.empty()) {
+		const std::string outputExt(std::filesystem::path(filename).extension().string());
+		if (!boost::iequals(outputExt, ".kmz")) {
+			if (boost::iequals(outputExt, ".openair") || boost::iequals(outputExt, ".txt")) outputType = OutputType::OpenAir_Format;
+			else if (boost::iequals(outputExt, ".cup")) outputType = OutputType::SeeYou_Format;
+			else if (boost::iequals(outputExt, ".mp")) outputType = OutputType::Polish_Format;
+			else if (boost::iequals(outputExt, ".img")) outputType = OutputType::Garmin_Format;
+			else if (boost::iequals(outputExt, ".csv")) outputType = OutputType::CSV_Format;
+			else outputType = OutputType::Unknown_Format;
+		}
 	}
 	return outputType;
 }
@@ -191,7 +192,7 @@ bool AirspaceConverter::PutTypeExtension(const OutputType type, std::string& fil
 		outputPath.replace_extension(".kmz");
 		break;
 	case OutputType::OpenAir_Format:
-		outputPath.replace_extension(".txt");
+		outputPath.replace_extension(".openair");
 		break;
 	case OutputType::SeeYou_Format:
 		outputPath.replace_extension(".cup");
@@ -225,7 +226,7 @@ void AirspaceConverter::LoadAirspaces(const OutputType suggestedTypeForOutputFil
 	const size_t initialAirspacesNumber = airspaces.size(); // Airspaces originally already loaded
 	for (const std::string& inputFile : airspaceFiles) {
 		const std::string ext(std::filesystem::path(inputFile).extension().string());
-		if(boost::iequals(ext, ".txt")) openAir.Read(inputFile);
+		if(boost::iequals(ext, ".openair") || boost::iequals(ext, ".txt")) openAir.Read(inputFile);
 		else if (boost::iequals(ext, ".aip")) openAIP.ReadAirspaces(inputFile);
 		else if (boost::iequals(ext, ".kmz")) kml.ReadKMZ(inputFile);
 		else if (boost::iequals(ext, ".kml")) kml.ReadKML(inputFile);
@@ -243,7 +244,7 @@ void AirspaceConverter::LoadAirspaces(const OutputType suggestedTypeForOutputFil
 				outputFile = std::filesystem::path(inputFile).replace_extension(".kmz").string();
 				break;
 			case OutputType::OpenAir_Format:
-				outputFile = std::filesystem::path(inputFile).replace_extension(".txt").string();
+				outputFile = std::filesystem::path(inputFile).replace_extension(".openair").string();
 				break;
 			case OutputType::Polish_Format:
 				outputFile = std::filesystem::path(inputFile).replace_extension(".mp").string();

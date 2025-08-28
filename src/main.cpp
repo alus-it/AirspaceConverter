@@ -18,7 +18,7 @@
 #include "Altitude.hpp"
 
 void printHelp() {
-	std::cout << "Example usage: airspaceconverter -q 1013 -a 35 -i inputFileOpenAir.txt -i openAIP_asp.aip -w waypoints.cup -w openAIP_wpt.aip -m terrainMap.dem -o outputFile.kmz" << std::endl << std::endl;
+	std::cout << "Example usage: airspaceconverter -q 1013 -a 35 -i inputAspFile.openair -i openAIP_asp.aip -w waypoints.cup -w openAIP_wpt.aip -m terrainMap.dem -o outputFile.kmz" << std::endl << std::endl;
 	std::cout << "Possible options:" << std::endl;
 	std::cout << "-q: optional, specify the QNH in hPa used to calculate height of flight levels" << std::endl;
 	std::cout << "-a: optional, specify a default terrain altitude in meters to calculate AGL heights of points not covered by loaded terrain map(s)" << std::endl;
@@ -29,7 +29,7 @@ void printHelp() {
 	std::cout << "    where the limits are comma separated, coordinates expressed in degrees, without spaces, negative for west longitudes and south latitudes" << std::endl;
 	std::cout << "-u: optional, set filter limits on altitude for the output, followed by the 1 or 2 limit values: lowAlt,hiAlt" << std::endl;
 	std::cout << "    altitudes are expressed in feet, at main sea level. If higher limit is omitted it will be considered as unlimited" << std::endl;
-	std::cout << "-o: optional, output file .kmz, .txt (OpenAir), .cup (SeeYou), .csv (LittleNavMap)";
+	std::cout << "-o: optional, output file .kmz (Google Earth), .opnair, .txt (OpenAir), .cup (SeeYou), .csv (LittleNavMap)";
 	if (AirspaceConverter::Is_cGPSmapperAvailable()) std::cout << ", .img (Garmin)";
 	std::cout << " or .mp (Polish). If not specified will be used the name of first input file as KMZ" << std::endl;
 	std::cout << "-p: optional, when writing in OpenAir avoid to use arcs and circles but only points (DP)" << std::endl;

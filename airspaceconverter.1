@@ -73,7 +73,7 @@ Specify a default terrain altitude in meters to calculate AGL heights of points 
 Default is 20 m.
 .TP
 .BR \-i " " \fIinputFile\fR
-Multiple, input airspace file(s) can be OpenAir (.txt), openAIP (.aip), Google Earth (.kmz, .kml).
+Multiple, input airspace file(s) can be OpenAir (.openair, .txt), openAIP (.aip), Google Earth (.kmz, .kml).
 At least one input airspace or waypoint file must be present.
 Additional input airspace files must be specified repeating the option \-i in front of each of them.
 OpenAir input files are expected to be encoded in ANSI but if encoded in UTF-8 with BOM they will be also read properly.
@@ -101,7 +101,7 @@ The limits are comma separated, expressed in feet, without spaces.
 If the high limit is omitted it will be considered as unlimited.
 .TP
 .BR \-o " " \fIoutputFile\fR
-Output file, can be: .kmz (Google Earth), .txt (OpenAir), .cup (SeeYou), .csv (LittleNavMap), .img (Garmin) or .mp (Polish).
+Output file, can be: .kmz (Google Earth), .opeair, .txt (OpenAir), .cup (SeeYou), .csv (LittleNavMap), .img (Garmin) or .mp (Polish).
 If not specified will be used the name of first input file as KMZ.
 Output OpenAir files will be always encoded in ANSI.
 WARNING: any already existing output file will be automatically overwritten.
