@@ -167,7 +167,7 @@ void KML::WriteHeader(const bool airspacePresent, const bool waypointsPresent) {
 	outputFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 		<< "<!--\n";
 	for(const std::string& line: AirspaceConverter::disclaimer) outputFile << line << "\n";
-	outputFile << "\n" << AirspaceConverter::GetCreationDateString() << " -->\n"
+	outputFile << "\n" << AirspaceConverter::GetFullCreationDateTimeString() << " -->\n"
 		<< "<kml xmlns = \"http://www.opengis.net/kml/2.2\">\n"
 		<< "<Document>\n"
 		<< "<open>true</open>\n";
