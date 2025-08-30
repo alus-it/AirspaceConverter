@@ -19,8 +19,8 @@
 #include "Processor.hpp"
 #include "AirspaceConverter.hpp"
 #include <filesystem>
+#include <format>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/format.hpp>
 #include <boost/locale/encoding.hpp>
 
 #ifdef _DEBUG

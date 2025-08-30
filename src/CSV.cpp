@@ -31,11 +31,11 @@
 #include "Geometry.hpp"
 #include <fstream>
 #include <iomanip>
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/format.hpp>
+#include <format>
 #include <cmath>
 #include <cassert>
+#include <boost/algorithm/string.hpp>
+#include <boost/tokenizer.hpp>
 
 CSV::CSV(std::multimap<int,Waypoint*>& waypointsMap):
 	waypoints(waypointsMap) {
@@ -310,7 +310,7 @@ bool CSV::Read(const std::string& fileName) {
 
 		// Verify line ending
 		if (!CRLFwarningGiven && !isCRLF) {
-			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: not valid Windows style end of line (expected CR LF).") % linecount));
+			AirspaceConverter::LogWarning(std::format("on line {}: not valid Windows style end of line (expected CR LF).", linecount));
 
 			// CSV files may contain thousands of WPs we don't want to print this warning all the time
 			CRLFwarningGiven = true;
@@ -338,14 +338,14 @@ bool CSV::Read(const std::string& fileName) {
 
 		// Skip too short lines
 		if (sLine.size() <= 4) { // At least 4 commas should be there
-			AirspaceConverter::LogError(boost::str(boost::format("line %1d is too short to contain anything useful: %2s") %linecount %sLine));
+			AirspaceConverter::LogError(std::format("line {} is too short to contain anything useful: {}", linecount, sLine));
 			continue;
 		}
 
 		// Tokenize with quotes
 		boost::tokenizer<boost::escaped_list_separator<char> > tokens(sLine); // default separator:',', default quote:'"', default escape char:'\'
 		if (std::distance(tokens.begin(),tokens.end()) < 10) { // We expect at least 10 fields
-			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: expected 10 fields: %2s") %linecount %sLine));
+			AirspaceConverter::LogError(std::format("on line {}: expected 10 fields: {}", linecount, sLine));
 			continue;
 		}
 
@@ -353,12 +353,12 @@ bool CSV::Read(const std::string& fileName) {
 
 		// Waypoint style
 		if (!ParseStyle(boost::trim_copy(*token),type)) // check & fix: ParseStyle()
-			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid waypoint style: %2s, assuming unknown") %linecount %(*token)));
+			AirspaceConverter::LogWarning(std::format("on line {}: invalid waypoint style: {}, assuming unknown", linecount, *token));
 
 		// Long name
 		const std::string name = boost::trim_copy(*(++token));
 		if (name.empty()) {
-			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: a name must be present: %2s") %linecount %sLine));
+			AirspaceConverter::LogError(std::format("on line {}: a name must be present: {}", linecount, sLine));
 			continue;
 		}
 
@@ -367,13 +367,13 @@ bool CSV::Read(const std::string& fileName) {
 
 		// Latitude
 		if (!ParseLatitude(boost::trim_copy(*(++token)), latitude)) { // check & fix: ParseLatitude()
-			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: invalid latitude: %2s") %linecount %(*token)));
+			AirspaceConverter::LogError(std::format("on line {}: invalid latitude: {}", linecount, *token));
 			continue;
 		}
 
 		// Longitude
 		if (!ParseLongitude(boost::trim_copy(*(++token)), longitude)) { // check & fix: ParseLongitude()
-			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: invalid longitude: %2s") %linecount %(*token)));
+			AirspaceConverter::LogError(std::format("on line {}: invalid longitude: {}", linecount, *token));
 			continue;
 		}
 
@@ -384,7 +384,7 @@ bool CSV::Read(const std::string& fileName) {
 		const bool altitudeParsed = blankAltitude ? false : ParseAltitude(elevationText, altitude); // check & fix: ParseAltitude()
 		
 		if (!altitudeParsed && !blankAltitude && !terrainMapsPresent)
-			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %elevationText));
+			AirspaceConverter::LogWarning(std::format("on line {}: invalid elevation: {}, assuming AMSL", linecount, elevationText));
 
 		// Altitude verification against terrain raster map
 		if (terrainMapsPresent && type > Waypoint::WaypointType::normal) // Unknown and normal waypoints skipped
@@ -400,15 +400,15 @@ bool CSV::Read(const std::string& fileName) {
 
 			// Runway direction
 			if (!ParseRunwayDir(boost::trim_copy(*(++token)),runwayDir)) // check & fix: ParseRunwayDir()
-				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid runway direction: %2s") % linecount % (*token)));
+				AirspaceConverter::LogWarning(std::format("on line {}: invalid runway direction: {}", linecount, *token));
 
 			// Runway length
 			if (!ParseRunwayLength(boost::trim_copy(*(++token)),runwayLength)) // check & fix: ParseRunwayLength()
-				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid runway length: %2s") %linecount %(*token)));
+				AirspaceConverter::LogWarning(std::format("on line {}: invalid runway length: {}", linecount, *token));
 
 			// Radio frequency
 			if (!ParseAirfieldFrequencies(boost::trim_copy(*(++token)),radioFreq,altRadioFreq)) // check & fix: ParseAirfieldFrequencies()
-				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid radio frequency for airfield: %2s") %linecount %(*token)));
+				AirspaceConverter::LogWarning(std::format("on line {}: invalid radio frequency for airfield: {}", linecount, *token));
 #endif
 			token++; // Skip as now Label/Tag(runway direction, length and radio freq)
 
@@ -425,7 +425,7 @@ bool CSV::Read(const std::string& fileName) {
 #if 0
 			if (altRadioFreq > 0) {
 				assert(radioFreq > 0);
-				if (altRadioFreq == radioFreq) AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: skipping repeated secondary radio frequency for airfield.") %linecount));
+				if (altRadioFreq == radioFreq) AirspaceConverter::LogWarning(std::format("on line {}: skipping repeated secondary radio frequency for airfield.", linecount));
 				else airfield->SetOtherFrequency(altRadioFreq);
 			}
 #endif
@@ -440,7 +440,7 @@ bool CSV::Read(const std::string& fileName) {
 #if 0
 			// Frequency may be used for VOR and NDB
 			if (!ParseOtherFrequency(boost::trim_copy(*(++token)), type, radioFreq)) // check & fix: ParseOtherFrequency()
-				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid frequency for non airfield waypoint: %2s") %linecount %(*token)));
+				AirspaceConverter::LogWarning(std::format("on line {}: invalid frequency for non airfield waypoint: {}", linecount, *token));
 #endif
 
 			// Description
@@ -528,7 +528,7 @@ bool CSV::Write(const std::string& fileName) {
 				type = "VRP";
 				break;
 			default:
-				AirspaceConverter::LogWarning(boost::str(boost::format("skipping point with unknown type: %d") % style));
+				AirspaceConverter::LogWarning(std::format("skipping point with unknown type: {}", style));
 				continue;
 		}
 		file << type << ',';

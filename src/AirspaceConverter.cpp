@@ -29,8 +29,8 @@
 #include <map>
 #include <tuple>
 #include <filesystem>
-#include <boost/algorithm/string/predicate.hpp>
 #include <format>
+#include <boost/algorithm/string/predicate.hpp>
 
 // The HTTP client used to check for new version from Boost Beast is available from version 1.70
 #if BOOST_VERSION >= 107000

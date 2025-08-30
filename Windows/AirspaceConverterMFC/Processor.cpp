@@ -13,9 +13,8 @@
 #include "stdafx.h"
 #include "Processor.hpp"
 #include "AirspaceConverter.hpp"
-#include <boost/filesystem/path.hpp>
+#include <format>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/format.hpp>
 
 Processor::Processor(HWND hwnd, AirspaceConverter* airspaceConverter) :
 	window(hwnd) ,
@@ -33,7 +32,7 @@ bool Processor::cGPSmapper(const std::string& polishFile, const std::string& out
 	AirspaceConverter::LogMessage("Invoking cGPSmapper to make: " + outputFile);
 
 	//TODO: add arguments to create files also for other software like Garmin BaseCamp
-	const std::string args(boost::str(boost::format("%1s -o %2s") % polishFile %outputFile));
+	const std::string args(std::format("{} -o {}", polishFile, outputFile));
 
 	SHELLEXECUTEINFO lpShellExecInfo = { 0 };
 	lpShellExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
