@@ -54,8 +54,6 @@ private:
 	bool ParseDA(const std::string& line, Airspace& airspace, const int& linenumber);
 	bool ParseDB(const std::string& line, Airspace& airspace);
 	bool ParseDC(const std::string& line, Airspace& airspace);
-
-	//bool ParseDY(const std::string& line, Airspace& airspace); // Airway not yet supported
 	bool InsertAirspace(Airspace& airspace);
 	void WriteHeader();
 	bool WriteCategory(const Airspace& airsapce);
