@@ -30,7 +30,7 @@
 #include <tuple>
 #include <filesystem>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/format.hpp>
+#include <format>
 
 // The HTTP client used to check for new version from Boost Beast is available from version 1.70
 #if BOOST_VERSION >= 107000
@@ -126,7 +126,7 @@ bool AirspaceConverter::Default_cGPSmapper(const std::string& polishFile, const 
 	LogMessage("Invoking cGPSmapper to make: " + outputFile);
 
 	//TODO: add arguments to create files also for other software like Garmin BaseCamp
-	const std::string cmd(boost::str(boost::format("%1s \"%2s\" -o \"%3s\"") %cGPSmapperCommand %polishFile %outputFile));
+	const std::string cmd(std::format("{} \"{}\" -o \"{}\"", cGPSmapperCommand, polishFile, outputFile));
 	LogMessage("Executing: " + cmd);
 	if(system(cmd.c_str()) == EXIT_SUCCESS) {
 		std::remove(polishFile.c_str()); // Delete polish file
@@ -254,7 +254,7 @@ void AirspaceConverter::LoadAirspaces(const OutputType suggestedTypeForOutputFil
 				outputFile = std::filesystem::path(inputFile).replace_extension(".img").string();
 		}
 	}
-	LogMessage(boost::str(boost::format("Read %1d airspace definition(s) from %2d file(s).") %(airspaces.size() - initialAirspacesNumber) %airspaceFiles.size()));
+	LogMessage(std::format("Read {} airspace definition(s) from {} file(s).", airspaces.size() - initialAirspacesNumber, airspaceFiles.size()));
 	airspaceFiles.clear();
 }
 
@@ -270,7 +270,7 @@ void AirspaceConverter::LoadTerrainRasterMaps() {
 	int counter = 0;
 	for (const std::string& demFile : terrainRasterMapFiles) if (AddTerrainMap(demFile)) counter++;
 	terrainRasterMapFiles.clear();
-	if (counter > 0) LogMessage(boost::str(boost::format("Read successfully %1d terrain raster map file(s).") % counter));
+	if (counter > 0) LogMessage(std::format("Read successfully {} terrain raster map file(s).", counter));
 }
 
 void AirspaceConverter::UnloadRasterMaps() {
@@ -300,7 +300,7 @@ void AirspaceConverter::LoadWaypoints() {
 		if (readOk && outputFile.empty()) outputFile = std::filesystem::path(inputFile).replace_extension(".kmz").string(); // Default output as KMZ
 	}
 	waypointFiles.clear();
-	if (counter > 0) LogMessage(boost::str(boost::format("Read successfully %1d waypoint(s) from %2d file(s).") % (waypoints.size() - wptCounter) %counter));
+	if (counter > 0) LogMessage(std::format("Read successfully {} waypoint(s) from {} file(s).", waypoints.size() - wptCounter, counter));
 }
 
 void AirspaceConverter::UnloadWaypoints() {
@@ -599,7 +599,7 @@ bool AirspaceConverter::FilterOnLatLonLimits(const double& topLat, const double&
 			if ((*it).second.IsWithinLatLonLimits(limits)) ++it;
 			else it = airspaces.erase(it);
 		}
-		LogMessage(boost::str(boost::format("Filtering airspaces on position... excluded: %1d, remaining: %2d") %(origAirspaces - GetNumOfAirspaces()) %GetNumOfAirspaces()));
+		LogMessage(std::format("Filtering airspaces on position... excluded: {}, remaining: {}", origAirspaces - GetNumOfAirspaces(), GetNumOfAirspaces()));
 	}
 
 	// Filter waypoints
@@ -613,7 +613,7 @@ bool AirspaceConverter::FilterOnLatLonLimits(const double& topLat, const double&
 				delete(w);
 			}
 		}
-		LogMessage(boost::str(boost::format("Filtering waypoints on position... excluded: %1d, remaining: %2d ") %(origWaypoints - GetNumOfWaypoints()) %GetNumOfWaypoints()));
+		LogMessage(std::format("Filtering waypoints on position... excluded: {}, remaining: {}", origWaypoints - GetNumOfWaypoints(), GetNumOfWaypoints()));
 	}
 	return true;
 }
@@ -632,7 +632,7 @@ bool AirspaceConverter::FilterOnAltitudeLimits(const Altitude& floor, const Alti
 			if ((*it).second.IsWithinAltLimits(floor, ceiling)) ++it;
 			else it = airspaces.erase(it);
 		}
-		LogMessage(boost::str(boost::format("Filtering airspaces on altitude... excluded: %1d, remaining: %2d") %(origAirspaces - GetNumOfAirspaces()) %GetNumOfAirspaces()));
+		LogMessage(std::format("Filtering airspaces on altitude... excluded: {}, remaining: {}", origAirspaces - GetNumOfAirspaces(), GetNumOfAirspaces()));
 	}
 
 	// Filter waypoints
@@ -648,7 +648,7 @@ bool AirspaceConverter::FilterOnAltitudeLimits(const Altitude& floor, const Alti
 				delete(w);
 			}
 		}
-		LogMessage(boost::str(boost::format("Filtering waypoints on altitude... excluded: %1d, remaining: %2d ") %(origWaypoints - GetNumOfWaypoints()) %GetNumOfWaypoints()));
+		LogMessage(std::format("Filtering waypoints on altitude... excluded: {}, remaining: {}", origWaypoints - GetNumOfWaypoints(), GetNumOfWaypoints()));
 	}
 	return true;
 }
@@ -675,18 +675,18 @@ bool AirspaceConverter::VerifyAltitudeOnTerrainMap(const double& lat, const doub
 		if (altitudeParsed) {
 			const double delta = isSpike ? alt - terrainAlt : fabs(alt - terrainAlt); // Spike such as an antenna, tower, VOR, etc: consider higher theresold in this case
 			if (isSpike ? delta > 100 || delta < 0 : terrainAlt > 5 ? delta > 10 : delta > 15) { // Consider bigger threshold if delta > 5 m (maybe it was really intended AMSL)
-				LogWarning(boost::str(boost::format("on line %1d: detected altitude difference of: %2g m respect ground, using terrain altitude: %3g m") %line %delta %terrainAlt));
+				LogWarning(std::format("on line {}: detected altitude difference of: {} m respect ground, using terrain altitude: {} m", line, delta, terrainAlt));
 				alt = (float)terrainAlt;
 			}
 		} else {
-			if (blankAltitude) LogWarning(boost::str(boost::format("on line %1d: blank elevation, using terrain altitude: %2g m") %line %terrainAlt));
-			else LogWarning(boost::str(boost::format("on line %1d: invalid elevation, using terrain altitude: %2g m") %line %terrainAlt));
+			if (blankAltitude) LogWarning(std::format("on line {}: blank elevation, using terrain altitude: {} m", line, terrainAlt));
+			else LogWarning(std::format("on line {}: invalid elevation, using terrain altitude: {} m", line,terrainAlt));
 			alt = (float)terrainAlt;
 		}
 		return true;
 	} 
-	if (blankAltitude) LogWarning(boost::str(boost::format("on line %1d: blank elevation, waypoint out of loaded terrain maps: assuming AMSL") %line));
-	else if (!altitudeParsed) LogWarning(boost::str(boost::format("on line %1d: invalid elevation, waypoint out of loaded terrain maps: assuming AMSL") %line));
+	if (blankAltitude) LogWarning(std::format("on line {}: blank elevation, waypoint out of loaded terrain maps: assuming AMSL", line));
+	else if (!altitudeParsed) LogWarning(std::format("on line {}: invalid elevation, waypoint out of loaded terrain maps: assuming AMSL", line));
 	return false;
 }
 

@@ -31,7 +31,7 @@
 #include <QFutureWatcher>
 #include <filesystem>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/format.hpp>
+#include <format>
 #include <cassert>
 #include "AirspaceConverter.hpp"
 #include "Altitude.hpp"
@@ -187,7 +187,7 @@ void MainWindow::refreshUI() {
 void MainWindow::endBusy() {
     if (busy) { // Stop the timer
         const double elapsedTimeSec = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - startTime).count() / 1e6;
-        logMessage(QString::fromStdString(std::string(boost::str(boost::format("Execution time: %1f sec.") %elapsedTimeSec))));
+        logMessage(QString::fromStdString(std::format("Execution time: {} sec.", elapsedTimeSec)));
     }
 
     // Set the numer of airspaces loaded in its spinBox
