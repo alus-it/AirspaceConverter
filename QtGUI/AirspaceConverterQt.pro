@@ -17,9 +17,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = airspaceconverter-gui
 TEMPLATE = app
-
-greaterThan(QT_MAJOR_VERSION, 4): CONFIG += c++23
-lessThan(QT_MAJOR_VERSION, 5): QMAKE_CXXFLAGS += -std=c++23
+CONFIG += c++23
+QMAKE_CXXFLAGS += -std=c++23
 
 RESOURCES += \
     resources.qrc
