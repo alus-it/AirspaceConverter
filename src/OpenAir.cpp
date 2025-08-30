@@ -336,8 +336,7 @@ bool OpenAir::Read(const std::string& fileName) {
 				lineParsedOK = ParseDC(sLine, airspace);
 				break;
 			case 'Y': // DY
-				//ParseDY(sLine, airspace); // Airway not yet supported
-				AirspaceConverter::LogWarning(std::format("skipping airway segment (not yet supported) on line {}: {}", linecount, sLine));
+				AirspaceConverter::LogWarning(std::format("skipping airway segment (deprecated) on line {}: {}", linecount, sLine));
 				lineParsedOK = false; 
 				break;
 			default:
@@ -456,14 +455,14 @@ bool OpenAir::ParseDP(const std::string& line, Airspace& airspace, const int& li
 				// If this point is matching the first point (can happen that last point matches the first point of last geometry) ... 
 				size_t numGeo = airspace.GetNumberOfGeometries();
 				if (numGeo > 1 && !airspace.GetGeometryAt(numGeo - 1)->IsPoint() && airspace.GetFirstPoint() == point) {
-					
-					// ... take a note that the last point is matching the fisrt (as it should be)
+
+					// ... take a note that the last point is matching the first (as it should be)
 					lastPointWasEqualToFirst = true;
 					return true;
 				}
 			}
 
-			// If the last point equal to the first was alredy detected than there is really a duplicate
+			// If the last point equal to the first was already detected than there is really a duplicate
 			AirspaceConverter::LogWarning(std::format("skipping unnecessary repeated point on line {}: {}", linenumber, line));	
 		}
 		return true;
@@ -553,20 +552,6 @@ bool OpenAir::ParseDC(const std::string& line, Airspace& airspace) {
 	}
 	return true;
 }
-
-/* Airway not yet supported
-bool OpenAir::ParseDY(const std::string & line, Airspace& airspace)
-{
-	if (airspace.GetType() == Airspace::UNDEFINED) return true;
-	if (varWidth == 0 || line.length() < 14) return false;
-	double lat = 0, lon = 0;
-	if (ParseCoordinates(line.substr(3), lat, lon)) {
-		airspace.AddGeometry(new AirwayPoint(lat, lon, varWidth));
-		return true;
-	} 
-	return false;
-}
-*/
 
 bool OpenAir::InsertAirspace(Airspace& airspace) {
 	if (airspace.GetType() == Airspace::UNDEFINED || airspace.GetName().empty()) {
