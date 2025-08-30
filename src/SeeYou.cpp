@@ -18,11 +18,11 @@
 #include "Geometry.hpp"
 #include <fstream>
 #include <iomanip>
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/format.hpp>
+#include <format>
 #include <cmath>
 #include <cassert>
+#include <boost/algorithm/string.hpp>
+#include <boost/tokenizer.hpp>
 
 const std::string SeeYou::defaultHeader = "name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc";
 
@@ -195,15 +195,15 @@ bool SeeYou::Read(const std::string& fileName) {
 			if (sLine.find(defaultHeader) != std::string::npos ||
 				sLine.find("name, code, country, lat, lon, elev, style, rwydir, rwylen, freq, desc") != std::string::npos ||
 				sLine.find("name, code, country, lat, lon, elev, style, rwdir, rwlen, freq, desc") != std::string::npos) {
-					AirspaceConverter::LogWarning(boost::str(boost::format("on first line: expected default SeeYou header: %1s but found: %2s") %defaultHeader %sLine));
+					AirspaceConverter::LogWarning(std::format("on first line: expected default SeeYou header: {} but found: {}", defaultHeader, sLine));
 					continue;
 				}
-			AirspaceConverter::LogWarning(boost::str(boost::format("first line not containing the default SeeYou header, it should be: %1s") %defaultHeader));
+			AirspaceConverter::LogWarning(std::format("first line not containing the default SeeYou header, it should be: {}", defaultHeader));
 		}
 
 		// Verify line ending
 		if (!CRLFwarningGiven && !isCRLF) {
-			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: not valid Windows style end of line (expected CR LF).") % linecount));
+			AirspaceConverter::LogWarning(std::format("on line {}: not valid Windows style end of line (expected CR LF).", linecount));
 
 			// CUP files may contain thousands of WPs we don't want to print this warning all the time
 			CRLFwarningGiven = true;
@@ -226,7 +226,7 @@ bool SeeYou::Read(const std::string& fileName) {
 
 		// Skip too short lines
 		if (sLine.size() <= 10) { // At least ten commas should be there
-			AirspaceConverter::LogError(boost::str(boost::format("line %1d is too short to contain anything useful: %2s") %linecount %sLine));
+			AirspaceConverter::LogError(std::format("line {} is too short to contain anything useful: {}", linecount, sLine));
 			continue;
 		}
 
@@ -236,7 +236,7 @@ bool SeeYou::Read(const std::string& fileName) {
 		// Tokenize with quotes
 		boost::tokenizer<boost::escaped_list_separator<char> > tokens(sLine); // default separator:',', default quote:'"', default escape char:'\'
 		if (std::distance(tokens.begin(),tokens.end()) != 11) { // We expect only 11 fields
-			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: expected 11 fields: %2s") %linecount %sLine));
+			AirspaceConverter::LogError(std::format("on line {}: expected 11 fields: {}", linecount, sLine));
 			continue;
 		}
 
@@ -244,7 +244,7 @@ bool SeeYou::Read(const std::string& fileName) {
 		boost::tokenizer<boost::escaped_list_separator<char> >::iterator token=tokens.begin();
 		const std::string name = boost::trim_copy(*token);
 		if (name.empty()) {
-			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: a name must be present: %2s") %linecount %sLine));
+			AirspaceConverter::LogError(std::format("on line {}: a name must be present: {}", linecount, sLine));
 			continue;
 		}
 
@@ -256,13 +256,13 @@ bool SeeYou::Read(const std::string& fileName) {
 
 		// Latitude
 		if (!ParseLatitude(boost::trim_copy(*(++token)), latitude)) {
-			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: invalid latitude: %2s") %linecount %(*token)));
+			AirspaceConverter::LogError(std::format("on line {}: invalid latitude: {}", linecount, *token));
 			continue;
 		}
 
 		// Longitude
 		if (!ParseLongitude(boost::trim_copy(*(++token)), longitude)) {
-			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: invalid longitude: %2s") %linecount %(*token)));
+			AirspaceConverter::LogError(std::format("on line {}: invalid longitude: {}", linecount, *token));
 			continue;
 		}
 
@@ -273,11 +273,11 @@ bool SeeYou::Read(const std::string& fileName) {
 		const bool altitudeParsed = blankAltitude ? false : ParseAltitude(elevationText, altitude);
 		
 		if (!altitudeParsed && !blankAltitude && !terrainMapsPresent)
-			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid elevation: %2s, assuming AMSL") %linecount %elevationText));
+			AirspaceConverter::LogWarning(std::format("on line {}: invalid elevation: {}, assuming AMSL", linecount, elevationText));
 
 		// Waypoint style
 		if (!ParseStyle(boost::trim_copy(*(++token)),type))
-			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid waypoint style: %2s, assuming unknown") %linecount %(*token)));
+			AirspaceConverter::LogWarning(std::format("on line {}: invalid waypoint style: {}, assuming unknown", linecount, *token));
 
 		// Altitude verification against terrain raster map
 		if (terrainMapsPresent && type > Waypoint::WaypointType::normal) // Unknown and normal waypoints skipped
@@ -287,15 +287,15 @@ bool SeeYou::Read(const std::string& fileName) {
 		if(Waypoint::IsTypeAirfield((Waypoint::WaypointType)type)) {
 			// Runway direction
 			if (!ParseRunwayDir(boost::trim_copy(*(++token)),runwayDir))
-				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid runway direction: %2s") % linecount % (*token)));
+				AirspaceConverter::LogWarning(std::format("on line {}: invalid runway direction: {}",  linecount, *token));
 
 			// Runway length
 			if (!ParseRunwayLength(boost::trim_copy(*(++token)),runwayLength))
-				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid runway length: %2s") %linecount %(*token)));
+				AirspaceConverter::LogWarning(std::format("on line {}: invalid runway length: {}", linecount, *token));
 
 			// Radio frequency
 			if (!ParseAirfieldFrequencies(boost::trim_copy(*(++token)),radioFreq,altRadioFreq))
-				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid radio frequency for airfield: %2s") %linecount %(*token)));
+				AirspaceConverter::LogWarning(std::format("on line {}: invalid radio frequency for airfield: {}", linecount, *token));
 
 			// Description
 			std::string description = boost::trim_copy(*(++token));
@@ -305,7 +305,7 @@ bool SeeYou::Read(const std::string& fileName) {
 			Airfield* airfield = new Airfield(name, code, country, latitude, longitude, altitude, type, runwayDir, runwayLength, radioFreq, description);
 			if (altRadioFreq > 0) {
 				assert(radioFreq > 0);
-				if (altRadioFreq == radioFreq) AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: skipping repeated secondary radio frequency for airfield.") %linecount));
+				if (altRadioFreq == radioFreq) AirspaceConverter::LogWarning(std::format("on line {}: skipping repeated secondary radio frequency for airfield.", linecount));
 				else airfield->SetOtherFrequency(altRadioFreq);
 			}
 
@@ -318,7 +318,7 @@ bool SeeYou::Read(const std::string& fileName) {
 
 			// Frequency may be used for VOR and NDB
 			if (!ParseOtherFrequency(boost::trim_copy(*(++token)), type, radioFreq))
-				AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: invalid frequency for non airfield waypoint: %2s") %linecount %(*token)));
+				AirspaceConverter::LogWarning(std::format("on line {}: invalid frequency for non airfield waypoint: {}", linecount, *token));
 
 			// Description
 			std::string description = boost::trim_copy(*(++token));

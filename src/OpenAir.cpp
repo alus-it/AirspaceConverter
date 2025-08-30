@@ -13,10 +13,10 @@
 #include "OpenAir.hpp"
 #include "AirspaceConverter.hpp"
 #include <iomanip>
+#include <format>
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/format.hpp>
 #include <boost/locale/encoding.hpp>
 
 const std::unordered_map<std::string, Airspace::Type> OpenAir::openAirAirspaceTable = {
@@ -118,7 +118,7 @@ bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg, bool isLon) 
 		if ((*token).length() != (isLon ? 3 : 2)) warnDegDigits = true;
 		deg = std::stod(*token);
 		if (deg < 0 || deg >= (isLon ? 180 : 90)) {
-			AirspaceConverter::LogError(boost::str(boost::format("on line %1d: invalid value of degrees for %s.") % linecount %(isLon ? "longitude" : "latitude")));
+			AirspaceConverter::LogError(std::format("on line {}: invalid value of degrees for {}.", linecount, isLon ? "longitude" : "latitude"));
 			return false;
 		}
 
@@ -128,7 +128,7 @@ bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg, bool isLon) 
 			if (fields == 3 && (*token).length() != 2) warnMinDigits = true;
 			const double min = std::stod(*token);
 			if (min < 0 || min >= 60) {
-				AirspaceConverter::LogError(boost::str(boost::format("on line %1d: invalid value of minutes for %s.") % linecount %(isLon ? "longitude" : "latitude")));
+				AirspaceConverter::LogError(std::format("on line {}: invalid value of minutes for {}.", linecount, isLon ? "longitude" : "latitude"));
 				return false;
 			}
 			deg += min / 60;
@@ -137,14 +137,14 @@ bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg, bool isLon) 
 			if (++token != tokens.end()) {
 				if ((*token).empty()) return false;
 				if (warnDegDigits)
-					AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: wrong number of digits for %s degrees.") % linecount %(isLon ? "longitude" : "latitude")));
+					AirspaceConverter::LogWarning(std::format("on line {}: wrong number of digits for {} degrees.", linecount, isLon ? "longitude" : "latitude"));
 				if (warnMinDigits)
-					AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: wrong number of digits for %s minutes.") % linecount %(isLon ? "longitude" : "latitude")));
+					AirspaceConverter::LogWarning(std::format("on line {}: wrong number of digits for {} minutes.", linecount, isLon ? "longitude" : "latitude"));
 				if ((*token).length() != 2)
-					AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: wrong number of digits for %s seconds.") % linecount %(isLon ? "longitude" : "latitude")));
+					AirspaceConverter::LogWarning(std::format("on line {}: wrong number of digits for {} seconds.", linecount, isLon ? "longitude" : "latitude"));
 				const double sec = std::stod(*token);
 				if (sec < 0 || sec >= 60) {
-					AirspaceConverter::LogError(boost::str(boost::format("on line %1d: invalid value of seconds for %s.") % linecount %(isLon ? "longitude" : "latitude")));
+					AirspaceConverter::LogError(std::format("on line {}: invalid value of seconds for {}.", linecount, isLon ? "longitude" : "latitude"));
 					return false;
 				}
 				deg += sec / 3600;
@@ -156,7 +156,7 @@ bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg, bool isLon) 
 
 	// Check if the final value is valid
 	if (deg > (isLon ? 180 : 90)) {
-		AirspaceConverter::LogError(boost::str(boost::format("on line %1d: invalid %s value.") % linecount %(isLon ? "longitude" : "latitude")));
+		AirspaceConverter::LogError(std::format("on line {}: invalid {} value.", linecount, isLon ? "longitude" : "latitude"));
 		return false;
 	}
 
@@ -261,7 +261,7 @@ bool OpenAir::Read(const std::string& fileName) {
 
 		// Verify line ending
 		if (lineEndingConsistent && isCRLF != initialCRLF && !sLine.empty()) {
-			AirspaceConverter::LogWarning(boost::str(boost::format("on line %1d: not consistent line ending style, file started with: %s.") % linecount %(initialCRLF ? "CR LF" : "LF")));
+			AirspaceConverter::LogWarning(std::format("on line {}: not consistent line ending style, file started with: {}.", linecount, initialCRLF ? "CR LF" : "LF"));
 
 			// OpenAir files may contain thousands of lines we don't want to print this warning all the time
 			lineEndingConsistent = false;
@@ -337,7 +337,7 @@ bool OpenAir::Read(const std::string& fileName) {
 				break;
 			case 'Y': // DY
 				//ParseDY(sLine, airspace); // Airway not yet supported
-				AirspaceConverter::LogWarning(boost::str(boost::format("skipping airway segment (not yet supported) on line %1d: %2s") %linecount %sLine));
+				AirspaceConverter::LogWarning(std::format("skipping airway segment (not yet supported) on line {}: {}", linecount, sLine));
 				lineParsedOK = false; 
 				break;
 			default:
@@ -359,7 +359,7 @@ bool OpenAir::Read(const std::string& fileName) {
 			break;
 		}
 		if (!lineParsedOK) {
-			AirspaceConverter::LogError(boost::str(boost::format("unable to parse OpenAir line %1d: %2s") %linecount %sLine));
+			AirspaceConverter::LogError(std::format("unable to parse OpenAir line {}: {}", linecount, sLine));
 			allParsedOK = false;
 		}
 	}
@@ -400,7 +400,7 @@ bool OpenAir::ParseAN(const std::string & line, Airspace& airspace, const bool i
 		airspace.SetName(isUTF8 ? name : boost::locale::conv::between(name, "utf-8", "ISO8859-1"));
 		return true;
 	}
-	AirspaceConverter::LogError(boost::str(boost::format("airspace %1s has already a name.") % airspace.GetName()));
+	AirspaceConverter::LogError(std::format("airspace {} has already a name.", airspace.GetName()));
 	return false;	
 }
 
@@ -464,7 +464,7 @@ bool OpenAir::ParseDP(const std::string& line, Airspace& airspace, const int& li
 			}
 
 			// If the last point equal to the first was alredy detected than there is really a duplicate
-			AirspaceConverter::LogWarning(boost::str(boost::format("skipping unnecessary repeated point on line %1d: %2s") % linenumber % line));	
+			AirspaceConverter::LogWarning(std::format("skipping unnecessary repeated point on line {}: {}", linenumber, line));	
 		}
 		return true;
 	}
@@ -520,7 +520,7 @@ bool OpenAir::ParseDA(const std::string& line, Airspace& airspace, const int& li
 		double radius = std::stod(*token);
 		double angleStart = std::stod(*(++token));
 		double angleEnd = std::stod(*(++token));
-		if (!CheckAngleDeg(angleStart) || !CheckAngleDeg(angleEnd)) AirspaceConverter::LogWarning(boost::str(boost::format("angle not in range 0-360 on line %1d: %2s") % linenumber % line));
+		if (!CheckAngleDeg(angleStart) || !CheckAngleDeg(angleEnd)) AirspaceConverter::LogWarning(std::format("angle not in range 0-360 on line {}: {}", linenumber, line));
 		airspace.AddGeometry(new Sector(varPoint, radius, angleStart, angleEnd, varRotationClockwise));
 	} catch (...) {
 		return false;
@@ -579,15 +579,15 @@ bool OpenAir::InsertAirspace(Airspace& airspace) {
 	bool validAirspace(airspace.GetNumberOfGeometries() > 0);
 
 	if (!validAirspace)
-		AirspaceConverter::LogError(boost::str(boost::format("at line %1d: skip airspace %2s with no geometries.") % lastACline % airspace.GetName()));
+		AirspaceConverter::LogError(std::format("at line {}: skip airspace {} with no geometries.", lastACline, airspace.GetName()));
 
 	if (validAirspace && airspace.GetTopAltitude() <= airspace.GetBaseAltitude()) {
-		AirspaceConverter::LogError(boost::str(boost::format("at line %1d: skip airspace %2s with top and base equal or inverted.") % lastACline % airspace.GetName()));
+		AirspaceConverter::LogError(std::format("at line {}: skip airspace {} with top and base equal or inverted.", lastACline, airspace.GetName()));
 		validAirspace = false;
 	}
 
 	if (validAirspace && airspace.GetTopAltitude().IsGND()) {
-		AirspaceConverter::LogError(boost::str(boost::format("at line %1d: skip airspace %2s with top at GND.") % lastACline % airspace.GetName()));
+		AirspaceConverter::LogError(std::format("at line {}: skip airspace {} with top at GND.", lastACline, airspace.GetName()));
 		validAirspace = false;
 	}
 
@@ -596,7 +596,7 @@ bool OpenAir::InsertAirspace(Airspace& airspace) {
 
 	// Ensure that the points are closed
 	if (validAirspace && !airspace.ClosePoints()) {
-		AirspaceConverter::LogError(boost::str(boost::format("at line %1d: skip airspace %2s with less than 3 points.") % lastACline % airspace.GetName()));
+		AirspaceConverter::LogError(std::format("at line {}: skip airspace {} with less than 3 points.", lastACline, airspace.GetName()));
 		validAirspace = false;
 	}
 
@@ -604,7 +604,7 @@ bool OpenAir::InsertAirspace(Airspace& airspace) {
 	if (validAirspace) {
 
 		// This should be just a warning
-		if (airspace.GetName().empty()) AirspaceConverter::LogWarning(boost::str(boost::format("at line %1d: airspace without name.") % lastACline));
+		if (airspace.GetName().empty()) AirspaceConverter::LogWarning(std::format("at line {}: airspace without name.", lastACline));
 		
 		airspaces.insert(std::pair<int, Airspace>(airspace.GetType(), std::move(airspace)));
 	}
@@ -721,7 +721,7 @@ bool OpenAir::WriteCategory(const Airspace& airspace) {
 		case Airspace::NOGLIDER:	openAirCategory = "GP"; break;
 		case Airspace::GLIDING:		openAirCategory = "GSEC"; break;
 		case Airspace::UNDEFINED:
-			AirspaceConverter::LogWarning(boost::str(boost::format("skipping undefined airspace %1s.") % airspace.GetName()));
+			AirspaceConverter::LogWarning(std::format("skipping undefined airspace {}.", airspace.GetName()));
 			assert(false);
 			return false;
 		default: openAirCategory = airspace.CategoryName(airspace.GetType()); break;

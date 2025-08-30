@@ -18,11 +18,11 @@
 #include "Geometry.hpp"
 #include <zip.h>
 #include <filesystem>
+#include <cmath>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/tokenizer.hpp>
-#include <cmath>
 
 const std::string KML::colors[Airspace::Type::UNDEFINED] = {
 	"9900ff", //CLASSA

@@ -19,7 +19,7 @@ Can write in the following formats:
 
 While converting to _OpenAir_ AirspaceConverter estimates if the points are part of arcs or circumferences in order to make use of arc and circumference definitions of the _OpenAir_ format and so avoiding to output all points one by one.  
 The ability to read **KML**/**KMZ** is based on the **KMZ** airspace files produced by _Austrocontrol_. This utility can convert also _SeeYou_ **.CUP** waypoint files to **KMZ** (for _Google Earth_). The conversion to **IMG** for _Garmin_ devices is done using _cGPSmapper_.  
-AirspaceConverter is written in C++17 and runs on _Linux_, _Windows_ and _macOS_. In order to be immediately easy to use it has _Qt_ and _Windows MFC_ user interfaces. But it can also work from command line.  
+AirspaceConverter is written in C++20 and runs on _Linux_, _Windows_ and _macOS_. In order to be immediately easy to use it has _Qt_ and _Windows MFC_ user interfaces. But it can also work from command line.  
 
 
 For more information's about this project: [alus.it/AirspaceConverter](https://www.alus.it/AirspaceConverter)  

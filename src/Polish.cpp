@@ -15,8 +15,8 @@
 #include "Airspace.hpp"
 #include <sstream>
 #include <filesystem>
-#include <boost/algorithm/string/predicate.hpp>
 #include <cassert>
+#include <boost/algorithm/string/predicate.hpp>
 
 /* TODO: customized types
 const int PFMwriter::types[] = {

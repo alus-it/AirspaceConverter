@@ -17,10 +17,10 @@
 #include "Airfield.hpp"
 #include <cmath>
 #include <fstream>
+#include <format>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/tokenizer.hpp>
-#include <boost/format.hpp>
 
 using boost::property_tree::ptree;
 
@@ -300,7 +300,7 @@ bool OpenAIP::ParseAirports(const ptree& airportsNode) {
 		AirspaceConverter::LogError("Expected to find at least one AIRPORT tag inside WAYPOINTS tag.");
 		return false;
 	}
-	AirspaceConverter::LogMessage(boost::str(boost::format("This openAIP waypoint file contains %1d airfields") %numOfAirports));
+	AirspaceConverter::LogMessage(std::format("This openAIP waypoint file contains {} airfields", numOfAirports));
 
 	for (ptree::value_type const& ap : airportsNode) { // for all children of WAYPOINTS tag
 		try {
@@ -454,7 +454,7 @@ bool OpenAIP::ParseNavAids(const ptree& navAidsNode) {
 		AirspaceConverter::LogError("Expected to find at least one NAVAID tag inside NAVAIDS tag.");
 		return false;
 	}
-	AirspaceConverter::LogMessage(boost::str(boost::format("This openAIP navaids file contains %1d navigation aids") %numOfNavAids));
+	AirspaceConverter::LogMessage(std::format("This openAIP navaids file contains {} navigation aids.", numOfNavAids));
 
 	for (ptree::value_type const& na : navAidsNode) { // for all children of WAYPOINTS tag
 		try {
