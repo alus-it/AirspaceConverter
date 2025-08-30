@@ -638,7 +638,7 @@ bool OpenAir::Write(const std::string& fileName) {
 
 		// Just a couple if assertions
 		assert(a.GetNumberOfPoints() > 3);
-		assert(a.GetFirstPoint()==a.GetLastPoint());
+		assert(a.GetFirstPoint() == a.GetLastPoint());
 
 		// Reset var
 		varRotationClockwise = true;
@@ -731,17 +731,27 @@ bool OpenAir::WriteCategory(const Airspace& airspace) {
 	return true;
 }
 
+void OpenAir::WriteLatLonDDMMSS(const int& latD, const int& latM, const int& latS, const char& NorS, const int& lonD, const int& lonM, const int& lonS, const char& EorW) {
+	file << std::setw(2) << latD << ":" << std::setw(2) << latM << ":" << std::setw(2) << latS << " " << NorS << " ";
+	file << std::setw(3) << lonD << ":" << std::setw(2) << lonM << ":" << std::setw(2) << lonS << " " << EorW;
+}
+
+void OpenAir::WriteLatLonDDMMmmm(const int& latD, const double& latM, const char& NorS, const int& lonD, const double& lonM, const char& EorW) {
+	file << std::setw(2) << latD << ":" << std::setw(6) << std::fixed << std::setprecision(3) << latM << " " << NorS << " ";
+	file << std::setw(3) << lonD << ":" << std::setw(6) << std::setprecision(3) << lonM << " " << EorW;
+	file << std::defaultfloat;
+}
+
 void OpenAir::WritePoint(const Geometry::LatLon& point, bool isCenterPoint /* = false */, bool addPrefix /*= true*/) {
 	if (isCenterPoint && addPrefix) file << "V X=";
 	switch (coordinateType) {
 		case CoordinateType::DEG_DECIMAL_MIN: {
 			if (!isCenterPoint && addPrefix) file << "DP ";
-			int deg;
-			double decimalMin;
-			point.GetLatDegMin(deg, decimalMin);
-			file << deg << ":" << decimalMin << " " << point.GetNorS() << " ";
-			point.GetLonDegMin(deg, decimalMin);
-			file << deg << ":" << decimalMin << " " << point.GetEorW();
+			int latD, lonD;
+			double latM, lonM;
+			point.GetLatDegMin(latD, latM);
+			point.GetLonDegMin(lonD, lonM);
+			WriteLatLonDDMMmmm(latD, latM, point.GetNorS(), lonD, lonM, point.GetEorW());
 		}
 		break;
 		case CoordinateType::DEG_MIN_SEC: {
@@ -759,8 +769,7 @@ void OpenAir::WritePoint(const Geometry::LatLon& point, bool isCenterPoint /* = 
 				lastLonS = lonS;
 			}
 			if (!isCenterPoint && addPrefix) file << "DP ";
-			file << std::setw(2) << latD << ":" << std::setw(2) << latM << ":" << std::setw(2) << latS << " " << point.GetNorS() << " ";
-			file << std::setw(3) << lonD << ":" << std::setw(2) << lonM << ":" << std::setw(2) << lonS << " " << point.GetEorW();
+			WriteLatLonDDMMSS(latD, latM, latS, point.GetNorS(), lonD, lonM, lonS, point.GetEorW());
 		}
 		break;
 		case CoordinateType::AUTO:
@@ -782,10 +791,8 @@ void OpenAir::WritePoint(const Geometry::LatLon& point, bool isCenterPoint /* = 
 				} else lastPointWasDDMMSS = false;
 			}
 			if (!isCenterPoint && addPrefix) file << "DP ";
-			if (latDDMMSS) file << std::setw(2) << latD << ":" << std::setw(2) << latM << ":" << std::setw(2) << latS << " " << point.GetNorS() << " ";
-			else file << latD << ":" << decimalLatM << " " << point.GetNorS() << " ";
-			if (lonDDMMSS) file << std::setw(3) << lonD << ":" << std::setw(2) << lonM << ":" << std::setw(2) << lonS <<" " << point.GetEorW();
-			else file << lonD << ":" << decimalLonM << " " << point.GetEorW();
+			if (latDDMMSS && lonDDMMSS) WriteLatLonDDMMSS(latD, latM, latS, point.GetNorS(), lonD, lonM, lonS, point.GetEorW());
+			else WriteLatLonDDMMmmm(latD, decimalLatM, point.GetNorS(), lonD, decimalLonM, point.GetEorW());
 		}
 	}
 	if (addPrefix) file << "\n";
@@ -796,7 +803,7 @@ void OpenAir::WritePoint(const Point& point) {
 }
 
 void OpenAir::WriteCircle(const Circle& circle) {
-	WritePoint(circle.GetCenterPoint(),true);
+	WritePoint(circle.GetCenterPoint(), true);
 	file << "DC " << circle.GetRadiusNM() << "\n";
 }
 
@@ -805,15 +812,15 @@ void OpenAir::WriteSector(const Sector& sector) {
 		varRotationClockwise = !varRotationClockwise;
 		file << "V D=" << (varRotationClockwise ? "+" : "-") << "\n";
 	}
-	WritePoint(sector.GetCenterPoint(),true);
+	WritePoint(sector.GetCenterPoint(), true);
 	int dir1, dir2;
 	if (Geometry::IsInt(sector.GetAngleStart(),dir1) && Geometry::IsInt(sector.GetAngleEnd(),dir2))
 		file << "DA " << sector.GetRadiusNM() << "," << dir1 << "," << dir2;
 	else {
 		file << "DB ";
-		WritePoint(sector.GetStartPoint(),true,false);
+		WritePoint(sector.GetStartPoint(), true, false);
 		file << ",";
-		WritePoint(sector.GetEndPoint(),true,false);
+		WritePoint(sector.GetEndPoint(), true, false);
 	}
 	file << "\n";
 }
