@@ -31,13 +31,9 @@
 #include <filesystem>
 #include <format>
 #include <boost/algorithm/string/predicate.hpp>
-
-// The HTTP client used to check for new version from Boost Beast is available from version 1.70
-#if BOOST_VERSION >= 107000
-#include <boost/beast/core.hpp>
+#include <boost/beast/core.hpp> // The HTTP client used to check for new version from Boost Beast is available from version 1.70
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
-#endif
 
 #ifdef __linux__ // If on Linux...
 	const std::string AirspaceConverter::basePath(std::filesystem::canonical("/proc/self/exe").parent_path().string());
@@ -505,15 +501,7 @@ std::string AirspaceConverter::GetCurrentDateString() {
 	const time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 	std::stringstream ss;
 #ifdef __GNUC__
-#if __GNUC__ > 4
 	ss << std::put_time(gmtime(&now), "%d-%m-%Y");
-#else
-	char dateString[20];
-	struct tm *utc;
-	utc = gmtime(&now);
-	strftime(dateString, sizeof(dateString), "%d-%m-%Y", utc);
-	ss << dateString;
-#endif
 #elif _WIN32
 	struct tm utc;
 	gmtime_s(&utc, &now);
@@ -526,15 +514,7 @@ std::string AirspaceConverter::GetFullCreationDateTimeString() {
 	const time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 	std::stringstream ss;
 #ifdef __GNUC__
-#if __GNUC__ > 4
 	ss << "This file was created on: " << std::put_time(gmtime(&now), "%a %d %B %Y at %T UTC");
-#else
-	char dateTimeString[40];
-	struct tm *utc;
-	utc = gmtime(&now);
-	strftime(dateTimeString, sizeof(dateTimeString), "%a %d %B %Y at %T UTC", utc);
-	ss << "This file was created on: " << dateTimeString;
-#endif
 #elif _WIN32
 	struct tm utc;
 	gmtime_s(&utc, &now);
@@ -702,7 +682,6 @@ int AirspaceConverter::VersionToNumber(const std::string& versionString) {
 }
 
 bool AirspaceConverter::CheckForNewVersion(int& versionDifference) {
-	#if BOOST_VERSION >= 107000
 	static const int runningVersionNumber = VersionToNumber(VERSION);
 	assert(runningVersionNumber > 0 && runningVersionNumber < 1000);
 	try {
@@ -758,6 +737,5 @@ bool AirspaceConverter::CheckForNewVersion(int& versionDifference) {
 	} catch (...) {
 		// This can happen in many cases including when no Internet connection is available; so: no need to bother the user
 	}
-	#endif
 	return false;
 }
