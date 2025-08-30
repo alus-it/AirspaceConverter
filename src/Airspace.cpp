@@ -14,14 +14,6 @@
 #include <algorithm>
 #include <cassert>
 #include <iomanip>
-#include <boost/version.hpp>
-#ifdef _WIN32
-#pragma warning( push )
-#pragma warning( disable : 4127 )
-#include <boost/geometry/formulas/differential_quantities.hpp>
-#include <boost/geometry/formulas/meridian_inverse.hpp>
-#pragma warning( pop )
-#endif
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
 #include <boost/geometry/geometries/adapted/boost_tuple.hpp>
@@ -561,7 +553,6 @@ bool Airspace::IsWithinAltLimits(const Altitude& floor, const Altitude& ceil) co
 }
 
 void Airspace::CalculateSurface(double& area, double& perimeter) const {
-#if BOOST_VERSION >= 106700 // Spheroidal
 	// Create geographic polygon
 	boost::geometry::model::polygon<boost::geometry::model::point<double, 2, boost::geometry::cs::geographic<boost::geometry::degree> > > polygon;
 	for (const Geometry::LatLon& point : points) boost::geometry::append(polygon, boost::make_tuple(point.Lon(), point.Lat()));
@@ -574,20 +565,4 @@ void Airspace::CalculateSurface(double& area, double& perimeter) const {
 
 	area = std::fabs(boost::geometry::area(polygon, wgs84)); // [Km2]
 	perimeter = boost::geometry::perimeter(polygon) / 1000; // [Km]
-
-#else // Spherical
-	// Create spherical polygon
-	boost::geometry::model::polygon<boost::geometry::model::point<float, 2, boost::geometry::cs::spherical_equatorial<boost::geometry::degree> > > polygon;
-	for (const Geometry::LatLon& point : points) boost::geometry::append(polygon, boost::make_tuple(point.Lon(), point.Lat()));
-	
-	static const double earthRadiusKm = 6371.0088;
-	static const double squareEarthRadiusKm = pow(earthRadiusKm,2);
-
-	// Spherical strategy with mean Earth radius in Km
-	//static const boost::geometry::strategy::area::spherical<> sphericalStrategy(earthRadiusKm);
-
-	//area = std::fabs(boost::geometry::area(polygon, sphericalStrategy));
-	area = std::fabs(boost::geometry::area(polygon)) * squareEarthRadiusKm; // [Km2]
-	perimeter = (double)boost::geometry::perimeter(polygon) * earthRadiusKm; // [Km]
-#endif
 }

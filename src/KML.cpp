@@ -681,27 +681,15 @@ bool KML::Write(const std::string& filename) {
 	zip_source* source = zip_source_file(archive, fileKML.c_str(), 0, 0);
 	if (source == nullptr) { // "failed to create source buffer. " << zip_strerror(archive)
 		// Discard zip file. In case ZIP_FL_OVERWRITE is not defined we are using an older libzib version such as 0.10.1, so we have to use the older functions
-#ifdef ZIP_FL_OVERWRITE
 		zip_discard(archive);
-#else
-		zip_close(archive);
-#endif
 		AirspaceConverter::LogError("Failed to create zip source buffer to read: " + fileKML);
 		return false;
 	}
 
 	// Add the buffer as KLM file in the ZIP
-#ifdef ZIP_FL_OVERWRITE
 	int index = (int)zip_file_add(archive, "doc.kml", source, ZIP_FL_OVERWRITE);
-#else
-	int index = (int)zip_add(archive, "doc.kml", source);
-#endif
 	if (index < 0) { // "failed to add file to archive. " << zip_strerror(archive)
-#ifdef ZIP_FL_OVERWRITE
 		zip_discard(archive);
-#else
-		zip_close(archive);
-#endif
 		zip_source_free(source); // The sorce buffer have to be freed in this case
 		AirspaceConverter::LogError("While compressing, failed to add: doc.kml");
 		return false;
@@ -722,28 +710,16 @@ bool KML::Write(const std::string& filename) {
 			// Create source buffer from KML file
 			source = zip_source_file(archive, iconPath.c_str(), 0, 0);
 			if (source == nullptr) { // "failed to create source buffer. " << zip_strerror(archive)
-#ifdef ZIP_FL_OVERWRITE
 				zip_discard(archive);
-#else
-				zip_close(archive);
-#endif
 				AirspaceConverter::LogError("Failed to create zip source buffer to read: " + iconPath);
 				return false;
 			}
 
 			// Add the buffer as PNG file in the ZIP
 			const std::string iconFile = "icons/" + waypointIcons[i];
-#ifdef ZIP_FL_OVERWRITE
 			index = (int)zip_file_add(archive, iconFile.c_str(), source, ZIP_FL_OVERWRITE);
-#else
-			index = (int)zip_add(archive, iconFile.c_str(), source);
-#endif
 			if (index < 0) { // "failed to add file to archive. " << zip_strerror(archive)
-#ifdef ZIP_FL_OVERWRITE
 				zip_discard(archive);
-#else
-				zip_close(archive);
-#endif
 				zip_source_free(source); // The sorce buffer have to be freed in this case
 				AirspaceConverter::LogError("While compressing, failed to add: " + iconFile);
 				return false;
