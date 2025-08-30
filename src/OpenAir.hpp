@@ -60,6 +60,8 @@ private:
 	void WriteHeader();
 	bool WriteCategory(const Airspace& airsapce);
 	void WritePoint(const Geometry::LatLon& point, bool isCenterPoint = false, bool addPrefix = true);
+	void WriteLatLonDDMMSS(const int& latD, const int& latM, const int& latS, const char& NorS, const int& lonD, const int& lonM, const int& lonS, const char& EorW);
+	void WriteLatLonDDMMmmm(const int& latD, const double& latM, const char& NorS, const int& lonD, const double& lonM, const char& EorW);
 	void WritePoint(const Point& point);
 	void WriteCircle(const Circle& circle);
 	void WriteSector(const Sector& sector);
