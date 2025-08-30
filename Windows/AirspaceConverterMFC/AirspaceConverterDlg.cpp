@@ -18,8 +18,7 @@
 #include "LimitsDlg.hpp"
 #include "Processor.hpp"
 #include "AirspaceConverter.hpp"
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
 #include <boost/locale/encoding.hpp>
@@ -392,7 +391,7 @@ void CAirspaceConverterDlg::EndBusy(const bool takeTime /* = false */) {
 	if (processor != nullptr) processor->Join();
 	if (takeTime) {
 		const double elapsedTimeSec = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - startTime).count() / 1e6;
-		LogMessage(std::string(boost::str(boost::format("Execution time: %1f sec.") % elapsedTimeSec)));
+		LogMessage(std::string(std::format("Execution time: %1f sec.") % elapsedTimeSec)));
 	}
 	if(converter != nullptr) {
 		numAirspacesLoaded = converter->GetNumOfAirspaces();
@@ -444,7 +443,7 @@ void CAirspaceConverterDlg::OnBnClickedInputFile() {
 		POSITION pos(dlg.GetStartPosition());
 		while (pos) {
 			const std::string inputFilename(CT2CA(dlg.GetNextPathName(pos)));
-			if (!boost::filesystem::is_regular_file(inputFilename)) continue;
+			if (!std::filesystem::is_regular_file(inputFilename)) continue;
 			converter->AddAirspaceFile(inputFilename);
 			if(outputFile.empty()) outputFile = inputFilename;
 		}
@@ -463,7 +462,7 @@ void CAirspaceConverterDlg::OnBnClickedInputWaypoints() {
 		POSITION pos(dlg.GetStartPosition());
 		while (pos) {
 			const std::string inputFilename(CT2CA(dlg.GetNextPathName(pos)));
-			if (!boost::filesystem::is_regular_file(inputFilename)) continue;
+			if (!std::filesystem::is_regular_file(inputFilename)) continue;
 			if(outputFile.empty()) outputFile = inputFilename;
 			converter->AddWaypointFile(inputFilename);
 		}
@@ -482,7 +481,7 @@ void CAirspaceConverterDlg::OnBnClickedLoadDEM() {
 		POSITION pos(dlg.GetStartPosition());
 		while (pos) {
 			const std::string inputFilename(CT2CA(dlg.GetNextPathName(pos)));
-			if (!boost::filesystem::is_regular_file(inputFilename)) continue;
+			if (!std::filesystem::is_regular_file(inputFilename)) continue;
 			converter->AddTerrainRasterMapFile(inputFilename);
 		}
 		if (processor != nullptr && processor->LoadDEMfiles()) StartBusy();
@@ -506,10 +505,10 @@ void CAirspaceConverterDlg::OnBnClickedInputFolderBt() {
 
 	outputFile.clear();
 	conversionDone = false;
-	boost::filesystem::path root(inputPath);
-	if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
-	for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
-		if (boost::filesystem::is_regular_file(*it)) {
+	std::filesystem::path root(inputPath);
+	if (!std::filesystem::exists(root) || !std::filesystem::is_directory(root)) return; //this should never happen
+	for (std::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
+		if (std::filesystem::is_regular_file(*it)) {
 			const std::string ext = it->path().extension().string();
 			if (boost::iequals(ext, ".openair") || boost::iequals(ext, ".txt") || boost::iequals(ext, ".aip") || boost::iequals(ext, ".kmz") || boost::iequals(ext, ".kml")) {
 				converter->AddAirspaceFile(it->path().string());
@@ -534,10 +533,10 @@ void CAirspaceConverterDlg::OnBnClickedInputWaypointsFolderBt() {
 	else return;
 	assert(!inputPath.empty());
 
-	boost::filesystem::path root(inputPath);
-	if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
-	for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
-		if (boost::filesystem::is_regular_file(*it)) {
+	std::filesystem::path root(inputPath);
+	if (!std::filesystem::exists(root) || !std::filesystem::is_directory(root)) return; //this should never happen
+	for (std::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
+		if (std::filesystem::is_regular_file(*it)) {
 			const std::string ext = it->path().extension().string();
 			if (boost::iequals(ext, ".cup") || boost::iequals(ext, ".aip") || boost::iequals(ext, ".csv")) {
 				converter->AddWaypointFile(it->path().string());
@@ -562,10 +561,10 @@ void CAirspaceConverterDlg::OnBnClickedLoadDemFolderBt() {
 	else return;
 	assert(!inputPath.empty());
 
-	boost::filesystem::path root(inputPath);
-	if (!boost::filesystem::exists(root) || !boost::filesystem::is_directory(root)) return; //this should never happen
-	for (boost::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
-		if (boost::filesystem::is_regular_file(*it) && boost::iequals(it->path().extension().string(), ".dem"))
+	std::filesystem::path root(inputPath);
+	if (!std::filesystem::exists(root) || !std::filesystem::is_directory(root)) return; //this should never happen
+	for (std::filesystem::directory_iterator it(root), endit; it != endit; ++it) {
+		if (std::filesystem::is_regular_file(*it) && boost::iequals(it->path().extension().string(), ".dem"))
 			converter->AddTerrainRasterMapFile(it->path().string());
 	}
 	if (processor != nullptr && processor->LoadDEMfiles()) StartBusy();
@@ -635,7 +634,7 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 	assert(!outputFile.empty());
 	
 	// Prepare and show the open file dialog asking where the user wants to save the converted file
-	boost::filesystem::path outputPath(outputFile);
+	std::filesystem::path outputPath(outputFile);
 	CFileDialog dlg(FALSE, NULL, CString(outputPath.stem().c_str()) , OFN_HIDEREADONLY, AirspaceConverter::Is_cGPSmapperAvailable() ?
 			_T("KMZ|*.kmz|OpenAir|*.openair|SeeYou|*.cup|LittleNavMap|*.csv|Polish|*.mp|Garmin|*.img||") :
 			_T("KMZ|*.kmz|OpenAir|*.openair|SeeYou|*.cup|LittleNavMap|*.csv|Polish|*.mp||"),
@@ -661,7 +660,7 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 	if (outputFile.empty()) return;
 	AirspaceConverter::OutputType type = (AirspaceConverter::OutputType)OutputTypeCombo.GetCurSel();
 	assert(type >= AirspaceConverter::OutputType::KMZ_Format && type < AirspaceConverter::OutputType::Unknown_Format);
-	if (boost::filesystem::exists(outputPath)) { // check if file already exists
+	if (std::filesystem::exists(outputPath)) { // check if file already exists
 		CString msg(outputFile.c_str());
 		msg += "\nalready exists, overwrite?";
 		if (MessageBox(msg, _T("Overwrite?"), MB_YESNO | MB_ICONINFORMATION) == IDYES) std::remove(outputFile.c_str());
@@ -673,8 +672,8 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 	switch (type) {
 	case AirspaceConverter::OutputType::KMZ_Format:
 		{
-			boost::filesystem::path kmlPath(outputPath.parent_path() / boost::filesystem::path("doc.kml"));
-			if (boost::filesystem::exists(kmlPath)) {
+			std::filesystem::path kmlPath(outputPath.parent_path() / std::filesystem::path("doc.kml"));
+			if (std::filesystem::exists(kmlPath)) {
 				if (MessageBox(_T("In the output folder the file doc.kml already exists.\nIn order to make the KMZ it will be overwritten and deleted. Continue?"), _T("Overwrite?"), MB_YESNO | MB_ICONINFORMATION) == IDYES) std::remove(kmlPath.string().c_str());
 				else return;
 			}
@@ -706,9 +705,9 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 		break;
 	case AirspaceConverter::OutputType::Garmin_Format:
 		{
-			boost::filesystem::path polishPath(outputPath);
+			std::filesystem::path polishPath(outputPath);
 			polishPath.replace_extension(".mp");
-			if (boost::filesystem::exists(polishPath)) {
+			if (std::filesystem::exists(polishPath)) {
 				CString msg(polishPath.c_str());
 				msg += " already exists.\nIn order to make the IMG it will be overwritten and deleted. Continue?";
 					if (MessageBox(msg, _T("Overwrite?"), MB_YESNO | MB_ICONINFORMATION) == IDYES) std::remove(polishPath.string().c_str());
