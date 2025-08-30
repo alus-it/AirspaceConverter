@@ -662,7 +662,7 @@ bool OpenAir::Write(const std::string& fileName) {
 				if (!f.second.empty()) file << ' ' << f.second;
 				file << "\n";
 			}
-			file.unsetf(std::ios_base::floatfield); //file << std::defaultfloat; not supported by older GCC 4.9.0
+			file << std::defaultfloat;
 		}
 
 		// Write transponder code
