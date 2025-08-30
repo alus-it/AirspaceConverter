@@ -391,7 +391,7 @@ void CAirspaceConverterDlg::EndBusy(const bool takeTime /* = false */) {
 	if (processor != nullptr) processor->Join();
 	if (takeTime) {
 		const double elapsedTimeSec = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - startTime).count() / 1e6;
-		LogMessage(std::string(std::format("Execution time: %1f sec.") % elapsedTimeSec)));
+		LogMessage(std::format("Execution time: {} sec.", elapsedTimeSec));
 	}
 	if(converter != nullptr) {
 		numAirspacesLoaded = converter->GetNumOfAirspaces();
