@@ -72,7 +72,6 @@ private:
 	std::multimap<int, Airspace>& airspaces;
 	bool varRotationClockwise;
 	Geometry::LatLon varPoint;
-	//double varWidth;
 	std::ofstream file;
 	int lastACline;
 	bool lastPointWasDDMMSS;
