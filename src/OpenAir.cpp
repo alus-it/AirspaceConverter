@@ -673,8 +673,8 @@ bool OpenAir::Write(const std::string& fileName) {
 			for (size_t i = 0; i < numOfGeometries; i++) a.GetGeometryAt(i)->WriteOpenAirGeometry(*this);
 		}
 
-		// Otherwise write every single point (except the last one which is the same)
-		else for (size_t i = 0; i < a.GetNumberOfPoints() - 1; i++) WritePoint(a.GetPointAt(i));
+		// Otherwise write every single point, including last one which must be equal to the first one to close the polygon
+		else for (size_t i = 0; i < a.GetNumberOfPoints(); i++) WritePoint(a.GetPointAt(i));
 
 		// Add an empty line at the end of the airspace
 		file << "\n";
