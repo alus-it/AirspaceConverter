@@ -104,64 +104,65 @@ bool OpenAIP::ReadAirspaces(const std::string& fileName) {
 			
 			// Airspace category
 			std::string str = asp.second.get_child("<xmlattr>").get<std::string>("CATEGORY");
-			Airspace::Type type = Airspace::UNDEFINED;
+			Airspace::Class airspClass = Airspace::Class::UNCLASSIFIED;
+			Airspace::Type type = Airspace::Type::UNDEFINED;
 			int len = (int)str.length();
 			if (len>0) switch (str.at(0)) {
 				case 'A':
-					if (len == 1) type = Airspace::CLASSA; // A class airspace
+					if (len == 1) airspClass = Airspace::Class::CLASSA; // A class airspace
 					break;
 				case 'B':
-					if (len == 1) type = Airspace::CLASSB; // B class airspace
+					if (len == 1) airspClass = Airspace::Class::CLASSB; // B class airspace
 					break;
 				case 'C':
-					if (len == 1) type = Airspace::CLASSC; // C class airspace
-					else if (str == "CTR") type = Airspace::CTR; // CTR airspace
+					if (len == 1) airspClass = Airspace::Class::CLASSC; // C class airspace
+					else if (str == "CTR") type = Airspace::Type::CTR; // CTR airspace
 					break;
 				case 'D':
-					if (len == 1) type = Airspace::CLASSD; // D class airspace
-					else if (str == "DANGER") type = Airspace::D; // Dangerous area
+					if (len == 1) airspClass = Airspace::Class::CLASSD; // D class airspace
+					else if (str == "DANGER") type = Airspace::Type::D; // Dangerous area
 					break;
 				case 'E':
-					if (len == 1) type = Airspace::CLASSE; // E class airspace
+					if (len == 1) airspClass = Airspace::Class::CLASSE; // E class airspace
 					break;
 				case 'F':
-					if (len == 1) type = Airspace::CLASSF; // F class airspace
-					else if (str == "FIR") type = Airspace::FIR; //FIR
+					if (len == 1) airspClass = Airspace::Class::CLASSF; // F class airspace
+					else if (str == "FIR") type = Airspace::Type::FIR; //FIR
 					break;
 				case 'G':
-					if (len == 1) type = Airspace::CLASSG; // G class airspace
-					else if (str == "GLIDING") type = Airspace::GLIDING;
+					if (len == 1) airspClass = Airspace::Class::CLASSG; // G class airspace
+					else if (str == "GLIDING") type = Airspace::Type::GLIDING;
 					break;
 				case 'O':
-					if (str == "OTH") type = Airspace::OTH;
+					if (str == "OTH") type = Airspace::Type::OTH;
 					break;
 				case 'P':
-					if (str == "PROHIBITED") type = Airspace::P; // Prohibited area
+					if (str == "PROHIBITED") type = Airspace::Type::P; // Prohibited area
 					break;
 				case 'R':
-					if (str == "RESTRICTED") type = Airspace::R; // Restricted area
-					else if (str == "RMZ") type = Airspace::RMZ; //RMZ
+					if (str == "RESTRICTED") type = Airspace::Type::R; // Restricted area
+					else if (str == "RMZ") type = Airspace::Type::RMZ; //RMZ
 					break;
 				case 'T':
 					if (len == 3 && str.at(1) == 'M') {
-						if (str.at(2) == 'A') type = Airspace::TMA;
-						else if (str.at(2) == 'Z') type = Airspace::TMZ;
+						if (str.at(2) == 'A') type = Airspace::Type::TMA;
+						else if (str.at(2) == 'Z') type = Airspace::Type::TMZ;
 					}
 					break;
 				case 'W':
-					if (str == "WAVE") type = Airspace::WAVE; //WAVE
+					if (str == "WAVE") type = Airspace::Type::WAVE; //WAVE
 					break;
 				case 'U':
-					if (str == "UIR") type = Airspace::UIR; //UIR
+					if (str == "UIR") type = Airspace::Type::UIR; //UIR
 					break;
 				default:
 					break;
 				} else continue;
-				if (type == Airspace::UNDEFINED) {
+				if (airspClass == Airspace::Class::UNCLASSIFIED && type == Airspace::Type::UNDEFINED) {
 					AirspaceConverter::LogWarning("skipping ASP with unknown/undefined CATEGORY attribute: " + str);
 					continue;
 				}
-				Airspace airspace(type);
+				Airspace airspace(airspClass, type);
 
 				// Airspace name
 				str = asp.second.get<std::string>("NAME");

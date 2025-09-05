@@ -19,20 +19,24 @@
 class Airspace {
 public:
 	typedef enum {
-		CLASSA = 0,	// Airspace class A
-		CLASSB,		// Airspace class B
-		CLASSC,		// Airspace class C
-		CLASSD,		// Airspace class D
-		CLASSE,		// Airspace class E
-		CLASSF,		// Airspace class F
-		CLASSG,		// Airspace class G
-		D,			// Danger area
+		CLASSA = 0,		// Airspace class A
+		CLASSB,			// Airspace class B
+		CLASSC,			// Airspace class C
+		CLASSD,			// Airspace class D
+		CLASSE,			// Airspace class E
+		CLASSF,			// Airspace class F
+		CLASSG,			// Airspace class G
+		UNCLASSIFIED	// Unclassified
+	} Class;
+
+	typedef enum {
+		D = 0,		// Danger area
 		P,			// Prohibited area
 		R,			// Restricted area
 		CTR,		// Control Traffic Region
 		TMZ,		// Transponder Mandatory Zone
 		RMZ,		// Radio Mandatory Zone
-		GLIDING,	// Gliding area
+		GLIDING,	// Gliding sector/area
 		NOGLIDER,	// No gliding area
 		WAVE,		// Wave window
 		NOTAM,		// Notice to Airmen "NOTAM" airspace category can be used in OpenAir files
@@ -59,7 +63,7 @@ public:
 		ASR,		// Aerial Sporting and Recreation Area
 		COMP,		// Competition boundary
 		TRZ,		// Transponder Recommended Zone
-		VFRR,		// VFR Route
+		VFRR,		// Designated Route for VFR
 		RTZ,		// Radio/Transponder Mandatory zone
 		PARA,		// Parachute jumping area
 		LFZ,		// Low Flying Zone
@@ -68,11 +72,27 @@ public:
 		MTA,		// Military Training Area
 		TSA,		// Temporary segregated airspace
 		TRA,		// Temporary reserved airspace
+
+		ACCSEC,		// Airspace providing communication frequency in remote areas
+		ALERT,		// Alert Area
+		ASRA,		// Aerial Sporting Or Recreational Activity
+		CUSTOM,		// Custom or user defined airspace
+		FIS,		// Flight Information Service Sector
+		HTZ,		// Helicopter Traffic Zone
+		LTA,		// Lower Traffic Area (Allows VFR Traffic in CTA)
+		MTR,		// Military Training Route
+		OFR,		// Overflight Restriction
+		TRAFR,		// TRA/TSA Feeding Route
+		UTA,		// Upper Traffic Area (Allows VFR Traffic in CTA)
+		VFRSEC,		// Visual Flying Rules Sector
+		WARNING,	// Warning Area
+
 		UNKNOWN,	// "UNKNOWN" as well can be used in OpenAir files
 		UNDEFINED	// also the last one
 	} Type;
 
-	Airspace() : type(UNDEFINED), airspaceClass(UNDEFINED), transponderCode(-1) {}
+	Airspace(): airspaceClass(UNCLASSIFIED), type(UNDEFINED), transponderCode(-1) {}
+	Airspace(Class airspClass, Type category = Type::UNDEFINED);
 	Airspace(Type category);
 	Airspace(const Airspace& orig);
 	Airspace(Airspace&& orig);
@@ -80,11 +100,14 @@ public:
 
 	Airspace& operator=(const Airspace& other);
 	bool operator==(const Airspace& other) const;
+	static std::string ClassName(const Class& airspClass);
 	inline static const std::string& CategoryName(const Type& category) { return CATEGORY_NAMES[category]; }
 	inline static const std::string& LongCategoryName(const Type& category) { return LONG_CATEGORY_NAMES[category]; }
 	static bool CategoryVisibleByDefault(const Type& category) { return CATEGORY_VISIBILITY[category]; }
+	void SetClass(const Class& airspClass);
 	void SetType(const Type& category);
-	void SetClass(const Type& airspClass);
+	inline bool IsUnclassified() const { return airspaceClass == Class::UNCLASSIFIED; }
+	inline bool IsTypeSpecified() const { return type != Type::UNDEFINED; }
 	bool GuessClassFromName();
 	bool NameStartsWithIdent(const std::string& ident);
 	inline void SetTopAltitude(const Altitude& alt) { top = alt; }
@@ -105,8 +128,10 @@ public:
 	bool IsWithinLatLonLimits(const Geometry::Limits& limits) const;
 	bool IsWithinAltLimits(const Altitude& floor, const Altitude& ceil) const;
 	inline void CutPointsFrom(Airspace& orig) { points = std::move(orig.points); }
+	inline const Class& GetClass() const { return airspaceClass; }
+	inline char GetClassLetter() const { return char(airspaceClass + 'A'); }
 	inline const Type& GetType() const { return type; }
-	inline const Type& GetClass() const { return airspaceClass; }
+	inline std::string GetClassName() const { return ClassName(airspaceClass); }
 	inline const std::string& GetCategoryName() const { return CategoryName(type); }
 	inline const std::string& GetLongCategoryName() const { return LongCategoryName(type); }
 	inline const Altitude& GetTopAltitude() const { return top; }
@@ -135,14 +160,16 @@ private:
 	void EvaluateAndAddArc(std::vector<Geometry::LatLon*>& arcPoints, std::vector<std::pair<const double, const double>>& centerPoints, const bool& clockwise);
 	void EvaluateAndAddCircle(const std::vector<Geometry::LatLon*>& arcPoints, const std::vector<std::pair<const double, const double>>& centerPoints);
 
+	static const std::string CLASS_NAMES[];
+	static const bool CLASS_VISIBILITY[];
 	static const std::string CATEGORY_NAMES[];
 	static const std::string LONG_CATEGORY_NAMES[];
 	static const bool CATEGORY_VISIBILITY[];
 	Altitude top, base;
 	std::vector<const Geometry*> geometries;
 	std::vector<Geometry::LatLon> points;
+	Class airspaceClass; // This is to remember the class of a TMA or CTR where possible
 	Type type;
-	Type airspaceClass; // This is to remember the class of a TMA or CTR where possible
 	std::string name;
 	std::vector<std::pair<int,std::string>> radioFrequencies; // Radio frequencies list values expressed in [Hz] and name/description
 	short transponderCode; // Transponder code mandated for this airspace 12 bits used (OCT:7777 = DEC:4095 = BIN:1111111111)

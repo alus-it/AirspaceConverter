@@ -19,60 +19,69 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/locale/encoding.hpp>
 
+
 const std::unordered_map<std::string, Airspace::Type> OpenAir::openAirAirspaceTable = {
-	{ "A", Airspace::CLASSA },
-	{ "B", Airspace::CLASSB },
-	{ "C", Airspace::CLASSC },
-	{ "D", Airspace::CLASSD },
-	{ "E", Airspace::CLASSE },
-	{ "F", Airspace::CLASSF },
-	{ "G", Airspace::CLASSG },
-	{ "Q", Airspace::D },
-	{ "P", Airspace::P },
-	{ "R", Airspace::R },
-	{ "CTR", Airspace::CTR },
-	{ "TMZ", Airspace::TMZ },
-	{ "RMZ", Airspace::RMZ },
-	{ "GSEC", Airspace::GLIDING },
-	{ "GP", Airspace::NOGLIDER },
-	{ "W", Airspace::WAVE },
-	{ "WAVE", Airspace::WAVE },
-	{ "NOTAM", Airspace::NOTAM },
-	{ "OTHER", Airspace::OTHER },
-	{ "TMA", Airspace::TMA },
-	{ "FIR", Airspace::FIR },
-	{ "UIR", Airspace::UIR },
-	{ "OTH", Airspace::OTH },
-	{ "AWY", Airspace::AWY },
-	{ "MATZ", Airspace::MATZ },
-	{ "MTMA", Airspace::MTMA },
-	{ "MTRA", Airspace::MTRA },
-	{ "T", Airspace::TFR },
-	{ "TFR", Airspace::TFR },
-	{ "ADA", Airspace::ADA },
-	{ "ADIZ", Airspace::ADIZ },
-	{ "CTA", Airspace::CTR },
-	{ "DFIR", Airspace::DFIR },
-	{ "TIZ", Airspace::TIZ },
-	{ "TIA", Airspace::TIA },
-	{ "SRZ", Airspace::SRZ },
-	{ "ATZ", Airspace::ATZ },
-	{ "FISA", Airspace::FISA },
-	{ "MBZ", Airspace::MBZ },
-	{ "ASR", Airspace::ASR },
-	{ "COMP", Airspace::COMP },
-	{ "TRZ", Airspace::TRZ },
-	{ "VFRR", Airspace::VFRR },
-	{ "RTZ", Airspace::RTZ },
-	{ "PARA", Airspace::PARA },
-	{ "LFZ", Airspace::LFZ },
-	{ "CFZ", Airspace::CFZ },
-	{ "MOA", Airspace::MOA },
-	{ "MTA", Airspace::MTA },
-	{ "TSA", Airspace::TSA },
-	{ "TRA", Airspace::TRA },
-	{ "UKN", Airspace::UNKNOWN },
-	{ "UNKNOWN", Airspace::UNKNOWN }
+	{ "Q",			Airspace::Type::D },
+	{ "P",			Airspace::Type::P },
+	{ "R",			Airspace::Type::R },
+	{ "CTR",		Airspace::Type::CTR },
+	{ "TMZ",		Airspace::Type::TMZ },
+	{ "RMZ",		Airspace::Type::RMZ },
+	{ "GSEC",		Airspace::Type::GLIDING },
+	{ "GP",			Airspace::Type::NOGLIDER },
+	{ "W",			Airspace::Type::WAVE },
+	{ "WAVE",		Airspace::Type::WAVE },
+	{ "NOTAM",		Airspace::Type::NOTAM },
+	{ "N",			Airspace::Type::NOTAM },
+	{ "OTHER",		Airspace::Type::OTHER },
+	{ "TMA",		Airspace::Type::TMA },
+	{ "FIR",		Airspace::Type::FIR },
+	{ "UIR",		Airspace::Type::UIR },
+	{ "OTH",		Airspace::Type::OTH },
+	{ "AWY",		Airspace::Type::AWY },
+	{ "MATZ",		Airspace::Type::MATZ },
+	{ "MTMA",		Airspace::Type::MTMA },
+	{ "MTRA",		Airspace::Type::MTRA },
+	{ "T",			Airspace::Type::TFR },
+	{ "TFR",		Airspace::Type::TFR },
+	{ "ADA",		Airspace::Type::ADA },
+	{ "ADIZ",		Airspace::Type::ADIZ },
+	{ "CTA",		Airspace::Type::CTR },
+	{ "DFIR",		Airspace::Type::DFIR },
+	{ "TIZ",		Airspace::Type::TIZ },
+	{ "TIA",		Airspace::Type::TIA },
+	{ "SRZ",		Airspace::Type::SRZ },
+	{ "ATZ",		Airspace::Type::ATZ },
+	{ "FISA",		Airspace::Type::FISA },
+	{ "MBZ",		Airspace::Type::MBZ },
+	{ "ASR",		Airspace::Type::ASR },
+	{ "COMP",		Airspace::Type::COMP },
+	{ "TRZ",		Airspace::Type::TRZ },
+	{ "VFRR",		Airspace::Type::VFRR },
+	{ "RTZ",		Airspace::Type::RTZ },
+	{ "PARA",		Airspace::Type::PARA },
+	{ "LFZ",		Airspace::Type::LFZ },
+	{ "CFZ",		Airspace::Type::CFZ },
+	{ "MOA",		Airspace::Type::MOA },
+	{ "MTA",		Airspace::Type::MTA },
+	{ "TSA",		Airspace::Type::TSA },
+	{ "TRA",		Airspace::Type::TRA },
+	{ "ACCSEC",		Airspace::Type::ACCSEC },
+	{ "ALERT",		Airspace::Type::ALERT },
+	{ "ASRA",		Airspace::Type::ASRA },
+	{ "CUSTOM",		Airspace::Type::CUSTOM },
+	{ "FIS",		Airspace::Type::FIS },
+	{ "HTZ",		Airspace::Type::HTZ },
+	{ "LTA",		Airspace::Type::LTA },
+	{ "MTR",		Airspace::Type::MTR },
+	{ "OFR",		Airspace::Type::OFR },
+	{ "TRAFR",		Airspace::Type::TRAFR },
+	{ "UTA",		Airspace::Type::UTA },
+	{ "VFRSEC",		Airspace::Type::VFRSEC },
+	{ "WARNING",	Airspace::Type::WARNING },
+	{ "UKN",		Airspace::Type::UNKNOWN },
+	{ "UNKNOWN",	Airspace::Type::UNKNOWN },
+	{ "NONE",		Airspace::Type::UNDEFINED }
 };
 
 bool OpenAir::calculateArcs = true;
@@ -692,26 +701,28 @@ void OpenAir::WriteHeader() {
 }
 
 bool OpenAir::WriteCategory(const Airspace& airspace) {
-	std::string openAirCategory;
-	switch(airspace.GetType()) {
-		case Airspace::CLASSA:		openAirCategory = "A"; break;
-		case Airspace::CLASSB:		openAirCategory = "B"; break;
-		case Airspace::CLASSC:		openAirCategory = "C"; break;
-		case Airspace::CLASSD:		openAirCategory = "D"; break;
-		case Airspace::CLASSE:		openAirCategory = "E"; break;
-		case Airspace::CLASSF:		openAirCategory = "F"; break;
-		case Airspace::CLASSG:		openAirCategory = "G"; break;
-		case Airspace::D:			openAirCategory = "Q"; break;
-		case Airspace::WAVE:		openAirCategory = "W"; break;
-		case Airspace::NOGLIDER:	openAirCategory = "GP"; break;
-		case Airspace::GLIDING:		openAirCategory = "GSEC"; break;
-		case Airspace::UNDEFINED:
-			AirspaceConverter::LogWarning(std::format("skipping undefined airspace {}.", airspace.GetName()));
-			assert(false);
-			return false;
-		default: openAirCategory = airspace.CategoryName(airspace.GetType()); break;
+	assert(airspace.GetClass() + Airspace::Class::CLASSA && airspace.GetClass() <= Airspace::Class::UNCLASSIFIED);
+	if (airspace.IsUnclassified() && !airspace.IsTypeSpecified()) {
+		AirspaceConverter::LogWarning(std::format("skipping unclassified and undefined airspace {}.", airspace.GetName()));
+		assert(false);
+		return false;
 	}
-	file << "AC " << openAirCategory << "\n";
+	file << "AC ";
+	if (airspace.IsUnclassified()) file << "UNC";
+	else file << airspace.GetClassLetter();
+	file << "\n";
+	if (airspace.IsTypeSpecified()) {
+		std::string openAirCategory;
+		switch(airspace.GetType()) {
+			case Airspace::Type::D:			openAirCategory = "Q";		break;
+			case Airspace::Type::WAVE:		openAirCategory = "W"; 		break;
+			case Airspace::Type::NOGLIDER:	openAirCategory = "GP";		break;
+			case Airspace::Type::GLIDING:	openAirCategory = "GSEC";	break;
+			case Airspace::Type::NOTAM:		openAirCategory = "N";		break;
+			default: openAirCategory = airspace.GetCategoryName(); break;
+		}
+		file << "AC " << openAirCategory << "\n";
+	}
 	lastPointWasDDMMSS = false;
 	return true;
 }

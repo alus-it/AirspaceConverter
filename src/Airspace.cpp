@@ -18,7 +18,7 @@
 #include <boost/geometry/geometries/polygon.hpp>
 #include <boost/geometry/geometries/adapted/boost_tuple.hpp>
 
-const bool Airspace::CATEGORY_VISIBILITY[Airspace::UNDEFINED] = {
+const bool Airspace::CLASS_VISIBILITY[] = {
 	false,	//CLASSA
 	false,	//CLASSB
 	false,	//CLASSC
@@ -26,6 +26,10 @@ const bool Airspace::CATEGORY_VISIBILITY[Airspace::UNDEFINED] = {
 	false,	//CLASSE
 	false,	//CLASSF
 	false,	//CLASSG
+	false	//UNCLASSIFIED
+};
+
+const bool Airspace::CATEGORY_VISIBILITY[] = {
 	true,	//DANGER
 	true,	//PROHIBITED
 	true,	//RESTRICTED
@@ -68,10 +72,26 @@ const bool Airspace::CATEGORY_VISIBILITY[Airspace::UNDEFINED] = {
 	false,	//MTA
 	false,	//TSA
 	false,	//TRA
-	false	//UNKNOWN
+	false,	//ACCSEC
+	true,	//ALERT
+	true,	//ASRA
+	false,	//CUSTOM
+	false,	//FIS
+	false,	//HTZ
+	true,	//LTA
+	true,	//MTR
+	false,	//NOTAM
+	true,	//OFR
+	false,	//TRAFR
+	true,	//UTA
+	true,	//VFRR
+	false,	//VFRSEC
+	true,	//WARNING
+	false,	//UNKNOWN
+	false 	//UNDEFINED
 };
 
-const std::string Airspace::CATEGORY_NAMES[Airspace::UNDEFINED] = {
+const std::string Airspace::CLASS_NAMES[] = {
 	"Class A",
 	"Class B",
 	"Class C",
@@ -79,6 +99,10 @@ const std::string Airspace::CATEGORY_NAMES[Airspace::UNDEFINED] = {
 	"Class E",
 	"Class F",
 	"Class G",
+	"Unclassified"
+};
+
+const std::string Airspace::CATEGORY_NAMES[Airspace::Type::UNDEFINED] = {
 	"D",
 	"P",
 	"R",
@@ -121,17 +145,22 @@ const std::string Airspace::CATEGORY_NAMES[Airspace::UNDEFINED] = {
 	"MTA",
 	"TSA",
 	"TRA",
+	"ACCSEC",
+	"ASRA",
+	"CUSTOM",
+	"FIS",
+	"HTZ",
+	"LTA",
+	"MTR",
+	"OFR",
+	"TRAFR",
+	"UTA",
+	"VFRSEC",
+	"WARNING",
 	"UNKNOWN"
 };
 
-const std::string Airspace::LONG_CATEGORY_NAMES[Airspace::UNDEFINED] = {
-	"Airspace class A",
-	"Airspace class B",
-	"Airspace class C",
-	"Airspace class D",
-	"Airspace class E",
-	"Airspace class F",
-	"Airspace class G",
+const std::string Airspace::LONG_CATEGORY_NAMES[Airspace::Type::UNDEFINED] = {
 	"Danger area",
 	"Prohibited area",
 	"Restricted area",
@@ -141,9 +170,9 @@ const std::string Airspace::LONG_CATEGORY_NAMES[Airspace::UNDEFINED] = {
 	"Gliding area",
 	"No gliding area",
 	"Wave window",
-	"Notice to Airmen",
+	"NOTAM affected Area",
 	"Other airspace type",
-	"Terminal Manoeuvring Area",
+	"Terminal Manoeuvering Area",
 	"Flight Information Region",
 	"Upper Information Region",
 	"Over The Horizon",
@@ -165,7 +194,7 @@ const std::string Airspace::LONG_CATEGORY_NAMES[Airspace::UNDEFINED] = {
 	"Aerial Sporting and Recreation Area",
 	"Competition boundary",
 	"Transponder Recommended Zone",
-	"VFR Route",
+	"Designated Route for VFR",
 	"Radio/Transponder Mandatory zone",
 	"Parachute jumping area",
 	"Low Flying Zone",
@@ -174,13 +203,35 @@ const std::string Airspace::LONG_CATEGORY_NAMES[Airspace::UNDEFINED] = {
 	"Military Training Area",
 	"Temporary Segregated Airspace",
 	"Temporary Reserved Airspace",
+	"Airspace providing communication frequency in remote areas",
+	"Alert Area",
+	"Aerial Sporting Or Recreational Activity",
+	"Custom or user defined airspace",
+	"Flight Information Service Sector",
+	"Helicopter Traffic Zone",
+	"Lower Traffic Area (Allows VFR Traffic in CTA)",
+	"Military Training Route",
+	"Overflight Restriction",
+	"TRA/TSA Feeding Route",
+	"Upper Traffic Area (Allows VFR Traffic in CTA)",
+	"Visual Flying Rules Sector",
+	"Warning Area",
 	"Unknown"
 };
 
-Airspace::Airspace(Type category)
-	: type(category)
-	, airspaceClass(category >= CLASSA && category <= CLASSG ? category : UNDEFINED)
-	, transponderCode(-1) {
+Airspace::Airspace(Class airspClass, Type category):
+	airspaceClass(airspClass),
+	type(category), 
+	transponderCode(-1) {
+	assert(airspaceClass >= Class::CLASSA && airspaceClass <= Class::UNCLASSIFIED);
+	assert(type >= Type::D && type <= Type::UNDEFINED);
+}
+
+Airspace::Airspace(Type category):
+	airspaceClass(Class::UNCLASSIFIED),
+	type(category),
+	transponderCode(-1) {
+	assert(type >= Type::D && type <= Type::UNDEFINED);
 }
 
 Airspace::Airspace(const Airspace& orig) // Copy constructor
@@ -188,8 +239,8 @@ Airspace::Airspace(const Airspace& orig) // Copy constructor
 	, base(orig.base)
 	, geometries(orig.geometries)
 	, points(orig.points)
-	, type(orig.type)
 	, airspaceClass(orig.airspaceClass)
+	, type(orig.type)
 	, name(orig.name)
 	, radioFrequencies(orig.radioFrequencies)
 	, transponderCode(orig.transponderCode) {
@@ -200,8 +251,8 @@ Airspace::Airspace(Airspace&& orig) // Move constructor
 	, base(std::move(orig.base))
 	, geometries(std::move(orig.geometries))
 	, points(std::move(orig.points))
-	, type(std::move(orig.type))
 	, airspaceClass(std::move(orig.airspaceClass))
+	, type(std::move(orig.type))
 	, name(std::move(orig.name))
 	, radioFrequencies(std::move(orig.radioFrequencies))
 	, transponderCode(std::move(orig.transponderCode)) {
@@ -213,8 +264,8 @@ Airspace& Airspace::operator=(const Airspace& other) {
 	base = other.base;
 	geometries = other.geometries;
 	points = other.points;
-	type = other.type;
 	airspaceClass = other.airspaceClass;
+	type = other.type;
 	name = other.name;
 	radioFrequencies = other.radioFrequencies;
 	transponderCode = other.transponderCode;
@@ -222,10 +273,10 @@ Airspace& Airspace::operator=(const Airspace& other) {
 }
 
 bool Airspace::operator==(const Airspace& other) const {
+	if (airspaceClass != other.airspaceClass) return false;
+	if (type != other.type) return false;
 	if (top != other.top) return false;
 	if (base != other.base) return false;
-	if (type != other.type) return false;
-	if (airspaceClass != other.airspaceClass) return false;
 	return points == other.points;
 }
 
@@ -233,15 +284,18 @@ Airspace::~Airspace() {
 	ClearGeometries();
 }
 
-void Airspace::SetType(const Type& category) {
-	type = category;
-	airspaceClass = category >= CLASSA && category <= CLASSG ? category : UNDEFINED;
+std::string Airspace::ClassName(const Class& airspClass) {
+	if (airspClass >= Class::CLASSA && airspClass <= Class::CLASSG) return "Class " + char('A' + airspClass);
+	return "Unclassified";
 }
 
-void Airspace::SetClass(const Type& airspClass) {
-	if(airspClass > CLASSG) return;
+void Airspace::SetClass(const Class& airspClass) {
+	if(airspClass > Class::UNCLASSIFIED) return;
 	airspaceClass = airspClass;
-	if (type <= CLASSG && type != airspClass) type = airspClass;
+}
+
+void Airspace::SetType(const Type& category) {
+	type = category;
 }
 
 void Airspace::AddRadioFrequency(const int frequencyHz, const std::string& description) {
@@ -270,7 +324,7 @@ std::string Airspace::GetTransponderCode() const {
 bool Airspace::GuessClassFromName() {
 	if (type != CTR && type != TMA && type != UNDEFINED) return false;
 	if (name.empty()) return false;
-	Type foundClass = UNDEFINED;
+	Class foundClass = Class::UNCLASSIFIED;
 	const static std::vector<std::string> keywords = {
 		"Airspace class",
 		"Luftraumklasse",
@@ -303,21 +357,20 @@ bool Airspace::GuessClassFromName() {
 			}
 		}
 		if (c >= 'A' && c <= 'F') {
-			foundClass = (Type)(c - 'A');
+			foundClass = (Class)(c - 'A');
 			length = pos - start + 1;
 			break;
 		} else if (c >= 'a' && c <= 'f') {
-			foundClass = (Type)(c - 'a');
+			foundClass = (Class)(c - 'a');
 			length = pos - start + 1;
 			break;
 		}
 	}
 
-	if (foundClass == UNDEFINED) return false;
+	if (foundClass == Class::UNCLASSIFIED) return false;
 
-	assert(foundClass >= CLASSA && foundClass <= CLASSG);
+	assert(foundClass >= Class::CLASSA && foundClass <= Class::CLASSG);
 	airspaceClass = foundClass;
-	if (type == UNDEFINED) type = foundClass;
 	
 	// Remove the text "Class: C" from the name
 	name.erase(start, length);
@@ -334,8 +387,8 @@ bool Airspace::NameStartsWithIdent(const std::string& ident) {
 }
 
 void Airspace::Clear() {
-	type = UNDEFINED;
-	airspaceClass = UNDEFINED;
+	airspaceClass = Class::UNCLASSIFIED;
+	type = Type::UNDEFINED;
 	name.clear();
 	ClearPoints();
 	radioFrequencies.clear();

@@ -24,8 +24,12 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/tokenizer.hpp>
 
+
+//TODO: add colors table for Classes
+
+
 const std::string KML::colors[Airspace::Type::UNDEFINED] = {
-	"9900ff", //CLASSA
+	"9900ff", //CLASSA //TODO: move classes color to new table
 	"cc0000", //CLASSB
 	"cc3399", //CLASSC
 	"ff9900", //CLASSD
@@ -74,6 +78,15 @@ const std::string KML::colors[Airspace::Type::UNDEFINED] = {
 	"64974f", //MTA
 	"7248e2", //TSA
 	"8c64ba", //TRA
+
+	//TODO: Add new airspace types!!!!!
+
+
+
+
+
+
+
 	"d4d4d4"  //UNKNOWN
 };
 
@@ -276,7 +289,7 @@ void KML::WriteHeader(const bool airspacePresent, const bool waypointsPresent) {
 void KML::OpenPlacemark(const Airspace& airspace) {
 	const std::string name(PrepareTagText(airspace.GetName()));
 	std::string longName(name);
-	if (airspace.GetClass() != Airspace::UNDEFINED && (airspace.GetType() == Airspace::CTR || airspace.GetType() == Airspace::TMA)) longName.append(" - " + Airspace::CategoryName(airspace.GetClass()));
+	if (!airspace.IsUnclassified()) longName.append(" - " + airspace.GetClassName());
 	double area(0), perimeter(0);
 	airspace.CalculateSurface(area, perimeter);
 	outputFile << "<Placemark>\n"
@@ -286,6 +299,7 @@ void KML::OpenPlacemark(const Airspace& airspace) {
 		<< "<ExtendedData>\n"
 		<< "<SchemaData schemaUrl=\"#AirspaceId\">\n"
 		<< "<SimpleData name=\"Name\">" << longName << "</SimpleData>\n"
+		<< "<SimpleData name=\"Class\">" <<  airspace.GetClassName() << "</SimpleData>\n"
 		<< "<SimpleData name=\"Category\">" <<  airspace.GetLongCategoryName() << "</SimpleData>\n"
 		<< "<SimpleData name=\"Top\">" << airspace.GetTopAltitude().ToString() << "</SimpleData>\n"
 		<< "<SimpleData name=\"Base\">" << airspace.GetBaseAltitude().ToString() << "</SimpleData>\n";
@@ -845,22 +859,28 @@ bool KML::ReadKMZ(const std::string& filename) {
 
 bool KML::ProcessFolder(const boost::property_tree::ptree& folder, const int upperCategory) {
 	const std::string categoryName = folder.get<std::string>("name"); // Try to guess the category from the name of folder
+	Airspace::Class thisClass = Airspace::Class::UNCLASSIFIED;
 	Airspace::Type thisCategory = Airspace::Type::UNDEFINED;
 	const std::string::size_type first = categoryName.find('(');
 	if (first != std::string::npos) {
 		const std::string::size_type last = categoryName.find(')');
 		if (last != std::string::npos && first < last) {
 			const std::string shortCategory = categoryName.substr(first+1, last-first-1);
-			bool found = false;
-			unsigned int cat = Airspace::Type::CLASSA;
+			bool foundClass = false, foundType = false;
+			unsigned int cat = 0;
 			do {
-				if (shortCategory == Airspace::CategoryName((Airspace::Type)cat)) found = true;
-				else cat++;
-			} while (cat < Airspace::Type::UNDEFINED && !found);
-			if (found) {
-				thisCategory = (Airspace::Type)cat;
-				if (thisCategory == Airspace::Type::CLASSD && categoryName == "Danger areas (D)") thisCategory = Airspace::Type::D;
+				if (!foundClass && cat <= Airspace::Class::UNCLASSIFIED && shortCategory == Airspace::ClassName((Airspace::Class)cat)) foundClass = true;
+				if (shortCategory == Airspace::CategoryName((Airspace::Type)cat)) foundType = true;
+				cat++;
+			} while (cat < Airspace::Type::UNDEFINED && !foundClass && !foundType);
+			if (foundClass) {
+				thisClass = (Airspace::Class)cat;
+				if (thisClass == Airspace::Class::CLASSD && categoryName == "Danger areas (D)") {
+					thisClass = Airspace::Class::UNCLASSIFIED;
+					thisCategory = Airspace::Type::D;
+				}
 			}
+			if (foundType) thisCategory = (Airspace::Type)cat;
 		}
 	}
 	if (thisCategory == Airspace::Type::UNDEFINED) {
@@ -1027,14 +1047,14 @@ bool KML::ProcessPlacemark(const boost::property_tree::ptree& placemark) {
 				else if (str == "NAM" || str == "name" || str == "Name") labelName = simpleData.second.data();
 				else if (str == "IDENT") ident = simpleData.second.data();
 				else if (str == "Category") {
-					unsigned int cat = Airspace::Type::CLASSA;
+					unsigned int cat = Airspace::Class::CLASSA;
 					bool found = false;
 					do {
 						if (simpleData.second.data() == Airspace::LongCategoryName((Airspace::Type)cat)) found = true;
 						else cat++;
 					} while (cat < Airspace::Type::UNDEFINED && !found);
 					if (!found) {
-						cat = Airspace::Type::CLASSA;
+						cat = Airspace::Class::CLASSA;
 						 do {
 							if (simpleData.second.data() == Airspace::CategoryName((Airspace::Type)cat)) found = true;
 							else cat++;
