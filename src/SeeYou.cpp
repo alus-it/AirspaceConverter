@@ -348,7 +348,7 @@ bool SeeYou::Write(const std::string& fileName) {
 	}
 	AirspaceConverter::LogMessage("Writing SeeYou output file: " + fileName);
 
-	// Write default CUP header on first line, and for compatibilty with "Strepla" do not write any disclaimer or comments 
+	// Write default CUP header on first line, and for compatibility with "Strepla" do not write any disclaimer or comments 
 	file << "name,code,country,lat,lon,elev,style,rwdir,rwlen,freq,desc\r\n";
 
 	// Go trough all waypoints

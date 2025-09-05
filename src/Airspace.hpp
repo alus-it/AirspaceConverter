@@ -37,7 +37,7 @@ public:
 		WAVE,		// Wave window
 		NOTAM,		// Notice to Airmen "NOTAM" airspace category can be used in OpenAir files
 		OTHER,		// Generic other type
-		TMA,		// Terminal Manoeuvring Area
+		TMA,		// Terminal Manoeuvering Area
 		FIR,		// Flight Information Region, from here on not visible by default
 		UIR,		// Upper Information Region
 		OTH,		// Over The Horizon

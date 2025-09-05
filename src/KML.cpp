@@ -497,7 +497,7 @@ bool KML::Write(const std::string& filename) {
 					// Get the airfield
 					const Airfield* a = (const Airfield*)w;
 					
-					// Get its rinway length and direction
+					// Get its runway length and direction
 					const int leng = a->GetRunwayLength();
 					dir = a->GetRunwayDir();
 
@@ -595,7 +595,7 @@ bool KML::Write(const std::string& filename) {
 
 				OpenPlacemark(a);
 
-				if ((a.IsMSLbased() && a.IsAMSLtopped()) || (a.IsGNDbased() && a.IsAMSLtopped())) WriteBaseOrTop(a, a.GetTopAltitude(), true); // base on the sea or on graund and AMSL top: that's easy!
+				if ((a.IsMSLbased() && a.IsAMSLtopped()) || (a.IsGNDbased() && a.IsAMSLtopped())) WriteBaseOrTop(a, a.GetTopAltitude(), true); // base on the sea or on ground and AMSL top: that's easy!
 				else if ((a.IsMSLbased() && a.IsAGLtopped()) || (a.IsGNDbased() && a.IsAGLtopped())) { // in this case it's more complicated
 
 					const double altitudeAGLmt = a.GetTopAltitude().GetAltMt();
@@ -690,7 +690,7 @@ bool KML::Write(const std::string& filename) {
 	int index = (int)zip_file_add(archive, "doc.kml", source, ZIP_FL_OVERWRITE);
 	if (index < 0) { // "failed to add file to archive. " << zip_strerror(archive)
 		zip_discard(archive);
-		zip_source_free(source); // The sorce buffer have to be freed in this case
+		zip_source_free(source); // The source buffer have to be freed in this case
 		AirspaceConverter::LogError("While compressing, failed to add: doc.kml");
 		return false;
 	}
@@ -720,7 +720,7 @@ bool KML::Write(const std::string& filename) {
 			index = (int)zip_file_add(archive, iconFile.c_str(), source, ZIP_FL_OVERWRITE);
 			if (index < 0) { // "failed to add file to archive. " << zip_strerror(archive)
 				zip_discard(archive);
-				zip_source_free(source); // The sorce buffer have to be freed in this case
+				zip_source_free(source); // The source buffer have to be freed in this case
 				AirspaceConverter::LogError("While compressing, failed to add: " + iconFile);
 				return false;
 			}
@@ -874,7 +874,7 @@ bool KML::ProcessFolder(const boost::property_tree::ptree& folder, const int upp
 	// Visit the folder elements
 	try {
 		for (boost::property_tree::ptree::value_type const& element : folder) {
-			if (element.first == "Placemark") ProcessPlacemark(element.second); // To find a Placemark shoud be more frequent here
+			if (element.first == "Placemark") ProcessPlacemark(element.second); // To find a Placemark should be more frequent here
 			else if (element.first == "Folder") ProcessFolder(element.second, thisCategory);
 		}
 	}

@@ -389,11 +389,11 @@ bool OpenAir::ParseAN(const std::string & line, Airspace& airspace, const bool i
 	if (airspace.GetName().empty()) {
 		std::string name(line.substr(3));
 		if (name == "COLORENTRY") {
-			airspace.SetType(Airspace::UNDEFINED); // Skip Strepla colortable entries
+			airspace.SetType(Airspace::UNDEFINED); // Skip Strepla color table entries
 			return true;
 		}
 		if (airspace.GetType() > Airspace::Type::OTHER && // If the type will be not (yet) recognized by LK8000 (from Type::OTHER on)
-			name.rfind(airspace.GetCategoryName()) == std::string::npos) { // ... and the name does not alredy contain it ...
+			name.rfind(airspace.GetCategoryName()) == std::string::npos) { // ... and the name does not aready contain it ...
 			name.insert (0, airspace.GetCategoryName() + " "); // Then make sure the name contains the type as text
 		}
 		airspace.SetName(isUTF8 ? name : boost::locale::conv::between(name, "utf-8", "ISO8859-1"));
