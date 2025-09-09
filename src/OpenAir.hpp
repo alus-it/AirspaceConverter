@@ -50,6 +50,7 @@ private:
 	static bool IsFileUTF8 (std::ifstream& inputFile);
 	static bool CheckAngleDeg(const double& angleDeg);
 	bool ParseAC(const std::string& line, Airspace& airspace);
+	bool ParseAY(const std::string& line, Airspace& airspace);
 	bool ParseV(const std::string& line, Airspace& airspace);
 	bool ParseDA(const std::string& line, Airspace& airspace, const int& linenumber);
 	bool ParseDB(const std::string& line, Airspace& airspace);

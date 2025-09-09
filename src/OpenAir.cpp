@@ -300,7 +300,7 @@ bool OpenAir::Read(const std::string& fileName) {
 		if (lineParsedOK) switch (sLine.at(0)) {
 		case 'A':
 			switch(sLine.at(1)) {
-			case 'C': //AC
+			case 'C': //AC: Airspace class
 				lineParsedOK = ParseAC(sLine, airspace);
 				if (lineParsedOK) lastACline = linecount;
 				break;
@@ -323,7 +323,8 @@ bool OpenAir::Read(const std::string& fileName) {
 			case 'W': //AW: Weekly activation Time
 			case 'T': //AT
 			case 'G': //AG
-			case 'Y': //AY // ignore all those for now...
+			case 'Y': //AY: Airspace type
+				lineParsedOK = ParseAY(sLine, airspace);
 				break;
 			default:
 				lineParsedOK = false;
@@ -379,41 +380,54 @@ bool OpenAir::Read(const std::string& fileName) {
 	return allParsedOK;
 }
 
-bool OpenAir::ParseAC(const std::string & line, Airspace& airspace) {
+bool OpenAir::ParseAC(const std::string& line, Airspace& airspace) {
 	varRotationClockwise = true; // Reset var to default at beginning of new airspace segment
 	InsertAirspace(airspace); // If new airspace first store the actual one
-	assert(airspace.GetType() == Airspace::UNDEFINED);
-	Airspace::Type type = Airspace::UNDEFINED;
+	assert(airspace.GetClass() == Airspace::Class::UNCLASSIFIED && airspace.GetType() == Airspace::Type::UNDEFINED);
+	if (line.size() < 4 || line.at(2) != ' ') return false;
+	if (line.size() == 4) {
+		const int classValue = line.at(3) - 'A';
+		if (classValue >= Airspace::Class::CLASSA && classValue <= Airspace::Class::CLASSG) {
+			airspace.SetClass(Airspace::Class(classValue));
+			return true;
+		}
+	} else if (line.size() == 6 && line.at(4) == 'U' && line.at(5) == 'N' && line.at(6) == 'C') return true;
+	AirspaceConverter::LogWarning(std::format("on line {} AC should define only airspace class.", line));
+	return ParseAY(line, airspace);
+}
+
+bool OpenAir::ParseAY(const std::string& line, Airspace& airspace) {
 	if (line.size() < 4 || line.at(2) !=' ') return false;
+	Airspace::Type type = Airspace::Type::UNDEFINED;
 	auto it = openAirAirspaceTable.find(line.substr(3));
 	if (it != openAirAirspaceTable.end()) type = it->second;
-	if (type == Airspace::UNDEFINED) return false;
+	else return false;
 	airspace.SetType(type);
 	return true;
 }
 
-bool OpenAir::ParseAN(const std::string & line, Airspace& airspace, const bool isUTF8) {
-	if (airspace.GetType() == Airspace::UNDEFINED) return true;
+bool OpenAir::ParseAN(const std::string& line, Airspace& airspace, const bool isUTF8) {
+	if (airspace.GetClass() == Airspace::Class::UNCLASSIFIED && airspace.GetType() == Airspace::Type::UNDEFINED) return true;
 	if (line.size() < 4) return false;
-	if (airspace.GetName().empty()) {
-		std::string name(line.substr(3));
-		if (name == "COLORENTRY") {
-			airspace.SetType(Airspace::UNDEFINED); // Skip Strepla color table entries
-			return true;
-		}
-		if (airspace.GetType() > Airspace::Type::OTHER && // If the type will be not (yet) recognized by LK8000 (from Type::OTHER on)
-			name.rfind(airspace.GetCategoryName()) == std::string::npos) { // ... and the name does not aready contain it ...
-			name.insert (0, airspace.GetCategoryName() + " "); // Then make sure the name contains the type as text
-		}
-		airspace.SetName(isUTF8 ? name : boost::locale::conv::between(name, "utf-8", "ISO8859-1"));
+	if (!airspace.GetName().empty()) {
+		AirspaceConverter::LogError(std::format("airspace {} has already a name.", airspace.GetName()));
+		return false;
+	}
+	std::string name(line.substr(3));
+	if (name == "COLORENTRY") {
+		airspace.SetType(Airspace::Type::UNDEFINED); // Skip Strepla color table entries
 		return true;
 	}
-	AirspaceConverter::LogError(std::format("airspace {} has already a name.", airspace.GetName()));
-	return false;	
+	if (airspace.GetType() > Airspace::Type::OTHER && // If the type will be not (yet) recognized by LK8000 (from Airspace::Type::OTHER on)
+		name.rfind(airspace.GetCategoryName()) == std::string::npos) { // ... and the name does not aready contain it ...
+		name.insert (0, airspace.GetCategoryName() + " "); // Then make sure the name contains the type as text
+	}
+	airspace.SetName(isUTF8 ? name : boost::locale::conv::between(name, "utf-8", "ISO8859-1"));
+	return true;
 }
 
 bool OpenAir::ParseAF(const std::string& line, Airspace& airspace, const bool isUTF8) {
-	if (airspace.GetType() == Airspace::UNDEFINED) return true;
+	if (airspace.GetClass() == Airspace::Class::UNCLASSIFIED && airspace.GetType() == Airspace::Type::UNDEFINED) return true;
 	if (line.size() < 4) return false;
 	std::string descr(line.substr(3));
 	try {
@@ -433,7 +447,7 @@ bool OpenAir::ParseAF(const std::string& line, Airspace& airspace, const bool is
 }
 
 bool OpenAir::ParseAltitude(const std::string& line, const bool isTop, Airspace& airspace) {
-	if (airspace.GetType() == Airspace::UNDEFINED) return true;
+	if (airspace.GetClass() == Airspace::Class::UNCLASSIFIED && airspace.GetType() == Airspace::Type::UNDEFINED) return true;
 	const std::string::size_type l = line.length();
 	if (l < 4) return false;
 	return AirspaceConverter::ParseAltitude(line.substr(3,l-3), isTop, airspace);
@@ -450,7 +464,7 @@ bool OpenAir::ParseT(const std::string& line) {
 }
 
 bool OpenAir::ParseDP(const std::string& line, Airspace& airspace, const int& linenumber) {
-	if (airspace.GetType() == Airspace::UNDEFINED) return true;
+	if (airspace.GetClass() == Airspace::Class::UNCLASSIFIED && airspace.GetType() == Airspace::Type::UNDEFINED) return true;
 	if (line.length() < 14) return false;
 	Geometry::LatLon point;
 	if (ParseCoordinates(line.substr(3), point)) {
@@ -480,7 +494,7 @@ bool OpenAir::ParseDP(const std::string& line, Airspace& airspace, const int& li
 }
 
 bool OpenAir::ParseV(const std::string & line, Airspace& airspace) {
-	if (airspace.GetType() == Airspace::UNDEFINED) return true;
+	if (airspace.GetClass() == Airspace::Class::UNCLASSIFIED && airspace.GetType() == Airspace::Type::UNDEFINED) return true;
 	if (line.length() < 5) return false;
 	switch (line.at(2)) {
 	case 'D':
@@ -518,7 +532,7 @@ bool OpenAir::CheckAngleDeg(const double& angleDeg) {
 }
 
 bool OpenAir::ParseDA(const std::string& line, Airspace& airspace, const int& linenumber) {
-	if (airspace.GetType() == Airspace::UNDEFINED) return true;
+	if (airspace.GetClass() == Airspace::Class::UNCLASSIFIED && airspace.GetType() == Airspace::Type::UNDEFINED) return true;
 	if (varPoint.Lat() == Geometry::LatLon::UNDEF_LAT || line.length() < 8) return false;
 	const std::string data(line.substr(3));
 	boost::tokenizer<boost::char_separator<char>> tokens(data, boost::char_separator<char>(","));
@@ -537,7 +551,7 @@ bool OpenAir::ParseDA(const std::string& line, Airspace& airspace, const int& li
 }
 
 bool OpenAir::ParseDB(const std::string& line, Airspace& airspace) {
-	if (airspace.GetType() == Airspace::UNDEFINED) return true;
+	if (airspace.GetClass() == Airspace::Class::UNCLASSIFIED && airspace.GetType() == Airspace::Type::UNDEFINED) return true;
 	if (varPoint.Lat() == Geometry::LatLon::UNDEF_LAT || line.length() < 26) return false;
 	const std::string data(line.substr(3));
 	boost::tokenizer<boost::char_separator<char>> tokens(data, boost::char_separator<char>(","));
@@ -552,7 +566,7 @@ bool OpenAir::ParseDB(const std::string& line, Airspace& airspace) {
 }
 
 bool OpenAir::ParseDC(const std::string& line, Airspace& airspace) {
-	if (airspace.GetType() == Airspace::UNDEFINED) return true;
+	if (airspace.GetClass() == Airspace::Class::UNCLASSIFIED && airspace.GetType() == Airspace::Type::UNDEFINED) return true;
 	if (varPoint.Lat() == Geometry::LatLon::UNDEF_LAT || line.length() < 4) return false;
 	try {
 		airspace.AddGeometry(new Circle(varPoint, std::stod(line.substr(3))));
@@ -563,7 +577,7 @@ bool OpenAir::ParseDC(const std::string& line, Airspace& airspace) {
 }
 
 bool OpenAir::InsertAirspace(Airspace& airspace) {
-	if (airspace.GetType() == Airspace::UNDEFINED || airspace.GetName().empty()) {
+	if ((airspace.GetClass() == Airspace::Class::UNCLASSIFIED && airspace.GetType() == Airspace::Type::UNDEFINED) || airspace.GetName().empty()) {
 		airspace.Clear();
 		lastPointWasEqualToFirst = false;
 		return false;
