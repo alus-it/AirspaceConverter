@@ -188,8 +188,8 @@ bool AirspaceConverter::PutTypeExtension(const OutputType type, std::string& fil
 		outputPath.replace_extension(".kmz");
 		break;
 	case OutputType::OpenAir_Format:
-		if (boost::iequals(outputPath.extension().string(), ".txt")) outputPath.replace_extension(".txt"); // If file requested with .txt leave it with .txt
-		else outputPath.replace_extension(".openair"); // othrwise use the default .openair extension
+		if (boost::iequals(outputPath.extension().string(), ".openair")) outputPath.replace_extension(".openair"); // If file requested with .openair leave it with .openair
+		else outputPath.replace_extension(".txt"); // otherwise use the default .txt extension //TODO: the default extension should become openair!
 		break;
 	case OutputType::SeeYou_Format:
 		outputPath.replace_extension(".cup");
@@ -241,7 +241,7 @@ void AirspaceConverter::LoadAirspaces(const OutputType suggestedTypeForOutputFil
 				outputFile = std::filesystem::path(inputFile).replace_extension(".kmz").string();
 				break;
 			case OutputType::OpenAir_Format:
-				outputFile = std::filesystem::path(inputFile).replace_extension(".openair").string();
+				outputFile = std::filesystem::path(inputFile).replace_extension(".txt").string(); //TODO: (".openair").string();
 				break;
 			case OutputType::Polish_Format:
 				outputFile = std::filesystem::path(inputFile).replace_extension(".mp").string();

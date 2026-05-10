@@ -636,8 +636,8 @@ void CAirspaceConverterDlg::OnBnClickedConvert() {
 	// Prepare and show the open file dialog asking where the user wants to save the converted file
 	std::filesystem::path outputPath(outputFile);
 	CFileDialog dlg(FALSE, NULL, CString(outputPath.stem().c_str()) , OFN_HIDEREADONLY, AirspaceConverter::Is_cGPSmapperAvailable() ?
-			_T("KMZ|*.kmz|OpenAir|*.openair|SeeYou|*.cup|LittleNavMap|*.csv|Polish|*.mp|Garmin|*.img||") :
-			_T("KMZ|*.kmz|OpenAir|*.openair|SeeYou|*.cup|LittleNavMap|*.csv|Polish|*.mp||"),
+			_T("KMZ|*.kmz|OpenAir|*.txt|SeeYou|*.cup|LittleNavMap|*.csv|Polish|*.mp|Garmin|*.img||") :
+			_T("KMZ|*.kmz|OpenAir|*.txt|SeeYou|*.cup|LittleNavMap|*.csv|Polish|*.mp||"),
 		(CWnd*)this, 0, TRUE);
 	dlg.GetOFN().lpstrTitle = L"Convert to ...";
 	dlg.GetOFN().lpstrInitialDir = CString(outputPath.parent_path().c_str());

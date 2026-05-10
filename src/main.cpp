@@ -18,7 +18,7 @@
 #include "Altitude.hpp"
 
 void printHelp() {
-	std::cout << "Example usage: airspaceconverter -q 1013 -a 35 -i inputAspFile.openair -i openAIP_asp.aip -w waypoints.cup -w openAIP_wpt.aip -m terrainMap.dem -o outputFile.kmz" << std::endl << std::endl;
+	std::cout << "Example usage: airspaceconverter -q 1013 -a 35 -i inputAspFile.txt -i openAIP_asp.aip -w waypoints.cup -w openAIP_wpt.aip -m terrainMap.dem -o outputFile.kmz" << std::endl << std::endl;
 	std::cout << "Possible options:" << std::endl;
 	std::cout << "-q: optional, specify the QNH in hPa used to calculate height of flight levels" << std::endl;
 	std::cout << "-a: optional, specify a default terrain altitude in meters to calculate AGL heights of points not covered by loaded terrain map(s)" << std::endl;
