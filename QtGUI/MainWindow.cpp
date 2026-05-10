@@ -364,9 +364,9 @@ void MainWindow::on_convertButton_clicked() {
     // Prepare dialog to ask for output file, will be without extension if not manually typed by the user
     std::string desiredOutputFile = QFileDialog::getSaveFileName(this, tr("Convert to..."),
                                                                  QString::fromStdString(std::filesystem::path(converter->GetOutputFile()).replace_extension("").string()),
-                                                                 AirspaceConverter::Is_cGPSmapperAvailable() ?
-                                                                     tr("Google Earth(*.kmz);;OpenAir(*.openair);;OpenAir(*.txt);;SeeYou(*.cup);;LittleNavMap(*.csv);;Polish(*.mp);;Garmin img(*.img)") :
-                                                                     tr("Google Earth(*.kmz);;OpenAir(*.openair);;OpenAir(*.txt);;SeeYou(*.cup);;LittleNavMap(*.csv);;Polish(*.mp)"),
+                                                                 AirspaceConverter::Is_cGPSmapperAvailable() ? //TODO: .openair will be the default for OpenAir
+                                                                     tr("Google Earth(*.kmz);;OpenAir(*.txt);;SeeYou(*.cup);;LittleNavMap(*.csv);;Polish(*.mp);;Garmin img(*.img)") :
+                                                                     tr("Google Earth(*.kmz);;OpenAir(*.txt);;SeeYou(*.cup);;LittleNavMap(*.csv);;Polish(*.mp)"),
                                                                  &selectedFilter).toStdString();
 
     // If no file selected or entered: do nothing

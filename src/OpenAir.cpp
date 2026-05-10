@@ -684,7 +684,7 @@ bool OpenAir::Write(const std::string& fileName) {
 }
 
 void OpenAir::WriteHeader() {
-	file << "*VERSION: 1.0\n"; //TODO: update version when the 
+	file << "*VERSION: 1.0\n"; //TODO: update version when OpenAir will be properly supported according the specs
 	file << "*WRITTEN_BY: AirspaceConverter\n";
 	file << "*DATE: " << AirspaceConverter::GetCurrentDateString() << "\n";
 	for(const std::string& line: AirspaceConverter::disclaimer) file << "* " << line << "\n";
