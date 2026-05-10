@@ -447,7 +447,7 @@ bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop,
 			} else {
 				if (!typeFound) {
 					if (valueFound) {
-						if (boost::iequals(str, "AGL") || boost::iequals(str, "AGND") || boost::iequals(str, "ASFC") || boost::iequals(str, "GND") || boost::iequals(str, "SFC")) {
+						if (boost::iequals(str, "AGL") || boost::iequals(str, "AGND") || boost::iequals(str, "ASFC") || boost::iequals(str, "SFC")) {
 							isAMSL = false;
 							typeFound = true;
 						} else if (boost::iequals(str, "MSL") || boost::iequals(str, "AMSL") || boost::iequals(str, "ALT")) typeFound = true;
@@ -471,7 +471,7 @@ bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop,
 							typeFound = true;
 							valueFound = true;
 							unitFound = true;
-						} else if (boost::iequals(str, "UNLIM") || boost::iequals(str, "UNLIMITED") || boost::iequals(str, "UNL")) {
+						} else if (boost::iequals(str, "UNL") || boost::iequals(str, "UNLIM") || boost::iequals(str, "UNLIMITED")) {
 							typeFound = true;
 							valueFound = true;
 							unitFound = true;
