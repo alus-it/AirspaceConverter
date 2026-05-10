@@ -425,6 +425,7 @@ bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop,
 	bool isInFeet = true;
 	bool unitFound = false;
 	bool isUnlimited = false;
+	bool allParsedOK = true;
 	std::string::size_type s = 0;
 	bool isNumber = isDigit(text.at(s));
 	for (std::string::size_type i = 1; i < l; i++) {
@@ -447,7 +448,11 @@ bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop,
 			} else {
 				if (!typeFound) {
 					if (valueFound) {
-						if (boost::iequals(str, "AGL") || boost::iequals(str, "AGND") || boost::iequals(str, "ASFC") || boost::iequals(str, "SFC")) {
+						if (boost::iequals(str, "AGL") || boost::iequals(str, "AGND") || boost::iequals(str, "ASFC") || boost::iequals(str, "SFC") || boost::iequals(str, "GND")) {
+							if (boost::iequals(str, "GND")) {
+								LogWarning("An altitude value followed by \"GND\" is not allowed in OpenAir!");
+								allParsedOK = false;
+							}
 							isAMSL = false;
 							typeFound = true;
 						} else if (boost::iequals(str, "MSL") || boost::iequals(str, "AMSL") || boost::iequals(str, "ALT")) typeFound = true;
@@ -494,7 +499,7 @@ bool AirspaceConverter::ParseAltitude(const std::string& text, const bool isTop,
 	else if (isInFeet) alt.SetAltFt((int)value, isAMSL);
 	else alt.SetAltMt(value, isAMSL);
 	isTop ? airspace.SetTopAltitude(alt) : airspace.SetBaseAltitude(alt);
-	return true;
+	return allParsedOK;
 }
 
 std::string AirspaceConverter::GetCurrentDateString() {
