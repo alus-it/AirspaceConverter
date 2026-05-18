@@ -86,7 +86,7 @@ elif [[ "$ACTION" == "D" || "$ACTION" == "d" ]]; then
 	mv airspaceconverter-gui ./Release/airspaceconverter-gui
 
 	# Ask the user for which version of Debian we are building the packages	
-	printf "Enter target Debian [7,8,9,10] or Ubuntu [16.04,18.04,20.04] release number: "
+	printf "Enter target Debian [7,8,9,10,11,12,13] or Ubuntu [16.04,18.04,20.04] release number: "
 	read -r OSVER
 
 	# Ask the packager for which architecure are built the copied binaries
