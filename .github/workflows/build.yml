@@ -11,10 +11,10 @@ jobs:
           echo "Repository: ${{ github.repository }}, branch: ${{ github.ref }}"
       - run: |
           echo "Running on: ${{ runner.os }}, triggered by: ${{ github.event_name }}"
-      # - name: Update distro
-      #   run: sudo apt update
-      # - name: Upgrade distro
-      #   run: sudo apt upgrade
+      - name: Update distro
+        run: sudo apt update
+      - name: Upgrade distro
+        run: sudo apt upgrade
       - name: Install deps
         run: sudo apt install libzstd-dev libzip-dev libboost1.83-dev libboost-system1.83-dev libboost-filesystem1.83-dev libboost-locale1.83-dev qtbase5-dev ;
              sudo apt install 7zip grep tar wget
