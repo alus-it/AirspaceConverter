@@ -322,7 +322,7 @@ bool OpenAir::Read(const std::string& fileName) {
 				if (lineParsedOK) lastACline = linecount;
 				break;
 			case 'N': //AN
-				lineParsedOK = ParseAN(sLine, airspace, isUTF8);
+				lineParsedOK = ParseAN(sLine, airspace);
 				break;
 			case 'L': //AL
 				lineParsedOK = ParseAltitude(sLine, false, airspace);
@@ -331,7 +331,7 @@ bool OpenAir::Read(const std::string& fileName) {
 				lineParsedOK = ParseAltitude(sLine, true, airspace);
 				break;
 			case 'F': //AF radio frequency
-				lineParsedOK = ParseAF(sLine, airspace, isUTF8);
+				lineParsedOK = ParseAF(sLine, airspace);
 				break;
 			case 'X': //AX: transponder code
 				lineParsedOK = airspace.SetTransponderCode(sLine.substr(3));
@@ -409,7 +409,7 @@ bool OpenAir::ParseAC(const std::string & line, Airspace& airspace) {
 	return true;
 }
 
-bool OpenAir::ParseAN(const std::string & line, Airspace& airspace, const bool isUTF8) {
+bool OpenAir::ParseAN(const std::string & line, Airspace& airspace) {
 	if (airspace.GetType() == Airspace::UNDEFINED) return true;
 	if (line.size() < 4) return false;
 	if (airspace.GetName().empty()) {
@@ -426,10 +426,10 @@ bool OpenAir::ParseAN(const std::string & line, Airspace& airspace, const bool i
 		return true;
 	}
 	AirspaceConverter::LogError(std::format("airspace {} has already a name.", airspace.GetName()));
-	return false;	
+	return false;
 }
 
-bool OpenAir::ParseAF(const std::string& line, Airspace& airspace, const bool isUTF8) {
+bool OpenAir::ParseAF(const std::string& line, Airspace& airspace) {
 	if (airspace.GetType() == Airspace::UNDEFINED) return true;
 	if (line.size() < 4) return false;
 	std::string descr(line.substr(3));

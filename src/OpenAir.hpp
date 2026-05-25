@@ -42,8 +42,8 @@ private:
 	static bool RemoveNonPrintable(std::string &s);
 	static bool ParseDegrees(const std::string& dddmmss, double& deg, bool isLon = false);
 	static bool ParseCoordinates(const std::string& text, Geometry::LatLon& point);
-	static bool ParseAN(const std::string& line, Airspace& airspace, const bool isUTF8 = false);
-	static bool ParseAF(const std::string& line, Airspace& airspace, const bool isUTF8 = false);
+	static bool ParseAN(const std::string& line, Airspace& airspace);
+	static bool ParseAF(const std::string& line, Airspace& airspace);
 	static bool ParseAltitude(const std::string& line, const bool isTop, Airspace& airspace);
 	static bool ParseS (const std::string& line);
 	static bool ParseT (const std::string& line);
