@@ -39,6 +39,7 @@ public:
 
 private:
 	static std::string& RemoveComments(std::string &s);
+	static bool RemoveNonPrintable(std::string &s);
 	static bool ParseDegrees(const std::string& dddmmss, double& deg, bool isLon = false);
 	static bool ParseCoordinates(const std::string& text, Geometry::LatLon& point);
 	static bool ParseAN(const std::string& line, Airspace& airspace, const bool isUTF8 = false);
