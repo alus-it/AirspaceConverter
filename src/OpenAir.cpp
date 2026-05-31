@@ -19,6 +19,7 @@
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/locale/encoding.hpp>
+#include <Windows.h>
 
 const std::unordered_map<std::string, Airspace::Type> OpenAir::openAirAirspaceTable = {
 	{ "A", Airspace::CLASSA },
@@ -100,6 +101,12 @@ std::string& OpenAir::RemoveComments(std::string &s) {
 }
 
 bool OpenAir::RemoveNonPrintable(std::string &s) {
+#ifdef _WIN32
+	//TODO: do it properly on Windows...
+	return false;
+#elif 
+	//MultiByteToWideChar();
+
 	static std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 	bool nonPrintableFound = false;
 	std::wstring ws = converter.from_bytes(s);
@@ -113,6 +120,7 @@ bool OpenAir::RemoveNonPrintable(std::string &s) {
 	ws.end());
 	if (nonPrintableFound) s = std::string(ws.begin(), ws.end());
 	return nonPrintableFound;
+#endif
 }
 
 bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg, bool isLon) {
