@@ -100,15 +100,11 @@ std::string& OpenAir::RemoveComments(std::string &s) {
 	return s;
 }
 
-bool OpenAir::RemoveNonPrintable(std::string &s) {
-#ifdef _WIN32
-	//TODO: do it properly on Windows...
-	return false;
-#elif 
-	//MultiByteToWideChar();
-
-	static std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+bool OpenAir::RemoveNonPrintable([[maybe_unused]]std::string &s) {
 	bool nonPrintableFound = false;
+#ifdef __linux__
+	//MultiByteToWideChar();
+	static std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 	std::wstring ws = converter.from_bytes(s);
 	ws.erase(std::remove_if(ws.begin(), ws.end(), [&nonPrintableFound](wchar_t c) {
 		if (!std::iswprint(c)) {
@@ -116,11 +112,15 @@ bool OpenAir::RemoveNonPrintable(std::string &s) {
 			return true;
 		}
 		return false;
-	}),
-	ws.end());
+		}),
+		ws.end());
 	if (nonPrintableFound) s = std::string(ws.begin(), ws.end());
-	return nonPrintableFound;
+#elif _WIN32
+	//TODO: do it properly on Windows...
+#else 
+	//TODO: ...
 #endif
+	return nonPrintableFound;
 }
 
 bool OpenAir::ParseDegrees(const std::string& dddmmss, double& deg, bool isLon) {
