@@ -14,12 +14,16 @@
 #include "AirspaceConverter.hpp"
 #include <iomanip>
 #include <format>
-#include <codecvt>
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/locale/encoding.hpp>
-#include <Windows.h>
+
+#ifdef __linux__
+#include <codecvt>
+#elif _WIN32
+//#include <Windows.h> //TODO...
+#endif
 
 const std::unordered_map<std::string, Airspace::Type> OpenAir::openAirAirspaceTable = {
 	{ "A", Airspace::CLASSA },
@@ -117,7 +121,7 @@ bool OpenAir::RemoveNonPrintable([[maybe_unused]]std::string &s) {
 	if (nonPrintableFound) s = std::string(ws.begin(), ws.end());
 #elif _WIN32
 	//TODO: do it properly on Windows...
-#else 
+#else
 	//TODO: ...
 #endif
 	return nonPrintableFound;
