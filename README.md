@@ -116,14 +116,15 @@ For the Linux distributions based on _Debian_ there is a also an _APT_ repositor
 Build dependencies
 ------------------
 In order to compile this project the following libraries are required:  
-- Qt (`libqt4-dev`)
-- libzip2 (`libzip-dev`) and dependencies (zlib)
-- Boost libraries (`libboost-locale-dev`)  
+- Qt: `libqt4-dev` (only for the Qt UI)
+- libzip2: `libzip-dev` and dependencies (zlib)
+- Boost libraries: `libboost-locale-dev`
+- OpenSSL: `libssl-dev`  
 
 Compiling and installing AirspaceConverter from sources on Linux
 ----------------------------------------------------------------
 First it is necessary to install the dependencies, on a _Debian_ based distribution it would be:  
-`sudo apt install libzip-dev libboost-locale-dev libqt5-private-dev lsb-release`  
+`sudo apt install libzip-dev libboost-locale-dev libqt5-private-dev libssl-dev lsb-release`  
 On older _Ubuntu_ or _Debian_ install `libqt4-dev` instead of `libqt5-private-dev`
 On _Fedora_:  
 `sudo dnf install libzip-devel boost-devel qt-devel lsb-release`  

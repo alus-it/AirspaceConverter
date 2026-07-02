@@ -259,6 +259,8 @@ case $OSVER in
 		BOOSTVER=1.83.0
 		QTVER=5.15.13
 		QTDEPS="libqt5core5t64 (>= ${QTVER}), libqt5gui5t64 (>= ${QTVER}), libqt5widgets5t64 (>= ${QTVER})"
+		SSLLIB=libssl3t64
+		SSLVER=3.0.13
 		MANT="Alberto Realis-Luc <admin@alus.it>"
 		;;
 	*)
@@ -391,10 +393,10 @@ echo 'Package: airspaceconverter
 Version: '${VERSION}'-'${DISTR}${OSVER}'
 Section: misc
 Priority: optional
-Build-Depends: libc6-dev (>= '${LIBCVER}'), libboost-locale-dev (>= '${BOOSTVER}'), libzip-dev (>= '${ZIPVER}')
+Build-Depends: libc6-dev (>= '${LIBCVER}'), libboost-locale-dev (>= '${BOOSTVER}'), libzip-dev (>= '${ZIPVER}'), libssl-dev (>= '${SSLVER}')
 Standards-Version: 3.9.4
 Architecture: '${ARCH}'
-Depends: libc6 (>= '${LIBCVER}'), libboost-locale'${BOOSTVER}' (>= '${BOOSTVER}'), '${ZIPLIB}' (>= '${ZIPVER}')
+Depends: libc6 (>= '${LIBCVER}'), libboost-locale'${BOOSTVER}' (>= '${BOOSTVER}'), '${ZIPLIB}' (>= '${ZIPVER}'), '${SSLLIB}' (>= '${SSLVER}')
 Enhances: airspaceconverter-gui (>= '${VERSION}'), cgpsmapper (>= 0.0.9.3c)
 Maintainer: '${MANT}'
 Installed-size: '${SIZE}'
