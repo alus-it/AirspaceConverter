@@ -68,6 +68,7 @@ QtGUI-build*
 .settings/*
 
 # Visual studio stuff
+.vs
 Windows/.vs
 Windows/packages
 Windows/ipch

@@ -31,9 +31,18 @@
 #include <filesystem>
 #include <format>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/beast/core.hpp> // The HTTP client used to check for new version from Boost Beast is available from version 1.70
+#include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
+#include <boost/asio/connect.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/ssl.hpp>
+
+//TEST beast
+//#include <cstdlib>
+
+
+
 
 #ifdef __linux__ // If on Linux...
 	const std::string AirspaceConverter::basePath(std::filesystem::canonical("/proc/self/exe").parent_path().string());
@@ -693,19 +702,43 @@ bool AirspaceConverter::CheckForNewVersion(int& versionDifference) {
 		// The io_context is required for all I/O
 		boost::asio::io_context ioc;
 
+		// The SSL context is required, and holds certificates
+		boost::asio::ssl::context ctx(boost::asio::ssl::context::tlsv13_client);
+
+		//TODO: Use the default paths for finding CA certificates
+		//ctx.set_default_verify_paths();
+
+		//TODO: Verify the remote server's certificate
+		//ctx.set_verify_mode(boost::asio::ssl::verify_peer);
+		
+		// FIXME: For now, we will not verify the server's certificate (not secure, but avoids issues with missing CA certificates)
+		ctx.set_verify_mode(boost::asio::ssl::verify_none);
+
 		// These objects perform our I/O
 		boost::asio::ip::tcp::resolver resolver(ioc);
-		boost::beast::tcp_stream stream(ioc);
+		boost::asio::ssl::stream<boost::beast::tcp_stream> stream(ioc, ctx);
+
+		// Domain name
+		const std::string host = "alus.it";
+
+		// Set SNI Hostname (many hosts need this to handshake successfully)
+		if (!SSL_set_tlsext_host_name(stream.native_handle(), host.c_str()))
+			throw boost::beast::system_error(static_cast<int>(::ERR_get_error()), boost::asio::error::get_ssl_category());
+
+		// Set the expected hostname in the peer certificate for verification
+		stream.set_verify_callback(boost::asio::ssl::host_name_verification(host));
 
 		// Look up the domain name
-		const std::string host = "alus.it";
-		const auto results = resolver.resolve(host, "80");
+		const auto results = resolver.resolve(host, "443");
 
 		// Make the connection on the IP address we get from a lookup
-		stream.connect(results);
+		boost::beast::get_lowest_layer(stream).connect(results);
+
+		// Perform the SSL handshake
+		stream.handshake(boost::asio::ssl::stream_base::client);
 
 		// Set up an HTTP GET request message (for HTTPS more libs would be required)
-		boost::beast::http::request<boost::beast::http::string_body> req{boost::beast::http::verb::get, "/AirspaceConverter/lastVersion.txt", 11};
+		boost::beast::http::request<boost::beast::http::string_body> req{ boost::beast::http::verb::get, "/AirspaceConverter/lastVersion.txt", 11 };
 		req.set(boost::beast::http::field::host, host);
 		req.set(boost::beast::http::field::user_agent, BOOST_BEAST_VERSION_STRING);
 
@@ -716,24 +749,20 @@ bool AirspaceConverter::CheckForNewVersion(int& versionDifference) {
 		boost::beast::flat_buffer buffer;
 
 		// Declare a container to hold the response
-		boost::beast::http::response<boost::beast::http::string_body> res;
+		boost::beast::http::response<boost::beast::http::dynamic_body> res;
 
 		// Receive the HTTP response
 		boost::beast::http::read(stream, buffer, res);
 
-		// Gracefully close the socket
+		// Gracefully close the stream
 		boost::beast::error_code ec;
-		stream.socket().shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+		stream.shutdown(ec);
 
 		// Not_connected happens sometimes: so don't bother reporting it.
-		if (ec && ec != boost::beast::errc::not_connected) {
-			throw boost::beast::system_error{ec};
-		}
+		if (ec && ec != boost::beast::errc::not_connected) throw boost::beast::system_error{ec};
 		
-		// If we get here then the connection is closed gracefully
-
-		// The content is the latest version string
-		const std::string latestVersion = res.body();
+		//  If we get here then the connection is closed gracefully: The content is the latest version string
+		const std::string latestVersion = boost::beast::buffers_to_string(res.body().data());
 		const int latestVersionNumber = VersionToNumber(latestVersion);
 		if (latestVersionNumber > 0) {
 			versionDifference = latestVersionNumber - runningVersionNumber;
