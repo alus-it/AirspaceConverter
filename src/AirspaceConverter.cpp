@@ -705,14 +705,14 @@ bool AirspaceConverter::CheckForNewVersion(int& versionDifference) {
 		// The SSL context is required, and holds certificates
 		boost::asio::ssl::context ctx(boost::asio::ssl::context::tlsv13_client);
 
-		//TODO: Use the default paths for finding CA certificates
-		//ctx.set_default_verify_paths();
+		// Use the default paths for finding CA certificates
+		ctx.set_default_verify_paths();
 
-		//TODO: Verify the remote server's certificate
-		//ctx.set_verify_mode(boost::asio::ssl::verify_peer);
+		// Verify the remote server's certificate
+		ctx.set_verify_mode(boost::asio::ssl::verify_peer);
 		
-		// FIXME: For now, we will not verify the server's certificate (not secure, but avoids issues with missing CA certificates)
-		ctx.set_verify_mode(boost::asio::ssl::verify_none);
+		// FIXME: For windows only: we will not verify the server's certificate (not secure, but avoids issues with missing CA certificates)
+		//ctx.set_verify_mode(boost::asio::ssl::verify_none);
 
 		// These objects perform our I/O
 		boost::asio::ip::tcp::resolver resolver(ioc);
