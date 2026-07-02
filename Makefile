@@ -20,7 +20,7 @@ APPNAME = airspaceconverter
 PLATFORM=$(shell uname -s)
 
 # Linker and strip options
-LFLAGS = -lzip '-Wl,-rpath,$$ORIGIN'
+LFLAGS = -lssl -lzip '-Wl,-rpath,$$ORIGIN'
 STRIP = -S
 
 ifeq ($(PLATFORM),Linux)

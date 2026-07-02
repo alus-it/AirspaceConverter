@@ -54,6 +54,9 @@ unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu/ -lboost_locale
 # Zip library
 unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu/ -lzip
 
+# OpenSSL library
+unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu/ -lssl
+
 
 ## Mac libraries
 macx: INCLUDEPATH += /usr/local/include/
@@ -63,6 +66,9 @@ macx: LIBS += -L/usr/local/lib/ -lboost_locale-mt
 
 # Zip library
 macx: LIBS += -L/usr/local/lib/ -lzip
+
+# OpenSSL library
+macx: LIBS += -L/usr/local/lib/ -lssl
 
 
 ## Windows libraries on 64 bit
