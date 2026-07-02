@@ -38,22 +38,39 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ssl.hpp>
 
-//TEST beast
-//#include <cstdlib>
-
-
-
-
 #ifdef __linux__ // If on Linux...
 	const std::string AirspaceConverter::basePath(std::filesystem::canonical("/proc/self/exe").parent_path().string());
+
 #elif _WIN32 // or if on Windows...
+	#include <windows.h>
+	#include <wincrypt.h>
+
 	const std::string AirspaceConverter::basePath = []() {
 		wchar_t wpath[MAX_PATH];
 		GetModuleFileNameW(NULL, wpath, MAX_PATH);
 		return std::filesystem::path(wpath).parent_path().string();
 	}();
+
+	static void LoadWindowsRootCertsIntoOpenSSL(SSL_CTX* ssl_ctx) {
+		HCERTSTORE hStore = CertOpenSystemStoreA(NULL, "ROOT");
+		if (!hStore) return;
+		PCCERT_CONTEXT pCtx = NULL;
+		while ((pCtx = CertEnumCertificatesInStore(hStore, pCtx)) != NULL) {
+			const unsigned char* p = pCtx->pbCertEncoded; // d2i modifies the pointer
+			X509* x = d2i_X509(NULL, &p, pCtx->cbCertEncoded);
+			if (x) {
+				X509_STORE* store = SSL_CTX_get_cert_store(ssl_ctx);
+				if (store) X509_STORE_add_cert(store, x);
+				X509_free(x);
+			}
+			// loop continues; CertEnumCertificatesInStore takes care of previous context
+		}
+		CertCloseStore(hStore, 0);
+	}
+
 #elif __APPLE__ // or if on macOS
 	//TODO....
+
 #endif
 
 std::function<void(const std::string&)> AirspaceConverter::LogMessage = DefaultLogMessage;
@@ -705,14 +722,15 @@ bool AirspaceConverter::CheckForNewVersion(int& versionDifference) {
 		// The SSL context is required, and holds certificates
 		boost::asio::ssl::context ctx(boost::asio::ssl::context::tlsv13_client);
 
+#ifdef _WIN32 // If on Windows...  load the Windows ROOT store into the OpenSSL certificate store
+		LoadWindowsRootCertsIntoOpenSSL(ctx.native_handle());
+#endif
+
 		// Use the default paths for finding CA certificates
 		ctx.set_default_verify_paths();
 
 		// Verify the remote server's certificate
 		ctx.set_verify_mode(boost::asio::ssl::verify_peer);
-		
-		// FIXME: For windows only: we will not verify the server's certificate (not secure, but avoids issues with missing CA certificates)
-		//ctx.set_verify_mode(boost::asio::ssl::verify_none);
 
 		// These objects perform our I/O
 		boost::asio::ip::tcp::resolver resolver(ioc);
